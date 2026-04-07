@@ -1,0 +1,23 @@
+# Raw proprietary data (paid investment bank files)
+data/raw/
+*.xlsx
+*.xls
+
+# Processed data (derived from proprietary sources)
+data/db/*.db
+data/processed/*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment
+.env
+
+# OS
+.DS_Store
+
+# Streamlit
+.streamlit/secrets.toml
