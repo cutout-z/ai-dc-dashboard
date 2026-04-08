@@ -1,0 +1,19 @@
+date,metric,provider,value,unit,source,notes
+2023-01-01,weekly_active_users,OpenAI,100000000,users,OpenAI blog,ChatGPT 100M WAU milestone
+2023-11-01,weekly_active_users,OpenAI,100000000,users,OpenAI DevDay,Reconfirmed at DevDay
+2024-05-01,weekly_active_users,OpenAI,200000000,users,OpenAI announcement,GPT-4o launch drove growth
+2024-08-01,monthly_active_users,OpenAI,200000000,users,Reuters,200M MAU reported
+2024-12-01,weekly_active_users,OpenAI,300000000,users,OpenAI blog,300M weekly users disclosed
+2025-03-01,weekly_active_users,OpenAI,400000000,users,OpenAI blog,400M+ weekly active users
+2023-03-01,api_tokens_per_day,OpenAI,10000000000,tokens,Estimates,~10B tokens/day estimated at GPT-4 launch
+2024-06-01,api_tokens_per_day,OpenAI,100000000000,tokens,Industry estimates,~100B tokens/day estimated (10x growth)
+2025-01-01,api_tokens_per_day,OpenAI,300000000000,tokens,Industry estimates,~300B tokens/day estimated with o1 reasoning
+2024-03-01,annual_revenue_run_rate,OpenAI,3400000000,USD,The Information,ARR ~$3.4B reported
+2024-08-01,annual_revenue_run_rate,OpenAI,5000000000,USD,NYT,ARR ~$5B reported
+2024-12-01,annual_revenue_run_rate,OpenAI,10000000000,USD,Bloomberg,ARR approaching $10B
+2025-03-01,annual_revenue_run_rate,OpenAI,16000000000,USD,The Information,ARR ~$16B reported
+2024-01-01,monthly_active_users,Anthropic,10000000,users,Estimates,Claude.ai estimated MAU
+2024-06-01,monthly_active_users,Anthropic,20000000,users,Estimates,Post Claude 3.5 Sonnet launch
+2025-01-01,monthly_active_users,Anthropic,40000000,users,Estimates,Claude estimated MAU growth
+2024-01-01,monthly_active_users,Google,150000000,users,Google I/O,Gemini monthly users reported at I/O
+2024-12-01,monthly_active_users,Google,350000000,users,Alphabet earnings,Gemini 350M+ MAU

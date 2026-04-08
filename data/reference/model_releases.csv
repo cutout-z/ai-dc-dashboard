@@ -1,0 +1,19 @@
+release_date,model,provider,category,context_k,notable
+2023-03-14,GPT-4,OpenAI,frontier,32,First multimodal frontier model
+2023-07-18,Llama 2,Meta,open_source,4,Open-weight 70B competitive with GPT-3.5
+2023-12-06,Gemini 1.0 Pro,Google,frontier,32,Google's first competitive frontier model
+2024-02-15,Gemini 1.5 Pro,Google,frontier,1000,First 1M token context window
+2024-03-04,Claude 3 Opus,Anthropic,frontier,200,SOTA on reasoning benchmarks at launch
+2024-04-18,Llama 3,Meta,open_source,8,Open-source approaching GPT-4 level
+2024-05-13,GPT-4o,OpenAI,frontier,128,Multimodal native — audio/vision/text
+2024-06-20,Claude 3.5 Sonnet,Anthropic,frontier,200,SOTA on coding and reasoning
+2024-07-23,Llama 3.1 405B,Meta,open_source,128,First open model matching frontier on benchmarks
+2024-09-12,o1-preview,OpenAI,reasoning,128,Chain-of-thought reasoning breakthrough
+2024-10-22,Claude 3.5 Sonnet v2,Anthropic,frontier,200,Computer use capability
+2024-12-05,Gemini 2.0 Flash,Google,frontier,1000,Low-cost high-capability model
+2025-01-20,DeepSeek R1,DeepSeek,open_source,128,Open reasoning model matching o1
+2025-02-24,Claude 3.7 Sonnet,Anthropic,reasoning,200,Hybrid reasoning + extended thinking
+2025-02-27,GPT-4.5,OpenAI,frontier,128,Largest pre-trained model to date
+2025-03-25,Gemini 2.5 Pro,Google,reasoning,1000,SOTA reasoning with 1M context
+2025-04-14,Claude 4 Sonnet,Anthropic,frontier,200,Agentic coding and tool use
+2025-05-22,Claude 4 Opus,Anthropic,frontier,200,SOTA on complex reasoning and analysis

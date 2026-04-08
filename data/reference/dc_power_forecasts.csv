@@ -1,0 +1,22 @@
+source,region,year,demand_twh,scenario,published_date,notes
+IEA,Global,2024,415,Actual,2025-01-01,IEA Electricity 2025 report
+IEA,Global,2026,590,Base,2025-01-01,IEA projection
+IEA,Global,2028,780,Base,2025-01-01,IEA projection
+IEA,Global,2030,945,Base,2025-01-01,IEA projection — near doubling from 2024
+IEA,United States,2024,200,Actual,2025-01-01,~4% of total US electricity
+IEA,United States,2030,470,Base,2025-01-01,IEA projection — ~8% of US electricity
+Goldman Sachs,United States,2024,200,Actual,2024-04-28,GS Power Up America report
+Goldman Sachs,United States,2028,350,Base,2024-04-28,GS projection — 8% CAGR
+Goldman Sachs,United States,2030,390,Base,2024-04-28,GS base case
+Goldman Sachs,United States,2030,480,Bull,2024-04-28,GS bull case — AI acceleration
+Goldman Sachs,Europe,2024,90,Actual,2024-04-28,GS estimate
+Goldman Sachs,Europe,2030,150,Base,2024-04-28,GS projection
+McKinsey,Global,2024,415,Actual,2025-02-01,McKinsey Global Energy Perspective
+McKinsey,Global,2030,1050,High,2025-02-01,McKinsey high scenario — AI-driven surge
+McKinsey,Global,2030,800,Low,2025-02-01,McKinsey low scenario — efficiency gains
+PJM,PJM Interconnect,2024,38,Actual,2024-12-01,PJM queue analysis
+PJM,PJM Interconnect,2029,62,Base,2024-12-01,PJM load forecast — DC-driven growth
+ERCOT,Texas,2024,22,Actual,2024-11-01,ERCOT long-term forecast
+ERCOT,Texas,2030,42,Base,2024-11-01,ERCOT projection — near doubling
+AEMO,Australia (NEM),2024,4.2,Actual,2024-12-01,AEMO ESOO 2024
+AEMO,Australia (NEM),2030,9.5,Base,2024-12-01,AEMO Step Change scenario

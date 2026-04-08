@@ -2,6 +2,7 @@
 
 import logging
 
+import pandas as pd
 import streamlit as st
 import yfinance as yf
 
@@ -10,18 +11,56 @@ from app.lib.yahoo_spark import run_spark, compute_returns_from_closes, _format_
 logger = logging.getLogger("ai_research")
 
 MAG7_AI_STOCKS = [
-    {"symbol": "AAPL",  "name": "Apple",     "group": "Mag 7"},
-    {"symbol": "MSFT",  "name": "Microsoft",  "group": "Mag 7"},
-    {"symbol": "GOOGL", "name": "Alphabet",   "group": "Mag 7"},
-    {"symbol": "AMZN",  "name": "Amazon",     "group": "Mag 7"},
-    {"symbol": "NVDA",  "name": "NVIDIA",     "group": "Mag 7"},
-    {"symbol": "META",  "name": "Meta",       "group": "Mag 7"},
-    {"symbol": "TSLA",  "name": "Tesla",      "group": "Mag 7"},
-    {"symbol": "ORCL",  "name": "Oracle",     "group": "AI Infra"},
-    {"symbol": "AMD",   "name": "AMD",        "group": "AI Infra"},
-    {"symbol": "TSM",   "name": "TSMC",       "group": "AI Infra"},
-    {"symbol": "PLTR",  "name": "Palantir",   "group": "AI Infra"},
+    {"symbol": "AAPL",  "name": "Apple",         "group": "Mag 7"},
+    {"symbol": "MSFT",  "name": "Microsoft",      "group": "Mag 7"},
+    {"symbol": "GOOGL", "name": "Alphabet",       "group": "Mag 7"},
+    {"symbol": "AMZN",  "name": "Amazon",         "group": "Mag 7"},
+    {"symbol": "NVDA",  "name": "NVIDIA",         "group": "Mag 7"},
+    {"symbol": "META",  "name": "Meta",           "group": "Mag 7"},
+    {"symbol": "TSLA",  "name": "Tesla",          "group": "Mag 7"},
+    {"symbol": "ORCL",  "name": "Oracle",         "group": "AI Infra"},
+    {"symbol": "AMD",   "name": "AMD",            "group": "AI Infra"},
+    {"symbol": "TSM",   "name": "TSMC",           "group": "AI Infra"},
+    {"symbol": "PLTR",  "name": "Palantir",       "group": "AI Infra"},
+    {"symbol": "EQIX",  "name": "Equinix",        "group": "DC Operators"},
+    {"symbol": "DLR",   "name": "Digital Realty",  "group": "DC Operators"},
+    {"symbol": "AMT",   "name": "American Tower",  "group": "DC Operators"},
 ]
+
+# Tickers to fetch earnings calendar for
+EARNINGS_TICKERS = ["MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSM", "EQIX", "DLR"]
+
+
+@st.cache_data(ttl=3600)
+def fetch_earnings_calendar() -> list[dict]:
+    """Fetch next earnings dates for key hyperscalers and DC operators."""
+    results = []
+    for sym in EARNINGS_TICKERS:
+        try:
+            t = yf.Ticker(sym)
+            cal = t.calendar
+            if cal is not None:
+                if isinstance(cal, pd.DataFrame) and not cal.empty:
+                    # Older yfinance returns DataFrame
+                    earn_date = cal.iloc[0, 0] if cal.shape[1] > 0 else None
+                    results.append({"ticker": sym, "earnings_date": str(earn_date) if earn_date else None})
+                elif isinstance(cal, dict):
+                    # Newer yfinance returns dict
+                    ed = cal.get("Earnings Date")
+                    if isinstance(ed, list) and ed:
+                        results.append({"ticker": sym, "earnings_date": str(ed[0])})
+                    elif ed:
+                        results.append({"ticker": sym, "earnings_date": str(ed)})
+                    else:
+                        results.append({"ticker": sym, "earnings_date": None})
+                else:
+                    results.append({"ticker": sym, "earnings_date": None})
+            else:
+                results.append({"ticker": sym, "earnings_date": None})
+        except Exception as e:
+            logger.debug("Earnings calendar %s error: %s", sym, e)
+            results.append({"ticker": sym, "earnings_date": None})
+    return results
 
 
 def _fetch_fundamentals(symbols: list[str]) -> dict:

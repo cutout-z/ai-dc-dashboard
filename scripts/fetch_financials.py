@@ -1,6 +1,6 @@
 """
 Fetch hyperscaler CAPEX + semi bellwether revenue from Yahoo Finance.
-Stores quarterly time series in SQLite.
+Stores quarterly and annual time series in SQLite.
 """
 
 import sqlite3
@@ -29,70 +29,101 @@ SEMI_BELLWETHERS = {
 ALL_TICKERS = {**HYPERSCALERS, **SEMI_BELLWETHERS}
 
 
+def _extract_capex(cf_df, date_col) :
+    """Extract CAPEX value from a cash flow DataFrame column."""
+    for label in ["Capital Expenditure", "CapitalExpenditure"]:
+        if label in cf_df.index:
+            val = cf_df.loc[label, date_col]
+            if pd.notna(val):
+                return abs(float(val))
+    return None
+
+
+def _extract_revenue(inc_df, date_col) :
+    """Extract revenue from an income statement DataFrame column."""
+    for label in ["Total Revenue", "TotalRevenue"]:
+        if label in inc_df.index:
+            val = inc_df.loc[label, date_col]
+            if pd.notna(val):
+                return float(val)
+    return None
+
+
 def fetch_quarterly_financials(ticker: str, name: str) -> list[dict]:
     """Fetch quarterly cash flow and income data for a ticker."""
     stock = yf.Ticker(ticker)
     records = []
+    now = datetime.now().isoformat()
 
-    # Cash flow for CAPEX
+    # Quarterly cash flow for CAPEX
     try:
         cf = stock.quarterly_cashflow
         if cf is not None and not cf.empty:
             for date_col in cf.columns:
                 period = date_col.strftime("%Y-%m-%d") if hasattr(date_col, "strftime") else str(date_col)
-                capex = None
-                for label in ["Capital Expenditure", "CapitalExpenditure"]:
-                    if label in cf.index:
-                        val = cf.loc[label, date_col]
-                        if pd.notna(val):
-                            capex = abs(float(val))
-                            break
-
+                capex = _extract_capex(cf, date_col)
                 records.append({
-                    "ticker": ticker,
-                    "company": name,
-                    "period": period,
-                    "metric": "capex",
-                    "value": capex,
-                    "unit": "USD",
-                    "source": "yahoo_finance",
-                    "fetched_at": datetime.now().isoformat(),
+                    "ticker": ticker, "company": name, "period": period,
+                    "metric": "capex", "frequency": "quarterly",
+                    "value": capex, "unit": "USD", "source": "yahoo_finance",
+                    "fetched_at": now,
                 })
     except Exception as e:
-        print(f"  Warning: cash flow fetch failed for {ticker}: {e}")
+        print(f"  Warning: quarterly cash flow failed for {ticker}: {e}")
 
-    # Income statement for revenue
+    # Quarterly income for revenue
     try:
         inc = stock.quarterly_income_stmt
         if inc is not None and not inc.empty:
             for date_col in inc.columns:
                 period = date_col.strftime("%Y-%m-%d") if hasattr(date_col, "strftime") else str(date_col)
-                revenue = None
-                for label in ["Total Revenue", "TotalRevenue"]:
-                    if label in inc.index:
-                        val = inc.loc[label, date_col]
-                        if pd.notna(val):
-                            revenue = float(val)
-                            break
-
+                revenue = _extract_revenue(inc, date_col)
                 records.append({
-                    "ticker": ticker,
-                    "company": name,
-                    "period": period,
-                    "metric": "revenue",
-                    "value": revenue,
-                    "unit": "USD",
-                    "source": "yahoo_finance",
-                    "fetched_at": datetime.now().isoformat(),
+                    "ticker": ticker, "company": name, "period": period,
+                    "metric": "revenue", "frequency": "quarterly",
+                    "value": revenue, "unit": "USD", "source": "yahoo_finance",
+                    "fetched_at": now,
                 })
     except Exception as e:
-        print(f"  Warning: income fetch failed for {ticker}: {e}")
+        print(f"  Warning: quarterly income failed for {ticker}: {e}")
+
+    # Annual cash flow for CAPEX (longer history)
+    try:
+        cf_annual = stock.cashflow
+        if cf_annual is not None and not cf_annual.empty:
+            for date_col in cf_annual.columns:
+                period = date_col.strftime("%Y-%m-%d") if hasattr(date_col, "strftime") else str(date_col)
+                capex = _extract_capex(cf_annual, date_col)
+                records.append({
+                    "ticker": ticker, "company": name, "period": period,
+                    "metric": "capex", "frequency": "annual",
+                    "value": capex, "unit": "USD", "source": "yahoo_finance",
+                    "fetched_at": now,
+                })
+    except Exception as e:
+        print(f"  Warning: annual cash flow failed for {ticker}: {e}")
+
+    # Annual income for revenue
+    try:
+        inc_annual = stock.income_stmt
+        if inc_annual is not None and not inc_annual.empty:
+            for date_col in inc_annual.columns:
+                period = date_col.strftime("%Y-%m-%d") if hasattr(date_col, "strftime") else str(date_col)
+                revenue = _extract_revenue(inc_annual, date_col)
+                records.append({
+                    "ticker": ticker, "company": name, "period": period,
+                    "metric": "revenue", "frequency": "annual",
+                    "value": revenue, "unit": "USD", "source": "yahoo_finance",
+                    "fetched_at": now,
+                })
+    except Exception as e:
+        print(f"  Warning: annual income failed for {ticker}: {e}")
 
     return records
 
 
 def run():
-    print("Fetching quarterly financials...")
+    print("Fetching quarterly + annual financials...")
     all_records = []
 
     for ticker, name in ALL_TICKERS.items():
@@ -102,23 +133,35 @@ def run():
         print(f"    {len(records)} records")
 
     df = pd.DataFrame(all_records)
-
-    # Drop rows where value is None
     df = df.dropna(subset=["value"])
 
-    print(f"\nTotal: {len(df)} data points")
+    quarterly = df[df["frequency"] == "quarterly"]
+    annual = df[df["frequency"] == "annual"]
+    print(f"\nTotal: {len(df)} data points ({len(quarterly)} quarterly, {len(annual)} annual)")
 
     # Write to SQLite
     conn = sqlite3.connect(DB_PATH)
     df.to_sql("quarterly_financials", conn, if_exists="replace", index=False)
 
-    # Create CAPEX summary view
+    # Create views
     conn.execute("DROP VIEW IF EXISTS v_hyperscaler_capex")
     conn.execute("""
         CREATE VIEW v_hyperscaler_capex AS
         SELECT ticker, company, period, value as capex_usd
         FROM quarterly_financials
         WHERE metric = 'capex'
+          AND frequency = 'quarterly'
+          AND ticker IN ('MSFT', 'GOOGL', 'AMZN', 'META')
+        ORDER BY period DESC, ticker
+    """)
+
+    conn.execute("DROP VIEW IF EXISTS v_hyperscaler_capex_annual")
+    conn.execute("""
+        CREATE VIEW v_hyperscaler_capex_annual AS
+        SELECT ticker, company, period, value as capex_usd
+        FROM quarterly_financials
+        WHERE metric = 'capex'
+          AND frequency = 'annual'
           AND ticker IN ('MSFT', 'GOOGL', 'AMZN', 'META')
         ORDER BY period DESC, ticker
     """)
@@ -129,6 +172,7 @@ def run():
         SELECT ticker, company, period, value as revenue_usd
         FROM quarterly_financials
         WHERE metric = 'revenue'
+          AND frequency = 'quarterly'
           AND ticker IN ('TSM', 'ASML', 'NVDA')
         ORDER BY period DESC, ticker
     """)

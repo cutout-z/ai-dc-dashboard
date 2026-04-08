@@ -1,0 +1,22 @@
+date,company,metric,value,unit,source,notes
+2023-01-01,OpenAI,valuation,29.0,USD_B,WSJ,Tender offer at $29B
+2023-01-01,OpenAI,arr,1.0,USD_B,The Information,Estimated ARR ~$1B
+2023-04-01,Anthropic,valuation,4.1,USD_B,TechCrunch,Google-led $300M round
+2023-10-01,Anthropic,valuation,18.4,USD_B,WSJ,Google + Amazon investment round
+2023-10-01,OpenAI,arr,1.3,USD_B,The Information,Growing post-GPT-4 launch
+2024-02-01,OpenAI,valuation,86.0,USD_B,Bloomberg,Tender offer — 3x in 12 months
+2024-03-01,OpenAI,arr,3.4,USD_B,The Information,ARR tripled from year prior
+2024-06-01,Anthropic,valuation,18.4,USD_B,Reuters,Maintained from Oct 2023 round
+2024-07-01,xAI,valuation,24.0,USD_B,Bloomberg,$6B Series B round
+2024-08-01,OpenAI,arr,5.0,USD_B,NYT,Continued acceleration
+2024-09-01,OpenAI,valuation,157.0,USD_B,FT,$6.6B raise at $157B — largest private tech round
+2024-10-01,Anthropic,arr,1.0,USD_B,The Information,Estimated ARR reaching $1B
+2024-12-01,OpenAI,arr,10.0,USD_B,Bloomberg,ARR approaching $10B — doubled in 4 months
+2024-12-01,Anthropic,valuation,60.0,USD_B,WSJ,Amazon-led round at $60B
+2024-12-01,xAI,valuation,50.0,USD_B,Bloomberg,$6B round at $50B — doubled in 5 months
+2025-01-01,Anthropic,arr,2.0,USD_B,The Information,ARR doubled from Oct 2024
+2025-03-01,OpenAI,arr,16.0,USD_B,The Information,ARR $16B — 60% growth in 3 months
+2025-03-01,OpenAI,valuation,300.0,USD_B,WSJ,$40B round at $300B — nearly doubled in 6 months
+2025-03-01,Anthropic,valuation,61.5,USD_B,Bloomberg,$3.5B Amazon investment
+2025-03-01,xAI,valuation,75.0,USD_B,CNBC,$10B round at $75B
+2025-03-01,Anthropic,arr,2.4,USD_B,The Information,Run rate accelerating

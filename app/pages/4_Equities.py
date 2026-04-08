@@ -9,7 +9,6 @@ st.set_page_config(page_title="Equities", layout="wide")
 
 st.title("Mag 7 & AI Infrastructure")
 
-# Lazy import to keep page load fast when navigating other pages
 from app.lib.equities import fetch_equities_data
 
 with st.spinner("Fetching equity data..."):
@@ -18,6 +17,46 @@ with st.spinner("Fetching equity data..."):
 if not stocks:
     st.warning("No equity data available. Check network connection.")
     st.stop()
+
+
+# ── Shared formatters ──
+def _color_returns(val):
+    if val is None or pd.isna(val):
+        return "color: gray"
+    return "color: #22c55e" if val >= 0 else "color: #ef4444"
+
+
+def _fmt_pct(val):
+    if val is None or pd.isna(val):
+        return "-"
+    return f"{val:+.2f}%"
+
+
+def _fmt_price(val):
+    if val is None or pd.isna(val):
+        return "-"
+    return f"${val:,.2f}"
+
+
+def _fmt_mcap(val):
+    if val is None or pd.isna(val):
+        return "-"
+    if val >= 1000:
+        return f"${val / 1000:.2f}T"
+    return f"${val:.1f}B"
+
+
+def _fmt_pe(val):
+    if val is None or pd.isna(val):
+        return "-"
+    return f"{val:.1f}x"
+
+
+def _fmt_eps(val):
+    if val is None or pd.isna(val):
+        return "-"
+    return f"${val:.2f}"
+
 
 # ──────────────────────────────────────────────
 # 1. SHARE PRICE PERFORMANCE TABLE
@@ -42,28 +81,7 @@ for s in stocks:
     })
 
 df_perf = pd.DataFrame(perf_rows)
-
-# Color-code return columns
 return_cols = ["Daily %", "1M %", "3M %", "6M %", "1Y %", "5Y %", "10Y %"]
-
-
-def _color_returns(val):
-    if val is None or pd.isna(val):
-        return "color: gray"
-    return "color: #22c55e" if val >= 0 else "color: #ef4444"
-
-
-def _fmt_pct(val):
-    if val is None or pd.isna(val):
-        return "-"
-    return f"{val:+.2f}%"
-
-
-def _fmt_price(val):
-    if val is None or pd.isna(val):
-        return "-"
-    return f"${val:,.2f}"
-
 
 styled = (
     df_perf.style
@@ -72,7 +90,7 @@ styled = (
     .map(_color_returns, subset=return_cols)
 )
 
-st.dataframe(styled, use_container_width=True, hide_index=True, height=440)
+st.dataframe(styled, use_container_width=True, hide_index=True, height=560)
 
 # ──────────────────────────────────────────────
 # 2. FUNDAMENTALS TABLE
@@ -86,6 +104,7 @@ for s in stocks:
     fund_rows.append({
         "Ticker": s["symbol"],
         "Name": s["name"],
+        "Group": s["group"],
         "Mkt Cap ($B)": mcap_fmt,
         "PE (T)": s.get("pe_trailing"),
         "PE (F)": s.get("pe_forward"),
@@ -97,27 +116,6 @@ for s in stocks:
     })
 
 df_fund = pd.DataFrame(fund_rows)
-
-
-def _fmt_mcap(val):
-    if val is None or pd.isna(val):
-        return "-"
-    if val >= 1000:
-        return f"${val / 1000:.2f}T"
-    return f"${val:.1f}B"
-
-
-def _fmt_pe(val):
-    if val is None or pd.isna(val):
-        return "-"
-    return f"{val:.1f}x"
-
-
-def _fmt_eps(val):
-    if val is None or pd.isna(val):
-        return "-"
-    return f"${val:.2f}"
-
 
 styled_fund = (
     df_fund.style
@@ -134,7 +132,7 @@ styled_fund = (
     .map(_color_returns, subset=["% from 52W High", "Rev Growth YoY %", "CAPEX Growth YoY %"])
 )
 
-st.dataframe(styled_fund, use_container_width=True, hide_index=True, height=440)
+st.dataframe(styled_fund, use_container_width=True, hide_index=True, height=560)
 
 # ──────────────────────────────────────────────
 # 3. CHARTS
@@ -164,7 +162,7 @@ with col1:
         ))
         fig_pe.update_layout(
             barmode="group",
-            height=450,
+            height=500,
             xaxis_title="P/E Ratio",
             legend=dict(orientation="h", yanchor="bottom", y=1.02),
             margin=dict(l=0, r=0, t=30, b=0),
@@ -186,7 +184,6 @@ with col2:
             "ytd_pct": s["returns"].get("1Y", 0) or 0,
         } for s in tree_data])
 
-        # Format labels
         df_tree["label"] = df_tree.apply(
             lambda r: f"{r['symbol']}<br>${r['market_cap'] / 1e12:.2f}T<br>{r['ytd_pct']:+.1f}%"
             if r["market_cap"] >= 1e12
@@ -203,7 +200,7 @@ with col2:
             color_continuous_midpoint=0,
         )
         fig_tree.update_layout(
-            height=450,
+            height=500,
             margin=dict(l=0, r=0, t=30, b=0),
             coloraxis_colorbar=dict(title="1Y %"),
         )
