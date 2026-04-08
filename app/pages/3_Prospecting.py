@@ -1,7 +1,5 @@
-"""
-Investment Prospecting — Screen 3,594 stocks by AI exposure, materiality,
-pricing power, and wave evolution. Personal mode focus.
-"""
+"""Investment Prospecting — Screen 3,594 stocks by AI exposure, materiality,
+pricing power, and wave evolution."""
 
 import streamlit as st
 import sqlite3
@@ -12,7 +10,6 @@ from pathlib import Path
 st.set_page_config(page_title="Prospecting", layout="wide")
 
 DB_PATH = st.session_state.get("db_path", str(Path(__file__).parent.parent.parent / "data" / "db" / "ai_research.db"))
-mode = st.session_state.get("mode", "Personal")
 
 st.title("AI Investment Prospecting")
 

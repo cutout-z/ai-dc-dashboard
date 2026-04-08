@@ -1,8 +1,4 @@
-"""
-Bubble Tracker — Key indicators for AI bubble risk assessment.
-Work mode: clean, stakeholder-ready charts.
-Personal mode: same data with thesis annotations.
-"""
+"""Bubble Tracker — Key indicators for AI bubble risk assessment."""
 
 import streamlit as st
 import sqlite3
@@ -15,9 +11,8 @@ from pathlib import Path
 st.set_page_config(page_title="Bubble Tracker", layout="wide")
 
 DB_PATH = st.session_state.get("db_path", str(Path(__file__).parent.parent.parent / "data" / "db" / "ai_research.db"))
-mode = st.session_state.get("mode", "Work")
 
-st.title("Bubble Tracker" if mode == "Work" else "Bubble Tracker (Thesis Mode)")
+st.title("Bubble Tracker")
 
 conn = sqlite3.connect(DB_PATH)
 
@@ -197,9 +192,8 @@ if not df_specs.empty:
 # ──────────────────────────────────────────────
 # 4. BUBBLE RISK SUMMARY (Work mode only)
 # ──────────────────────────────────────────────
-if mode == "Work":
-    st.header("Risk Summary")
-    st.markdown("""
+st.header("Risk Summary")
+st.markdown("""
     | Indicator | Signal | Direction | Notes |
     |-----------|--------|-----------|-------|
     | Hyperscaler CAPEX | Accelerating | Higher risk | Combined quarterly spend at record levels |
