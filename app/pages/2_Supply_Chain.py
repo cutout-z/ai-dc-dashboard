@@ -12,7 +12,6 @@ from pathlib import Path
 st.set_page_config(page_title="Supply Chain", layout="wide")
 
 DB_PATH = st.session_state.get("db_path", str(Path(__file__).parent.parent.parent / "data" / "db" / "ai_research.db"))
-mode = st.session_state.get("mode", "Work")
 
 st.title("AI Infrastructure Value Chain")
 

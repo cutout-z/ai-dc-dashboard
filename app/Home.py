@@ -1,7 +1,4 @@
-"""
-AI Research Dashboard
-Two modes: Work (bubble risk, stakeholder-ready) / Personal (investment prospecting)
-"""
+"""AI / Data Centre Research Dashboard."""
 
 import streamlit as st
 from pathlib import Path
@@ -16,16 +13,10 @@ st.set_page_config(
 DB_PATH = Path(__file__).parent.parent / "data" / "db" / "ai_research.db"
 
 st.sidebar.title("AI Research")
-mode = st.sidebar.radio("Mode", ["Work", "Personal"], index=0)
-st.session_state["mode"] = mode
 st.session_state["db_path"] = str(DB_PATH)
 
-if mode == "Work":
-    st.title("AI / Data Centre Research")
-    st.caption("Bubble risk indicators, supply chain intelligence, capability tracking")
-else:
-    st.title("AI Investment Prospecting")
-    st.caption("Screening, thesis development, opportunity identification")
+st.title("AI / Data Centre Research")
+st.caption("Bubble risk indicators, supply chain intelligence, investment prospecting")
 
 # Quick stats
 import sqlite3
@@ -59,4 +50,6 @@ st.markdown("""
 - **Bubble Tracker** — Hyperscaler CAPEX trends, LLM capability curves, key risk indicators
 - **Supply Chain** — AI infrastructure value chain taxonomy with analyst positioning
 - **Prospecting** — Screen 3,594 stocks by AI exposure, materiality, pricing power, wave evolution
+- **Equities** — Mag 7 & AI infrastructure stock prices, fundamentals, P/E comparison
+- **DC Commodities** — Key input costs for data centre buildout (energy, metals, semis, power)
 """)
