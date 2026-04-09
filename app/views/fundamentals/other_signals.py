@@ -1,4 +1,4 @@
-"""Bubble Tracker — Key indicators for AI bubble risk assessment."""
+"""Other Signals — semi demand, frontier labs, GPU leases, LLM capability, DC power, risk."""
 
 import streamlit as st
 import sqlite3
@@ -7,216 +7,27 @@ import plotly.express as px
 import plotly.graph_objects as go
 from pathlib import Path
 
-st.set_page_config(page_title="Bubble Tracker", layout="wide")
-
-DB_PATH = st.session_state.get("db_path", str(Path(__file__).parent.parent.parent / "data" / "db" / "ai_research.db"))
+DB_PATH = st.session_state["db_path"]
 DATA_DIR = Path(__file__).parent.parent.parent / "data" / "reference"
 
-COMPANY_COLORS = {
-    "Microsoft": "#00A4EF",
-    "Alphabet": "#EA4335",
-    "Amazon": "#FF9900",
-    "Meta": "#1877F2",
-}
-
-st.title("Bubble Tracker")
+st.title("Other Signals")
+st.caption("Bubble-risk indicators beyond hyperscaler CAPEX.")
 
 conn = sqlite3.connect(DB_PATH)
 
 # ══════════════════════════════════════════════
-# 1. HYPERSCALER CAPEX
-# ══════════════════════════════════════════════
-st.header("Hyperscaler CAPEX")
-
-# --- 1a. Annual CAPEX with Guidance Overlay ---
-st.subheader("Annual CAPEX vs Forward Guidance")
-
-# Try to load annual data; fall back to computing from quarterly
-try:
-    df_annual = pd.read_sql("""
-        SELECT ticker, company, period, value as capex_usd
-        FROM quarterly_financials
-        WHERE metric = 'capex' AND frequency = 'annual'
-          AND ticker IN ('MSFT', 'GOOGL', 'AMZN', 'META')
-        ORDER BY period
-    """, conn)
-except Exception:
-    df_annual = pd.DataFrame()
-
-if not df_annual.empty:
-    df_annual["capex_bn"] = df_annual["capex_usd"] / 1e9
-    df_annual["period"] = pd.to_datetime(df_annual["period"])
-    df_annual["year"] = df_annual["period"].dt.year
-
-    # Stacked bar — annual actuals
-    fig_annual = go.Figure()
-
-    for company, color in COMPANY_COLORS.items():
-        mask = df_annual["company"] == company
-        df_c = df_annual[mask].sort_values("year")
-        fig_annual.add_trace(go.Bar(
-            x=df_c["year"],
-            y=df_c["capex_bn"],
-            name=company,
-            marker_color=color,
-        ))
-
-    # Load guidance overlay
-    guidance_path = DATA_DIR / "capex_guidance.csv"
-    if guidance_path.exists():
-        df_guide = pd.read_csv(guidance_path)
-        df_guide = df_guide[df_guide["guidance_usd_b"].notna()]
-
-        if not df_guide.empty:
-            # Extract year from fiscal_year (e.g. "FY2025" -> 2025, "CY2025" -> 2025)
-            df_guide["year"] = df_guide["fiscal_year"].str.extract(r"(\d{4})").astype(int)
-
-            # Aggregate guidance per year
-            guide_by_year = df_guide.groupby("year")["guidance_usd_b"].sum().reset_index()
-
-            fig_annual.add_trace(go.Scatter(
-                x=guide_by_year["year"],
-                y=guide_by_year["guidance_usd_b"],
-                name="Combined Guidance",
-                mode="markers+lines",
-                marker=dict(size=14, symbol="diamond", color="white", line=dict(width=2, color="red")),
-                line=dict(dash="dash", color="red", width=2),
-            ))
-
-            # Add revision annotations
-            revised = df_guide[df_guide["prior_guidance_usd_b"].notna()]
-            for _, row in revised.iterrows():
-                fig_annual.add_annotation(
-                    x=row["year"],
-                    y=row["guidance_usd_b"],
-                    text=f"{row['company']}: ${row['prior_guidance_usd_b']:.0f}B→${row['guidance_usd_b']:.0f}B",
-                    showarrow=True,
-                    arrowhead=2,
-                    arrowsize=0.8,
-                    ax=0,
-                    ay=-35,
-                    font=dict(size=9, color="red"),
-                )
-
-    fig_annual.update_layout(
-        barmode="stack",
-        height=500,
-        yaxis_title="CAPEX ($B)",
-        xaxis_title="Year",
-        xaxis=dict(dtick=1),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02),
-    )
-    st.plotly_chart(fig_annual, use_container_width=True)
-
-    # Guidance detail table
-    if guidance_path.exists():
-        with st.expander("Guidance Detail"):
-            df_guide_display = pd.read_csv(guidance_path)
-            df_guide_display = df_guide_display[df_guide_display["guidance_usd_b"].notna()]
-            st.dataframe(
-                df_guide_display[["company", "fiscal_year", "guidance_usd_b", "prior_guidance_usd_b", "guidance_date", "notes"]],
-                use_container_width=True,
-                hide_index=True,
-            )
-else:
-    st.warning("No annual CAPEX data. Run: python scripts/fetch_financials.py")
-
-# --- 1b. Quarterly CAPEX — Progress vs Guidance Pace ---
-st.subheader("Quarterly CAPEX")
-
-df_capex = pd.read_sql("""
-    SELECT ticker, company, period, capex_usd
-    FROM v_hyperscaler_capex
-    ORDER BY period
-""", conn)
-
-if not df_capex.empty:
-    df_capex["capex_bn"] = df_capex["capex_usd"] / 1e9
-    df_capex["period"] = pd.to_datetime(df_capex["period"])
-    # Convert period-end dates to quarter labels (e.g. 2025-03-31 → "Q1 2025")
-    df_capex["quarter"] = df_capex["period"].dt.to_period("Q").astype(str)
-    df_capex = df_capex.sort_values("period")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        fig_q = px.bar(
-            df_capex, x="quarter", y="capex_bn", color="company",
-            title="Quarterly CAPEX ($B)",
-            labels={"capex_bn": "CAPEX ($B)", "quarter": "Quarter"},
-            barmode="stack",
-            color_discrete_map=COMPANY_COLORS,
-        )
-        fig_q.update_layout(height=400, xaxis_type="category",
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02))
-        st.plotly_chart(fig_q, use_container_width=True)
-
-    with col2:
-        fig_ind = px.line(
-            df_capex, x="quarter", y="capex_bn", color="company",
-            title="Individual CAPEX Trends",
-            labels={"capex_bn": "$B", "quarter": "Quarter"},
-            color_discrete_map=COMPANY_COLORS,
-        )
-        fig_ind.update_layout(height=400, xaxis_type="category")
-        st.plotly_chart(fig_ind, use_container_width=True)
-
-    # QoQ growth
-    df_total = df_capex.groupby("quarter")["capex_bn"].sum().reset_index()
-    df_total["qoq_pct"] = df_total["capex_bn"].pct_change() * 100
-
-    fig_total = go.Figure()
-    fig_total.add_trace(go.Bar(
-        x=df_total["quarter"], y=df_total["capex_bn"],
-        name="Total CAPEX", marker_color="#4A90D9"
-    ))
-    fig_total.add_trace(go.Scatter(
-        x=df_total["quarter"], y=df_total["qoq_pct"],
-        name="QoQ %", yaxis="y2", line=dict(color="red", width=2),
-        mode="lines+markers"
-    ))
-    fig_total.update_layout(
-        title="Aggregate CAPEX + QoQ Growth",
-        yaxis=dict(title="CAPEX ($B)"),
-        yaxis2=dict(title="QoQ %", overlaying="y", side="right"),
-        height=350, showlegend=False, xaxis_type="category",
-    )
-    st.plotly_chart(fig_total, use_container_width=True)
-else:
-    st.warning("No quarterly CAPEX data. Run: python scripts/fetch_financials.py")
-
-# --- 1c. Earnings Calendar ---
-st.subheader("Earnings Calendar")
-
-from app.lib.equities import fetch_earnings_calendar
-
-with st.spinner("Fetching earnings dates..."):
-    earnings = fetch_earnings_calendar()
-
-if earnings:
-    df_earn = pd.DataFrame(earnings)
-    df_earn = df_earn[df_earn["earnings_date"].notna()]
-    if not df_earn.empty:
-        df_earn["earnings_date"] = pd.to_datetime(df_earn["earnings_date"], errors="coerce")
-        df_earn = df_earn.dropna(subset=["earnings_date"]).sort_values("earnings_date")
-        df_earn["days_away"] = (df_earn["earnings_date"] - pd.Timestamp.now()).dt.days
-
-        cols = st.columns(len(df_earn))
-        for i, (_, row) in enumerate(df_earn.iterrows()):
-            days = row["days_away"]
-            delta_str = "Today" if days == 0 else (f"{abs(days)}d ago" if days < 0 else f"in {days}d")
-            cols[i].metric(row["ticker"], row["earnings_date"].strftime("%Y-%m-%d"), delta_str)
-
-# ══════════════════════════════════════════════
-# 2. SEMI DEMAND BELLWETHERS
+# SEMI DEMAND BELLWETHERS
 # ══════════════════════════════════════════════
 st.header("Semi Demand Bellwethers")
 
-df_semi = pd.read_sql("""
+df_semi = pd.read_sql(
+    """
     SELECT ticker, company, period, revenue_usd
     FROM v_semi_revenue
     ORDER BY period
-""", conn)
+    """,
+    conn,
+)
 
 if not df_semi.empty:
     df_semi["revenue_bn"] = df_semi["revenue_usd"] / 1e9
@@ -235,7 +46,7 @@ if not df_semi.empty:
     fig_semi.update_layout(height=400)
     st.plotly_chart(fig_semi, use_container_width=True)
 
-# --- 2b. TSMC Monthly Revenue ---
+# --- TSMC Monthly Revenue ---
 st.subheader("TSMC Monthly Revenue")
 st.caption("Higher frequency signal than quarterly earnings.")
 
@@ -259,7 +70,7 @@ if tsmc_path.exists():
         st.plotly_chart(fig_yoy, use_container_width=True)
 
 # ══════════════════════════════════════════════
-# 3. TOKEN CONSUMPTION & AI DEMAND
+# TOKEN CONSUMPTION & AI DEMAND
 # ══════════════════════════════════════════════
 st.header("AI Demand Indicators")
 
@@ -271,7 +82,6 @@ if token_path.exists():
     col1, col2 = st.columns(2)
 
     with col1:
-        # User growth
         st.subheader("Frontier Model User Growth")
         df_users = df_tokens[df_tokens["metric"].str.contains("active_users")]
         if not df_users.empty:
@@ -286,7 +96,6 @@ if token_path.exists():
             st.plotly_chart(fig_users, use_container_width=True)
 
     with col2:
-        # Revenue run rate
         st.subheader("OpenAI Revenue Run Rate")
         df_rev = df_tokens[df_tokens["metric"] == "annual_revenue_run_rate"]
         if not df_rev.empty:
@@ -307,7 +116,7 @@ if token_path.exists():
             st.plotly_chart(fig_arr, use_container_width=True)
 
 # ══════════════════════════════════════════════
-# 4. FRONTIER LAB REVENUE & VALUATIONS
+# FRONTIER LAB REVENUE & VALUATIONS
 # ══════════════════════════════════════════════
 st.header("Frontier Lab Revenue & Valuations")
 
@@ -321,7 +130,6 @@ if val_path.exists():
     col1, col2 = st.columns(2)
 
     with col1:
-        # Valuation trajectory
         st.subheader("Valuation Trajectory")
         df_v = df_val[df_val["metric"] == "valuation"].sort_values("date")
         if not df_v.empty:
@@ -352,7 +160,6 @@ if val_path.exists():
             st.plotly_chart(fig_v, use_container_width=True)
 
     with col2:
-        # ARR trajectory
         st.subheader("Revenue Run Rate (ARR)")
         df_r = df_val[df_val["metric"] == "arr"].sort_values("date")
         if not df_r.empty:
@@ -379,9 +186,7 @@ if val_path.exists():
             )
             st.plotly_chart(fig_r, use_container_width=True)
 
-    # Valuation / Revenue multiple
     st.subheader("Implied Revenue Multiple")
-    # For each company, compute latest valuation / latest ARR
     multiples = []
     for company in lab_colors:
         latest_val = df_val[(df_val["company"] == company) & (df_val["metric"] == "valuation")].sort_values("date").tail(1)
@@ -401,7 +206,6 @@ if val_path.exists():
     if multiples:
         st.dataframe(pd.DataFrame(multiples), use_container_width=True, hide_index=True)
 
-    # Full timeline
     with st.expander("Full Announcement Timeline"):
         df_display = df_val.sort_values("date", ascending=False)
         df_display["value_fmt"] = df_display.apply(
@@ -416,7 +220,7 @@ if val_path.exists():
         )
 
 # ══════════════════════════════════════════════
-# 5. GPU LEASE PRICES
+# GPU LEASE PRICES
 # ══════════════════════════════════════════════
 st.header("GPU Lease Prices")
 st.caption("Cloud GPU pricing from primary providers and secondary/spot markets.")
@@ -429,7 +233,6 @@ if gpu_path.exists():
     col1, col2 = st.columns(2)
 
     with col1:
-        # H100 pricing across providers
         st.subheader("H100 80GB Pricing")
         df_h100 = df_gpu[df_gpu["gpu_model"] == "H100 80GB"]
         if not df_h100.empty:
@@ -444,10 +247,7 @@ if gpu_path.exists():
             st.plotly_chart(fig_h100, use_container_width=True)
 
     with col2:
-        # All GPU models — latest prices
         st.subheader("Current GPU Pricing")
-        latest_date = df_gpu["date"].max()
-        # Get most recent price per gpu_model + provider + commitment
         df_latest = df_gpu.sort_values("date").groupby(["gpu_model", "provider", "commitment"]).last().reset_index()
         df_latest = df_latest.sort_values(["gpu_model", "price_per_hour"])
 
@@ -461,9 +261,7 @@ if gpu_path.exists():
         fig_gpu_bar.update_layout(height=400, margin=dict(l=0, r=0, t=30, b=0))
         st.plotly_chart(fig_gpu_bar, use_container_width=True)
 
-    # Price trend summary
     df_h100_spot = df_gpu[(df_gpu["gpu_model"] == "H100 80GB") & (df_gpu["commitment"] == "spot")]
-    df_h100_od = df_gpu[(df_gpu["gpu_model"] == "H100 80GB") & (df_gpu["commitment"] == "on-demand")]
     if not df_h100_spot.empty and len(df_h100_spot) >= 2:
         first_spot = df_h100_spot.iloc[0]["price_per_hour"]
         last_spot = df_h100_spot.iloc[-1]["price_per_hour"]
@@ -471,7 +269,7 @@ if gpu_path.exists():
         st.caption(f"H100 spot market: ${first_spot:.2f}/hr → ${last_spot:.2f}/hr ({spot_change:+.0f}% since first tracked)")
 
 # ══════════════════════════════════════════════
-# 6. LLM CAPABILITY TRACKING
+# LLM CAPABILITY TRACKING
 # ══════════════════════════════════════════════
 st.header("LLM Capability Frontier")
 
@@ -555,7 +353,7 @@ if model_path.exists():
     st.plotly_chart(fig_qcount, use_container_width=True)
 
 # ══════════════════════════════════════════════
-# 7. DC POWER DEMAND FORECASTS
+# DC POWER DEMAND FORECASTS
 # ══════════════════════════════════════════════
 st.header("DC Power Demand Forecasts")
 
@@ -587,7 +385,7 @@ if power_path.exists():
                       use_container_width=True, hide_index=True)
 
 # ══════════════════════════════════════════════
-# 8. BUBBLE RISK SUMMARY
+# BUBBLE RISK SUMMARY
 # ══════════════════════════════════════════════
 st.header("Risk Summary")
 st.markdown("""

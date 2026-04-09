@@ -9,7 +9,6 @@ CHART_LAYOUT = dict(
     hoverlabel=dict(bgcolor="white", font_size=12),
 )
 
-st.set_page_config(page_title="Model Performance", layout="wide", page_icon="🧠")
 st.title("Model Performance")
 st.caption("Frontier AI model benchmarks, context windows, and capability milestones.")
 

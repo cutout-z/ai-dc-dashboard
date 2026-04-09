@@ -1,4 +1,4 @@
-"""DC / AI Input Commodities — key input costs for data centre buildout."""
+"""DC & AI Inputs — key commodity/input costs for data centre buildout."""
 
 import streamlit as st
 import pandas as pd
@@ -6,9 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 
-st.set_page_config(page_title="DC Commodities", layout="wide")
-
-st.title("DC / AI Input Costs")
+st.title("DC & AI Inputs")
 
 from app.lib.commodities import fetch_commodity_overview, DC_COMMODITIES, KEY_METRICS
 
