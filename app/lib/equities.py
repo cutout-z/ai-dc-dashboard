@@ -31,36 +31,52 @@ MAG7_AI_STOCKS = [
 EARNINGS_TICKERS = ["MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSM", "EQIX", "DLR"]
 
 
+# ANZ region tickers for earnings calendar
+ANZ_EARNINGS_TICKERS = [
+    {"symbol": "NXT.AX", "name": "NextDC", "region": "ANZ"},
+    {"symbol": "IFT.NZ", "name": "Infratil (CDC)", "region": "ANZ"},
+    {"symbol": "MQG.AX", "name": "Macquarie Group", "region": "ANZ"},
+    {"symbol": "GMG.AX", "name": "Goodman Group", "region": "ANZ"},
+]
+
+
+def _extract_earnings_date(cal) -> str | None:
+    """Extract earnings date from yfinance calendar response (DataFrame or dict)."""
+    if cal is None:
+        return None
+    if isinstance(cal, pd.DataFrame) and not cal.empty:
+        return str(cal.iloc[0, 0]) if cal.shape[1] > 0 else None
+    if isinstance(cal, dict):
+        ed = cal.get("Earnings Date")
+        if isinstance(ed, list) and ed:
+            return str(ed[0])
+        if ed:
+            return str(ed)
+    return None
+
+
+@st.cache_data(ttl=3600)
+def fetch_earnings_dates(tickers: tuple[str, ...]) -> dict[str, str | None]:
+    """Fetch next earnings date for an arbitrary list of tickers.
+
+    Tuple argument so the Streamlit cache key is hashable.
+    """
+    results: dict[str, str | None] = {}
+    for sym in tickers:
+        try:
+            t = yf.Ticker(sym)
+            results[sym] = _extract_earnings_date(t.calendar)
+        except Exception as e:
+            logger.debug("Earnings %s error: %s", sym, e)
+            results[sym] = None
+    return results
+
+
 @st.cache_data(ttl=3600)
 def fetch_earnings_calendar() -> list[dict]:
     """Fetch next earnings dates for key hyperscalers and DC operators."""
-    results = []
-    for sym in EARNINGS_TICKERS:
-        try:
-            t = yf.Ticker(sym)
-            cal = t.calendar
-            if cal is not None:
-                if isinstance(cal, pd.DataFrame) and not cal.empty:
-                    # Older yfinance returns DataFrame
-                    earn_date = cal.iloc[0, 0] if cal.shape[1] > 0 else None
-                    results.append({"ticker": sym, "earnings_date": str(earn_date) if earn_date else None})
-                elif isinstance(cal, dict):
-                    # Newer yfinance returns dict
-                    ed = cal.get("Earnings Date")
-                    if isinstance(ed, list) and ed:
-                        results.append({"ticker": sym, "earnings_date": str(ed[0])})
-                    elif ed:
-                        results.append({"ticker": sym, "earnings_date": str(ed)})
-                    else:
-                        results.append({"ticker": sym, "earnings_date": None})
-                else:
-                    results.append({"ticker": sym, "earnings_date": None})
-            else:
-                results.append({"ticker": sym, "earnings_date": None})
-        except Exception as e:
-            logger.debug("Earnings calendar %s error: %s", sym, e)
-            results.append({"ticker": sym, "earnings_date": None})
-    return results
+    dates = fetch_earnings_dates(tuple(EARNINGS_TICKERS))
+    return [{"ticker": sym, "earnings_date": dates.get(sym)} for sym in EARNINGS_TICKERS]
 
 
 def _fetch_fundamentals(symbols: list[str]) -> dict:

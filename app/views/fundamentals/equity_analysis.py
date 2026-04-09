@@ -1,13 +1,14 @@
-"""Mag 7 & AI Infrastructure Equities — prices, fundamentals, P/E comparison, treemap."""
+"""Equity Analysis (key players) — Mag 7, AI Infra, DC Operators.
+
+Share price performance is split into per-group tiles. Fundamentals + charts below.
+"""
 
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
-st.set_page_config(page_title="Equities", layout="wide")
-
-st.title("Mag 7 & AI Infrastructure")
+st.title("Equity Analysis (key players)")
 
 from app.lib.equities import fetch_equities_data
 
@@ -59,38 +60,49 @@ def _fmt_eps(val):
 
 
 # ──────────────────────────────────────────────
-# 1. SHARE PRICE PERFORMANCE TABLE
+# 1. SHARE PRICE PERFORMANCE — per-group tiles
 # ──────────────────────────────────────────────
 st.header("Share Price Performance")
 
-perf_rows = []
-for s in stocks:
-    ret = s.get("returns", {})
-    perf_rows.append({
-        "Ticker": s["symbol"],
-        "Name": s["name"],
-        "Group": s["group"],
-        "Price": s["price"],
-        "Daily %": s["change_pct"],
-        "1M %": ret.get("1M"),
-        "3M %": ret.get("3M"),
-        "6M %": ret.get("6M"),
-        "1Y %": ret.get("1Y"),
-        "5Y %": ret.get("5Y"),
-        "10Y %": ret.get("10Y"),
-    })
-
-df_perf = pd.DataFrame(perf_rows)
 return_cols = ["Daily %", "1M %", "3M %", "6M %", "1Y %", "5Y %", "10Y %"]
 
-styled = (
-    df_perf.style
-    .format({col: _fmt_pct for col in return_cols})
-    .format({"Price": _fmt_price})
-    .map(_color_returns, subset=return_cols)
-)
+# Preserve group order from MAG7_AI_STOCKS
+seen_groups = []
+for s in stocks:
+    if s["group"] not in seen_groups:
+        seen_groups.append(s["group"])
 
-st.dataframe(styled, use_container_width=True, hide_index=True, height=560)
+for group in seen_groups:
+    group_stocks = [s for s in stocks if s["group"] == group]
+    perf_rows = []
+    for s in group_stocks:
+        ret = s.get("returns", {})
+        perf_rows.append({
+            "Ticker": s["symbol"],
+            "Name": s["name"],
+            "Price": s["price"],
+            "Daily %": s["change_pct"],
+            "1M %": ret.get("1M"),
+            "3M %": ret.get("3M"),
+            "6M %": ret.get("6M"),
+            "1Y %": ret.get("1Y"),
+            "5Y %": ret.get("5Y"),
+            "10Y %": ret.get("10Y"),
+        })
+
+    df_perf = pd.DataFrame(perf_rows)
+
+    with st.container(border=True):
+        st.subheader(group)
+        styled = (
+            df_perf.style
+            .format({col: _fmt_pct for col in return_cols})
+            .format({"Price": _fmt_price})
+            .map(_color_returns, subset=return_cols)
+        )
+        # Tile height scales with row count (~35px per row + header)
+        row_h = 35 * (len(df_perf) + 1) + 3
+        st.dataframe(styled, use_container_width=True, hide_index=True, height=row_h)
 
 # ──────────────────────────────────────────────
 # 2. FUNDAMENTALS TABLE
