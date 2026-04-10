@@ -82,7 +82,17 @@ with col_anz:
 # 2. NEWS FEED
 # ══════════════════════════════════════════════
 st.header("News Feed")
-st.caption("Google News + curated DC feeds. Cached 30 minutes. Grouped by theme.")
+st.caption("Google News + curated DC feeds. Cached 30 minutes. All topics merged.")
+
+# Dot / label colour per bucket
+_BUCKET_COLORS: dict[str, str] = {
+    "Frontier Labs":           "#ef4444",  # red
+    "Hyperscaler CAPEX":       "#3b82f6",  # blue
+    "Supply Chain":            "#a855f7",  # purple
+    "Model Releases":          "#22c55e",  # green
+    "ANZ DC":                  "#14b8a6",  # teal
+    "China / Export Controls": "#f59e0b",  # amber
+}
 
 col_refresh, _ = st.columns([1, 5])
 with col_refresh:
@@ -95,18 +105,43 @@ with st.spinner("Fetching news..."):
 if not any(news_data.values()):
     st.warning("No news items fetched. Check network connectivity.")
 else:
-    # Tabs for buckets
-    tab_labels = list(BUCKETS.keys())
-    tabs = st.tabs(tab_labels)
-    for tab, label in zip(tabs, tab_labels):
-        with tab:
-            items = news_data.get(label, [])
-            if not items:
-                st.info(f"No items in {label}.")
-                continue
-            for it in items:
-                st.markdown(
-                    f"**[{it['title']}]({it['url']})**  \n"
-                    f"_{it['source']} · {it['age_str']} ago_"
-                )
-                st.divider()
+    # Flatten all buckets → single chronological feed (deduplicated by URL)
+    all_items: list[dict] = []
+    seen_urls: set[str] = set()
+    for bucket_label, items in news_data.items():
+        for it in items:
+            if it["url"] not in seen_urls:
+                seen_urls.add(it["url"])
+                all_items.append({**it, "bucket": bucket_label})
+
+    all_items.sort(key=lambda x: x["published"] or "", reverse=True)
+
+    # Build one HTML block for the entire feed
+    rows_html: list[str] = []
+    for it in all_items:
+        bucket = it["bucket"]
+        color  = _BUCKET_COLORS.get(bucket, "#6b7280")
+        title  = it["title"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        source = it["source"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        age    = it["age_str"]
+        url    = it["url"]
+
+        rows_html.append(f"""
+<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 2px 6px;">
+  <span style="margin-top:5px;width:7px;height:7px;border-radius:50%;
+               background:{color};flex-shrink:0;display:inline-block;"></span>
+  <div style="min-width:0;">
+    <a href="{url}" target="_blank" rel="noopener"
+       style="color:#e2e8f0;text-decoration:none;font-size:13px;line-height:1.45;">
+      {title}
+    </a>
+    <div style="margin-top:3px;font-size:11px;color:#6b7280;">
+      {source}&nbsp;·&nbsp;{age}
+      &nbsp;&nbsp;<span style="color:{color};font-weight:500;font-size:10px;">{bucket}</span>
+    </div>
+  </div>
+</div>
+<div style="border-top:1px solid #1e293b;margin:0 0 0 17px;"></div>""")
+
+    with st.container(border=True):
+        st.markdown("\n".join(rows_html), unsafe_allow_html=True)

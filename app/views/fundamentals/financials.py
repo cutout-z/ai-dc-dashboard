@@ -1,11 +1,7 @@
-"""Financial (key players) — 3-statement summary + AI revenue disclosure.
+"""Financial (key players) — 3-statement summary from yfinance.
 
-Per-company transposed financial tables covering:
-  Revenue, EBITDA, CAPEX, OCF, FCF, Cash, Gross Debt, Net Debt,
-  Off-Balance-Sheet Leases, Net D/EBITDA, Post-Lease D/EBITDA, CAPEX/Sales
-
-Excel model companies (MSFT, AMZN, GOOGL, META, ORCL): FY2022A–FY2027E
-Remaining companies (AAPL, NVDA, TSLA, AMD, TSM, PLTR, EQIX, DLR, AMT): last 4 fiscal years via yfinance
+P&L, Balance Sheet, Cash Flow Statement, Key Ratios, and Analyst Consensus
+per company (dropdown selector). All statement values in $M USD; last 4 fiscal years.
 """
 
 import streamlit as st
@@ -17,148 +13,138 @@ from app.lib.financials import (
     get_all_financials,
     load_ai_supplement,
     COMPANY_ORDER,
-    EXCEL_COMPANY_META,
 )
 
-CAPEX_SALES_FLAG = 0.34   # >34% = elevated capital intensity
-ND_EBITDA_FLAG   = 3.0    # >3x = elevated leverage
 
+# ── Formatters ────────────────────────────────────────────────────────────────
 
-# ── Formatters ───────────────────────────────────────────────────────────────
-
-def _fmt_b(v):
-    """Format $M value as $B string."""
+def _fmt_b(v) -> str:
     if v is None or pd.isna(v):
         return "—"
-    b = v / 1000
-    return f"${b:,.1f}B"
+    return f"${v / 1000:,.1f}B"
 
+def _fmt_pct(v) -> str:
+    if v is None or pd.isna(v):
+        return "—"
+    return f"{v:.1f}%"
 
-def _fmt_x(v):
+def _fmt_x(v) -> str:
     if v is None or pd.isna(v):
         return "—"
     return f"{v:.1f}x"
 
 
-def _fmt_pct(v):
-    if v is None or pd.isna(v):
-        return "—"
-    return f"{v * 100:.1f}%"
+# ── Colour rules ──────────────────────────────────────────────────────────────
+# Sign-based: True = green ≥ 0 / red < 0 | False = green < 0 / red ≥ 0
+
+_COLOR_ROWS: dict[str, bool] = {
+    "Net Income":        True,
+    "Net Debt":          False,   # net cash = green
+    "Operating CF":      True,
+    "Free CF":           True,
+    "Net Margin %":      True,
+    "FCF Margin %":      True,
+    "Operating Margin %": True,
+}
+
+_RATIO_FORMATTERS = {
+    "Gross Margin %":    _fmt_pct,
+    "Operating Margin %": _fmt_pct,
+    "Net Margin %":      _fmt_pct,
+    "FCF Margin %":      _fmt_pct,
+    "CapEx / Revenue %": _fmt_pct,
+    "Net Debt / EBITDA": _fmt_x,
+}
 
 
-# ── Colour helpers (applied to the raw numeric DataFrame before formatting) ──
+# ── Table renderer ────────────────────────────────────────────────────────────
 
-def _color_nd(val):
-    """Green if net cash (negative), red if net debt."""
-    try:
-        v = float(val)
-        return "color: #22c55e" if v < 0 else "color: #ef4444"
-    except Exception:
-        return ""
+def _render_table(title: str, rows: dict, years: list, formatters: dict | None = None) -> None:
+    with st.container(border=True):
+        st.subheader(title)
+        if not rows or not years:
+            st.caption("No data.")
+            return
 
+        num_df  = pd.DataFrame(rows, index=years).T
+        disp    = {
+            k: [(formatters or {}).get(k, _fmt_b)(v) for v in vals]
+            for k, vals in rows.items()
+        }
+        disp_df = pd.DataFrame(disp, index=years).T
 
-def _color_fcf(val):
-    try:
-        v = float(val)
-        return "color: #22c55e" if v >= 0 else "color: #ef4444"
-    except Exception:
-        return ""
+        styled = disp_df.style
+        for label, pos_green in _COLOR_ROWS.items():
+            if label not in num_df.index:
+                continue
+            for j, col in enumerate(disp_df.columns):
+                raw = num_df.loc[label].iloc[j]
+                if raw is None or pd.isna(raw):
+                    continue
+                r = float(raw)
+                color = (
+                    "color: #22c55e"
+                    if (pos_green and r >= 0) or (not pos_green and r < 0)
+                    else "color: #ef4444"
+                )
+                styled = styled.map(lambda _, c=color: c, subset=pd.IndexSlice[[label], [col]])
 
-
-def _color_capex_sales(val):
-    try:
-        v = float(val)
-        return "color: #ef4444" if v > CAPEX_SALES_FLAG else ""
-    except Exception:
-        return ""
-
-
-def _color_leverage(val):
-    try:
-        v = float(val)
-        return "color: #ef4444" if v > ND_EBITDA_FLAG else ""
-    except Exception:
-        return ""
-
-
-# ── Build display table for one company ──────────────────────────────────────
-
-_METRIC_ROWS = [
-    # (display_label, key, fmt_fn, color_fn)
-    ("Revenue",           "revenue",      _fmt_b,   None),
-    ("EBITDA",            "ebitda",       _fmt_b,   None),
-    ("CAPEX",             "capex",        _fmt_b,   None),
-    ("OCF",               "ocf",          _fmt_b,   None),
-    ("FCF",               "fcf",          _fmt_b,   _color_fcf),
-    ("Cash",              "cash",         _fmt_b,   None),
-    ("Gross Debt",        "gross_debt",   _fmt_b,   None),
-    ("Net Debt",          "net_debt",     _fmt_b,   _color_nd),
-    ("OBS Leases",        "obs_leases",   _fmt_b,   None),
-    ("Net D/EBITDA",      "nd_ebitda",    _fmt_x,   _color_leverage),
-    ("Post-Lease D/EBITDA","pl_nd_ebitda",_fmt_x,   _color_leverage),
-    ("CAPEX / Sales",     "capex_sales",  _fmt_pct, _color_capex_sales),
-]
+        st.dataframe(styled, use_container_width=True, height=35 * len(disp_df) + 40)
 
 
-def _build_table(d: dict) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
-    """Return (numeric_df, display_df, color_map) for Styler.
+# ── Consensus renderer ────────────────────────────────────────────────────────
 
-    numeric_df  — raw numbers (for colour computation)
-    display_df  — pre-formatted strings
-    color_map   — {row_label: color_fn} for rows that need colouring
-    """
-    years = d["years"]
-    num_rows = {}
-    disp_rows = {}
-    color_map = {}
+def _render_consensus(c: dict) -> None:
+    with st.container(border=True):
+        st.subheader("Analyst Consensus")
+        if not c:
+            st.caption("No consensus data available.")
+            return
 
-    for label, key, fmt, cfn in _METRIC_ROWS:
-        vals = d.get(key, [None] * len(years))
-        num_rows[label]  = vals
-        disp_rows[label] = [fmt(v) for v in vals]
-        if cfn:
-            color_map[label] = cfn
+        col1, col2, col3 = st.columns(3)
 
-    num_df  = pd.DataFrame(num_rows, index=years).T
-    disp_df = pd.DataFrame(disp_rows, index=years).T
-    return num_df, disp_df, color_map
+        with col1:
+            st.markdown("**Revenue Estimates**")
+            if c.get("rev_0y_avg") is not None:
+                low, avg, high = c.get("rev_0y_low"), c["rev_0y_avg"], c.get("rev_0y_high")
+                st.metric("Current FY", _fmt_b(avg))
+                if low is not None and high is not None:
+                    st.caption(f"Range: {_fmt_b(low)} – {_fmt_b(high)}")
+            if c.get("rev_1y_avg") is not None:
+                growth = c.get("rev_growth")
+                delta  = f"{growth * 100:+.1f}% YoY" if growth is not None else None
+                st.metric("Next FY", _fmt_b(c["rev_1y_avg"]), delta=delta)
+                low1, high1 = c.get("rev_1y_low"), c.get("rev_1y_high")
+                if low1 is not None and high1 is not None:
+                    st.caption(f"Range: {_fmt_b(low1)} – {_fmt_b(high1)}")
+            if c.get("rev_n"):
+                st.caption(f"{c['rev_n']} analysts")
 
+        with col2:
+            st.markdown("**EPS Estimates**")
+            if c.get("eps_0y_avg") is not None:
+                st.metric("Current FY", f"${c['eps_0y_avg']:.2f}")
+            if c.get("eps_1y_avg") is not None:
+                st.metric("Next FY", f"${c['eps_1y_avg']:.2f}")
+            if c.get("eps_n"):
+                st.caption(f"{c['eps_n']} analysts")
 
-def _style_table(num_df: pd.DataFrame, disp_df: pd.DataFrame,
-                 color_map: dict, hist_count: int) -> object:
-    """Apply formatting strings + per-cell colour to the display DataFrame."""
-
-    def cell_style(val, row_label, col_pos, color_fn):
-        raw = num_df.loc[row_label].iloc[col_pos]
-        try:
-            raw = float(raw) if raw is not None else None
-        except Exception:
-            raw = None
-        return color_fn(raw) if raw is not None else ""
-
-    styled = disp_df.style
-
-    for row_label, cfn in color_map.items():
-        if row_label not in disp_df.index:
-            continue
-        for j, col in enumerate(disp_df.columns):
-            styled = styled.map(
-                lambda v, r=row_label, j=j, c=cfn: cell_style(v, r, j, c),
-                subset=pd.IndexSlice[[row_label], [col]],
-            )
-
-    # Dim estimate columns (lighter text)
-    if hist_count < len(disp_df.columns):
-        est_cols = list(disp_df.columns[hist_count:])
-        styled = styled.map(
-            lambda _: "color: #9ca3af",
-            subset=pd.IndexSlice[:, est_cols],
-        )
-
-    return styled
+        with col3:
+            st.markdown("**Price Target**")
+            if c.get("pt_mean") is not None:
+                current = c.get("pt_current")
+                upside  = (
+                    f"{(c['pt_mean'] / current - 1) * 100:+.1f}% vs current"
+                    if current else None
+                )
+                st.metric("Mean", f"${c['pt_mean']:.2f}", delta=upside)
+            if c.get("pt_low") is not None and c.get("pt_high") is not None:
+                st.caption(f"Range: ${c['pt_low']:.2f} – ${c['pt_high']:.2f}")
+            if c.get("pt_current") is not None:
+                st.caption(f"Current price: ${c['pt_current']:.2f}")
 
 
-# ── Load data ────────────────────────────────────────────────────────────────
+# ── Load data ─────────────────────────────────────────────────────────────────
 
 with st.spinner("Loading financial data…"):
     all_fin = get_all_financials()
@@ -169,63 +155,8 @@ if not all_fin:
     st.stop()
 
 
-# ── Group header display ─────────────────────────────────────────────────────
+# ── AI Revenue Proxy & Disclosure Quality ────────────────────────────────────
 
-_GROUPS = ["Mag 7", "AI Infra", "DC Operators"]
-
-for group in _GROUPS:
-    tickers = [t for t in COMPANY_ORDER if t in all_fin and all_fin[t]["group"] == group]
-    if not tickers:
-        continue
-
-    st.header(group)
-
-    for ticker in tickers:
-        d = all_fin[ticker]
-        name    = d["name"]
-        source  = d["source"]
-        years   = d["years"]
-        hc      = d.get("hist_count", len(years))
-        n_years = len(years)
-
-        source_note = (
-            "Excel model (FY2022A–FY2027E, $M USD)"
-            if source == "excel"
-            else f"yfinance annual ({years[0]}–{years[-1]}, $M USD)"
-        )
-
-        num_df, disp_df, cmap = _build_table(d)
-
-        # Auto height: 35px × rows + 40px header
-        tbl_h = 35 * len(disp_df) + 40
-
-        with st.container(border=True):
-            col_a, col_b = st.columns([3, 1])
-            with col_a:
-                st.subheader(f"{name} ({ticker})")
-            with col_b:
-                st.caption(source_note)
-
-            # Column-header styling: bold historical, dimmed estimate
-            styled = _style_table(num_df, disp_df, cmap, hc)
-
-            st.dataframe(
-                styled,
-                use_container_width=True,
-                height=tbl_h,
-            )
-
-            if source == "excel":
-                st.caption(
-                    "OBS Leases = uncommenced data-centre lease commitments (Moody's $662B aggregate, "
-                    "phased 50% FY2026E / 100% FY2027E per company share). "
-                    "Estimate columns (E) in grey. Net Debt negative = net cash position."
-                )
-
-
-# ── AI Revenue Proxy & Disclosure Quality ───────────────────────────────────
-
-st.divider()
 st.header("AI Revenue Proxy & Disclosure Quality")
 st.caption(
     "AI revenue is not a GAAP line item. Figures represent management disclosures, "
@@ -235,7 +166,6 @@ st.caption(
 if ai_supp:
     df_supp = pd.DataFrame(ai_supp)
 
-    # Disclosure quality colour
     def _dq_color(val):
         if not isinstance(val, str):
             return ""
@@ -250,12 +180,52 @@ if ai_supp:
         .map(_dq_color, subset=["Disclosure Quality"])
         .set_properties(subset=["Source / Notes"], **{"white-space": "pre-wrap", "max-width": "420px"})
     )
-    h_supp = 35 * (len(df_supp) + 1) + 10
     st.dataframe(
         styled_supp,
         use_container_width=True,
         hide_index=True,
-        height=h_supp,
+        height=35 * (len(df_supp) + 1) + 10,
     )
 else:
     st.info("AI Supplement data not available — check Excel model path.")
+
+st.divider()
+
+
+# ── Company selector ──────────────────────────────────────────────────────────
+
+available = [t for t in COMPANY_ORDER if t in all_fin]
+selected = st.selectbox(
+    "Company",
+    options=available,
+    format_func=lambda t: f"{all_fin[t]['name']} ({t})  —  {all_fin[t]['group']}",
+)
+
+if not selected:
+    st.stop()
+
+d     = all_fin[selected]
+years = d["years"]
+
+st.caption(f"yfinance annual  ·  {years[0]}–{years[-1]}  ·  $M USD  ·  all actuals")
+
+
+# ── Three-statement display ───────────────────────────────────────────────────
+
+_render_table("Income Statement",    d["income"],   years)
+_render_table("Balance Sheet",       d["balance"],  years)
+_render_table("Cash Flow Statement", d["cashflow"], years)
+
+
+# ── Key Ratios ────────────────────────────────────────────────────────────────
+
+_render_table("Key Ratios", d.get("ratios", {}), years, formatters=_RATIO_FORMATTERS)
+st.caption(
+    "Lease Oblig. = GAAP-reported capital/operating lease liabilities (ASC 842 / IFRS 16). "
+    "Net Debt / EBITDA: negative = net cash. CapEx / Revenue flags capital intensity."
+)
+
+
+# ── Analyst Consensus ─────────────────────────────────────────────────────────
+
+_render_consensus(d.get("consensus", {}))

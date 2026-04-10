@@ -25,6 +25,7 @@ df_universe = pd.read_sql("SELECT * FROM v_full_universe WHERE included = 1", co
 # 1. TAXONOMY OVERVIEW
 # ──────────────────────────────────────────────
 st.header("Supply Chain Taxonomy")
+st.caption("Click any segment or sub-bucket to drill down. Click the centre to zoom back out.")
 
 if not df_universe.empty:
     df_sun = df_universe.dropna(subset=["segment", "sub_bucket"])

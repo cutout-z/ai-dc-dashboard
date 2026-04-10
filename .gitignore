@@ -1,11 +1,7 @@
-# Raw proprietary data (paid investment bank files)
+# Raw proprietary data (source Excel models — not redistributed)
 data/raw/
 *.xlsx
 *.xls
-
-# Processed data (derived from proprietary sources)
-data/db/*.db
-data/processed/*.csv
 
 # Python
 __pycache__/
