@@ -90,10 +90,11 @@ for tab, (category, items) in zip(tabs, data.items()):
         df = pd.DataFrame(rows)
         pct_cols = ["Daily %", "1M %", "3M %", "6M %", "1Y %"]
 
+        fmt_map = {col: _fmt_pct for col in pct_cols}
+        fmt_map["Price"] = _fmt_price
         styled = (
             df.style
-            .format({col: _fmt_pct for col in pct_cols})
-            .format({"Price": _fmt_price})
+            .format(fmt_map)
             .map(_color_val, subset=pct_cols)
         )
         st.dataframe(styled, use_container_width=True, hide_index=True)

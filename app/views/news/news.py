@@ -1,5 +1,7 @@
 """News — earnings calendars and curated AI/DC news feed."""
 
+from __future__ import annotations
+
 from datetime import datetime
 
 import pandas as pd
