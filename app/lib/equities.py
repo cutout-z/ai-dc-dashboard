@@ -1,5 +1,7 @@
 """Mag 7 + AI infrastructure equities — prices via Yahoo spark, fundamentals via yfinance."""
 
+from __future__ import annotations
+
 import logging
 
 import pandas as pd
@@ -91,6 +93,8 @@ def _fetch_fundamentals(symbols: list[str]) -> dict:
             eps_t = info.get("trailingEps")
             eps_f = info.get("forwardEps")
             w52h = info.get("fiftyTwoWeekHigh")
+            w52l = info.get("fiftyTwoWeekLow")
+            target_1y = info.get("targetMeanPrice")
             pct_from_high = None
             if price and w52h and w52h != 0:
                 pct_from_high = round((price / w52h - 1) * 100, 2)
@@ -120,6 +124,9 @@ def _fetch_fundamentals(symbols: list[str]) -> dict:
                 "pe_forward": round(pe_f, 2) if pe_f else None,
                 "eps_trailing": round(eps_t, 2) if eps_t else None,
                 "eps_forward": round(eps_f, 2) if eps_f else None,
+                "week52_low": w52l,
+                "week52_high": w52h,
+                "target_mean_1y": target_1y,
                 "pct_from_high": pct_from_high,
                 "rev_growth_yoy": rev_growth,
                 "capex_yoy": capex_yoy,
@@ -163,6 +170,9 @@ def fetch_equities_data() -> list[dict]:
             "pe_forward": fund.get("pe_forward"),
             "eps_trailing": fund.get("eps_trailing"),
             "eps_forward": fund.get("eps_forward"),
+            "week52_low": fund.get("week52_low"),
+            "week52_high": fund.get("week52_high"),
+            "target_mean_1y": fund.get("target_mean_1y"),
             "pct_from_high": fund.get("pct_from_high"),
             "rev_growth_yoy": fund.get("rev_growth_yoy"),
             "capex_yoy": fund.get("capex_yoy"),

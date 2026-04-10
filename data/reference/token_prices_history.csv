@@ -1,0 +1,40 @@
+date,model,provider,input_usd_per_mtok,output_usd_per_mtok,notes
+2020-06-01,GPT-3 (davinci),OpenAI,60.0,60.0,Initial GPT-3 API launch pricing
+2022-11-01,GPT-3.5 Turbo,OpenAI,2.0,2.0,ChatGPT launch pricing
+2023-03-01,GPT-4 (8k),OpenAI,30.0,60.0,GPT-4 launch
+2023-03-01,Claude 1,Anthropic,11.02,32.68,Claude 1 API
+2023-07-01,Claude 2,Anthropic,8.0,24.0,Claude 2 launch
+2023-11-01,GPT-4 Turbo,OpenAI,10.0,30.0,DevDay launch — 3x cheaper
+2023-12-01,Gemini Pro 1.0,Google,0.50,1.50,Gemini Pro free tier launch pricing
+2024-02-01,Gemini 1.5 Pro,Google,7.0,21.0,1.5 Pro 128k context launch
+2024-03-01,Claude 3 Opus,Anthropic,15.0,75.0,Claude 3 family launch
+2024-03-01,Claude 3 Sonnet,Anthropic,3.0,15.0,Claude 3 Sonnet
+2024-03-01,Claude 3 Haiku,Anthropic,0.25,1.25,Claude 3 Haiku — cheapest frontier
+2024-05-01,DeepSeek V2,DeepSeek,0.14,0.28,DeepSeek-V2 chat API
+2024-05-01,GPT-4o,OpenAI,5.0,15.0,GPT-4o launch — half GPT-4 Turbo
+2024-05-01,Gemini 1.5 Flash,Google,0.35,1.05,Gemini 1.5 Flash launch
+2024-06-01,Claude 3.5 Sonnet,Anthropic,3.0,15.0,Claude 3.5 Sonnet
+2024-07-01,GPT-4o mini,OpenAI,0.15,0.60,GPT-4o mini — 60% below GPT-3.5 Turbo
+2024-07-01,Llama 3.1 405B (Together),Meta,5.0,15.0,Llama 3.1 405B via Together AI
+2024-07-01,Mistral Large 2,Mistral,2.0,6.0,Mistral Large 2 launch
+2024-09-01,o1-preview,OpenAI,15.0,60.0,o1-preview reasoning
+2024-09-01,o1-mini,OpenAI,3.0,12.0,o1-mini
+2024-09-01,Qwen 2.5 72B (DashScope),Alibaba,0.90,0.90,Qwen 2.5 via Alibaba Cloud
+2024-10-01,Claude 3.5 Haiku,Anthropic,0.80,4.0,Claude 3.5 Haiku
+2024-10-01,Grok 2,xAI,5.0,15.0,Grok 2 API launch
+2024-12-01,DeepSeek V3,DeepSeek,0.27,1.10,DeepSeek-V3 launch
+2024-12-01,Gemini 2.0 Flash,Google,0.10,0.40,Gemini 2.0 Flash
+2024-12-01,Llama 3.3 70B (Together),Meta,0.88,0.88,Llama 3.3 70B via Together AI
+2025-01-01,DeepSeek R1,DeepSeek,0.55,2.19,DeepSeek R1 reasoning model
+2025-01-01,o3-mini,OpenAI,1.10,4.40,o3-mini launch
+2025-01-01,Qwen 2.5 Max,Alibaba,1.60,6.40,Qwen 2.5 Max flagship
+2025-02-01,Grok 3,xAI,3.0,15.0,Grok 3 launch
+2025-02-01,Claude 3.7 Sonnet,Anthropic,3.0,15.0,Claude 3.7 Sonnet hybrid reasoning
+2025-03-01,Gemini 2.5 Pro,Google,1.25,10.0,Gemini 2.5 Pro launch
+2025-04-01,Llama 4 Maverick (Together),Meta,0.19,0.49,Llama 4 Maverick open weights
+2025-04-01,Qwen 3 235B,Alibaba,2.0,6.0,Qwen 3 flagship
+2025-05-01,Claude 4 Opus,Anthropic,15.0,75.0,Claude 4 Opus
+2025-05-01,Claude 4 Sonnet,Anthropic,3.0,15.0,Claude 4 Sonnet
+2025-05-01,Mistral Medium 3,Mistral,0.40,2.0,Mistral Medium 3
+2025-07-01,Grok 4,xAI,3.0,15.0,Grok 4 launch
+2025-08-01,GPT-5,OpenAI,1.25,10.0,GPT-5 flagship

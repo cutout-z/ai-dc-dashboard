@@ -59,6 +59,8 @@ def _fmt_eps(val):
     return f"${val:.2f}"
 
 
+
+
 # ──────────────────────────────────────────────
 # 1. SHARE PRICE PERFORMANCE — per-group tiles
 # ──────────────────────────────────────────────
@@ -92,62 +94,68 @@ for group in seen_groups:
 
     df_perf = pd.DataFrame(perf_rows)
 
+    fund_rows = []
+    for s in group_stocks:
+        mcap = s.get("market_cap")
+        mcap_fmt = round(mcap / 1e9, 1) if mcap else None
+        fund_rows.append({
+            "Ticker": s["symbol"],
+            "Name": s["name"],
+            "Mkt Cap ($B)": mcap_fmt,
+            "PE (T)": s.get("pe_trailing"),
+            "PE (F)": s.get("pe_forward"),
+            "EPS (T)": s.get("eps_trailing"),
+            "EPS (F)": s.get("eps_forward"),
+            "52W Low": s.get("week52_low"),
+            "52W High": s.get("week52_high"),
+            "1Y Target Est": s.get("target_mean_1y"),
+        })
+    df_fund = pd.DataFrame(fund_rows)
+
+    # Both tables have 10 columns; force equal widths so columns align between tables.
+    perf_col_config = {col: st.column_config.Column(width="small") for col in df_perf.columns}
+    fund_col_config = {col: st.column_config.Column(width="small") for col in df_fund.columns}
+
     with st.container(border=True):
         st.subheader(group)
+        fmt_map = {col: _fmt_pct for col in return_cols}
+        fmt_map["Price"] = _fmt_price
         styled = (
             df_perf.style
-            .format({col: _fmt_pct for col in return_cols})
-            .format({"Price": _fmt_price})
+            .format(fmt_map)
             .map(_color_returns, subset=return_cols)
         )
         # Tile height scales with row count (~35px per row + header)
         row_h = 35 * (len(df_perf) + 1) + 3
-        st.dataframe(styled, use_container_width=True, hide_index=True, height=row_h)
+        st.dataframe(
+            styled,
+            use_container_width=True,
+            hide_index=True,
+            height=row_h,
+            column_config=perf_col_config,
+        )
+
+        styled_fund = df_fund.style.format({
+            "Mkt Cap ($B)": _fmt_mcap,
+            "PE (T)": _fmt_pe,
+            "PE (F)": _fmt_pe,
+            "EPS (T)": _fmt_eps,
+            "EPS (F)": _fmt_eps,
+            "52W Low": _fmt_price,
+            "52W High": _fmt_price,
+            "1Y Target Est": _fmt_price,
+        })
+        fund_h = 35 * (len(df_fund) + 1) + 3
+        st.dataframe(
+            styled_fund,
+            use_container_width=True,
+            hide_index=True,
+            height=fund_h,
+            column_config=fund_col_config,
+        )
 
 # ──────────────────────────────────────────────
-# 2. FUNDAMENTALS TABLE
-# ──────────────────────────────────────────────
-st.header("Fundamentals")
-
-fund_rows = []
-for s in stocks:
-    mcap = s.get("market_cap")
-    mcap_fmt = round(mcap / 1e9, 1) if mcap else None
-    fund_rows.append({
-        "Ticker": s["symbol"],
-        "Name": s["name"],
-        "Group": s["group"],
-        "Mkt Cap ($B)": mcap_fmt,
-        "PE (T)": s.get("pe_trailing"),
-        "PE (F)": s.get("pe_forward"),
-        "EPS (T)": s.get("eps_trailing"),
-        "EPS (F)": s.get("eps_forward"),
-        "% from 52W High": s.get("pct_from_high"),
-        "Rev Growth YoY %": s.get("rev_growth_yoy"),
-        "CAPEX Growth YoY %": s.get("capex_yoy"),
-    })
-
-df_fund = pd.DataFrame(fund_rows)
-
-styled_fund = (
-    df_fund.style
-    .format({
-        "Mkt Cap ($B)": _fmt_mcap,
-        "PE (T)": _fmt_pe,
-        "PE (F)": _fmt_pe,
-        "EPS (T)": _fmt_eps,
-        "EPS (F)": _fmt_eps,
-        "% from 52W High": _fmt_pct,
-        "Rev Growth YoY %": _fmt_pct,
-        "CAPEX Growth YoY %": _fmt_pct,
-    })
-    .map(_color_returns, subset=["% from 52W High", "Rev Growth YoY %", "CAPEX Growth YoY %"])
-)
-
-st.dataframe(styled_fund, use_container_width=True, hide_index=True, height=560)
-
-# ──────────────────────────────────────────────
-# 3. CHARTS
+# 2. CHARTS
 # ──────────────────────────────────────────────
 col1, col2 = st.columns(2)
 
