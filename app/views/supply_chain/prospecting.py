@@ -71,8 +71,7 @@ st.subheader(f"Screener Results — {len(df_filtered)} stocks")
 
 display_cols = [
     "ticker", "company", "region", "gics_sector", "gics_industry",
-    "market_cap_usd_m", "exposure_latest", "materiality_latest",
-    "pricing_power_latest", "materiality_trend", "alpha_flag",
+    "market_cap_usd_m",
 ]
 display_cols = [c for c in display_cols if c in df_filtered.columns]
 
@@ -173,31 +172,5 @@ if SHOW_UPGRADERS:
         st.dataframe(df_upgraders[upgrade_cols], use_container_width=True, hide_index=True, height=400)
     else:
         st.info("No materiality upgraders in filtered set.")
-
-# ──────────────────────────────────────────────
-# SCATTER: MARKET CAP vs MATERIALITY
-# ──────────────────────────────────────────────
-st.header("Universe Map")
-
-df_plot = df_filtered.dropna(subset=["market_cap_usd_m", "materiality_score"]).copy()
-if not df_plot.empty:
-    df_plot["log_mcap"] = df_plot["market_cap_usd_m"].apply(lambda x: max(x, 1))
-
-    fig_map = px.scatter(
-        df_plot,
-        x="materiality_score",
-        y="log_mcap",
-        color="exposure_latest",
-        hover_name="company",
-        hover_data=["ticker", "region", "pricing_power_latest"],
-        title="Universe Map — Materiality vs Market Cap",
-        labels={
-            "materiality_score": "Materiality Score (1=Insignificant, 4=Core)",
-            "log_mcap": "Market Cap ($M USD)",
-        },
-        log_y=True,
-    )
-    fig_map.update_layout(height=500)
-    st.plotly_chart(fig_map, use_container_width=True)
 
 conn.close()

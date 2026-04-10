@@ -1,0 +1,33 @@
+level,segment,sub_bucket
+Inside DC,Semi Production,IC Design
+Inside DC,Semi Production,OSAT
+Inside DC,Semi Production,Foundry
+Inside DC,Semi Production,IDM
+Inside DC,Semi Production,Semi Design Services
+Inside DC,Semi Production,Semi Capital Equipment
+Inside DC,Processor,GPU
+Inside DC,Processor,CPU
+Inside DC,Server Components,Power Supply
+Inside DC,Server Components,Passive Component
+Inside DC,Server Components,Thermal Solution
+Inside DC,Server Components,PCB
+Inside DC,Server,Server Brands
+Inside DC,Server,ODM / EMS
+Inside DC,Network,InfiniBand
+Inside DC,Network,Ethernet
+Inside DC,Network,DCI (Routing/Optical)
+Inside DC,Network,Memory/Storage
+Inside DC,Network,Cabling
+Inside DC,Internal Power/Cooling,Liquid Cooling
+Inside DC,Internal Power/Cooling,Power Electronics
+Inside DC,Internal Power/Cooling,UPS
+Outside DC,Power Supply,Grid + Onsite Renewable Storage
+Outside DC,Power Supply,Generators & Grid Connection
+Outside DC,Power Supply,Grid Infrastructure
+Outside DC,Power Supply,Nuclear
+Outside DC,Power Supply,Fuel Cells
+Outside DC,Owners/Operators,Hyperscalers
+Outside DC,Owners/Operators,DC REITs
+Outside DC,Owners/Operators,Private Equity
+Outside DC,Owners/Operators,Enterprises/Tier 2
+Outside DC,Owners/Operators,Neo-cloud
