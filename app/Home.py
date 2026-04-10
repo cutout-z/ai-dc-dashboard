@@ -5,7 +5,7 @@ from pathlib import Path
 
 st.set_page_config(
     page_title="AI & DC Dashboard",
-    page_icon="🔬",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -16,39 +16,42 @@ st.session_state["db_path"] = str(DB_PATH)
 st.sidebar.title("AI & DC Dashboard")
 
 # Define pages
-landing = st.Page("views/landing.py", title="Home", icon="🏠", default=True)
+landing = st.Page("views/landing.py", title="Home", default=True)
 
 # Fundamentals Tracking
 model_performance = st.Page(
-    "views/fundamentals/model_performance.py", title="Model Performance", icon="🧠"
+    "views/fundamentals/model_performance.py", title="Model Performance"
 )
 equity_analysis = st.Page(
-    "views/fundamentals/equity_analysis.py", title="Equity Analysis (key players)", icon="📈"
+    "views/fundamentals/equity_analysis.py", title="Equity Analysis (key players)"
+)
+financials = st.Page(
+    "views/fundamentals/financials.py", title="Financial (key players)"
 )
 hyperscaler_capex = st.Page(
-    "views/fundamentals/hyperscaler_capex.py", title="Hyperscaler CAPEX", icon="💰"
+    "views/fundamentals/hyperscaler_capex.py", title="Hyperscaler CAPEX"
 )
 other_signals = st.Page(
-    "views/fundamentals/other_signals.py", title="Other Signals", icon="📡"
+    "views/fundamentals/other_signals.py", title="Other Signals"
 )
 
 # Supply Chain
 value_chain = st.Page(
-    "views/supply_chain/value_chain.py", title="AI Infra Value Chain", icon="🔗"
+    "views/supply_chain/value_chain.py", title="AI Infra Value Chain"
 )
 dc_inputs = st.Page(
-    "views/supply_chain/dc_inputs.py", title="DC & AI Inputs", icon="⚙️"
+    "views/supply_chain/dc_inputs.py", title="DC & AI Inputs"
 )
 prospecting = st.Page(
-    "views/supply_chain/prospecting.py", title="Prospecting", icon="🔍"
+    "views/supply_chain/prospecting.py", title="Prospecting"
 )
 
 # News
-news = st.Page("views/news/news.py", title="News", icon="📰")
+news = st.Page("views/news/news.py", title="News")
 
 # System
 source_health = st.Page(
-    "views/system/source_health.py", title="Source Health", icon="🩺"
+    "views/system/source_health.py", title="Source Health"
 )
 
 pg = st.navigation(
@@ -57,6 +60,7 @@ pg = st.navigation(
         "Fundamentals Tracking": [
             model_performance,
             equity_analysis,
+            financials,
             hyperscaler_capex,
             other_signals,
         ],

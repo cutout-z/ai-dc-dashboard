@@ -64,11 +64,11 @@ def _classify(age_seconds: float | None, fresh_max: float, stale_max: float) -> 
 
 STATUS_ORDER = {"error": 0, "no-data": 1, "very-stale": 2, "stale": 3, "fresh": 4}
 STATUS_ICONS = {
-    "fresh": "🟢",
-    "stale": "🟡",
-    "very-stale": "🔴",
-    "no-data": "⚪",
-    "error": "❌",
+    "fresh": "OK",
+    "stale": "STALE",
+    "very-stale": "OLD",
+    "no-data": "--",
+    "error": "ERR",
 }
 
 

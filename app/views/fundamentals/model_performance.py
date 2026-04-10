@@ -235,7 +235,7 @@ def _compute_y_range(scores: list[float], max_score: float = 100.0, floor: float
 
 def _explainer(what: str, why: str, source: str) -> None:
     """Render a collapsible explainer for a chart."""
-    with st.expander("ℹ️ About this chart"):
+    with st.expander("About this chart"):
         st.markdown(f"**What it shows.** {what}")
         st.markdown(f"**Why it matters.** {why}")
         st.markdown(f"**Source.** {source}")
