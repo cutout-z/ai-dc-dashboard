@@ -15,5 +15,9 @@ date,metric,provider,value,unit,source,notes
 2024-01-01,monthly_active_users,Anthropic,10000000,users,Estimates,Claude.ai estimated MAU
 2024-06-01,monthly_active_users,Anthropic,20000000,users,Estimates,Post Claude 3.5 Sonnet launch
 2025-01-01,monthly_active_users,Anthropic,40000000,users,Estimates,Claude estimated MAU growth
+2025-03-01,monthly_active_users,Anthropic,50000000,users,Estimates,Claude MAU estimate — accelerating post Claude 3.7
 2024-01-01,monthly_active_users,Google,150000000,users,Google I/O,Gemini monthly users reported at I/O
 2024-12-01,monthly_active_users,Google,350000000,users,Alphabet earnings,Gemini 350M+ MAU
+2025-03-01,monthly_active_users,Google,500000000,users,Alphabet Q1 2025 earnings,Gemini 500M+ MAU reported
+2025-01-01,monthly_active_users,xAI,40000000,users,Estimates,Grok MAU estimate — tens of millions disclosed
+2025-03-01,monthly_active_users,xAI,60000000,users,Estimates,Grok MAU estimate post Grok 3 launch
