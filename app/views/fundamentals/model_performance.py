@@ -1,10 +1,12 @@
-"""Model Performance — AI model benchmarks, context windows, pricing, and compute hardware."""
+"""LLM Analysis — AI model benchmarks, context windows, pricing, compute hardware, and live leaderboard."""
 
 from __future__ import annotations
 
+import sqlite3
 from pathlib import Path
 
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -16,10 +18,11 @@ CHART_LAYOUT = dict(
     hoverlabel=dict(bgcolor="white", font_size=12),
 )
 
-st.title("Model Performance")
-st.caption("Frontier AI model benchmarks, context windows, API pricing, and compute hardware.")
+st.title("LLM Analysis")
+st.caption("Frontier AI model benchmarks, context windows, API pricing, compute hardware, and live leaderboard.")
 
 DATA_DIR = Path(__file__).parent.parent.parent.parent / "data" / "reference"
+DB_PATH = st.session_state["db_path"]
 
 # ─── Provider colours (consistent across all charts) ───
 PROVIDER_COLOURS = {
@@ -569,6 +572,84 @@ else:
             what="Monthly median H100 rental price in $/GPU-hour, broken out by provider tier. Hyperscaler = AWS/Azure/GCP list prices. Neocloud = CoreWeave, Lambda, Crusoe, etc. Marketplace = GPU marketplaces monetising underutilised reserved capacity (Vast.ai, SF Compute, etc.).",
             why="H100 lease rates are the cleanest public proxy for GPU depreciation and chip obsolescence. The gap between tiers (hyperscaler ~3× marketplace) reveals how much of cloud AI gross margin is 'convenience tax' vs. compute cost. Sharp 2025 declines are the story: Blackwell supply came online, H100 residual value fell ~30% in 90 days.",
             source="Silicon Data — *H100 Rental Index* public blog (silicondata.com/blog/h100-rental-price-over-time). Manually transcribed, refreshed quarterly. Paid API with daily data available via Bloomberg (ticker SDH100RT).",
+        )
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# SECTION 5 — Live Leaderboard
+# ═════════════════════════════════════════════════════════════════════════
+st.header("Live Leaderboard")
+st.caption("Arena Elo ratings, intelligence-vs-cost frontier, and context window leaders — updated via /ai-research skill.")
+
+_conn = sqlite3.connect(DB_PATH)
+df_elo = pd.read_sql("SELECT * FROM llm_arena_elo ORDER BY elo DESC", _conn)
+df_specs = pd.read_sql("SELECT * FROM llm_model_specs ORDER BY intelligence_score DESC NULLS LAST", _conn)
+_conn.close()
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("Arena Elo Ratings")
+    if not df_elo.empty:
+        _vis = [p for p in df_elo["provider"].unique() if p in sel_providers] if sel_providers else df_elo["provider"].unique().tolist()
+        df_elo_vis = df_elo[df_elo["provider"].isin(_vis)] if _vis else df_elo
+        fig_elo = px.bar(
+            df_elo_vis.head(15), x="elo", y="model", color="provider",
+            orientation="h", title="Top 15 by Elo",
+            labels={"elo": "Elo Score"},
+            color_discrete_map=PROVIDER_COLOURS,
+        )
+        fig_elo.update_layout(height=450, yaxis=dict(autorange="reversed"), **CHART_LAYOUT)
+        st.plotly_chart(fig_elo, use_container_width=True)
+    _explainer(
+        what="Chatbot Arena (lmsys.org) Elo scores — a head-to-head blind preference tournament where humans choose between model responses. Elo is computed from win rates across millions of votes.",
+        why="Human preference Elo is the most neutral capability signal available. It has no benchmark contamination problem and aligns with what users actually prefer. It's the one metric all providers accept as credible.",
+        source="LMSYS Chatbot Arena leaderboard (chat.lmsys.org). Updated via /ai-research skill.",
+    )
+
+with col2:
+    st.subheader("Intelligence vs Cost Frontier")
+    if not df_specs.empty:
+        df_plot = df_specs.dropna(subset=["intelligence_score", "input_price_per_m_tokens"])
+        if not df_plot.empty:
+            _vis2 = [p for p in df_plot["provider"].unique() if p in sel_providers] if sel_providers else df_plot["provider"].unique().tolist()
+            df_plot = df_plot[df_plot["provider"].isin(_vis2)] if _vis2 else df_plot
+            fig_frontier = px.scatter(
+                df_plot, x="input_price_per_m_tokens", y="intelligence_score",
+                text="model", color="provider",
+                title="Intelligence Index vs $/1M Input Tokens",
+                labels={"input_price_per_m_tokens": "$/1M Input Tokens", "intelligence_score": "Intelligence Index"},
+                color_discrete_map=PROVIDER_COLOURS,
+            )
+            fig_frontier.update_traces(textposition="top center", textfont_size=9)
+            fig_frontier.update_layout(height=450, **CHART_LAYOUT)
+            st.plotly_chart(fig_frontier, use_container_width=True)
+    _explainer(
+        what="Each model plotted at its list input price (x-axis) vs composite intelligence index (y-axis). The Pareto frontier moves left and up over time — models that were SOTA 12 months ago are now dominated on both axes.",
+        why="As intelligence commoditises, can any provider maintain pricing power? This chart shows how fast the frontier is shifting — and whether there is still a capability moat at the top end that justifies premium pricing.",
+        source="Artificial Analysis intelligence index + provider list pricing. Updated via /ai-research skill.",
+    )
+
+if not df_specs.empty:
+    df_ctx = df_specs.dropna(subset=["context_window"]).sort_values("context_window", ascending=False)
+    if not df_ctx.empty:
+        st.subheader("Context Window Leaders")
+        df_ctx = df_ctx.copy()
+        df_ctx["ctx_k"] = df_ctx["context_window"] / 1000
+        _vis3 = [p for p in df_ctx["provider"].unique() if p in sel_providers] if sel_providers else df_ctx["provider"].unique().tolist()
+        df_ctx_vis = df_ctx[df_ctx["provider"].isin(_vis3)] if _vis3 else df_ctx
+        fig_ctx = px.bar(
+            df_ctx_vis.head(10), x="ctx_k", y="model", orientation="h",
+            title="Top 10 by Context Window (K tokens)",
+            labels={"ctx_k": "Context Window (K tokens)"}, color="provider",
+            color_discrete_map=PROVIDER_COLOURS,
+        )
+        fig_ctx.update_layout(height=350, yaxis=dict(autorange="reversed"), **CHART_LAYOUT)
+        st.plotly_chart(fig_ctx, use_container_width=True)
+        _explainer(
+            what="Current snapshot: the 10 models with the largest maximum context windows, in thousands of tokens. Companion to the Context Window Expansion time-series above.",
+            why="Context window is a hard application constraint. Models that can ingest entire codebases or documents without chunking enable qualitatively different workflows. The jump from 4K → 1M+ tokens represents a category shift, not just a spec improvement.",
+            source="Model cards and provider announcements. Updated via /ai-research skill.",
         )
 
 

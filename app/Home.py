@@ -20,7 +20,7 @@ landing = st.Page("views/landing.py", title="Home", default=True)
 
 # Fundamentals Tracking
 model_performance = st.Page(
-    "views/fundamentals/model_performance.py", title="Model Performance"
+    "views/fundamentals/model_performance.py", title="LLM Analysis"
 )
 equity_analysis = st.Page(
     "views/fundamentals/equity_analysis.py", title="Equity Analysis (key players)"

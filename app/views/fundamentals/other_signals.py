@@ -21,6 +21,11 @@ conn = sqlite3.connect(DB_PATH)
 # SEMI DEMAND BELLWETHERS
 # ══════════════════════════════════════════════
 st.header("Semi Demand Bellwethers")
+st.caption(
+    "TSMC monthly revenue is the highest-frequency public signal for AI hardware demand across the full value chain. "
+    "ASML orders are a 6–12 month leading indicator of new node capacity. "
+    "NVDA captures direct AI accelerator demand."
+)
 
 df_semi = pd.read_sql(
     """
@@ -104,52 +109,40 @@ if tsmc_path.exists():
 # TOKEN CONSUMPTION & AI DEMAND
 # ══════════════════════════════════════════════
 st.header("AI Demand Indicators")
+st.caption(
+    "User growth is the clearest leading indicator of whether AI revenue can sustain current CAPEX levels. "
+    "Rising users without commensurate monetisation would be a key bubble-risk signal."
+)
 
 token_path = DATA_DIR / "token_consumption.csv"
 if token_path.exists():
     df_tokens = pd.read_csv(token_path)
     df_tokens["date"] = pd.to_datetime(df_tokens["date"])
 
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.subheader("Frontier Model User Growth")
-        df_users = df_tokens[df_tokens["metric"].str.contains("active_users")]
-        if not df_users.empty:
-            df_users["value_m"] = df_users["value"] / 1e6
-            fig_users = px.scatter(
-                df_users, x="date", y="value_m", color="provider",
-                size="value_m", title="Active Users (Millions)",
-                labels={"value_m": "Users (M)", "date": ""},
-            )
-            fig_users.update_traces(marker=dict(sizemin=5))
-            fig_users.update_layout(height=400, margin=dict(l=0, r=0, t=30, b=0))
-            st.plotly_chart(fig_users, use_container_width=True)
-
-    with col2:
-        st.subheader("OpenAI Revenue Run Rate")
-        df_rev = df_tokens[df_tokens["metric"] == "annual_revenue_run_rate"]
-        if not df_rev.empty:
-            df_rev["value_b"] = df_rev["value"] / 1e9
-            fig_arr = go.Figure()
-            fig_arr.add_trace(go.Scatter(
-                x=df_rev["date"], y=df_rev["value_b"],
-                mode="lines+markers+text",
-                text=[f"${v:.0f}B" for v in df_rev["value_b"]],
-                textposition="top center",
-                line=dict(color="#10b981", width=3),
-                marker=dict(size=10),
-            ))
-            fig_arr.update_layout(
-                title="ARR ($B)", yaxis_title="$B",
-                height=400, margin=dict(l=0, r=0, t=30, b=0),
-            )
-            st.plotly_chart(fig_arr, use_container_width=True)
+    st.subheader("Frontier Model User Growth")
+    st.caption("Mix of weekly active users (OpenAI) and monthly active users (Anthropic, Google, xAI) — compare directionally, not precisely.")
+    df_users = df_tokens[df_tokens["metric"].str.contains("active_users")].copy()
+    if not df_users.empty:
+        df_users["value_m"] = df_users["value"] / 1e6
+        fig_users = px.scatter(
+            df_users, x="date", y="value_m", color="provider",
+            size="value_m", title="Active Users (Millions)",
+            labels={"value_m": "Users (M)", "date": ""},
+        )
+        fig_users.update_traces(marker=dict(sizemin=5))
+        fig_users.update_layout(height=400, margin=dict(l=0, r=0, t=30, b=0))
+        st.plotly_chart(fig_users, use_container_width=True)
 
 # ══════════════════════════════════════════════
 # FRONTIER LAB REVENUE & VALUATIONS
 # ══════════════════════════════════════════════
 st.header("Frontier Lab Revenue & Valuations")
+st.caption(
+    "Frontier labs are consuming the majority of AI CAPEX but are private. "
+    "Funding round valuations and reported ARR are the only public signals. "
+    "Implied EV/Revenue multiples of 15–30× represent the 'AI premium' the market is pricing in — "
+    "the key question is whether revenue acceleration justifies the multiple expansion."
+)
 
 val_path = DATA_DIR / "frontier_lab_valuations.csv"
 if val_path.exists():
@@ -254,7 +247,11 @@ if val_path.exists():
 # GPU LEASE PRICES
 # ══════════════════════════════════════════════
 st.header("GPU Lease Prices")
-st.caption("Cloud GPU pricing from primary providers and secondary/spot markets.")
+st.caption(
+    "Spot GPU prices are the most real-time signal of AI compute supply/demand. "
+    "Declining spot prices indicate supply outpacing demand; rising prices indicate the opposite. "
+    "H100 spot at ~$1/hr (vs $4/hr peak) signals significant oversupply of prior-gen compute as Blackwell comes online."
+)
 
 gpu_path = DATA_DIR / "gpu_lease_prices.csv"
 if gpu_path.exists():
@@ -299,52 +296,6 @@ if gpu_path.exists():
         spot_change = ((last_spot / first_spot) - 1) * 100
         st.caption(f"H100 spot market: ${first_spot:.2f}/hr → ${last_spot:.2f}/hr ({spot_change:+.0f}% since first tracked)")
 
-# ══════════════════════════════════════════════
-# LLM CAPABILITY TRACKING
-# ══════════════════════════════════════════════
-st.header("LLM Capability Frontier")
-
-df_elo = pd.read_sql("SELECT * FROM llm_arena_elo ORDER BY elo DESC", conn)
-df_specs = pd.read_sql("SELECT * FROM llm_model_specs ORDER BY intelligence_score DESC NULLS LAST", conn)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    if not df_elo.empty:
-        fig_elo = px.bar(
-            df_elo.head(15), x="elo", y="model", color="provider",
-            orientation="h", title="Arena Elo Ratings (Top 15)",
-            labels={"elo": "Elo Score"},
-        )
-        fig_elo.update_layout(height=450, yaxis=dict(autorange="reversed"))
-        st.plotly_chart(fig_elo, use_container_width=True)
-
-with col2:
-    if not df_specs.empty:
-        df_plot = df_specs.dropna(subset=["intelligence_score", "input_price_per_m_tokens"])
-        if not df_plot.empty:
-            fig_frontier = px.scatter(
-                df_plot, x="input_price_per_m_tokens", y="intelligence_score",
-                text="model", color="provider",
-                title="Intelligence vs Cost Frontier",
-                labels={"input_price_per_m_tokens": "$/1M Input Tokens", "intelligence_score": "Intelligence Index"},
-            )
-            fig_frontier.update_traces(textposition="top center", textfont_size=9)
-            fig_frontier.update_layout(height=450)
-            st.plotly_chart(fig_frontier, use_container_width=True)
-
-if not df_specs.empty:
-    df_ctx = df_specs.dropna(subset=["context_window"]).sort_values("context_window", ascending=False)
-    if not df_ctx.empty:
-        df_ctx["ctx_k"] = df_ctx["context_window"] / 1000
-        fig_ctx = px.bar(
-            df_ctx.head(10), x="ctx_k", y="model", orientation="h",
-            title="Context Window Leaders (K tokens)",
-            labels={"ctx_k": "Context Window (K tokens)"}, color="provider",
-        )
-        fig_ctx.update_layout(height=350, yaxis=dict(autorange="reversed"))
-        st.plotly_chart(fig_ctx, use_container_width=True)
-
 # --- Model Release Timeline ---
 st.subheader("Frontier Model Release Timeline")
 
@@ -387,6 +338,11 @@ if model_path.exists():
 # DC POWER DEMAND FORECASTS
 # ══════════════════════════════════════════════
 st.header("DC Power Demand Forecasts")
+st.caption(
+    "Power constraint — not silicon — is now the binding constraint on hyperscale AI clusters. "
+    "All major forecasters project near-doubling of data centre power demand by 2030. "
+    "The key risk: if power build-out falls behind, CAPEX commitments become stranded."
+)
 
 power_path = DATA_DIR / "dc_power_forecasts.csv"
 if power_path.exists():
