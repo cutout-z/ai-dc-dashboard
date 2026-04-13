@@ -1,9 +1,15 @@
 """AI Infrastructure Value Chain — taxonomy + per-segment stock tiles."""
 
+import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import streamlit as st
 import sqlite3
 import pandas as pd
 import plotly.express as px
+import yfinance as yf
+
+logger = logging.getLogger("ai_research")
 
 # Feature toggles — keeping code for later but hidden per request.
 # Re-enable once the underlying bull:bear skew data is refreshed.
@@ -12,6 +18,38 @@ SHOW_CROSS_SEGMENT = False
 
 TOP_N_PER_SEGMENT = 10
 TILE_ROW_HEIGHT = 35
+
+@st.cache_data(ttl=3600)
+def _fetch_market_caps(tickers: tuple[str, ...]) -> dict[str, float | None]:
+    """Fetch market caps for a batch of tickers via yfinance."""
+    results: dict[str, float | None] = {}
+
+    def _get(sym: str) -> tuple[str, float | None]:
+        try:
+            info = yf.Ticker(sym).info or {}
+            return sym, info.get("marketCap")
+        except Exception as e:
+            logger.debug("Market cap %s error: %s", sym, e)
+            return sym, None
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for sym, cap in pool.map(lambda s: _get(s), tickers):
+            results[sym] = cap
+    return results
+
+
+def _fmt_mcap(v) -> str:
+    if pd.isna(v) or v is None:
+        return "—"
+    v = float(v)
+    if v >= 1e12:
+        return f"${v / 1e12:.1f}T"
+    if v >= 1e9:
+        return f"${v / 1e9:.1f}B"
+    if v >= 1e6:
+        return f"${v / 1e6:.0f}M"
+    return f"${v:,.0f}"
+
 
 DB_PATH = st.session_state["db_path"]
 
@@ -44,14 +82,19 @@ if not df_universe.empty:
 # ──────────────────────────────────────────────
 st.header("Segments")
 st.caption(
-    f"Top {TOP_N_PER_SEGMENT} per segment by analyst upside. "
+    f"Top {TOP_N_PER_SEGMENT} per segment. "
     "Click a column header to sort. Scroll tile for more rows."
 )
 
 # Prepare display columns
 df_display = df_universe.copy()
-if "upside_to_pt" in df_display.columns:
-    df_display["upside_pct"] = (df_display["upside_to_pt"] * 100).round(1)
+
+# Fetch market caps for all tickers
+all_tickers = tuple(df_display["ticker"].dropna().unique())
+with st.spinner("Fetching market caps..."):
+    mcap_map = _fetch_market_caps(all_tickers)
+df_display["market_cap_raw"] = df_display["ticker"].map(mcap_map)
+df_display["market_cap"] = df_display["market_cap_raw"].apply(_fmt_mcap)
 
 segments = [s for s in sorted(df_display["segment"].dropna().unique())]
 
@@ -60,20 +103,11 @@ for segment in segments:
     if df_seg.empty:
         continue
 
-    display_cols = ["company", "ticker", "sub_bucket", "region"]
-    if "upside_pct" in df_seg.columns:
-        display_cols.append("upside_pct")
-    if "bull_bear_skew" in df_seg.columns:
-        display_cols.append("bull_bear_skew")
-    if "materiality_latest" in df_seg.columns:
-        display_cols.append("materiality_latest")
-    if "pricing_power_latest" in df_seg.columns:
-        display_cols.append("pricing_power_latest")
+    display_cols = ["company", "ticker", "sub_bucket", "region", "market_cap"]
 
     display_cols = [c for c in display_cols if c in df_seg.columns]
 
-    sort_col = "upside_pct" if "upside_pct" in display_cols else "company"
-    df_seg_sorted = df_seg.sort_values(sort_col, ascending=False)
+    df_seg_sorted = df_seg.sort_values("market_cap_raw", ascending=False, na_position="last")
 
     # Visible rows = top N; full dataset is still in the frame (scrollable)
     visible_rows = min(TOP_N_PER_SEGMENT, len(df_seg_sorted))
@@ -88,10 +122,7 @@ for segment in segments:
                     "ticker": "Ticker",
                     "sub_bucket": "Sub-bucket",
                     "region": "Region",
-                    "upside_pct": "Upside %",
-                    "bull_bear_skew": "Bull:Bear",
-                    "materiality_latest": "Materiality",
-                    "pricing_power_latest": "Pricing Power",
+                    "market_cap": "Market Cap",
                 }
             ),
             use_container_width=True,

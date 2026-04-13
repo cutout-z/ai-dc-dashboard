@@ -1,0 +1,25 @@
+operator,operator_type,parent_company,listed,ticker
+NEXTDC,Colocation,NEXTDC,true,ASX:NXT
+CDC Data Centres,Colocation,Infratil,true,NZX:IFT
+AirTrunk,Colocation,Blackstone,false,
+Macquarie Data Centres,Colocation,Macquarie Technology Group,true,ASX:MAQ
+Goodman Group,Developer,Goodman Group,true,ASX:GMG
+Equinix,Colocation,Equinix,true,NASDAQ:EQIX
+Digital Realty,Colocation,Digital Realty,true,NYSE:DLR
+Amazon Web Services,Hyperscaler,Amazon,true,NASDAQ:AMZN
+Microsoft Azure,Hyperscaler,Microsoft,true,NASDAQ:MSFT
+Google Cloud,Hyperscaler,Alphabet,true,NASDAQ:GOOGL
+Oracle Cloud,Hyperscaler,Oracle,true,NYSE:ORCL
+Meta,Hyperscaler,Meta Platforms,true,NASDAQ:META
+Vocus,Telecom,Vocus Group,false,
+Fujitsu,Technology,Fujitsu,true,TYO:6702
+NTT,Telecom,NTT,true,TYO:9432
+DCI Data Centres,Colocation,Brookfield,false,
+Global Switch,Colocation,Global Switch,false,
+KINX,Colocation,KINX,false,
+Canberra Data Centres,Colocation,Canberra Data Centres,false,
+Harbour ISP,Telecom,Harbour ISP,false,
+SUBco,Telecom,SUBco,false,
+Yondr Group,Developer,Yondr Group,false,
+CloudHQ,Developer,CloudHQ,false,
+Stack Infrastructure,Developer,IPI Partners,false,
