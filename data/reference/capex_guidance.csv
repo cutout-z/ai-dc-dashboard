@@ -1,10 +1,19 @@
-ticker,company,fiscal_year,fy_end_month,guidance_usd_b,guidance_date,prior_guidance_usd_b,source,notes
-MSFT,Microsoft,FY2024,6,55.7,2024-07-30,,Q4 FY2024 earnings,Actual full-year result
-MSFT,Microsoft,FY2025,6,80.0,2025-01-29,60.0,Q2 FY2025 earnings,"Revised up from ~$60B guided in Jul 2024. ""We will invest approximately $80 billion"""
-MSFT,Microsoft,FY2026,6,,,,,"No formal guidance yet, expected Jul 2025"
-GOOGL,Alphabet,CY2024,12,52.5,2025-02-04,,Q4 CY2024 earnings,Actual full-year result
-GOOGL,Alphabet,CY2025,12,75.0,2025-02-04,50.0,Q4 CY2024 earnings,"Revised up from initial ~$50B. ""We expect 2025 capex to be approximately $75 billion"""
-AMZN,Amazon,CY2024,12,83.0,2025-02-06,,Q4 CY2024 earnings,Actual full-year result
-AMZN,Amazon,CY2025,12,100.0,2025-02-06,,Q4 CY2024 earnings,"Plans to spend approximately $100 billion, predominantly on AI infrastructure"
-META,Meta,CY2024,12,39.2,2025-01-29,,Q4 CY2024 earnings,Actual full-year result
-META,Meta,CY2025,12,62.5,2025-01-29,40.0,Q4 CY2024 earnings,"Guided $60-65B range (midpoint $62.5B), up from $37-40B guided earlier"
+ticker,company,fiscal_year,fy_end_month,guidance_usd_b,guidance_low,guidance_high,guidance_date,prior_guidance_usd_b,source,notes
+MSFT,Microsoft,FY2025,6,63.0,,,2025-07-22,,FY2025 earnings,Actual full-year result (FY ends Jun)
+MSFT,Microsoft,FY2026,6,120.0,,,2026-01-29,,Q2 FY2026 earnings,"Guided $120B+; H1 FY2026 was $72.4B. NOTE: FY ends Jun 2026"
+GOOGL,Alphabet,CY2025,12,91.0,,,2026-02-04,,Q4 CY2025 earnings,Actual full-year result
+GOOGL,Alphabet,CY2026,12,180.0,175.0,185.0,2026-02-04,,Q4 CY2025 earnings,"Guided $175-185B range (midpoint $180B)"
+AMZN,Amazon,CY2025,12,131.0,,,2026-02-06,,Q4 CY2025 earnings,Actual full-year result
+AMZN,Amazon,CY2026,12,200.0,,,2026-02-06,,Q4 CY2025 earnings,"Guided ~$200B, predominantly AI infrastructure"
+META,Meta,CY2025,12,72.0,,,2026-01-29,,Q4 CY2025 earnings,"Actual full-year result; was guided $60-65B, came in higher"
+META,Meta,CY2026,12,125.0,115.0,135.0,2026-01-29,,Q4 CY2025 earnings,"Guided $115-135B range (midpoint $125B)"
+ORCL,Oracle,FY2025,5,21.0,,,2025-06-12,,Q4 FY2025 earnings,"Actual full-year result. NOTE: FY ends May 2025"
+ORCL,Oracle,FY2026,5,50.0,,,2025-12-09,35.0,Q2 FY2026 earnings,"Revised up from $35B guided in Sep 2025. NOTE: FY ends May 2026"
+CRWV,CoreWeave,CY2025,12,14.9,,,2026-02-24,,Q4 CY2025 earnings,"Actual full-year result; IPO'd Mar 2025"
+CRWV,CoreWeave,CY2026,12,32.5,30.0,35.0,2026-02-24,,Q4 CY2025 earnings,"Guided $30-35B (midpoint $32.5B), more than double CY2025"
+AAPL,Apple,FY2025,9,12.7,,,2025-10-30,,Q4 FY2025 earnings,"Actual full-year result. NOTE: FY ends Sep 2025"
+AAPL,Apple,FY2026,9,14.0,,,2026-01-30,,Q1 FY2026 earnings,"Guided ~$14B; modest increase driven by AI server buildout. NOTE: FY ends Sep 2026"
+AMD,AMD,CY2025,12,0.9,,,2026-02-04,,Q4 CY2025 earnings,"Actual full-year estimate. Fabless model — low CAPEX relative to revenue"
+TSM,TSMC,CY2025,12,40.9,,,2026-01-16,,Q4 CY2025 earnings,Actual full-year result
+TSM,TSMC,CY2026,12,54.0,52.0,56.0,2026-04-17,,Q1 CY2026 earnings,"Guided $52-56B (midpoint $54B), ~32% increase over CY2025. 70-80% on advanced nodes"
+NVDA,NVIDIA,FY2026,1,6.0,,,2026-02-26,,Q4 FY2026 earnings,"Actual full-year result (FY ends Jan 2026). Asset-light fabless model"
