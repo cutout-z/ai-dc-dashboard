@@ -1,5 +1,5 @@
 """
-Fetch hyperscaler CAPEX + semi bellwether revenue from Yahoo Finance.
+Fetch AI & DC CAPEX + semi bellwether revenue from Yahoo Finance.
 Stores quarterly and annual time series in SQLite.
 """
 
@@ -11,22 +11,28 @@ from datetime import datetime
 
 DB_PATH = Path(__file__).parent.parent / "data" / "db" / "ai_research.db"
 
-# Hyperscalers — the core CAPEX signal
-HYPERSCALERS = {
+# All companies tracked for CAPEX
+CAPEX_COMPANIES = {
     "MSFT": "Microsoft",
     "GOOGL": "Alphabet",
     "AMZN": "Amazon",
     "META": "Meta",
+    "ORCL": "Oracle",
+    "CRWV": "CoreWeave",
+    "AAPL": "Apple",
+    "AMD": "AMD",
+    "TSM": "TSMC",
+    "NVDA": "NVIDIA",
 }
 
-# Semi bellwethers — demand signal
+# Semi bellwethers — revenue demand signal
 SEMI_BELLWETHERS = {
     "TSM": "TSMC",
     "ASML": "ASML",
     "NVDA": "NVIDIA",
 }
 
-ALL_TICKERS = {**HYPERSCALERS, **SEMI_BELLWETHERS}
+ALL_TICKERS = {**CAPEX_COMPANIES, **SEMI_BELLWETHERS}
 
 
 def _extract_capex(cf_df, date_col) :
@@ -122,6 +128,31 @@ def fetch_quarterly_financials(ticker: str, name: str) -> list[dict]:
     return records
 
 
+def _load_seed_data() -> pd.DataFrame:
+    """Load historical quarterly CAPEX from seed CSV (extends yfinance's ~6-quarter limit)."""
+    seed_path = Path(__file__).parent.parent / "data" / "reference" / "capex_quarterly_seed.csv"
+    if not seed_path.exists():
+        return pd.DataFrame()
+
+    df_seed = pd.read_csv(seed_path)
+    now = datetime.now().isoformat()
+    records = []
+    for _, row in df_seed.iterrows():
+        records.append({
+            "ticker": row["ticker"],
+            "company": row["company"],
+            "period": row["period"],
+            "metric": "capex",
+            "frequency": "quarterly",
+            "value": abs(float(row["capex_usd"])),
+            "unit": "USD",
+            "source": f"seed/{row.get('source', 'manual')}",
+            "fetched_at": now,
+        })
+    print(f"  Loaded {len(records)} seed records")
+    return pd.DataFrame(records)
+
+
 def run():
     print("Fetching quarterly + annual financials...")
     all_records = []
@@ -132,8 +163,29 @@ def run():
         all_records.extend(records)
         print(f"    {len(records)} records")
 
-    df = pd.DataFrame(all_records)
-    df = df.dropna(subset=["value"])
+    df_api = pd.DataFrame(all_records)
+    df_api = df_api.dropna(subset=["value"])
+
+    # Load seed data for historical quarterly CAPEX (back to 2021)
+    print("Loading seed data...")
+    df_seed = _load_seed_data()
+
+    # Merge: assign calendar quarter key, prefer API data over seed for overlaps
+    if not df_seed.empty:
+        for df in [df_api, df_seed]:
+            df["_quarter"] = pd.to_datetime(df["period"]).dt.to_period("Q").astype(str)
+
+        # API data wins on overlap (ticker + quarter + metric + frequency)
+        merge_key = ["ticker", "_quarter", "metric", "frequency"]
+        api_keys = set(df_api[merge_key].apply(tuple, axis=1))
+        seed_mask = ~df_seed[merge_key].apply(tuple, axis=1).isin(api_keys)
+        df_seed_new = df_seed[seed_mask]
+        print(f"  {len(df_seed_new)} seed records fill historical gaps")
+
+        df = pd.concat([df_api, df_seed_new], ignore_index=True)
+        df = df.drop(columns=["_quarter"])
+    else:
+        df = df_api
 
     quarterly = df[df["frequency"] == "quarterly"]
     annual = df[df["frequency"] == "annual"]
@@ -143,26 +195,28 @@ def run():
     conn = sqlite3.connect(DB_PATH)
     df.to_sql("quarterly_financials", conn, if_exists="replace", index=False)
 
-    # Create views
+    # Create views — all CAPEX-tracked companies
+    capex_tickers = ", ".join(f"'{t}'" for t in CAPEX_COMPANIES)
+
     conn.execute("DROP VIEW IF EXISTS v_hyperscaler_capex")
-    conn.execute("""
+    conn.execute(f"""
         CREATE VIEW v_hyperscaler_capex AS
         SELECT ticker, company, period, value as capex_usd
         FROM quarterly_financials
         WHERE metric = 'capex'
           AND frequency = 'quarterly'
-          AND ticker IN ('MSFT', 'GOOGL', 'AMZN', 'META')
+          AND ticker IN ({capex_tickers})
         ORDER BY period DESC, ticker
     """)
 
     conn.execute("DROP VIEW IF EXISTS v_hyperscaler_capex_annual")
-    conn.execute("""
+    conn.execute(f"""
         CREATE VIEW v_hyperscaler_capex_annual AS
         SELECT ticker, company, period, value as capex_usd
         FROM quarterly_financials
         WHERE metric = 'capex'
           AND frequency = 'annual'
-          AND ticker IN ('MSFT', 'GOOGL', 'AMZN', 'META')
+          AND ticker IN ({capex_tickers})
         ORDER BY period DESC, ticker
     """)
 

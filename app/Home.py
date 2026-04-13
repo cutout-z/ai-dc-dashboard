@@ -29,7 +29,7 @@ financials = st.Page(
     "views/fundamentals/financials.py", title="Financial (key players)"
 )
 hyperscaler_capex = st.Page(
-    "views/fundamentals/hyperscaler_capex.py", title="Hyperscaler CAPEX"
+    "views/fundamentals/hyperscaler_capex.py", title="AI & DC CAPEX"
 )
 other_signals = st.Page(
     "views/fundamentals/other_signals.py", title="Other Signals"

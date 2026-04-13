@@ -1,4 +1,4 @@
-"""Hyperscaler CAPEX — annual + quarterly spending with forward guidance overlay."""
+"""AI & DC CAPEX — annual + quarterly spending with forward guidance overlay."""
 
 import streamlit as st
 import sqlite3
@@ -15,24 +15,59 @@ COMPANY_COLORS = {
     "Alphabet": "#EA4335",
     "Amazon": "#FF9900",
     "Meta": "#1877F2",
+    "Oracle": "#C74634",
+    "CoreWeave": "#00BFA5",
+    "Apple": "#A3AAAE",
+    "AMD": "#7CB342",
+    "TSMC": "#6B3FA0",
+    "NVIDIA": "#76B900",
 }
 
-st.title("Hyperscaler CAPEX")
+# Companies with non-December fiscal year ends
+FYE_NOTES = {
+    "Microsoft": "FYE Jun",
+    "Oracle": "FYE May",
+    "Apple": "FYE Sep",
+    "NVIDIA": "FYE Jan",
+}
+
+ALL_COMPANIES = list(COMPANY_COLORS.keys())
+
+st.title("AI & DC CAPEX Tracker")
 
 conn = sqlite3.connect(DB_PATH)
 
-# ══════════════════════════════════════════════
+# ── Company filter ──────────────────────────────────────────
+selected = st.multiselect(
+    "Companies",
+    ALL_COMPANIES,
+    default=ALL_COMPANIES,
+    key="capex_companies",
+)
+if not selected:
+    st.warning("Select at least one company.")
+    st.stop()
+
+# Build SQL IN clause from company names
+selected_sql = ", ".join(f"'{c}'" for c in selected)
+
+# ══════════════════════════════════════════════════════════════
 # Annual CAPEX with Guidance Overlay
-# ══════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
 st.subheader("Annual CAPEX vs Forward Guidance")
+
+# FYE footnote
+fye_flags = [f"{co} ({note})" for co, note in FYE_NOTES.items() if co in selected]
+if fye_flags:
+    st.caption("**Non-calendar FYE:** " + " · ".join(fye_flags))
 
 try:
     df_annual = pd.read_sql(
-        """
+        f"""
         SELECT ticker, company, period, value as capex_usd
         FROM quarterly_financials
         WHERE metric = 'capex' AND frequency = 'annual'
-          AND ticker IN ('MSFT', 'GOOGL', 'AMZN', 'META')
+          AND company IN ({selected_sql})
         ORDER BY period
         """,
         conn,
@@ -47,9 +82,12 @@ if not df_annual.empty:
 
     fig_annual = go.Figure()
 
-    for company, color in COMPANY_COLORS.items():
+    for company in selected:
+        color = COMPANY_COLORS.get(company, "#888")
         mask = df_annual["company"] == company
         df_c = df_annual[mask].sort_values("year")
+        if df_c.empty:
+            continue
         fig_annual.add_trace(go.Bar(
             x=df_c["year"],
             y=df_c["capex_bn"],
@@ -57,10 +95,12 @@ if not df_annual.empty:
             marker_color=color,
         ))
 
+    # Guidance overlay
     guidance_path = DATA_DIR / "capex_guidance.csv"
     if guidance_path.exists():
         df_guide = pd.read_csv(guidance_path)
         df_guide = df_guide[df_guide["guidance_usd_b"].notna()]
+        df_guide = df_guide[df_guide["company"].isin(selected)]
 
         if not df_guide.empty:
             df_guide["year"] = df_guide["fiscal_year"].str.extract(r"(\d{4})").astype(int)
@@ -71,21 +111,20 @@ if not df_annual.empty:
                 y=guide_by_year["guidance_usd_b"],
                 name="Combined Guidance",
                 mode="markers+lines",
-                marker=dict(size=14, symbol="diamond", color="white", line=dict(width=2, color="red")),
+                marker=dict(size=14, symbol="diamond", color="white",
+                            line=dict(width=2, color="red")),
                 line=dict(dash="dash", color="red", width=2),
             ))
 
+            # Annotate revisions
             revised = df_guide[df_guide["prior_guidance_usd_b"].notna()]
             for _, row in revised.iterrows():
                 fig_annual.add_annotation(
                     x=row["year"],
                     y=row["guidance_usd_b"],
                     text=f"{row['company']}: ${row['prior_guidance_usd_b']:.0f}B→${row['guidance_usd_b']:.0f}B",
-                    showarrow=True,
-                    arrowhead=2,
-                    arrowsize=0.8,
-                    ax=0,
-                    ay=-35,
+                    showarrow=True, arrowhead=2, arrowsize=0.8,
+                    ax=0, ay=-35,
                     font=dict(size=9, color="red"),
                 )
 
@@ -99,27 +138,47 @@ if not df_annual.empty:
     )
     st.plotly_chart(fig_annual, use_container_width=True)
 
+    # Guidance detail + history expander
     if guidance_path.exists():
-        with st.expander("Guidance Detail"):
-            df_guide_display = pd.read_csv(guidance_path)
-            df_guide_display = df_guide_display[df_guide_display["guidance_usd_b"].notna()]
-            st.dataframe(
-                df_guide_display[["company", "fiscal_year", "guidance_usd_b", "prior_guidance_usd_b", "guidance_date", "notes"]],
-                use_container_width=True,
-                hide_index=True,
-            )
+        col_g1, col_g2 = st.columns(2)
+        with col_g1:
+            with st.expander("Current Guidance"):
+                df_gd = pd.read_csv(guidance_path)
+                df_gd = df_gd[df_gd["guidance_usd_b"].notna() & df_gd["company"].isin(selected)]
+                display_cols = ["company", "fiscal_year", "fy_end_month",
+                                "guidance_usd_b", "guidance_low", "guidance_high",
+                                "prior_guidance_usd_b", "guidance_date", "notes"]
+                display_cols = [c for c in display_cols if c in df_gd.columns]
+                st.dataframe(df_gd[display_cols], use_container_width=True, hide_index=True)
+
+        history_path = DATA_DIR / "capex_guidance_history.csv"
+        with col_g2:
+            if history_path.exists():
+                with st.expander("Guidance Revision History"):
+                    df_hist = pd.read_csv(history_path)
+                    df_hist = df_hist[df_hist["company"].isin(selected)]
+                    df_hist = df_hist.sort_values(
+                        ["company", "fiscal_year", "announced_date"]
+                    )
+                    hist_cols = ["company", "fiscal_year", "guidance_usd_b",
+                                 "guidance_low", "guidance_high",
+                                 "announced_date", "source", "notes"]
+                    hist_cols = [c for c in hist_cols if c in df_hist.columns]
+                    st.dataframe(df_hist[hist_cols], use_container_width=True,
+                                 hide_index=True)
 else:
     st.warning("No annual CAPEX data. Run: python scripts/fetch_financials.py")
 
-# ══════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
 # Quarterly CAPEX
-# ══════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
 st.subheader("Quarterly CAPEX")
 
 df_capex = pd.read_sql(
-    """
+    f"""
     SELECT ticker, company, period, capex_usd
     FROM v_hyperscaler_capex
+    WHERE company IN ({selected_sql})
     ORDER BY period
     """,
     conn,
@@ -141,7 +200,8 @@ if not df_capex.empty:
             barmode="stack",
             color_discrete_map=COMPANY_COLORS,
         )
-        fig_q.update_layout(height=400, xaxis_type="category",
+        fig_q.update_layout(height=450, xaxis_type="category",
+                            xaxis_tickangle=-45,
                             legend=dict(orientation="h", yanchor="bottom", y=1.02))
         st.plotly_chart(fig_q, use_container_width=True)
 
@@ -152,7 +212,8 @@ if not df_capex.empty:
             labels={"capex_bn": "$B", "quarter": "Quarter"},
             color_discrete_map=COMPANY_COLORS,
         )
-        fig_ind.update_layout(height=400, xaxis_type="category")
+        fig_ind.update_layout(height=450, xaxis_type="category",
+                              xaxis_tickangle=-45)
         st.plotly_chart(fig_ind, use_container_width=True)
 
     # QoQ growth
@@ -174,6 +235,7 @@ if not df_capex.empty:
         yaxis=dict(title="CAPEX ($B)"),
         yaxis2=dict(title="QoQ %", overlaying="y", side="right"),
         height=350, showlegend=False, xaxis_type="category",
+        xaxis_tickangle=-45,
     )
     st.plotly_chart(fig_total, use_container_width=True)
 else:
