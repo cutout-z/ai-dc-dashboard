@@ -81,59 +81,68 @@ def fetch_earnings_calendar() -> list[dict]:
     return [{"ticker": sym, "earnings_date": dates.get(sym)} for sym in EARNINGS_TICKERS]
 
 
-def _fetch_fundamentals(symbols: list[str]) -> dict:
-    results = {}
-    for sym in symbols:
+def _fetch_one_fundamental(sym: str) -> tuple[str, dict]:
+    try:
+        t = yf.Ticker(sym)
+        info = t.info or {}
+        price = info.get("currentPrice") or info.get("regularMarketPrice")
+        pe_t = info.get("trailingPE")
+        pe_f = info.get("forwardPE")
+        eps_t = info.get("trailingEps")
+        eps_f = info.get("forwardEps")
+        w52h = info.get("fiftyTwoWeekHigh")
+        w52l = info.get("fiftyTwoWeekLow")
+        target_1y = info.get("targetMeanPrice")
+        pct_from_high = None
+        if price and w52h and w52h != 0:
+            pct_from_high = round((price / w52h - 1) * 100, 2)
+
+        rev_growth = None
+        capex_yoy = None
         try:
-            t = yf.Ticker(sym)
-            info = t.info or {}
-            price = info.get("currentPrice") or info.get("regularMarketPrice")
-            pe_t = info.get("trailingPE")
-            pe_f = info.get("forwardPE")
-            eps_t = info.get("trailingEps")
-            eps_f = info.get("forwardEps")
-            w52h = info.get("fiftyTwoWeekHigh")
-            w52l = info.get("fiftyTwoWeekLow")
-            target_1y = info.get("targetMeanPrice")
-            pct_from_high = None
-            if price and w52h and w52h != 0:
-                pct_from_high = round((price / w52h - 1) * 100, 2)
+            inc = t.income_stmt
+            if inc is not None and not inc.empty and "Total Revenue" in inc.index and inc.shape[1] >= 2:
+                rev_curr = inc.loc["Total Revenue"].iloc[0]
+                rev_prev = inc.loc["Total Revenue"].iloc[1]
+                if rev_prev and rev_prev != 0:
+                    rev_growth = round((rev_curr / rev_prev - 1) * 100, 1)
 
-            rev_growth = None
-            capex_yoy = None
-            try:
-                inc = t.income_stmt
-                if inc is not None and not inc.empty and "Total Revenue" in inc.index and inc.shape[1] >= 2:
-                    rev_curr = inc.loc["Total Revenue"].iloc[0]
-                    rev_prev = inc.loc["Total Revenue"].iloc[1]
-                    if rev_prev and rev_prev != 0:
-                        rev_growth = round((rev_curr / rev_prev - 1) * 100, 1)
+            cf = t.cashflow
+            if cf is not None and not cf.empty and "Capital Expenditure" in cf.index and cf.shape[1] >= 2:
+                capex_curr = abs(cf.loc["Capital Expenditure"].iloc[0])
+                capex_prev = abs(cf.loc["Capital Expenditure"].iloc[1])
+                if capex_prev and capex_prev != 0:
+                    capex_yoy = round((capex_curr / capex_prev - 1) * 100, 1)
+        except Exception:
+            pass
 
-                cf = t.cashflow
-                if cf is not None and not cf.empty and "Capital Expenditure" in cf.index and cf.shape[1] >= 2:
-                    capex_curr = abs(cf.loc["Capital Expenditure"].iloc[0])
-                    capex_prev = abs(cf.loc["Capital Expenditure"].iloc[1])
-                    if capex_prev and capex_prev != 0:
-                        capex_yoy = round((capex_curr / capex_prev - 1) * 100, 1)
-            except Exception:
-                pass
+        return sym, {
+            "market_cap": info.get("marketCap"),
+            "pe_trailing": round(pe_t, 2) if pe_t else None,
+            "pe_forward": round(pe_f, 2) if pe_f else None,
+            "eps_trailing": round(eps_t, 2) if eps_t else None,
+            "eps_forward": round(eps_f, 2) if eps_f else None,
+            "week52_low": w52l,
+            "week52_high": w52h,
+            "target_mean_1y": target_1y,
+            "pct_from_high": pct_from_high,
+            "rev_growth_yoy": rev_growth,
+            "capex_yoy": capex_yoy,
+        }
+    except Exception as e:
+        logger.debug("Fundamentals %s error: %s", sym, e)
+        return sym, {}
 
-            results[sym] = {
-                "market_cap": info.get("marketCap"),
-                "pe_trailing": round(pe_t, 2) if pe_t else None,
-                "pe_forward": round(pe_f, 2) if pe_f else None,
-                "eps_trailing": round(eps_t, 2) if eps_t else None,
-                "eps_forward": round(eps_f, 2) if eps_f else None,
-                "week52_low": w52l,
-                "week52_high": w52h,
-                "target_mean_1y": target_1y,
-                "pct_from_high": pct_from_high,
-                "rev_growth_yoy": rev_growth,
-                "capex_yoy": capex_yoy,
-            }
-        except Exception as e:
-            logger.debug("Fundamentals %s error: %s", sym, e)
-            results[sym] = {}
+
+def _fetch_fundamentals(symbols: list[str]) -> dict:
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    results = {}
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futures = {pool.submit(_fetch_one_fundamental, sym): sym for sym in symbols}
+        for future in as_completed(futures):
+            sym, data = future.result()
+            results[sym] = data
     return results
 
 

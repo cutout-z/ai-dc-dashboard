@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from pathlib import Path
 
 from app.lib.fx import convert_to_usd
+from app.lib.hardware import ARCH_COLOURS, ARCH_ORDER, flagship_per_generation, load_nvidia_dc_gpus
 
 DB_PATH = st.session_state["db_path"]
 DATA_DIR = Path(__file__).parent.parent.parent.parent / "data" / "reference"
@@ -370,6 +371,159 @@ if power_path.exists():
     with st.expander("Full Forecast Data"):
         st.dataframe(df_power[["source", "region", "year", "demand_twh", "scenario", "notes"]],
                       use_container_width=True, hide_index=True)
+
+# ══════════════════════════════════════════════
+# COMPUTE & HARDWARE
+# ══════════════════════════════════════════════
+
+CHART_LAYOUT = dict(
+    font=dict(family="Inter, system-ui, sans-serif", size=12),
+    margin=dict(l=40, r=20, t=40, b=40),
+    hoverlabel=dict(bgcolor="white", font_size=12),
+)
+
+
+def _compute_y_range(scores, max_score=100.0, floor=0.0):
+    if not scores:
+        return (floor, max_score)
+    lo = min(scores)
+    hi = max(scores)
+    y_min = max(floor, lo - lo * 0.10)
+    y_max = min(max_score, hi + hi * 0.05)
+    if y_max <= y_min:
+        y_max = y_min + 1
+    return (y_min, y_max)
+
+
+st.header("Compute & Hardware")
+
+gpu_df = load_nvidia_dc_gpus()
+
+if gpu_df.empty:
+    st.warning(
+        "NVIDIA hardware data missing. Expected at data/external/ml_hardware.csv "
+        "(sourced from https://epoch.ai/data/ml_hardware.csv). Run `/ai-research` to refresh."
+    )
+else:
+    st.subheader("NVIDIA Data-Centre GPU Performance")
+    with st.expander("About this chart"):
+        st.markdown("**What it shows.** Peak dense Tensor-FP16/BF16 throughput for each NVIDIA data-centre GPU SKU, plotted against release date. Log scale. Coloured by architecture family (Volta → Ampere → Hopper → Blackwell).")
+        st.markdown("**Why it matters.** Training FLOPS per chip has grown ~20× in 8 years (125 TFLOPS V100 → 2500 TFLOPS GB300). Combined with cluster scaling, this is what enables each new frontier-model generation.")
+        st.markdown("**Source.** Epoch AI — *Machine Learning Hardware* dataset (epoch.ai/data/machine-learning-hardware), CC-BY licence.")
+
+    fig_gpu = go.Figure()
+    for arch in ARCH_ORDER:
+        sub = gpu_df[gpu_df["arch"] == arch]
+        if sub.empty:
+            continue
+        hbm_txt = sub["hbm_gb"].map(lambda v: f"{v:.0f} GB HBM" if pd.notna(v) else "HBM —")
+        bw_txt = sub["mem_bw_gb_s"].map(lambda v: f"{v:,.0f} GB/s" if pd.notna(v) else "bw —")
+        price_txt = sub["price_usd"].map(lambda v: f"${v:,.0f}" if pd.notna(v) else "price —")
+        custom = list(zip(sub["tdp_w"].fillna(0), hbm_txt, bw_txt, price_txt))
+        fig_gpu.add_trace(go.Scatter(
+            x=sub["release_date"],
+            y=sub["tflops_tensor_fp16"],
+            text=sub["name"],
+            customdata=custom,
+            name=arch,
+            mode="markers",
+            marker=dict(size=10, color=ARCH_COLOURS[arch], line=dict(width=1, color="#1f2937")),
+            hovertemplate=(
+                "%{text}<br>"
+                "%{y:,.0f} TFLOPS (Tensor FP16/BF16)<br>"
+                "TDP: %{customdata[0]:.0f} W<br>"
+                "%{customdata[1]}<br>"
+                "%{customdata[2]}<br>"
+                "%{customdata[3]}"
+                f"<extra>{arch}</extra>"
+            ),
+        ))
+
+    fig_gpu.update_layout(
+        yaxis_title="Tensor-FP16/BF16 Performance (TFLOPS)",
+        yaxis_type="log",
+        **CHART_LAYOUT,
+    )
+    st.plotly_chart(fig_gpu, use_container_width=True)
+
+    st.subheader("Performance per Watt — Flagship Line")
+    with st.expander("About this chart"):
+        st.markdown("**What it shows.** Tensor-FP16 TFLOPS divided by TDP (W) for the flagship SKU of each NVIDIA data-centre generation.")
+        st.markdown("**Why it matters.** Power (not silicon) is the binding constraint on hyperscale training clusters. Perf-per-watt determines whether the next cluster can be built inside a given power envelope.")
+        st.markdown("**Source.** Derived from Epoch AI ML Hardware dataset.")
+
+    flagships = flagship_per_generation(gpu_df)
+    flagships = flagships[flagships["tdp_w"].notna()]
+    flagships["perf_per_watt"] = flagships["tflops_tensor_fp16"] / flagships["tdp_w"]
+
+    fig_ppw = go.Figure()
+    fig_ppw.add_trace(go.Scatter(
+        x=flagships["release_date"],
+        y=flagships["perf_per_watt"],
+        text=flagships["name"] + " (" + flagships["arch"] + ")",
+        mode="lines+markers",
+        line=dict(color="#10b981", width=2),
+        marker=dict(size=10, color="#10b981"),
+        hovertemplate="%{text}<br>%{y:.2f} TFLOPS/W<extra></extra>",
+    ))
+
+    y_min, y_max = _compute_y_range(flagships["perf_per_watt"].tolist(), max_score=10, floor=0.1)
+    fig_ppw.update_layout(
+        yaxis_title="Tensor FP16 TFLOPS per Watt",
+        yaxis_range=[y_min, y_max],
+        **CHART_LAYOUT,
+    )
+    st.plotly_chart(fig_ppw, use_container_width=True)
+
+    st.subheader("H100 Rental Prices")
+    with st.expander("About this chart"):
+        st.markdown("**What it shows.** Monthly median H100 rental price in $/GPU-hour, broken out by provider tier.")
+        st.markdown("**Why it matters.** H100 lease rates are the cleanest public proxy for GPU depreciation and chip obsolescence. Sharp 2025 declines reflect Blackwell supply coming online.")
+        st.markdown("**Source.** Silicon Data — *H100 Rental Index* (silicondata.com/blog/h100-rental-price-over-time).")
+
+    @st.cache_data(ttl=86400)
+    def load_h100_prices() -> pd.DataFrame:
+        csv = DATA_DIR / "h100_rental_prices.csv"
+        if not csv.exists():
+            return pd.DataFrame()
+        df = pd.read_csv(csv)
+        df["month"] = pd.to_datetime(df["month"])
+        return df
+
+    h100_df = load_h100_prices()
+    if h100_df.empty:
+        st.warning("H100 rental price CSV missing.")
+    else:
+        tier_colours = {
+            "Hyperscaler": "#3b82f6",
+            "Neocloud":    "#a855f7",
+            "Marketplace": "#10b981",
+        }
+
+        fig_h100 = go.Figure()
+        for tier in ["Hyperscaler", "Neocloud", "Marketplace"]:
+            sub = h100_df[h100_df["tier"] == tier].sort_values("month")
+            if sub.empty:
+                continue
+            fig_h100.add_trace(go.Scatter(
+                x=sub["month"],
+                y=sub["price_usd_per_gpu_hr"],
+                name=tier,
+                mode="lines+markers",
+                line=dict(color=tier_colours[tier], width=2),
+                marker=dict(size=6, color=tier_colours[tier]),
+                hovertemplate=f"{tier}<br>%{{x|%b %Y}}: $%{{y:.2f}}/GPU-hr<extra></extra>",
+            ))
+
+        y_min, y_max = _compute_y_range(
+            h100_df["price_usd_per_gpu_hr"].tolist(), max_score=12, floor=0.5
+        )
+        fig_h100.update_layout(
+            yaxis_title="$ per GPU-hour",
+            yaxis_range=[y_min, y_max],
+            **CHART_LAYOUT,
+        )
+        st.plotly_chart(fig_h100, use_container_width=True)
 
 # ══════════════════════════════════════════════
 # BUBBLE RISK SUMMARY

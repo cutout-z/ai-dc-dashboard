@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 from pathlib import Path
 
 DB_PATH = st.session_state["db_path"]
-DATA_DIR = Path(__file__).parent.parent.parent / "data" / "reference"
+DATA_DIR = Path(__file__).parent.parent.parent.parent / "data" / "reference"
 
 COMPANY_COLORS = {
     "Microsoft": "#00A4EF",
@@ -18,9 +18,6 @@ COMPANY_COLORS = {
     "Oracle": "#C74634",
     "CoreWeave": "#00BFA5",
     "Apple": "#A3AAAE",
-    "AMD": "#7CB342",
-    "TSMC": "#6B3FA0",
-    "NVIDIA": "#76B900",
 }
 
 # Companies with non-December fiscal year ends
@@ -28,7 +25,6 @@ FYE_NOTES = {
     "Microsoft": "FYE Jun",
     "Oracle": "FYE May",
     "Apple": "FYE Sep",
-    "NVIDIA": "FYE Jan",
 }
 
 ALL_COMPANIES = list(COMPANY_COLORS.keys())
@@ -116,17 +112,6 @@ if not df_annual.empty:
                 line=dict(dash="dash", color="red", width=2),
             ))
 
-            # Annotate revisions
-            revised = df_guide[df_guide["prior_guidance_usd_b"].notna()]
-            for _, row in revised.iterrows():
-                fig_annual.add_annotation(
-                    x=row["year"],
-                    y=row["guidance_usd_b"],
-                    text=f"{row['company']}: ${row['prior_guidance_usd_b']:.0f}B→${row['guidance_usd_b']:.0f}B",
-                    showarrow=True, arrowhead=2, arrowsize=0.8,
-                    ax=0, ay=-35,
-                    font=dict(size=9, color="red"),
-                )
 
     fig_annual.update_layout(
         barmode="stack",
@@ -190,6 +175,14 @@ if not df_capex.empty:
     df_capex["quarter"] = df_capex["period"].dt.to_period("Q").astype(str)
     df_capex = df_capex.sort_values("period")
 
+    # Drop trailing quarter if incomplete (e.g. Oracle reports one quarter ahead)
+    co_per_q = df_capex.groupby("quarter")["company"].nunique()
+    last_q = sorted(co_per_q.index)[-1]
+    if co_per_q[last_q] < co_per_q.median():
+        df_capex = df_capex[df_capex["quarter"] != last_q]
+
+    quarter_order = sorted(df_capex["quarter"].unique())
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -199,10 +192,12 @@ if not df_capex.empty:
             labels={"capex_bn": "CAPEX ($B)", "quarter": "Quarter"},
             barmode="stack",
             color_discrete_map=COMPANY_COLORS,
+            category_orders={"quarter": quarter_order},
         )
         fig_q.update_layout(height=450, xaxis_type="category",
                             xaxis_tickangle=-45,
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02))
+                            legend=dict(orientation="h", yanchor="bottom", y=1.02,
+                                        title_text=""))
         st.plotly_chart(fig_q, use_container_width=True)
 
     with col2:
@@ -211,13 +206,16 @@ if not df_capex.empty:
             title="Individual CAPEX Trends",
             labels={"capex_bn": "$B", "quarter": "Quarter"},
             color_discrete_map=COMPANY_COLORS,
+            category_orders={"quarter": quarter_order},
         )
         fig_ind.update_layout(height=450, xaxis_type="category",
-                              xaxis_tickangle=-45)
+                              xaxis_tickangle=-45,
+                              legend=dict(title_text=""))
         st.plotly_chart(fig_ind, use_container_width=True)
 
     # QoQ growth
     df_total = df_capex.groupby("quarter")["capex_bn"].sum().reset_index()
+    df_total = df_total.sort_values("quarter").reset_index(drop=True)
     df_total["qoq_pct"] = df_total["capex_bn"].pct_change() * 100
 
     fig_total = go.Figure()
