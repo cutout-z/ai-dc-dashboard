@@ -1,0 +1,28 @@
+year,scenario,dc_consumption_twh,dc_peak_demand_gw,total_nem_demand_twh,source
+2020,Baseline,2.5,0.29,185.0,Oxford Economics estimate
+2021,Baseline,2.7,0.31,186.0,Oxford Economics estimate
+2022,Baseline,3.0,0.34,188.0,Oxford Economics estimate
+2023,Baseline,3.3,0.38,190.0,Oxford Economics estimate
+2024,Baseline,3.6,0.41,192.0,Oxford Economics estimate
+2025,Baseline,4.0,0.45,194.0,AEMO 2025 ESOO / Oxford Economics FY25
+2026,Step Change,4.9,0.56,199.0,AEMO IASR Step Change
+2027,Step Change,6.1,0.70,204.0,AEMO IASR Step Change
+2028,Step Change,7.6,0.87,209.0,AEMO IASR Step Change
+2029,Step Change,9.5,1.08,214.0,AEMO IASR Step Change
+2030,Step Change,12.0,1.37,219.0,AEMO IASR Step Change
+2031,Step Change,14.5,1.66,225.0,AEMO IASR Step Change
+2032,Step Change,17.0,1.94,231.0,AEMO IASR Step Change
+2026,Progressive Change,4.5,0.51,199.0,AEMO IASR Progressive Change
+2027,Progressive Change,5.2,0.59,202.0,AEMO IASR Progressive Change
+2028,Progressive Change,6.0,0.68,205.0,AEMO IASR Progressive Change
+2029,Progressive Change,6.9,0.79,208.0,AEMO IASR Progressive Change
+2030,Progressive Change,8.0,0.91,211.0,AEMO IASR Progressive Change
+2031,Progressive Change,9.2,1.05,214.0,AEMO IASR Progressive Change
+2032,Progressive Change,10.5,1.20,217.0,AEMO IASR Progressive Change
+2026,CEFC High,5.5,0.63,199.0,CEFC/Baringa High scenario
+2027,CEFC High,7.5,0.86,204.0,CEFC/Baringa High scenario
+2028,CEFC High,10.0,1.14,209.0,CEFC/Baringa High scenario
+2029,CEFC High,13.0,1.48,214.0,CEFC/Baringa High scenario
+2030,CEFC High,16.5,1.88,219.0,CEFC/Baringa High scenario
+2031,CEFC High,20.0,2.28,225.0,CEFC/Baringa High scenario
+2032,CEFC High,24.0,2.74,231.0,CEFC/Baringa High scenario

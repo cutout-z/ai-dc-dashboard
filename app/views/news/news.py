@@ -62,6 +62,8 @@ for t in all_tickers:
     })
 
 df_earn = pd.DataFrame(rows).sort_values("_sort").drop(columns=["_sort"])
+# Drop past earnings (negative days) — yfinance sometimes returns the last reported date
+df_earn = df_earn[df_earn["Days Away"].isna() | (df_earn["Days Away"] >= 0)]
 
 # Split into two tiles: Global and ANZ
 col_global, col_anz = st.columns(2)
