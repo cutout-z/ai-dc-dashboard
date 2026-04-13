@@ -1,7 +1,14 @@
 """AI & DC Dashboard — navigation entry point."""
 
-import streamlit as st
+import sys
 from pathlib import Path
+
+# Ensure repo root is on sys.path so `from app.lib.xxx` imports work on Streamlit Cloud
+_repo_root = str(Path(__file__).resolve().parent.parent)
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
+
+import streamlit as st
 
 st.set_page_config(
     page_title="AI & DC Dashboard",
