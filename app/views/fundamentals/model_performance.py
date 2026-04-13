@@ -549,52 +549,55 @@ df_elo = pd.read_sql("SELECT * FROM llm_arena_elo ORDER BY elo DESC", _conn)
 df_specs = pd.read_sql("SELECT * FROM llm_model_specs ORDER BY intelligence_score DESC NULLS LAST", _conn)
 _conn.close()
 
-col1, col2 = st.columns(2)
-
-with col1:
-    st.subheader("Arena Elo Ratings")
-    _explainer(
-        what="Chatbot Arena (lmsys.org) Elo scores — a head-to-head blind preference tournament where humans choose between model responses. Elo is computed from win rates across millions of votes.",
-        why="Human preference Elo is the most neutral capability signal available. It has no benchmark contamination problem and aligns with what users actually prefer. It's the one metric all providers accept as credible.",
-        source="LMSYS Chatbot Arena leaderboard (chat.lmsys.org). Updated via /ai-research skill.",
+st.subheader("Arena Elo Ratings")
+_explainer(
+    what="Chatbot Arena (lmsys.org) Elo scores — a head-to-head blind preference tournament where humans choose between model responses. Elo is computed from win rates across millions of votes.",
+    why="Human preference Elo is the most neutral capability signal available. It has no benchmark contamination problem and aligns with what users actually prefer. It's the one metric all providers accept as credible.",
+    source="LMSYS Chatbot Arena leaderboard (chat.lmsys.org). Updated via /ai-research skill.",
+)
+if not df_elo.empty:
+    _vis = [p for p in df_elo["provider"].unique() if p in sel_providers] if sel_providers else df_elo["provider"].unique().tolist()
+    df_elo_vis = df_elo[df_elo["provider"].isin(_vis)] if _vis else df_elo
+    _elo_top = df_elo_vis.head(15).copy()
+    _elo_min = _elo_top["elo"].min()
+    _elo_floor = round(_elo_min * 0.95)  # 5% below worst score
+    _elo_top["elo_offset"] = _elo_top["elo"] - _elo_floor
+    fig_elo = px.bar(
+        _elo_top, x="elo_offset", y="model", color="provider",
+        orientation="h", title="Top 15 by Elo",
+        text="elo", custom_data=["elo"],
+        color_discrete_map=PROVIDER_COLOURS,
     )
-    if not df_elo.empty:
-        _vis = [p for p in df_elo["provider"].unique() if p in sel_providers] if sel_providers else df_elo["provider"].unique().tolist()
-        df_elo_vis = df_elo[df_elo["provider"].isin(_vis)] if _vis else df_elo
-        fig_elo = px.bar(
-            df_elo_vis.head(15), x="elo", y="model", color="provider",
-            orientation="h", title="Top 15 by Elo",
-            labels={"elo": "Elo Score"},
+    fig_elo.update_traces(base=_elo_floor, textposition="outside", textfont_size=10,
+                          hovertemplate="Elo Score=%{customdata[0]}<br>model=%{y}<extra></extra>")
+    fig_elo.update_layout(height=450, yaxis=dict(autorange="reversed"), xaxis=dict(title_text="Elo Score"), **CHART_LAYOUT)
+    st.plotly_chart(fig_elo, use_container_width=True)
+
+st.subheader("Intelligence vs Cost Frontier")
+_explainer(
+    what="Each model plotted at its list input price (x-axis) vs composite intelligence index (y-axis). The Pareto frontier moves left and up over time — models that were SOTA 12 months ago are now dominated on both axes.",
+    why="As intelligence commoditises, can any provider maintain pricing power? This chart shows how fast the frontier is shifting — and whether there is still a capability moat at the top end that justifies premium pricing.",
+    source="Artificial Analysis intelligence index + provider list pricing. Updated via /ai-research skill.",
+)
+if not df_specs.empty:
+    df_plot = df_specs.dropna(subset=["intelligence_score", "input_price_per_m_tokens"])
+    if not df_plot.empty:
+        _vis2 = [p for p in df_plot["provider"].unique() if p in sel_providers] if sel_providers else df_plot["provider"].unique().tolist()
+        df_plot = df_plot[df_plot["provider"].isin(_vis2)] if _vis2 else df_plot
+        fig_frontier = px.scatter(
+            df_plot, x="input_price_per_m_tokens", y="intelligence_score",
+            text="model", color="provider",
+            title="Intelligence Index vs $/1M Input Tokens",
+            labels={"input_price_per_m_tokens": "$/1M Input Tokens", "intelligence_score": "Intelligence Index"},
             color_discrete_map=PROVIDER_COLOURS,
         )
-        fig_elo.update_layout(height=450, yaxis=dict(autorange="reversed"), **CHART_LAYOUT)
-        st.plotly_chart(fig_elo, use_container_width=True)
-
-with col2:
-    st.subheader("Intelligence vs Cost Frontier")
-    _explainer(
-        what="Each model plotted at its list input price (x-axis) vs composite intelligence index (y-axis). The Pareto frontier moves left and up over time — models that were SOTA 12 months ago are now dominated on both axes.",
-        why="As intelligence commoditises, can any provider maintain pricing power? This chart shows how fast the frontier is shifting — and whether there is still a capability moat at the top end that justifies premium pricing.",
-        source="Artificial Analysis intelligence index + provider list pricing. Updated via /ai-research skill.",
-    )
-    if not df_specs.empty:
-        df_plot = df_specs.dropna(subset=["intelligence_score", "input_price_per_m_tokens"])
-        if not df_plot.empty:
-            _vis2 = [p for p in df_plot["provider"].unique() if p in sel_providers] if sel_providers else df_plot["provider"].unique().tolist()
-            df_plot = df_plot[df_plot["provider"].isin(_vis2)] if _vis2 else df_plot
-            fig_frontier = px.scatter(
-                df_plot, x="input_price_per_m_tokens", y="intelligence_score",
-                text="model", color="provider",
-                title="Intelligence Index vs $/1M Input Tokens",
-                labels={"input_price_per_m_tokens": "$/1M Input Tokens", "intelligence_score": "Intelligence Index"},
-                color_discrete_map=PROVIDER_COLOURS,
-            )
-            fig_frontier.update_traces(textposition="top center", textfont_size=9)
-            fig_frontier.update_layout(height=450, **CHART_LAYOUT)
-            st.plotly_chart(fig_frontier, use_container_width=True)
+        fig_frontier.update_traces(textposition="top center", textfont_size=9)
+        fig_frontier.update_layout(height=450, **CHART_LAYOUT)
+        st.plotly_chart(fig_frontier, use_container_width=True)
 
 if not df_specs.empty:
     df_ctx = df_specs.dropna(subset=["context_window"]).sort_values("context_window", ascending=False)
+    df_ctx = df_ctx[~df_ctx["model"].str.contains("Llama 4 Scout", case=False, na=False)]
     if not df_ctx.empty:
         st.subheader("Context Window Leaders")
         _explainer(
