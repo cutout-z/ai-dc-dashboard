@@ -5,6 +5,7 @@ All companies fetched via yfinance annual income_stmt / cashflow / balance_sheet
 Last 4 fiscal years. Values in $M USD.
 """
 from __future__ import annotations
+import json
 import logging
 from pathlib import Path
 
@@ -14,6 +15,8 @@ import yfinance as yf
 import openpyxl
 
 logger = logging.getLogger("ai_research")
+
+_CSV_PATH = Path(__file__).parent.parent.parent / "data" / "reference" / "ai_supplement.csv"
 
 _EXCEL_PATH = (
     Path(__file__).parent.parent.parent.parent
@@ -53,7 +56,20 @@ COMPANY_ORDER = [
 
 @st.cache_data(ttl=86400)
 def load_ai_supplement() -> list[dict]:
-    """Extract AI revenue proxy / disclosure-quality table from AI_Supplement sheet."""
+    """Load AI revenue proxy / disclosure-quality table.
+
+    Tries committed CSV first (works on Streamlit Cloud), then falls back
+    to the local Excel file for development.
+    """
+    if _CSV_PATH.exists():
+        df = pd.read_csv(_CSV_PATH)
+        # Forward-fill Company column (merged cells in original Excel)
+        df["Company"] = df["Company"].ffill()
+        # Rename 'Metric Description' → 'Metric' for display consistency
+        if "Metric Description" in df.columns:
+            df = df.rename(columns={"Metric Description": "Metric"})
+        return df.to_dict("records")
+
     if not _EXCEL_PATH.exists():
         return []
     wb = openpyxl.load_workbook(str(_EXCEL_PATH), data_only=True)
@@ -110,16 +126,31 @@ def _yf_val(df: pd.DataFrame | None, *labels, n: int = 4, scale: float = 1.0) ->
     return [None] * len(yrs), yrs
 
 
+_CONSENSUS_PATH = Path(__file__).parent.parent.parent / "data" / "reference" / "consensus.json"
+
+
+def _load_consensus_file() -> dict:
+    """Load pre-computed consensus data from JSON (committed to repo)."""
+    if not _CONSENSUS_PATH.exists():
+        return {}
+    try:
+        data = json.loads(_CONSENSUS_PATH.read_text())
+        return data.get("data", {})
+    except Exception:
+        return {}
+
+
 def _fetch_consensus(t: yf.Ticker, scale: float, ticker: str) -> dict:
     """Fetch broker consensus estimates (revenue, EPS, price targets).
 
-    scale should be ccy_scale/1e6 to convert revenue estimates → $M.
-    EPS and price targets are not scaled (per-share / per-unit).
+    Tries yfinance live first; falls back to pre-computed JSON file
+    (for Streamlit Cloud where yfinance estimate endpoints are blocked).
     """
+    # Try yfinance first
     try:
-        rev_est  = t.revenue_estimate   # DataFrame: index=period, cols=avg/low/high/...
-        eps_est  = t.earnings_estimate
-        ptgt     = t.analyst_price_targets or {}   # dict: current/mean/low/high/median
+        rev_est = t.revenue_estimate
+        eps_est = t.earnings_estimate
+        ptgt = t.analyst_price_targets or {}
 
         def _get(df, period, col):
             try:
@@ -131,7 +162,6 @@ def _fetch_consensus(t: yf.Ticker, scale: float, ticker: str) -> dict:
                 return None
 
         def _s(v):
-            """Scale a revenue value to $M."""
             return round(v * scale, 1) if v is not None else None
 
         def _p(key):
@@ -141,8 +171,7 @@ def _fetch_consensus(t: yf.Ticker, scale: float, ticker: str) -> dict:
             except (TypeError, ValueError):
                 return None
 
-        return {
-            # Revenue consensus ($M after scale)
+        result = {
             "rev_0y_avg":  _s(_get(rev_est, "0y", "avg")),
             "rev_0y_low":  _s(_get(rev_est, "0y", "low")),
             "rev_0y_high": _s(_get(rev_est, "0y", "high")),
@@ -151,19 +180,24 @@ def _fetch_consensus(t: yf.Ticker, scale: float, ticker: str) -> dict:
             "rev_1y_high": _s(_get(rev_est, "+1y", "high")),
             "rev_n":       int(_get(rev_est, "0y", "numberOfAnalysts") or 0) or None,
             "rev_growth":  _get(rev_est, "+1y", "growth"),
-            # EPS consensus (per share, no scale)
             "eps_0y_avg":  _get(eps_est, "0y", "avg"),
             "eps_1y_avg":  _get(eps_est, "+1y", "avg"),
             "eps_n":       int(_get(eps_est, "0y", "numberOfAnalysts") or 0) or None,
-            # Price targets (USD)
             "pt_current": _p("current"),
             "pt_mean":    _p("mean"),
             "pt_low":     _p("low"),
             "pt_high":    _p("high"),
         }
+
+        has_data = any(v is not None for k, v in result.items() if k not in ("rev_n", "eps_n"))
+        if has_data:
+            return result
     except Exception as e:
-        logger.warning("consensus %s: %s", ticker, e)
-        return {}
+        logger.debug("yfinance consensus %s: %s", ticker, e)
+
+    # Fallback: pre-computed JSON file (refreshed via etl/refresh_consensus.py)
+    cached = _load_consensus_file()
+    return cached.get(ticker, {})
 
 
 # ════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,11 @@
+Company,Metric Description,FY2024A,FY2025E,FY2026E,FY2027E,Disclosure Quality,Source / Notes
+MSFT,Azure AI Services,5000,13000,20000,30000,B — Partial,Q3 FY25: AI drove 16pts of 33% Azure growth; ARR $13B as of Q2 FY25 (Dec 2024). Excludes M365 Copilot.
+MSFT,AI % of Total Revenue,~2.0%,~4.7%,~6.3%,~8.2%,B,Estimated from Azure AI ARR vs total Microsoft revenue. Understates AI-enhanced products.
+AMZN,AWS AI (incl. chips),N/D,">10,000",N/D,N/D,C — Not Disclosed,"Jassy: 'multi-billion ARR, triple-digit growth'; Graviton+Trainium chips alone >$10B ARR. Bedrock is growing but unquantified."
+AMZN,AI % of Total Revenue,N/D,<2%,N/D,N/D,C,AWS is ~24% of total revenue. AI is subset of AWS. Company has not disclosed AI-specific revenue.
+GOOGL,Google Cloud,33175,58000,85000,110000,B — Proxy Only,Google Cloud +48% YoY in Q4 2025. Full-year 2025 ~$58B. AI drives Cloud growth but is not separately broken out within Cloud.
+GOOGL,AI % of Total Revenue,9.5%,14.4%,19.7%,23.0%,C,"AI is also embedded in Search (AI Overviews), YouTube, and Ads optimization — none separately quantified."
+META,Family of Apps (Ads),N/D,N/D,N/D,N/D,C — Not Disclosed,"98.7% of revenue is advertising. AI improves targeting/engagement (Reels, ranking). Analyst attribution: AI drove ~26% YoY ad growth in Q3 2025. Not a disclosed line item."
+META,Meta AI / WhatsApp Biz,Immaterial,Immaterial,Emerging,Emerging,C,Meta AI as consumer product; WhatsApp Business messaging. Both are growing but remain immaterial vs $116B+ total revenue.
+ORCL,OCI IaaS (Cloud Infrastructure),3000,16400,27000,38000,A — Most Disclosed,Q2 FY26: $4.1B/qtr (+68% YoY). FY26 cloud infra guided >70% growth. RPO surged 359% to $455B (OpenAI/Stargate). FY25 OCI annualized ~$16B.
+ORCL,OCI % of Total Revenue,~7.1%,~28.8%,~42.2%,~53.5%,A,Fastest-growing segment. Non-AI OCI workloads also included — pure AI-only OCI not separately broken out within IaaS.
