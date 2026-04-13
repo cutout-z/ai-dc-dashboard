@@ -1,7 +1,8 @@
 """Source Health — freshness audit across all data sources.
 
 Tracks:
-- Reference CSV files (mtime, row count, latest date column)
+- Reference CSVs and JSON files (mtime, row count, latest date column)
+- AU DC processed parquets and reference CSVs
 - SQLite tables and views (row count, latest period where applicable)
 - Live fetchers (configured TTL — shows cache staleness intent)
 - News buckets (item counts + latest article per bucket)
@@ -9,6 +10,7 @@ Tracks:
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,10 +21,12 @@ import streamlit as st
 from app.lib.news import fetch_news_source_health
 
 DB_PATH = Path(st.session_state["db_path"])
-DATA_DIR = Path(__file__).parent.parent.parent / "data" / "reference"
+DATA_DIR = Path(__file__).parent.parent.parent / "data"
+REF_DIR = DATA_DIR / "reference"
+AU_DC_DIR = DATA_DIR / "au_dc"
 
 st.title("Source Health")
-st.caption("Freshness audit across CSVs, DB tables, live fetchers, and news feeds.")
+st.caption("Freshness audit across CSVs, JSON, parquets, DB tables, live fetchers, and news feeds.")
 
 
 # ──────────────────────────────────────────────
@@ -77,38 +81,47 @@ def _status_cell(status: str) -> str:
 
 
 # ──────────────────────────────────────────────
-# 1. REFERENCE CSVs
+# 1. REFERENCE CSVs + JSON
 # ──────────────────────────────────────────────
-st.header("Reference CSVs")
-st.caption("Thresholds: fresh < 30d, stale < 90d, very-stale ≥ 90d")
+st.header("Reference Data (CSVs & JSON)")
+st.caption("Thresholds: per-file freshness. Default: fresh < 30d, stale < 90d.")
 
 # Per-file freshness thresholds (in days). Some data is inherently slow-moving.
-CSV_FRESH_DAYS = {
-    "capex_guidance.csv": 30,         # earnings-season cadence
-    "tsmc_monthly_revenue.csv": 15,   # monthly
+FILE_FRESH_DAYS = {
+    "capex_guidance.csv": 30,
+    "capex_guidance_history.csv": 90,
+    "capex_quarterly_seed.csv": 90,
+    "tsmc_monthly_revenue.csv": 15,
     "token_consumption.csv": 60,
+    "token_prices_history.csv": 60,
     "frontier_lab_valuations.csv": 60,
     "gpu_lease_prices.csv": 60,
+    "h100_rental_prices.csv": 60,
     "model_releases.csv": 30,
-    "dc_power_forecasts.csv": 180,    # annual reports
+    "dc_power_forecasts.csv": 180,
+    "ai_supplement.csv": 90,         # curated, updates with earnings
+    "consensus.json": 7,             # refreshed via etl/refresh_consensus.py
+    "llm_leaderboard.json": 30,
 }
 
-# Date columns to scan for "latest observed" per file
+# Date columns to scan for "latest observed" per CSV
 CSV_DATE_COLS = {
     "capex_guidance.csv": "guidance_date",
-    "tsmc_monthly_revenue.csv": None,  # composed from year+month
+    "tsmc_monthly_revenue.csv": None,
     "token_consumption.csv": "date",
     "frontier_lab_valuations.csv": "date",
     "gpu_lease_prices.csv": "date",
     "model_releases.csv": "release_date",
-    "dc_power_forecasts.csv": None,    # contains years, not a date col
+    "dc_power_forecasts.csv": None,
 }
 
-csv_rows = []
-for csv_path in sorted(DATA_DIR.glob("*.csv")):
+ref_rows = []
+
+# Scan CSVs
+for csv_path in sorted(REF_DIR.glob("*.csv")):
     name = csv_path.name
     age_s = _age_seconds(csv_path)
-    fresh_days = CSV_FRESH_DAYS.get(name, 30)
+    fresh_days = FILE_FRESH_DAYS.get(name, 30)
     status = _classify(age_s, fresh_days * 86400, fresh_days * 3 * 86400)
 
     row_count = None
@@ -127,7 +140,7 @@ for csv_path in sorted(DATA_DIR.glob("*.csv")):
         status = "error"
         latest = f"parse error: {e}"
 
-    csv_rows.append({
+    ref_rows.append({
         "Source": name,
         "Status": _status_cell(status),
         "File Age": _fmt_age(age_s),
@@ -137,13 +150,126 @@ for csv_path in sorted(DATA_DIR.glob("*.csv")):
         "_age": age_s or 0,
     })
 
-csv_rows.sort(key=lambda r: (STATUS_ORDER.get(r["_status"], 5), -r["_age"]))
-df_csv = pd.DataFrame([{k: v for k, v in r.items() if not k.startswith("_")} for r in csv_rows])
-st.dataframe(df_csv, use_container_width=True, hide_index=True, height=35 * (len(df_csv) + 1) + 3)
+# Scan JSON files
+for json_path in sorted(REF_DIR.glob("*.json")):
+    name = json_path.name
+    age_s = _age_seconds(json_path)
+    fresh_days = FILE_FRESH_DAYS.get(name, 30)
+    status = _classify(age_s, fresh_days * 86400, fresh_days * 3 * 86400)
+
+    row_count = None
+    latest = None
+    try:
+        data = json.loads(json_path.read_text())
+        if name == "consensus.json":
+            row_count = len(data.get("data", {}))
+            latest = data.get("updated", "—")
+        elif name == "llm_leaderboard.json":
+            if isinstance(data, list):
+                row_count = len(data)
+            elif isinstance(data, dict):
+                row_count = len(data.get("data", data.get("models", data)))
+    except Exception as e:
+        status = "error"
+        latest = f"parse error: {e}"
+
+    ref_rows.append({
+        "Source": name,
+        "Status": _status_cell(status),
+        "File Age": _fmt_age(age_s),
+        "Rows": row_count,
+        "Latest Entry": latest or "—",
+        "_status": status,
+        "_age": age_s or 0,
+    })
+
+ref_rows.sort(key=lambda r: (STATUS_ORDER.get(r["_status"], 5), -r["_age"]))
+df_ref = pd.DataFrame([{k: v for k, v in r.items() if not k.startswith("_")} for r in ref_rows])
+st.dataframe(df_ref, use_container_width=True, hide_index=True, height=35 * (len(df_ref) + 1) + 3)
 
 
 # ──────────────────────────────────────────────
-# 2. SQLITE TABLES / VIEWS
+# 2. AU DC DATA (parquets + reference CSVs)
+# ──────────────────────────────────────────────
+st.header("AU DC Data")
+st.caption("Processed parquets and reference CSVs for Australian Market section.")
+
+AU_DC_FRESH_DAYS = {
+    # Processed parquets — refreshed via ETL
+    "dc_demand.parquet": 30,
+    "esoo_forecasts.parquet": 90,
+    "financials_history.parquet": 30,
+    "financials_quotes.parquet": 7,
+    "generation_info.parquet": 30,
+    "grid_capacity.parquet": 30,
+    "nem_demand_actual.parquet": 30,
+    "projects.parquet": 30,
+    # Reference CSVs — curated seed data
+    "projects_seed.csv": 90,
+    "dc_demand_forecasts.csv": 180,
+    "esoo_forecasts.csv": 180,
+    "nem_regions.csv": 365,
+    "operator_types.csv": 365,
+}
+
+AU_DC_PARQUET_DATE_COLS = {
+    "dc_demand.parquet": "date",
+    "nem_demand_actual.parquet": "date",
+    "financials_history.parquet": "date",
+    "financials_quotes.parquet": "date",
+}
+
+au_dc_rows = []
+for subdir in ("processed", "reference"):
+    scan_dir = AU_DC_DIR / subdir
+    if not scan_dir.exists():
+        continue
+    for fpath in sorted(scan_dir.glob("*")):
+        if fpath.suffix not in (".parquet", ".csv"):
+            continue
+        name = fpath.name
+        age_s = _age_seconds(fpath)
+        fresh_days = AU_DC_FRESH_DAYS.get(name, 30)
+        status = _classify(age_s, fresh_days * 86400, fresh_days * 3 * 86400)
+
+        row_count = None
+        latest = None
+        try:
+            if fpath.suffix == ".parquet":
+                df = pd.read_parquet(fpath)
+            else:
+                df = pd.read_csv(fpath)
+            row_count = len(df)
+            date_col = AU_DC_PARQUET_DATE_COLS.get(name)
+            if date_col and date_col in df.columns:
+                latest_val = pd.to_datetime(df[date_col], errors="coerce").max()
+                if pd.notna(latest_val):
+                    latest = latest_val.strftime("%Y-%m-%d")
+        except Exception as e:
+            status = "error"
+            latest = f"parse error: {e}"
+
+        au_dc_rows.append({
+            "Source": f"{subdir}/{name}",
+            "Status": _status_cell(status),
+            "File Age": _fmt_age(age_s),
+            "Rows": row_count,
+            "Latest Entry": latest or "—",
+            "_status": status,
+            "_age": age_s or 0,
+        })
+
+if au_dc_rows:
+    au_dc_rows.sort(key=lambda r: (STATUS_ORDER.get(r["_status"], 5), -r["_age"]))
+    df_au_dc = pd.DataFrame([{k: v for k, v in r.items() if not k.startswith("_")} for r in au_dc_rows])
+    st.dataframe(df_au_dc, use_container_width=True, hide_index=True,
+                 height=35 * (len(df_au_dc) + 1) + 3)
+else:
+    st.info("No AU DC data files found.")
+
+
+# ──────────────────────────────────────────────
+# 3. SQLITE TABLES / VIEWS
 # ──────────────────────────────────────────────
 st.header("SQLite Tables & Views")
 
@@ -205,26 +331,64 @@ st.dataframe(df_db, use_container_width=True, hide_index=True, height=35 * (len(
 
 
 # ──────────────────────────────────────────────
-# 3. LIVE FETCHERS (cache TTLs)
+# 4. LIVE FETCHERS (cache TTLs + degradation)
 # ──────────────────────────────────────────────
 st.header("Live Fetchers")
 st.caption(
-    "Streamlit caches these functions with the configured TTL. Source Health reports "
-    "the TTL contract — actual freshness depends on when each page was last viewed."
+    "Streamlit caches these functions with the configured TTL. "
+    "\"Fallback\" shows what happens when the live API fails (e.g. on Streamlit Cloud)."
 )
 
 live_rows = [
-    {"Source": "fetch_equities_data() — yfinance + Yahoo spark", "TTL": "5m"},
-    {"Source": "fetch_commodity_overview() — Yahoo spark", "TTL": "5m"},
-    {"Source": "fetch_earnings_dates() — yfinance", "TTL": "1h"},
-    {"Source": "fetch_news_buckets() — feedparser (Google News + direct)", "TTL": "30m"},
+    {
+        "Source": "fetch_equities_data() — prices + fundamentals",
+        "TTL": "5m",
+        "API": "Yahoo spark + yfinance fast_info",
+        "Fallback": "Prices: spark (reliable). Fundamentals: fast_info → t.info → computed from statements",
+    },
+    {
+        "Source": "fetch_financials() — 3-statement",
+        "TTL": "1h",
+        "API": "yfinance (income_stmt, balance_sheet, cashflow)",
+        "Fallback": "None — yfinance statements generally work on Cloud",
+    },
+    {
+        "Source": "_fetch_consensus() — analyst estimates",
+        "TTL": "1h",
+        "API": "yfinance (revenue_estimate, earnings_estimate, analyst_price_targets)",
+        "Fallback": "data/reference/consensus.json (refresh via etl/refresh_consensus.py)",
+    },
+    {
+        "Source": "_fetch_market_caps() — value chain",
+        "TTL": "1h",
+        "API": "yfinance fast_info",
+        "Fallback": "None — shows '—' if fast_info fails",
+    },
+    {
+        "Source": "fetch_commodity_overview() — DC inputs",
+        "TTL": "5m",
+        "API": "Yahoo spark",
+        "Fallback": "None — spark is reliable on Cloud",
+    },
+    {
+        "Source": "fetch_earnings_dates() — calendar",
+        "TTL": "1h",
+        "API": "yfinance (Ticker.calendar)",
+        "Fallback": "None — shows blank if blocked",
+    },
+    {
+        "Source": "fetch_news_buckets() — news feeds",
+        "TTL": "30m",
+        "API": "feedparser (Google News RSS + direct)",
+        "Fallback": "None — RSS generally works on Cloud",
+    },
 ]
 st.dataframe(pd.DataFrame(live_rows), use_container_width=True, hide_index=True,
              height=35 * (len(live_rows) + 1) + 3)
 
 
 # ──────────────────────────────────────────────
-# 4. NEWS BUCKETS
+# 5. NEWS BUCKETS
 # ──────────────────────────────────────────────
 st.header("News Buckets")
 st.caption("Item counts and latest article per bucket (from cached fetch).")
