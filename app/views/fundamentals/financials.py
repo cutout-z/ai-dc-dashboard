@@ -4,6 +4,8 @@ P&L, Balance Sheet, Cash Flow Statement, Key Ratios, and Analyst Consensus
 per company (dropdown selector). All statement values in $M USD; last 4 fiscal years.
 """
 
+from typing import Optional
+
 import streamlit as st
 import pandas as pd
 
@@ -59,7 +61,7 @@ _RATIO_FORMATTERS = {
 
 # ── Table renderer ────────────────────────────────────────────────────────────
 
-def _render_table(title: str, rows: dict, years: list, formatters: dict | None = None) -> None:
+def _render_table(title: str, rows: dict, years: list, formatters: Optional[dict] = None) -> None:
     with st.container(border=True):
         st.subheader(title)
         if not rows or not years:
@@ -207,7 +209,12 @@ if not selected:
 d     = all_fin[selected]
 years = d["years"]
 
-st.caption(f"yfinance annual  ·  {years[0]}–{years[-1]}  ·  $M USD  ·  all actuals")
+has_estimates = any(y.endswith("E") for y in years)
+if has_estimates:
+    actual_end = [y for y in years if not y.endswith("E")][-1]
+    st.caption(f"yfinance annual  ·  {years[0]}–{actual_end} actuals + consensus estimates  ·  $M USD")
+else:
+    st.caption(f"yfinance annual  ·  {years[0]}–{years[-1]}  ·  $M USD  ·  all actuals")
 
 
 # ── Three-statement display ───────────────────────────────────────────────────

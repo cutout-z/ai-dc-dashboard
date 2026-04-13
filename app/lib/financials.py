@@ -170,113 +170,183 @@ def _fetch_consensus(t: yf.Ticker, scale: float, ticker: str) -> dict:
 # Main loader
 # ════════════════════════════════════════════════════════════════════════════
 
+def _fetch_one_company(ticker: str, meta: dict) -> tuple[str, dict | None]:
+    """Fetch financials + consensus for a single company (thread-safe)."""
+    try:
+        t     = yf.Ticker(ticker)
+        scale = meta["ccy_scale"] / 1e6   # native currency → $M
+
+        inc = t.income_stmt
+        cf  = t.cashflow
+        bs  = t.balance_sheet
+
+        # ── Income Statement ──────────────────────────────────────────
+        revenue,   yrs = _yf_val(inc, "Total Revenue",                                scale=scale)
+        gross_pft, _   = _yf_val(inc, "Gross Profit",                                 scale=scale)
+        ebitda,    _   = _yf_val(inc, "EBITDA", "Normalized EBITDA",                  scale=scale)
+        op_inc,    _   = _yf_val(inc, "Operating Income", "EBIT",                     scale=scale)
+        net_inc,   _   = _yf_val(inc, "Net Income", "Net Income Common Stockholders", scale=scale)
+
+        # ── Balance Sheet ─────────────────────────────────────────────
+        cash,       _  = _yf_val(bs,
+            "Cash And Cash Equivalents",
+            "Cash Cash Equivalents And Short Term Investments",
+            scale=scale,
+        )
+        tot_assets, _  = _yf_val(bs, "Total Assets",  scale=scale)
+        tot_debt,   _  = _yf_val(bs,
+            "Total Debt",
+            "Long Term Debt And Capital Lease Obligation",
+            "Long Term Debt",
+            scale=scale,
+        )
+        tot_equity, _  = _yf_val(bs,
+            "Stockholders Equity",
+            "Common Stock Equity",
+            "Total Equity Gross Minority Interest",
+            scale=scale,
+        )
+        # Lease obligations (GAAP reported — capital / operating leases)
+        lease_lt,  _   = _yf_val(bs,
+            "Long Term Capital Lease Obligation",
+            "Long Term Lease Obligation",
+            scale=scale,
+        )
+        lease_cur, _   = _yf_val(bs,
+            "Current Capital Lease Obligation",
+            "Current Lease Obligation",
+            scale=scale,
+        )
+        # Prefer total if reported; otherwise sum current + non-current
+        lease_tot, _   = _yf_val(bs, "Capital Lease Obligations", "Leases", scale=scale)
+        n = len(yrs)
+        if not any(v is not None for v in lease_tot):
+            lease_tot = [
+                round((a or 0) + (b or 0), 1) if (a is not None or b is not None) else None
+                for a, b in zip(lease_cur, lease_lt)
+            ]
+
+        net_debt = [
+            round(d - c, 1) if d is not None and c is not None else None
+            for d, c in zip(tot_debt, cash)
+        ]
+
+        # ── Cash Flow Statement ───────────────────────────────────────
+        ocf,    _   = _yf_val(cf, "Operating Cash Flow", scale=scale)
+        capex_r, _  = _yf_val(cf, "Capital Expenditure",  scale=scale)
+        capex       = [abs(v) if v is not None else None for v in capex_r]
+        fcf_r,  _   = _yf_val(cf, "Free Cash Flow",       scale=scale)
+        fcf = [
+            fcf_r[i] if fcf_r[i] is not None
+            else (
+                round(ocf[i] - capex[i], 1)
+                if ocf[i] is not None and capex[i] is not None
+                else None
+            )
+            for i in range(n)
+        ]
+
+        # ── Forward estimates (extend income statement) ────────────
+        income = {
+            "Revenue":          revenue,
+            "Gross Profit":     gross_pft,
+            "EBITDA":           ebitda,
+            "Operating Income": op_inc,
+            "Net Income":       net_inc,
+        }
+        balance = {
+            "Cash & Equiv.":  cash,
+            "Total Assets":   tot_assets,
+            "Total Debt":     tot_debt,
+            "Lease Oblig.":   lease_tot,
+            "Net Debt":       net_debt,
+            "Total Equity":   tot_equity,
+        }
+        cashflow = {
+            "Operating CF": ocf,
+            "CapEx":        capex,
+            "Free CF":      fcf,
+        }
+
+        try:
+            rev_est = t.revenue_estimate
+            eps_est = t.earnings_estimate
+            if rev_est is not None and not rev_est.empty and yrs:
+                last_fy = int(yrs[-1].replace("FY", ""))
+
+                def _est(df, period):
+                    try:
+                        v = df.loc[period, "avg"]
+                        return round(float(v) * scale, 1) if pd.notna(v) else None
+                    except (KeyError, TypeError):
+                        return None
+
+                rev_0y = _est(rev_est, "0y")
+                rev_1y = _est(rev_est, "+1y")
+                # EPS × shares ≈ net income estimate
+                ni_0y, ni_1y = None, None
+                if eps_est is not None and not eps_est.empty:
+                    try:
+                        shares = (t.info or {}).get("sharesOutstanding")
+                        if shares:
+                            def _eps_raw(period):
+                                try:
+                                    v = eps_est.loc[period, "avg"]
+                                    return float(v) if pd.notna(v) else None
+                                except (KeyError, TypeError):
+                                    return None
+                            e0 = _eps_raw("0y")
+                            e1 = _eps_raw("+1y")
+                            if e0 is not None:
+                                ni_0y = round(e0 * shares * scale, 1)
+                            if e1 is not None:
+                                ni_1y = round(e1 * shares * scale, 1)
+                    except Exception:
+                        pass
+
+                est_years = [f"FY{last_fy + 1}E", f"FY{last_fy + 2}E"]
+                yrs = yrs + est_years
+
+                income["Revenue"]    = revenue + [rev_0y, rev_1y]
+                income["Net Income"] = net_inc + [ni_0y, ni_1y]
+                for key in income:
+                    if len(income[key]) < len(yrs):
+                        income[key] = income[key] + [None] * (len(yrs) - len(income[key]))
+                for d in (balance, cashflow):
+                    for key in d:
+                        d[key] = d[key] + [None, None]
+        except Exception as e:
+            logger.debug("Estimates %s: %s", ticker, e)
+
+        return ticker, {
+            "name":  meta["name"],
+            "group": meta["group"],
+            "years": yrs,
+            "income":   income,
+            "balance":  balance,
+            "cashflow": cashflow,
+            "consensus": _fetch_consensus(t, scale, ticker),
+        }
+    except Exception as e:
+        logger.warning("yfinance financials %s: %s", ticker, e)
+        return ticker, None
+
+
 @st.cache_data(ttl=3600)
 def fetch_financials() -> dict:
     """Fetch last 4 fiscal years of financials + consensus for all companies."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     out = {}
-    for ticker, meta in COMPANY_META.items():
-        try:
-            t     = yf.Ticker(ticker)
-            scale = meta["ccy_scale"] / 1e6   # native currency → $M
-
-            inc = t.income_stmt
-            cf  = t.cashflow
-            bs  = t.balance_sheet
-
-            # ── Income Statement ──────────────────────────────────────────
-            revenue,   yrs = _yf_val(inc, "Total Revenue",                                scale=scale)
-            gross_pft, _   = _yf_val(inc, "Gross Profit",                                 scale=scale)
-            ebitda,    _   = _yf_val(inc, "EBITDA", "Normalized EBITDA",                  scale=scale)
-            op_inc,    _   = _yf_val(inc, "Operating Income", "EBIT",                     scale=scale)
-            net_inc,   _   = _yf_val(inc, "Net Income", "Net Income Common Stockholders", scale=scale)
-
-            # ── Balance Sheet ─────────────────────────────────────────────
-            cash,       _  = _yf_val(bs,
-                "Cash And Cash Equivalents",
-                "Cash Cash Equivalents And Short Term Investments",
-                scale=scale,
-            )
-            tot_assets, _  = _yf_val(bs, "Total Assets",  scale=scale)
-            tot_debt,   _  = _yf_val(bs,
-                "Total Debt",
-                "Long Term Debt And Capital Lease Obligation",
-                "Long Term Debt",
-                scale=scale,
-            )
-            tot_equity, _  = _yf_val(bs,
-                "Stockholders Equity",
-                "Common Stock Equity",
-                "Total Equity Gross Minority Interest",
-                scale=scale,
-            )
-            # Lease obligations (GAAP reported — capital / operating leases)
-            lease_lt,  _   = _yf_val(bs,
-                "Long Term Capital Lease Obligation",
-                "Long Term Lease Obligation",
-                scale=scale,
-            )
-            lease_cur, _   = _yf_val(bs,
-                "Current Capital Lease Obligation",
-                "Current Lease Obligation",
-                scale=scale,
-            )
-            # Prefer total if reported; otherwise sum current + non-current
-            lease_tot, _   = _yf_val(bs, "Capital Lease Obligations", "Leases", scale=scale)
-            n = len(yrs)
-            if not any(v is not None for v in lease_tot):
-                lease_tot = [
-                    round((a or 0) + (b or 0), 1) if (a is not None or b is not None) else None
-                    for a, b in zip(lease_cur, lease_lt)
-                ]
-
-            net_debt = [
-                round(d - c, 1) if d is not None and c is not None else None
-                for d, c in zip(tot_debt, cash)
-            ]
-
-            # ── Cash Flow Statement ───────────────────────────────────────
-            ocf,    _   = _yf_val(cf, "Operating Cash Flow", scale=scale)
-            capex_r, _  = _yf_val(cf, "Capital Expenditure",  scale=scale)
-            capex       = [abs(v) if v is not None else None for v in capex_r]
-            fcf_r,  _   = _yf_val(cf, "Free Cash Flow",       scale=scale)
-            fcf = [
-                fcf_r[i] if fcf_r[i] is not None
-                else (
-                    round(ocf[i] - capex[i], 1)
-                    if ocf[i] is not None and capex[i] is not None
-                    else None
-                )
-                for i in range(n)
-            ]
-
-            out[ticker] = {
-                "name":  meta["name"],
-                "group": meta["group"],
-                "years": yrs,
-                "income": {
-                    "Revenue":          revenue,
-                    "Gross Profit":     gross_pft,
-                    "EBITDA":           ebitda,
-                    "Operating Income": op_inc,
-                    "Net Income":       net_inc,
-                },
-                "balance": {
-                    "Cash & Equiv.":  cash,
-                    "Total Assets":   tot_assets,
-                    "Total Debt":     tot_debt,
-                    "Lease Oblig.":   lease_tot,
-                    "Net Debt":       net_debt,
-                    "Total Equity":   tot_equity,
-                },
-                "cashflow": {
-                    "Operating CF": ocf,
-                    "CapEx":        capex,
-                    "Free CF":      fcf,
-                },
-                "consensus": _fetch_consensus(t, scale, ticker),
-            }
-        except Exception as e:
-            logger.warning("yfinance financials %s: %s", ticker, e)
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futures = {
+            pool.submit(_fetch_one_company, ticker, meta): ticker
+            for ticker, meta in COMPANY_META.items()
+        }
+        for future in as_completed(futures):
+            ticker, data = future.result()
+            if data is not None:
+                out[ticker] = data
     return out
 
 

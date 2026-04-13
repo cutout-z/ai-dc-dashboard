@@ -20,9 +20,6 @@ CAPEX_COMPANIES = {
     "ORCL": "Oracle",
     "CRWV": "CoreWeave",
     "AAPL": "Apple",
-    "AMD": "AMD",
-    "TSM": "TSMC",
-    "NVDA": "NVIDIA",
 }
 
 # Semi bellwethers — revenue demand signal

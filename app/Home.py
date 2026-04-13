@@ -20,7 +20,7 @@ landing = st.Page("views/landing.py", title="Home", default=True)
 
 # Fundamentals Tracking
 model_performance = st.Page(
-    "views/fundamentals/model_performance.py", title="LLM Analysis"
+    "views/fundamentals/model_performance.py", title="LLM Performance Analysis"
 )
 equity_analysis = st.Page(
     "views/fundamentals/equity_analysis.py", title="Equity Analysis (key players)"
@@ -65,8 +65,7 @@ pg = st.navigation(
             other_signals,
         ],
         "Supply Chain": [value_chain, dc_inputs, prospecting],
-        "News": [news],
-        "System": [source_health],
+        "Other": [news, source_health],
     }
 )
 
