@@ -142,10 +142,16 @@ def _load_consensus_file() -> dict:
 def _fetch_consensus(t: yf.Ticker, scale: float, ticker: str) -> dict:
     """Fetch broker consensus estimates (revenue, EPS, price targets).
 
-    Tries yfinance live first; falls back to pre-computed JSON file
-    (for Streamlit Cloud where yfinance estimate endpoints are blocked).
+    Prefers pre-computed JSON file (reliable, works on Streamlit Cloud).
+    Falls back to yfinance live if JSON is missing or has no data for ticker.
+    Refresh JSON via: python etl/refresh_consensus.py
     """
-    # Try yfinance first
+    # Prefer pre-computed JSON (fast, reliable on Cloud)
+    cached = _load_consensus_file()
+    if ticker in cached and cached[ticker]:
+        return cached[ticker]
+
+    # Fallback: yfinance live (works locally, unreliable on Streamlit Cloud)
     try:
         rev_est = t.revenue_estimate
         eps_est = t.earnings_estimate
@@ -194,9 +200,7 @@ def _fetch_consensus(t: yf.Ticker, scale: float, ticker: str) -> dict:
     except Exception as e:
         logger.debug("yfinance consensus %s: %s", ticker, e)
 
-    # Fallback: pre-computed JSON file (refreshed via etl/refresh_consensus.py)
-    cached = _load_consensus_file()
-    return cached.get(ticker, {})
+    return {}
 
 
 # ════════════════════════════════════════════════════════════════════════════
