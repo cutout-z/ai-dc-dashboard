@@ -20,3 +20,18 @@ date,company,metric,value,unit,source,notes
 2025-03-01,Anthropic,valuation,61.5,USD_B,Bloomberg,$3.5B Amazon investment
 2025-03-01,xAI,valuation,75.0,USD_B,CNBC,$10B round at $75B
 2025-03-01,Anthropic,arr,2.4,USD_B,The Information,Run rate accelerating
+2025-05-01,Anthropic,arr,3.0,USD_B,CNBC,ARR $3B — accelerating business demand
+2025-07-01,OpenAI,arr,12.0,USD_B,CNBC/The Information,ARR $12B — first $1B revenue month
+2025-07-01,Anthropic,arr,5.0,USD_B,Bloomberg/Anthropic,ARR $5B — confirmed by Anthropic Series F
+2025-07-01,Anthropic,valuation,183.0,USD_B,Anthropic,Series F at $183B post-money
+2025-07-01,xAI,valuation,200.0,USD_B,Bloomberg,$10B raise at $200B valuation
+2025-08-01,OpenAI,arr,13.0,USD_B,NYT,ARR $13B reported
+2025-10-01,Anthropic,arr,7.0,USD_B,Anthropic/Reuters,ARR approaching $7B — confirmed by Amodei
+2025-12-01,OpenAI,arr,21.4,USD_B,The Information,ARR $21.4B at year end
+2025-12-01,Anthropic,arr,9.0,USD_B,Bloomberg,ARR $9B at year end
+2026-01-01,xAI,valuation,230.0,USD_B,Bloomberg,$20B Series E at $230B
+2026-02-01,Anthropic,valuation,380.0,USD_B,CNBC,$30B round at $380B post-money
+2026-02-01,Anthropic,arr,14.0,USD_B,Anthropic,ARR $14B — disclosed at funding round
+2026-02-01,OpenAI,arr,25.0,USD_B,The Information,ARR $25B
+2026-03-01,Anthropic,arr,19.0,USD_B,Bloomberg,ARR $19B — surging growth
+2026-04-01,Anthropic,arr,30.0,USD_B,Anthropic,ARR $30B — surpassed OpenAI
