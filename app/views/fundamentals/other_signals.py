@@ -378,17 +378,17 @@ st.header("Risk Summary")
 st.markdown("""
 | Indicator | Signal | Direction | Notes |
 |-----------|--------|-----------|-------|
-| Hyperscaler CAPEX | Accelerating | Higher risk | Combined guidance >$300B for 2025, significant upward revisions |
-| Semi demand | Strong | Supports thesis | NVDA, TSMC revenue growth 30-45% YoY sustained |
-| AI demand / tokens | Surging | Supports thesis | OpenAI ARR 5x in 18 months, 400M+ weekly users |
-| Frontier lab valuations | Extreme | Higher risk | OpenAI $300B at ~19x revenue, Anthropic $62B at ~26x |
-| GPU lease prices | Declining | Mixed | H100 spot down >50%, but signals oversupply of prior gen |
-| LLM capability | Advancing | Lower risk | Continued Elo gains justify CAPEX |
+| Hyperscaler CAPEX | Accelerating | Higher risk | Combined guidance >$350B for 2026, continued upward revisions |
+| Semi demand | Strong | Supports thesis | TSMC revenue growth 35-45% YoY sustained through Q1 2026 |
+| AI demand / tokens | Surging | Supports thesis | OpenAI ARR $25B, 900M WAU; Anthropic ARR $30B, surpassed OpenAI |
+| Frontier lab valuations | Extreme | Higher risk | Anthropic $380B at ~13x ARR, xAI $230B, OpenAI TBD |
+| GPU lease prices | Declining | Mixed | H100 spot <$1/hr, down >75% from peak — Blackwell driving migration |
+| LLM capability | Advancing | Lower risk | GPQA >94%, HLE >53%, SWE-Bench >80% — continued rapid gains |
 | Model cost deflation | Rapid | Mixed | Enables adoption, compresses enabler margins |
-| Open source gap | Narrowing | Higher risk | Reduces moat for paid frontier models |
+| Open source gap | Narrowing | Higher risk | Qwen3.5, Kimi K2.5 competitive with frontier on benchmarks |
 | DC power demand | Surging | Higher risk | All forecasters projecting near-doubling by 2030 |
 
-*Updated via reference CSVs in data/reference/. Run /ai-research for automated updates.*
+*Updated April 2026 via reference CSVs in data/reference/. Run /ai-research for automated updates.*
 """)
 
 conn.close()

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from pathlib import Path
 
@@ -23,6 +24,69 @@ st.caption("Frontier AI model benchmarks, context windows, API pricing, compute 
 
 DATA_DIR = Path(__file__).parent.parent.parent.parent / "data" / "reference"
 DB_PATH = st.session_state["db_path"]
+
+# ═════════════════════════════════════════════════════════════════════════
+# LLM LEADERBOARD — top 30 models from llm-stats.com
+# ═════════════════════════════════════════════════════════════════════════
+
+@st.cache_data(ttl=86400)
+def _load_leaderboard() -> pd.DataFrame:
+    path = DATA_DIR / "llm_leaderboard.json"
+    if not path.exists():
+        return pd.DataFrame()
+    with open(path) as f:
+        data = json.load(f)
+    return pd.DataFrame(data["models"])
+
+
+_lb_df = _load_leaderboard()
+
+if not _lb_df.empty:
+    st.header("LLM Leaderboard")
+    st.caption("Top 30 frontier models ranked by composite score — sourced from [llm-stats.com](https://llm-stats.com/leaderboards/llm-leaderboard).")
+
+    # Build display table
+    _display = _lb_df.rename(columns={
+        "rank": "#",
+        "name": "Model",
+        "org": "Org",
+        "gpqa": "GPQA",
+        "aime_2025": "AIME '25",
+        "swe_bench": "SWE-Bench",
+        "hle": "HLE",
+        "input_price": "In $/M",
+        "output_price": "Out $/M",
+        "context_k": "Ctx (K)",
+        "speed_cps": "Speed",
+    })
+    _display = _display[["#", "Model", "Org", "GPQA", "AIME '25", "SWE-Bench", "HLE",
+                          "In $/M", "Out $/M", "Ctx (K)", "Speed"]]
+
+    st.dataframe(
+        _display,
+        use_container_width=True,
+        hide_index=True,
+        height=500,
+        column_config={
+            "#": st.column_config.NumberColumn(width="small"),
+            "Model": st.column_config.TextColumn(width="medium"),
+            "Org": st.column_config.TextColumn(width="small"),
+            "GPQA": st.column_config.NumberColumn(format="%.1f%%"),
+            "AIME '25": st.column_config.NumberColumn(format="%.1f%%"),
+            "SWE-Bench": st.column_config.NumberColumn(format="%.1f%%"),
+            "HLE": st.column_config.NumberColumn(format="%.1f%%"),
+            "In $/M": st.column_config.NumberColumn(format="$%.2f"),
+            "Out $/M": st.column_config.NumberColumn(format="$%.2f"),
+            "Ctx (K)": st.column_config.NumberColumn(format="%d"),
+            "Speed": st.column_config.NumberColumn(format="%d c/s"),
+        },
+    )
+    with open(DATA_DIR / "llm_leaderboard.json") as _f:
+        _lb_meta = json.load(_f)["_meta"]
+    st.caption(f"Last updated: {_lb_meta['updated']}. "
+               "Scores as percentages. Speed in characters/second. Awaiting LLM Stats API for live updates.")
+    st.markdown("")
+
 
 # ─── Provider colours (consistent across all charts) ───
 PROVIDER_COLOURS = {
@@ -59,6 +123,14 @@ CONTEXT_WINDOWS = [
     {"model": "Gemini 2.5 Pro",   "date": "2025-03", "tokens": 1000000,  "provider": "Google"},
     {"model": "Llama 4 Maverick", "date": "2025-04", "tokens": 10000000, "provider": "Meta"},
     {"model": "Claude Opus 4",    "date": "2025-05", "tokens": 1000000,  "provider": "Anthropic"},
+    {"model": "GPT-5",            "date": "2025-08", "tokens": 400000,   "provider": "OpenAI"},
+    {"model": "Claude Sonnet 4.5","date": "2025-09", "tokens": 200000,   "provider": "Anthropic"},
+    {"model": "Gemini 3 Pro",     "date": "2025-11", "tokens": 1000000,  "provider": "Google"},
+    {"model": "GPT-5.2",          "date": "2025-12", "tokens": 400000,   "provider": "OpenAI"},
+    {"model": "Gemini 3 Flash",   "date": "2025-12", "tokens": 1000000,  "provider": "Google"},
+    {"model": "Claude Opus 4.6",  "date": "2026-02", "tokens": 1000000,  "provider": "Anthropic"},
+    {"model": "Gemini 3.1 Pro",   "date": "2026-02", "tokens": 1048576,  "provider": "Google"},
+    {"model": "GPT-5.4",          "date": "2026-03", "tokens": 1000000,  "provider": "OpenAI"},
 ]
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -117,6 +189,11 @@ BENCHMARKS = {
             {"model": "Mistral Medium 3",    "date": "2025-05", "score": 77.2, "provider": "Mistral"},
             {"model": "Grok 4",              "date": "2025-07", "score": 86.6, "provider": "xAI"},
             {"model": "Qwen3-235B Thinking", "date": "2025-07", "score": 84.4, "provider": "Alibaba"},
+            {"model": "Gemini 3 Pro",        "date": "2025-11", "score": 81.0, "provider": "Google"},
+            {"model": "GPT-5.2",             "date": "2025-12", "score": 79.5, "provider": "OpenAI"},
+            {"model": "Gemini 3 Flash",      "date": "2025-12", "score": 81.2, "provider": "Google"},
+            {"model": "Gemini 3.1 Pro",      "date": "2026-02", "score": 80.5, "provider": "Google"},
+            {"model": "GPT-5.4",             "date": "2026-03", "score": 81.2, "provider": "OpenAI"},
         ],
     },
     "GPQA Diamond": {
@@ -148,10 +225,19 @@ BENCHMARKS = {
             {"model": "DeepSeek R1-0528",    "date": "2025-05", "score": 81.0, "provider": "DeepSeek"},
             {"model": "Grok 4",              "date": "2025-07", "score": 88.0, "provider": "xAI"},
             {"model": "Qwen3-235B Thinking", "date": "2025-07", "score": 81.1, "provider": "Alibaba"},
+            {"model": "Claude Sonnet 4.5",   "date": "2025-09", "score": 83.4, "provider": "Anthropic"},
+            {"model": "Claude Opus 4.1",     "date": "2025-10", "score": 80.9, "provider": "Anthropic"},
+            {"model": "Gemini 3 Pro",        "date": "2025-11", "score": 91.9, "provider": "Google"},
+            {"model": "GPT-5.2",             "date": "2025-12", "score": 92.4, "provider": "OpenAI"},
+            {"model": "Gemini 3 Flash",      "date": "2025-12", "score": 90.4, "provider": "Google"},
+            {"model": "Claude Opus 4.6",     "date": "2026-02", "score": 91.3, "provider": "Anthropic"},
+            {"model": "Claude Sonnet 4.6",   "date": "2026-02", "score": 89.9, "provider": "Anthropic"},
+            {"model": "Gemini 3.1 Pro",      "date": "2026-02", "score": 94.3, "provider": "Google"},
+            {"model": "GPT-5.4",             "date": "2026-03", "score": 92.8, "provider": "OpenAI"},
         ],
     },
     "Humanity's Last Exam": {
-        "description": "Extremely hard questions from domain experts — ceiling test for frontier models. Current SOTA ~24%.",
+        "description": "Extremely hard questions from domain experts — ceiling test for frontier models. Current SOTA ~53%.",
         "why": "Designed to be the 'last' benchmark humans can beat frontier models on. Scores near zero for all pre-2025 models, starting to climb now — watched closely as a capability ceiling indicator.",
         "source": "Scale AI & Center for AI Safety (agi.safe.ai); scores from HLE leaderboard.",
         "max_score": 100,
@@ -168,6 +254,13 @@ BENCHMARKS = {
             {"model": "DeepSeek R1-0528",    "date": "2025-05", "score": 17.7, "provider": "DeepSeek"},
             {"model": "Grok 4",              "date": "2025-07", "score": 24.0, "provider": "xAI"},
             {"model": "Qwen3-235B Thinking", "date": "2025-07", "score": 18.2, "provider": "Alibaba"},
+            {"model": "Gemini 3 Pro",        "date": "2025-11", "score": 45.8, "provider": "Google"},
+            {"model": "GPT-5.2",             "date": "2025-12", "score": 34.5, "provider": "OpenAI"},
+            {"model": "Gemini 3 Flash",      "date": "2025-12", "score": 43.5, "provider": "Google"},
+            {"model": "Claude Opus 4.6",     "date": "2026-02", "score": 53.1, "provider": "Anthropic"},
+            {"model": "Claude Sonnet 4.6",   "date": "2026-02", "score": 49.0, "provider": "Anthropic"},
+            {"model": "Gemini 3.1 Pro",      "date": "2026-02", "score": 51.4, "provider": "Google"},
+            {"model": "GPT-5.4",             "date": "2026-03", "score": 39.8, "provider": "OpenAI"},
         ],
     },
     "SWE-Bench Verified": {
@@ -191,6 +284,13 @@ BENCHMARKS = {
             {"model": "Claude 4 Opus",          "date": "2025-05", "score": 72.5, "provider": "Anthropic"},
             {"model": "DeepSeek R1-0528",       "date": "2025-05", "score": 57.6, "provider": "DeepSeek"},
             {"model": "Grok 4",                 "date": "2025-07", "score": 72.0, "provider": "xAI"},
+            {"model": "Claude Opus 4.1",        "date": "2025-10", "score": 74.5, "provider": "Anthropic"},
+            {"model": "Gemini 3 Pro",            "date": "2025-11", "score": 76.2, "provider": "Google"},
+            {"model": "GPT-5.2",                 "date": "2025-12", "score": 80.0, "provider": "OpenAI"},
+            {"model": "Gemini 3 Flash",          "date": "2025-12", "score": 78.0, "provider": "Google"},
+            {"model": "Claude Opus 4.6",         "date": "2026-02", "score": 80.8, "provider": "Anthropic"},
+            {"model": "Claude Sonnet 4.6",       "date": "2026-02", "score": 79.6, "provider": "Anthropic"},
+            {"model": "Gemini 3.1 Pro",          "date": "2026-02", "score": 80.6, "provider": "Google"},
         ],
     },
 }
@@ -213,6 +313,10 @@ CAPABILITY_MILESTONES = [
     {"date": "2025-02", "event": "Claude Code: autonomous coding",      "complexity": 8.5},
     {"date": "2025-05", "event": "Claude 4: extended thinking, agents", "complexity": 9},
     {"date": "2025-07", "event": "Grok 4: frontier reasoning",          "complexity": 9.3},
+    {"date": "2025-08", "event": "GPT-5: multi-step tool use",          "complexity": 9.5},
+    {"date": "2025-11", "event": "Gemini 3: multi-modal reasoning",     "complexity": 9.6},
+    {"date": "2026-02", "event": "Claude 4.6: 1M ctx, 91% GPQA",       "complexity": 9.8},
+    {"date": "2026-02", "event": "Gemini 3.1: 94% GPQA SOTA",          "complexity": 9.9},
 ]
 
 
@@ -289,6 +393,11 @@ st.header("Capability Progression")
 
 # ─── Task Complexity Over Time ───
 st.subheader("Task Complexity Over Time")
+_explainer(
+    what="Qualitative capability progression of frontier AI systems, from few-shot learning (GPT-3, 2020) to autonomous reasoning agents (Claude 4, Grok 4). Each point marks a distinct capability milestone.",
+    why="Benchmark scores plateau and reset; capability steps do not. This chart answers 'what can models *do* now that they couldn't 12 months ago?' — the question investors actually care about.",
+    source="Hand-curated from provider release announcements. Complexity levels are qualitative, not a measured metric.",
+)
 
 fig_complexity = go.Figure()
 fig_complexity.add_trace(go.Scatter(
@@ -306,14 +415,14 @@ fig_complexity.update_layout(
     **CHART_LAYOUT,
 )
 st.plotly_chart(fig_complexity, use_container_width=True)
-_explainer(
-    what="Qualitative capability progression of frontier AI systems, from few-shot learning (GPT-3, 2020) to autonomous reasoning agents (Claude 4, Grok 4). Each point marks a distinct capability milestone.",
-    why="Benchmark scores plateau and reset; capability steps do not. This chart answers 'what can models *do* now that they couldn't 12 months ago?' — the question investors actually care about.",
-    source="Hand-curated from provider release announcements. Complexity levels are qualitative, not a measured metric.",
-)
 
 # ─── Context Window Expansion ───
 st.subheader("Context Window Expansion")
+_explainer(
+    what="Maximum prompt size each frontier model can process in a single call, plotted on a log scale. From 4K tokens (GPT-3) to 10M tokens (Llama 4 Maverick) — a ~2500x expansion in five years.",
+    why="Context window is a hard constraint on what applications are possible. Long-context unlocks RAG-free codebases, whole-book summarisation, and multi-hour agent loops. The 'memory wall' has been the hardest architectural constraint to break.",
+    source="Provider announcements and model cards. Context sizes are quoted maximums — effective context (where recall stays high) is often shorter.",
+)
 
 fig_ctx = go.Figure()
 for trace in _provider_traces(
@@ -329,11 +438,6 @@ fig_ctx.update_layout(
     **CHART_LAYOUT,
 )
 st.plotly_chart(fig_ctx, use_container_width=True)
-_explainer(
-    what="Maximum prompt size each frontier model can process in a single call, plotted on a log scale. From 4K tokens (GPT-3) to 10M tokens (Llama 4 Maverick) — a ~2500x expansion in five years.",
-    why="Context window is a hard constraint on what applications are possible. Long-context unlocks RAG-free codebases, whole-book summarisation, and multi-hour agent loops. The 'memory wall' has been the hardest architectural constraint to break.",
-    source="Provider announcements and model cards. Context sizes are quoted maximums — effective context (where recall stays high) is often shorter.",
-)
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -345,6 +449,11 @@ st.caption("Five benchmarks spanning general knowledge (MMLU, MMLU-Pro), reasoni
 for bench_name, bench_data in BENCHMARKS.items():
     st.subheader(bench_name)
     st.caption(bench_data["description"])
+    _explainer(
+        what=bench_data["description"],
+        why=bench_data["why"],
+        source=bench_data["source"],
+    )
 
     # Filter scores to selected providers
     visible_scores = [s for s in bench_data["scores"] if s["provider"] in sel_providers]
@@ -365,11 +474,6 @@ for bench_name, bench_data in BENCHMARKS.items():
         **CHART_LAYOUT,
     )
     st.plotly_chart(fig_bench, use_container_width=True)
-    _explainer(
-        what=bench_data["description"],
-        why=bench_data["why"],
-        source=bench_data["source"],
-    )
     st.markdown("")  # spacer
 
 
@@ -396,6 +500,11 @@ if token_df.empty:
     st.warning("Token price history CSV missing. Expected at data/reference/token_prices_history.csv")
 else:
     st.subheader("Blended API Cost Over Time")
+    _explainer(
+        what="API list price per million tokens for flagship frontier models at release, blended as (3×input + output)/4 to approximate a typical chat workload. Log scale.",
+        why="Costs have fallen ~1000× since GPT-3 (2020). Epoch AI estimates 'price to match GPT-4 quality' has declined ~40× per year. This is the single most important variable in AI unit economics — it determines which applications are deployable and at what margin.",
+        source="List prices from provider announcements & release blog posts. Open-weight models (Llama, Qwen) priced via major hosted providers (Together AI, DashScope). Snapshot at release — later price cuts not shown.",
+    )
 
     fig_price = go.Figure()
     for provider in PROVIDER_COLOURS:
@@ -428,11 +537,6 @@ else:
         **CHART_LAYOUT,
     )
     st.plotly_chart(fig_price, use_container_width=True)
-    _explainer(
-        what="API list price per million tokens for flagship frontier models at release, blended as (3×input + output)/4 to approximate a typical chat workload. Log scale.",
-        why="Costs have fallen ~1000× since GPT-3 (2020). Epoch AI estimates 'price to match GPT-4 quality' has declined ~40× per year. This is the single most important variable in AI unit economics — it determines which applications are deployable and at what margin.",
-        source="List prices from provider announcements & release blog posts. Open-weight models (Llama, Qwen) priced via major hosted providers (Together AI, DashScope). Snapshot at release — later price cuts not shown.",
-    )
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -450,6 +554,11 @@ if gpu_df.empty:
 else:
     # ─── 4a. NVIDIA GPU Performance Over Time ───
     st.subheader("NVIDIA Data-Centre GPU Performance")
+    _explainer(
+        what="Peak dense Tensor-FP16/BF16 throughput for each NVIDIA data-centre GPU SKU, plotted against release date. Log scale. Coloured by architecture family (Volta → Ampere → Hopper → Blackwell). Each dot is one SKU — multiple dots per generation reflect PCIe/SXM/memory variants.",
+        why="Training FLOPS per chip has grown ~20× in 8 years (125 TFLOPS V100 → 2500 TFLOPS GB300). Combined with cluster scaling, this is what enables each new frontier-model generation. The 'memory wall' narrative lives on the memory bandwidth column — inspect via hover.",
+        source="Epoch AI — *Machine Learning Hardware* dataset (epoch.ai/data/machine-learning-hardware), CC-BY licence. Cached locally at data/external/ml_hardware.csv.",
+    )
 
     fig_gpu = go.Figure()
     for arch in ARCH_ORDER:
@@ -485,14 +594,14 @@ else:
         **CHART_LAYOUT,
     )
     st.plotly_chart(fig_gpu, use_container_width=True)
-    _explainer(
-        what="Peak dense Tensor-FP16/BF16 throughput for each NVIDIA data-centre GPU SKU, plotted against release date. Log scale. Coloured by architecture family (Volta → Ampere → Hopper → Blackwell). Each dot is one SKU — multiple dots per generation reflect PCIe/SXM/memory variants.",
-        why="Training FLOPS per chip has grown ~20× in 8 years (125 TFLOPS V100 → 2500 TFLOPS GB300). Combined with cluster scaling, this is what enables each new frontier-model generation. The 'memory wall' narrative lives on the memory bandwidth column — inspect via hover.",
-        source="Epoch AI — *Machine Learning Hardware* dataset (epoch.ai/data/machine-learning-hardware), CC-BY licence. Cached locally at data/external/ml_hardware.csv.",
-    )
 
     # ─── 4b. Perf per Watt (flagship line) ───
     st.subheader("Performance per Watt — Flagship Line")
+    _explainer(
+        what="Tensor-FP16 TFLOPS divided by TDP (W) for the flagship SKU of each NVIDIA data-centre generation. One dot per architecture: V100 → A100 → H100 → Blackwell.",
+        why="Power (not silicon) is the binding constraint on hyperscale training clusters. Data-centre deals are negotiated in MW, not $. Perf-per-watt is the 'Moore's law for AI' metric — it determines whether the next cluster can be built inside a given power envelope.",
+        source="Derived from Epoch AI ML Hardware dataset. Flagship = highest-TFLOPS SKU per architecture family.",
+    )
 
     flagships = flagship_per_generation(gpu_df)
     flagships = flagships[flagships["tdp_w"].notna()]
@@ -516,14 +625,14 @@ else:
         **CHART_LAYOUT,
     )
     st.plotly_chart(fig_ppw, use_container_width=True)
-    _explainer(
-        what="Tensor-FP16 TFLOPS divided by TDP (W) for the flagship SKU of each NVIDIA data-centre generation. One dot per architecture: V100 → A100 → H100 → Blackwell.",
-        why="Power (not silicon) is the binding constraint on hyperscale training clusters. Data-centre deals are negotiated in MW, not $. Perf-per-watt is the 'Moore's law for AI' metric — it determines whether the next cluster can be built inside a given power envelope.",
-        source="Derived from Epoch AI ML Hardware dataset. Flagship = highest-TFLOPS SKU per architecture family.",
-    )
 
     # ─── 4c. H100 Rental Prices ───
     st.subheader("H100 Rental Prices")
+    _explainer(
+        what="Monthly median H100 rental price in $/GPU-hour, broken out by provider tier. Hyperscaler = AWS/Azure/GCP list prices. Neocloud = CoreWeave, Lambda, Crusoe, etc. Marketplace = GPU marketplaces monetising underutilised reserved capacity (Vast.ai, SF Compute, etc.).",
+        why="H100 lease rates are the cleanest public proxy for GPU depreciation and chip obsolescence. The gap between tiers (hyperscaler ~3× marketplace) reveals how much of cloud AI gross margin is 'convenience tax' vs. compute cost. Sharp 2025 declines are the story: Blackwell supply came online, H100 residual value fell ~30% in 90 days.",
+        source="Silicon Data — *H100 Rental Index* public blog (silicondata.com/blog/h100-rental-price-over-time). Manually transcribed, refreshed quarterly. Paid API with daily data available via Bloomberg (ticker SDH100RT).",
+    )
 
     @st.cache_data(ttl=86400)
     def load_h100_prices() -> pd.DataFrame:
@@ -568,11 +677,6 @@ else:
             **CHART_LAYOUT,
         )
         st.plotly_chart(fig_h100, use_container_width=True)
-        _explainer(
-            what="Monthly median H100 rental price in $/GPU-hour, broken out by provider tier. Hyperscaler = AWS/Azure/GCP list prices. Neocloud = CoreWeave, Lambda, Crusoe, etc. Marketplace = GPU marketplaces monetising underutilised reserved capacity (Vast.ai, SF Compute, etc.).",
-            why="H100 lease rates are the cleanest public proxy for GPU depreciation and chip obsolescence. The gap between tiers (hyperscaler ~3× marketplace) reveals how much of cloud AI gross margin is 'convenience tax' vs. compute cost. Sharp 2025 declines are the story: Blackwell supply came online, H100 residual value fell ~30% in 90 days.",
-            source="Silicon Data — *H100 Rental Index* public blog (silicondata.com/blog/h100-rental-price-over-time). Manually transcribed, refreshed quarterly. Paid API with daily data available via Bloomberg (ticker SDH100RT).",
-        )
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -590,6 +694,11 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("Arena Elo Ratings")
+    _explainer(
+        what="Chatbot Arena (lmsys.org) Elo scores — a head-to-head blind preference tournament where humans choose between model responses. Elo is computed from win rates across millions of votes.",
+        why="Human preference Elo is the most neutral capability signal available. It has no benchmark contamination problem and aligns with what users actually prefer. It's the one metric all providers accept as credible.",
+        source="LMSYS Chatbot Arena leaderboard (chat.lmsys.org). Updated via /ai-research skill.",
+    )
     if not df_elo.empty:
         _vis = [p for p in df_elo["provider"].unique() if p in sel_providers] if sel_providers else df_elo["provider"].unique().tolist()
         df_elo_vis = df_elo[df_elo["provider"].isin(_vis)] if _vis else df_elo
@@ -601,14 +710,14 @@ with col1:
         )
         fig_elo.update_layout(height=450, yaxis=dict(autorange="reversed"), **CHART_LAYOUT)
         st.plotly_chart(fig_elo, use_container_width=True)
-    _explainer(
-        what="Chatbot Arena (lmsys.org) Elo scores — a head-to-head blind preference tournament where humans choose between model responses. Elo is computed from win rates across millions of votes.",
-        why="Human preference Elo is the most neutral capability signal available. It has no benchmark contamination problem and aligns with what users actually prefer. It's the one metric all providers accept as credible.",
-        source="LMSYS Chatbot Arena leaderboard (chat.lmsys.org). Updated via /ai-research skill.",
-    )
 
 with col2:
     st.subheader("Intelligence vs Cost Frontier")
+    _explainer(
+        what="Each model plotted at its list input price (x-axis) vs composite intelligence index (y-axis). The Pareto frontier moves left and up over time — models that were SOTA 12 months ago are now dominated on both axes.",
+        why="As intelligence commoditises, can any provider maintain pricing power? This chart shows how fast the frontier is shifting — and whether there is still a capability moat at the top end that justifies premium pricing.",
+        source="Artificial Analysis intelligence index + provider list pricing. Updated via /ai-research skill.",
+    )
     if not df_specs.empty:
         df_plot = df_specs.dropna(subset=["intelligence_score", "input_price_per_m_tokens"])
         if not df_plot.empty:
@@ -624,16 +733,16 @@ with col2:
             fig_frontier.update_traces(textposition="top center", textfont_size=9)
             fig_frontier.update_layout(height=450, **CHART_LAYOUT)
             st.plotly_chart(fig_frontier, use_container_width=True)
-    _explainer(
-        what="Each model plotted at its list input price (x-axis) vs composite intelligence index (y-axis). The Pareto frontier moves left and up over time — models that were SOTA 12 months ago are now dominated on both axes.",
-        why="As intelligence commoditises, can any provider maintain pricing power? This chart shows how fast the frontier is shifting — and whether there is still a capability moat at the top end that justifies premium pricing.",
-        source="Artificial Analysis intelligence index + provider list pricing. Updated via /ai-research skill.",
-    )
 
 if not df_specs.empty:
     df_ctx = df_specs.dropna(subset=["context_window"]).sort_values("context_window", ascending=False)
     if not df_ctx.empty:
         st.subheader("Context Window Leaders")
+        _explainer(
+            what="Current snapshot: the 10 models with the largest maximum context windows, in thousands of tokens. Companion to the Context Window Expansion time-series above.",
+            why="Context window is a hard application constraint. Models that can ingest entire codebases or documents without chunking enable qualitatively different workflows. The jump from 4K → 1M+ tokens represents a category shift, not just a spec improvement.",
+            source="Model cards and provider announcements. Updated via /ai-research skill.",
+        )
         df_ctx = df_ctx.copy()
         df_ctx["ctx_k"] = df_ctx["context_window"] / 1000
         _vis3 = [p for p in df_ctx["provider"].unique() if p in sel_providers] if sel_providers else df_ctx["provider"].unique().tolist()
@@ -646,11 +755,6 @@ if not df_specs.empty:
         )
         fig_ctx.update_layout(height=350, yaxis=dict(autorange="reversed"), **CHART_LAYOUT)
         st.plotly_chart(fig_ctx, use_container_width=True)
-        _explainer(
-            what="Current snapshot: the 10 models with the largest maximum context windows, in thousands of tokens. Companion to the Context Window Expansion time-series above.",
-            why="Context window is a hard application constraint. Models that can ingest entire codebases or documents without chunking enable qualitatively different workflows. The jump from 4K → 1M+ tokens represents a category shift, not just a spec improvement.",
-            source="Model cards and provider announcements. Updated via /ai-research skill.",
-        )
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -658,6 +762,6 @@ if not df_specs.empty:
 # ═════════════════════════════════════════════════════════════════════════
 st.markdown("---")
 st.caption(
-    "Data sources: Epoch AI (ML Hardware dataset, CC-BY) · Silicon Data (H100 Rental Index blog) · "
+    "Data sources: LLM Stats (llm-stats.com) · Epoch AI (ML Hardware dataset, CC-BY) · Silicon Data (H100 Rental Index blog) · "
     "provider model cards & release announcements. Benchmark scores are vendor-reported unless otherwise noted."
 )

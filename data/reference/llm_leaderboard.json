@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "source": "llm-stats.com/leaderboards/llm-leaderboard",
+    "updated": "2026-04-13",
+    "note": "Manual snapshot. Replace with API call when LLM Stats API goes live."
+  },
+  "models": [
+    {"rank": 1, "name": "Claude Opus 4.6", "org": "Anthropic", "gpqa": 91.3, "aime_2025": 99.8, "swe_bench": 80.8, "hle": 53.1, "input_price": 5.0, "output_price": 25.0, "context_k": 1000, "speed_cps": 67},
+    {"rank": 2, "name": "Gemini 3.1 Pro", "org": "Google", "gpqa": 94.3, "aime_2025": null, "swe_bench": 80.6, "hle": 51.4, "input_price": 2.5, "output_price": 15.0, "context_k": 1049, "speed_cps": 129},
+    {"rank": 3, "name": "GPT-5.4", "org": "OpenAI", "gpqa": 92.8, "aime_2025": null, "swe_bench": null, "hle": 39.8, "input_price": 2.5, "output_price": 15.0, "context_k": 1000, "speed_cps": 123},
+    {"rank": 4, "name": "GLM-5", "org": "Zhipu AI", "gpqa": null, "aime_2025": null, "swe_bench": 77.8, "hle": null, "input_price": 1.0, "output_price": 3.2, "context_k": 200, "speed_cps": 34},
+    {"rank": 5, "name": "Claude Opus 4.5", "org": "Anthropic", "gpqa": 87.0, "aime_2025": null, "swe_bench": 80.9, "hle": null, "input_price": 5.0, "output_price": 25.0, "context_k": 200, "speed_cps": null},
+    {"rank": 6, "name": "Gemini 3 Pro", "org": "Google", "gpqa": 91.9, "aime_2025": 100.0, "swe_bench": 76.2, "hle": 45.8, "input_price": null, "output_price": null, "context_k": null, "speed_cps": 115},
+    {"rank": 7, "name": "Gemini 3 Flash", "org": "Google", "gpqa": 90.4, "aime_2025": 99.7, "swe_bench": 78.0, "hle": 43.5, "input_price": 0.5, "output_price": 3.0, "context_k": 1000, "speed_cps": 242},
+    {"rank": 8, "name": "GPT-5.2", "org": "OpenAI", "gpqa": 92.4, "aime_2025": 100.0, "swe_bench": 80.0, "hle": 34.5, "input_price": 1.75, "output_price": 14.0, "context_k": 400, "speed_cps": 62},
+    {"rank": 9, "name": "Kimi K2.5", "org": "Moonshot AI", "gpqa": 87.6, "aime_2025": 96.1, "swe_bench": 76.8, "hle": 50.2, "input_price": 0.6, "output_price": 2.5, "context_k": 262, "speed_cps": 22},
+    {"rank": 10, "name": "Claude Sonnet 4.6", "org": "Anthropic", "gpqa": 89.9, "aime_2025": null, "swe_bench": 79.6, "hle": 49.0, "input_price": 3.0, "output_price": 15.0, "context_k": 200, "speed_cps": 109},
+    {"rank": 11, "name": "GLM-5.1", "org": "Zhipu AI", "gpqa": 86.2, "aime_2025": null, "swe_bench": null, "hle": 52.3, "input_price": 1.4, "output_price": 4.4, "context_k": 200, "speed_cps": 12},
+    {"rank": 12, "name": "GPT-5 High", "org": "OpenAI", "gpqa": 87.3, "aime_2025": 94.6, "swe_bench": null, "hle": null, "input_price": 1.25, "output_price": 10.0, "context_k": 400, "speed_cps": 28},
+    {"rank": 13, "name": "Qwen3.5-397B-A17B", "org": "Alibaba", "gpqa": 88.4, "aime_2025": null, "swe_bench": 76.4, "hle": 28.7, "input_price": 0.6, "output_price": 3.6, "context_k": 262, "speed_cps": 46},
+    {"rank": 14, "name": "Qwen3.5-122B-A10B", "org": "Alibaba", "gpqa": 86.6, "aime_2025": null, "swe_bench": 72.0, "hle": 47.5, "input_price": 0.4, "output_price": 3.2, "context_k": 262, "speed_cps": 6},
+    {"rank": 15, "name": "GPT-5.2 Codex", "org": "OpenAI", "gpqa": null, "aime_2025": null, "swe_bench": null, "hle": null, "input_price": 1.75, "output_price": 14.0, "context_k": 400, "speed_cps": 112},
+    {"rank": 16, "name": "GLM-4.6", "org": "Zhipu AI", "gpqa": 81.0, "aime_2025": 93.9, "swe_bench": 68.0, "hle": 17.2, "input_price": 0.55, "output_price": 2.19, "context_k": 131, "speed_cps": null},
+    {"rank": 17, "name": "GPT-5.3 Codex", "org": "OpenAI", "gpqa": null, "aime_2025": null, "swe_bench": null, "hle": null, "input_price": 1.75, "output_price": 14.0, "context_k": 400, "speed_cps": null},
+    {"rank": 18, "name": "GPT-5.1 High", "org": "OpenAI", "gpqa": 88.1, "aime_2025": 99.6, "swe_bench": null, "hle": null, "input_price": 1.25, "output_price": 10.0, "context_k": 400, "speed_cps": 20},
+    {"rank": 19, "name": "Claude Sonnet 4.5", "org": "Anthropic", "gpqa": 83.4, "aime_2025": 87.0, "swe_bench": null, "hle": null, "input_price": 3.0, "output_price": 15.0, "context_k": 200, "speed_cps": 124},
+    {"rank": 20, "name": "GPT-5 Medium", "org": "OpenAI", "gpqa": 88.1, "aime_2025": 88.9, "swe_bench": null, "hle": null, "input_price": 1.25, "output_price": 10.0, "context_k": 400, "speed_cps": 76},
+    {"rank": 21, "name": "GPT-5.1", "org": "OpenAI", "gpqa": 88.1, "aime_2025": 94.0, "swe_bench": 76.3, "hle": null, "input_price": 1.25, "output_price": 10.0, "context_k": 400, "speed_cps": null},
+    {"rank": 22, "name": "Gemma 4 26B-A4B", "org": "Google", "gpqa": 82.3, "aime_2025": null, "swe_bench": null, "hle": 17.2, "input_price": 0.13, "output_price": 0.4, "context_k": 262, "speed_cps": 135},
+    {"rank": 23, "name": "Claude Opus 4.1", "org": "Anthropic", "gpqa": 80.9, "aime_2025": 78.0, "swe_bench": 74.5, "hle": null, "input_price": 15.0, "output_price": 75.0, "context_k": 200, "speed_cps": 40},
+    {"rank": 24, "name": "GLM-4.7", "org": "Zhipu AI", "gpqa": 85.7, "aime_2025": 95.7, "swe_bench": 73.8, "hle": 42.8, "input_price": 0.6, "output_price": 2.2, "context_k": 205, "speed_cps": null},
+    {"rank": 25, "name": "Kimi K2 0905", "org": "Moonshot AI", "gpqa": 75.8, "aime_2025": null, "swe_bench": null, "hle": null, "input_price": 0.6, "output_price": 2.5, "context_k": 262, "speed_cps": 55},
+    {"rank": 26, "name": "GPT-5.1 Thinking", "org": "OpenAI", "gpqa": 88.1, "aime_2025": 94.0, "swe_bench": 76.3, "hle": null, "input_price": 1.25, "output_price": 10.0, "context_k": 400, "speed_cps": null},
+    {"rank": 27, "name": "GPT-5 mini", "org": "OpenAI", "gpqa": 82.3, "aime_2025": 91.1, "swe_bench": null, "hle": 16.7, "input_price": 0.25, "output_price": 2.0, "context_k": 400, "speed_cps": 64},
+    {"rank": 28, "name": "Gemini 3.1 Flash-Lite", "org": "Google", "gpqa": 86.9, "aime_2025": null, "swe_bench": null, "hle": 16.0, "input_price": 0.25, "output_price": 1.5, "context_k": 1000, "speed_cps": 271},
+    {"rank": 29, "name": "Kimi K2-Thinking-0905", "org": "Moonshot AI", "gpqa": 84.5, "aime_2025": 100.0, "swe_bench": 71.3, "hle": 51.0, "input_price": null, "output_price": null, "context_k": null, "speed_cps": null},
+    {"rank": 30, "name": "MiniMax M2.5", "org": "MiniMax", "gpqa": null, "aime_2025": null, "swe_bench": 80.2, "hle": null, "input_price": 0.3, "output_price": 1.2, "context_k": 1000, "speed_cps": 218}
+  ]
+}

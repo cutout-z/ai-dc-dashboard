@@ -21,3 +21,21 @@ date,metric,provider,value,unit,source,notes
 2025-03-01,monthly_active_users,Google,500000000,users,Alphabet Q1 2025 earnings,Gemini 500M+ MAU reported
 2025-01-01,monthly_active_users,xAI,40000000,users,Estimates,Grok MAU estimate — tens of millions disclosed
 2025-03-01,monthly_active_users,xAI,60000000,users,Estimates,Grok MAU estimate post Grok 3 launch
+2025-06-01,weekly_active_users,OpenAI,500000000,users,OpenAI,500M+ WAU disclosed
+2025-06-01,annual_revenue_run_rate,OpenAI,10000000000,USD,CNBC,ARR $10B — CNBC confirmed
+2025-06-01,monthly_active_users,Google,400000000,users,Alphabet Q2 2025 earnings,Gemini 400M+ MAU
+2025-06-01,monthly_active_users,Anthropic,30000000,users,Estimates,Claude estimated MAU
+2025-07-01,weekly_active_users,OpenAI,700000000,users,The Information,700M WAU — first month of $1B revenue
+2025-07-01,monthly_active_users,xAI,50000000,users,Estimates,Grok MAU estimate mid-2025
+2025-08-01,annual_revenue_run_rate,OpenAI,13000000000,USD,NYT,ARR $13B reported
+2025-09-01,weekly_active_users,OpenAI,800000000,users,OpenAI,800M+ WAU reported
+2025-09-01,monthly_active_users,Google,550000000,users,Alphabet Q3 2025 earnings,Gemini 550M+ MAU
+2025-09-01,monthly_active_users,Anthropic,40000000,users,Estimates,Claude MAU estimate post Claude Code growth
+2025-12-01,weekly_active_users,OpenAI,800000000,users,OpenAI,800M+ WAU sustained
+2025-12-01,annual_revenue_run_rate,OpenAI,21400000000,USD,The Information,ARR $21.4B at year end
+2025-12-01,monthly_active_users,Google,650000000,users,Alphabet Q4 2025 earnings,Gemini 650M+ MAU
+2026-02-01,weekly_active_users,OpenAI,900000000,users,OpenAI blog,900M WAU milestone
+2026-02-01,annual_revenue_run_rate,OpenAI,25000000000,USD,The Information,ARR $25B
+2026-02-01,monthly_active_users,Google,750000000,users,TechCrunch,Gemini 750M MAU surpassed
+2026-02-01,monthly_active_users,Anthropic,70000000,users,Estimates,Claude MAU estimate — Claude Code driving growth
+2026-02-01,monthly_active_users,xAI,50000000,users,Third-party estimates,Grok estimated 50M MAU

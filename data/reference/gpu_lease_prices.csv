@@ -19,3 +19,15 @@ date,gpu_model,price_per_hour,currency,provider,commitment,notes
 2025-03-01,H200,3.49,USD,Lambda Labs,on-demand,H200 becoming available more broadly
 2025-03-01,B200,4.99,USD,CoreWeave,on-demand,Blackwell initial pricing — very limited supply
 2025-03-01,H100 80GB,0.99,USD,VAST.ai,spot,Secondary market floor — oversupply of older H100s
+2025-06-01,H100 80GB,1.89,USD,Lambda Labs,on-demand,Continued decline as Blackwell ramps
+2025-06-01,H100 80GB,0.89,USD,VAST.ai,spot,Secondary market continuing to drop
+2025-09-01,H100 80GB,1.79,USD,Lambda Labs,on-demand,Stabilizing at lower level
+2025-09-01,H100 80GB,0.79,USD,VAST.ai,spot,Oversupply persists — mass Blackwell migration
+2025-09-01,B200,4.49,USD,Lambda Labs,on-demand,Blackwell broader availability
+2025-12-01,H100 80GB,1.59,USD,Lambda Labs,on-demand,Further decline
+2025-12-01,H100 80GB,0.75,USD,VAST.ai,spot,Near all-time lows
+2025-12-01,B200,3.99,USD,Lambda Labs,on-demand,Blackwell prices stabilizing
+2025-12-01,H200,2.99,USD,Lambda Labs,on-demand,H200 declining alongside H100
+2026-03-01,H100 80GB,1.49,USD,Lambda Labs,on-demand,H100 fully commoditized
+2026-03-01,H100 80GB,0.75,USD,VAST.ai,spot,All-time low
+2026-03-01,B200,3.49,USD,Lambda Labs,on-demand,B200 prices declining as supply increases
