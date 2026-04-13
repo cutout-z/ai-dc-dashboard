@@ -287,7 +287,9 @@ def _fetch_one_company(ticker: str, meta: dict) -> tuple[str, dict | None]:
                 ni_0y, ni_1y = None, None
                 if eps_est is not None and not eps_est.empty:
                     try:
-                        shares = (t.info or {}).get("sharesOutstanding")
+                        shares = getattr(t.fast_info, "shares", None)
+                        if shares is None:
+                            shares = (t.info or {}).get("sharesOutstanding")
                         if shares:
                             def _eps_raw(period):
                                 try:

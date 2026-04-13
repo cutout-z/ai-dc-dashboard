@@ -21,13 +21,13 @@ TILE_ROW_HEIGHT = 35
 
 @st.cache_data(ttl=3600)
 def _fetch_market_caps(tickers: tuple[str, ...]) -> dict[str, float | None]:
-    """Fetch market caps for a batch of tickers via yfinance."""
+    """Fetch market caps for a batch of tickers via yfinance fast_info."""
     results: dict[str, float | None] = {}
 
     def _get(sym: str) -> tuple[str, float | None]:
         try:
-            info = yf.Ticker(sym).info or {}
-            return sym, info.get("marketCap")
+            fi = yf.Ticker(sym).fast_info
+            return sym, getattr(fi, "market_cap", None)
         except Exception as e:
             logger.debug("Market cap %s error: %s", sym, e)
             return sym, None

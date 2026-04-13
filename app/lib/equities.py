@@ -84,15 +84,73 @@ def fetch_earnings_calendar() -> list[dict]:
 def _fetch_one_fundamental(sym: str) -> tuple[str, dict]:
     try:
         t = yf.Ticker(sym)
-        info = t.info or {}
-        price = info.get("currentPrice") or info.get("regularMarketPrice")
+
+        # fast_info is more reliable on Streamlit Cloud than t.info
+        fi = t.fast_info
+        price = getattr(fi, "last_price", None)
+        market_cap = getattr(fi, "market_cap", None)
+        w52h = getattr(fi, "year_high", None)
+        w52l = getattr(fi, "year_low", None)
+
+        # Try t.info as fallback for fields fast_info doesn't have
+        info = {}
+        try:
+            info = t.info or {}
+        except Exception:
+            pass
+
         pe_t = info.get("trailingPE")
         pe_f = info.get("forwardPE")
         eps_t = info.get("trailingEps")
         eps_f = info.get("forwardEps")
-        w52h = info.get("fiftyTwoWeekHigh")
-        w52l = info.get("fiftyTwoWeekLow")
         target_1y = info.get("targetMeanPrice")
+
+        # Prefer fast_info values, fall back to info
+        if market_cap is None:
+            market_cap = info.get("marketCap")
+        if price is None:
+            price = info.get("currentPrice") or info.get("regularMarketPrice")
+        if w52h is None:
+            w52h = info.get("fiftyTwoWeekHigh")
+        if w52l is None:
+            w52l = info.get("fiftyTwoWeekLow")
+
+        # Compute PE from price + EPS in financial statements if info failed
+        if pe_t is None or eps_t is None:
+            try:
+                inc = t.income_stmt
+                bs = t.balance_sheet
+                if inc is not None and not inc.empty and bs is not None and not bs.empty:
+                    ni_row = None
+                    for label in ("Net Income", "Net Income Common Stockholders"):
+                        if label in inc.index:
+                            ni_row = label
+                            break
+                    shares_row = None
+                    for label in ("Ordinary Shares Number", "Share Issued"):
+                        if label in bs.index:
+                            shares_row = label
+                            break
+                    if ni_row and shares_row:
+                        ni = float(inc.loc[ni_row].iloc[0])
+                        shares = float(bs.loc[shares_row].iloc[0])
+                        if shares and shares > 0:
+                            computed_eps = ni / shares
+                            if eps_t is None:
+                                eps_t = round(computed_eps, 2)
+                            if pe_t is None and price and computed_eps and computed_eps != 0:
+                                pe_t = round(price / computed_eps, 2)
+            except Exception:
+                pass
+
+        # Try analyst_price_targets if target_1y is still None
+        if target_1y is None:
+            try:
+                ptgt = t.analyst_price_targets or {}
+                target_1y = ptgt.get("mean") or ptgt.get("median")
+            except Exception:
+                pass
+
         pct_from_high = None
         if price and w52h and w52h != 0:
             pct_from_high = round((price / w52h - 1) * 100, 2)
@@ -117,7 +175,7 @@ def _fetch_one_fundamental(sym: str) -> tuple[str, dict]:
             pass
 
         return sym, {
-            "market_cap": info.get("marketCap"),
+            "market_cap": market_cap,
             "pe_trailing": round(pe_t, 2) if pe_t else None,
             "pe_forward": round(pe_f, 2) if pe_f else None,
             "eps_trailing": round(eps_t, 2) if eps_t else None,
