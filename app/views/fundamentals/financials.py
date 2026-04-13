@@ -189,7 +189,7 @@ if ai_supp:
         height=35 * (len(df_supp) + 1) + 10,
     )
 else:
-    st.info("AI Supplement data not available — check Excel model path.")
+    st.info("AI Supplement data not available — check data/reference/ai_supplement.csv exists.")
 
 st.divider()
 

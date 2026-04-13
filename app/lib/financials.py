@@ -16,13 +16,11 @@ import openpyxl
 
 logger = logging.getLogger("ai_research")
 
-_CSV_PATH = Path(__file__).parent.parent.parent / "data" / "reference" / "ai_supplement.csv"
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
-_EXCEL_PATH = (
-    Path(__file__).parent.parent.parent.parent
-    / "AI Bubble Project"
-    / "Hyperscalers_3Statement_Model.xlsx"
-)
+_CSV_PATH = _REPO_ROOT / "data" / "reference" / "ai_supplement.csv"
+
+_EXCEL_PATH = _REPO_ROOT.parent / "AI Bubble Project" / "Hyperscalers_3Statement_Model.xlsx"
 
 # ── Company registry ─────────────────────────────────────────────────────────
 
@@ -61,16 +59,17 @@ def load_ai_supplement() -> list[dict]:
     Tries committed CSV first (works on Streamlit Cloud), then falls back
     to the local Excel file for development.
     """
+    logger.info("AI supplement CSV path: %s (exists=%s)", _CSV_PATH, _CSV_PATH.exists())
     if _CSV_PATH.exists():
         df = pd.read_csv(_CSV_PATH)
-        # Forward-fill Company column (merged cells in original Excel)
         df["Company"] = df["Company"].ffill()
-        # Rename 'Metric Description' → 'Metric' for display consistency
         if "Metric Description" in df.columns:
             df = df.rename(columns={"Metric Description": "Metric"})
+        logger.info("AI supplement loaded %d rows from CSV", len(df))
         return df.to_dict("records")
 
     if not _EXCEL_PATH.exists():
+        logger.info("AI supplement: neither CSV nor Excel found")
         return []
     wb = openpyxl.load_workbook(str(_EXCEL_PATH), data_only=True)
     ws = wb["AI_Supplement"]
@@ -126,7 +125,7 @@ def _yf_val(df: pd.DataFrame | None, *labels, n: int = 4, scale: float = 1.0) ->
     return [None] * len(yrs), yrs
 
 
-_CONSENSUS_PATH = Path(__file__).parent.parent.parent / "data" / "reference" / "consensus.json"
+_CONSENSUS_PATH = _REPO_ROOT / "data" / "reference" / "consensus.json"
 
 
 def _load_consensus_file() -> dict:
