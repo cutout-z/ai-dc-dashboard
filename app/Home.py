@@ -37,9 +37,23 @@ st.markdown(
         overflow: visible !important;
     }
     [data-testid="stSidebarNav"] [data-testid="stSidebarNavViewMoreButton"],
-    [data-testid="stSidebarNav"] [data-testid="stSidebarNavViewLessButton"],
-    [data-testid="stSidebarNav"] button[kind="header"] {
+    [data-testid="stSidebarNav"] [data-testid="stSidebarNavViewLessButton"] {
         display: none !important;
+    }
+    /* Make section headings non-collapsible (plain labels) */
+    [data-testid="stSidebarNav"] [data-testid="stSidebarNavSeparator"] details {
+        pointer-events: none;
+    }
+    [data-testid="stSidebarNav"] [data-testid="stSidebarNavSeparator"] details summary::marker,
+    [data-testid="stSidebarNav"] [data-testid="stSidebarNavSeparator"] details summary::-webkit-details-marker {
+        display: none !important;
+    }
+    [data-testid="stSidebarNav"] [data-testid="stSidebarNavSeparator"] details[open] > summary ~ * {
+        display: block !important;
+    }
+    /* Indent page links under headings */
+    [data-testid="stSidebarNav"] [data-testid="stSidebarNavLink"] {
+        padding-left: 2rem !important;
     }
     </style>
     """,
@@ -113,7 +127,6 @@ pg = st.navigation(
             power,
         ],
         "Supply Chain": [value_chain, dc_inputs, prospecting],
-        "Other": [news, source_health],
         "Australian Market - Alpha/WIP": [
             au_landing,
             au_market_overview,
@@ -121,6 +134,7 @@ pg = st.navigation(
             au_company,
             au_project,
         ],
+        "Other": [news, source_health],
     }
 )
 
