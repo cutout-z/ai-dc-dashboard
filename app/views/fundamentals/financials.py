@@ -235,4 +235,11 @@ st.caption(
 
 # ── Analyst Consensus ─────────────────────────────────────────────────────────
 
-_render_consensus(d.get("consensus", {}))
+consensus = d.get("consensus", {})
+
+# Debug: show consensus source status (remove after confirming it works)
+from app.lib.financials import _CONSENSUS_PATH
+_consensus_debug = f"consensus keys: {list(consensus.keys())[:5]}..." if consensus else "empty"
+st.caption(f"_debug: JSON={_CONSENSUS_PATH.exists()}, ticker={selected}, {_consensus_debug}")
+
+_render_consensus(consensus)
