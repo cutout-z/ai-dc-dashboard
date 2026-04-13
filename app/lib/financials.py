@@ -130,12 +130,18 @@ _CONSENSUS_PATH = _REPO_ROOT / "data" / "reference" / "consensus.json"
 
 def _load_consensus_file() -> dict:
     """Load pre-computed consensus data from JSON (committed to repo)."""
+    logger.info("Consensus JSON path: %s (exists=%s)", _CONSENSUS_PATH, _CONSENSUS_PATH.exists())
     if not _CONSENSUS_PATH.exists():
+        logger.warning("Consensus JSON not found at %s", _CONSENSUS_PATH)
         return {}
     try:
-        data = json.loads(_CONSENSUS_PATH.read_text())
-        return data.get("data", {})
-    except Exception:
+        raw = _CONSENSUS_PATH.read_text()
+        data = json.loads(raw)
+        result = data.get("data", {})
+        logger.info("Consensus JSON loaded: %d companies", len(result))
+        return result
+    except Exception as e:
+        logger.warning("Consensus JSON parse error: %s", e)
         return {}
 
 
