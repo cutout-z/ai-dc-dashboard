@@ -88,12 +88,20 @@ def fetch_earnings_dates(tickers: tuple[str, ...]) -> dict[str, str | None]:
             logger.debug("Earnings %s error: %s", sym, e)
             results[sym] = None
 
-    # If yfinance returned nothing useful, fall back to reference CSV
-    if not any(results.values()):
-        fallback = _load_earnings_fallback()
-        for sym in tickers:
-            if sym in fallback:
-                results[sym] = fallback[sym]
+    # Fall back to reference CSV for tickers where yfinance returned nothing
+    # or a past date (common for half-yearly ANZ reporters and on Streamlit Cloud)
+    fallback = _load_earnings_fallback()
+    today = pd.Timestamp.now().normalize()
+    for sym in tickers:
+        yf_date = results.get(sym)
+        fb_date = fallback.get(sym)
+        if not yf_date and fb_date:
+            results[sym] = fb_date
+        elif yf_date and fb_date:
+            yf_ts = pd.to_datetime(yf_date, errors="coerce")
+            fb_ts = pd.to_datetime(fb_date, errors="coerce")
+            if pd.notna(yf_ts) and yf_ts < today and pd.notna(fb_ts) and fb_ts >= today:
+                results[sym] = fb_date
 
     return results
 
