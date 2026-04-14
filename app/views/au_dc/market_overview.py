@@ -76,7 +76,7 @@ with col1:
                      color_discrete_map=COLOUR_PALETTE, title="Capacity by Region (Risked)",
                      labels={"risked_mw": "Capacity (MW)", "nem_region": "NEM Region"},
                      barmode="stack")
-        fig.update_layout(template="plotly_white", margin=dict(l=40, r=20, t=40, b=40))
+        fig.update_layout(template=st.session_state.get("plotly_template", "plotly_dark"), margin=dict(l=40, r=20, t=40, b=40))
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:

@@ -12,11 +12,15 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
-CHART_LAYOUT = dict(
-    font=dict(family="Inter, system-ui, sans-serif", size=12),
-    margin=dict(l=40, r=20, t=40, b=40),
-    hoverlabel=dict(bgcolor="white", font_size=12),
-)
+def _chart_layout():
+    return dict(
+        template=st.session_state.get("plotly_template", "plotly_dark"),
+        font=dict(family="Inter, system-ui, sans-serif", size=12),
+        margin=dict(l=40, r=20, t=40, b=40),
+        hoverlabel=dict(bgcolor=st.session_state.get("hoverlabel_bg", "#333"), font_size=12),
+    )
+
+CHART_LAYOUT = _chart_layout()
 
 st.title("LLM Performance Analysis")
 st.caption("Frontier AI model benchmarks, context windows, API pricing, and live leaderboard.")

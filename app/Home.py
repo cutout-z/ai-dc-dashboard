@@ -20,6 +20,14 @@ st.set_page_config(
 DB_PATH = Path(__file__).parent.parent / "data" / "db" / "ai_research.db"
 st.session_state["db_path"] = str(DB_PATH)
 
+# Theme-aware colors — adapts Plotly charts to active Streamlit theme
+_dark = (st.get_option("theme.base") or "dark") == "dark"
+st.session_state["plotly_template"] = "plotly_dark" if _dark else "plotly_white"
+st.session_state["annotation_color"] = "white" if _dark else "#333"
+st.session_state["hoverlabel_bg"] = "#333" if _dark else "white"
+st.session_state["marker_line_color"] = "white" if _dark else "#333"
+st.session_state["error_bar_color"] = "white" if _dark else "#333"
+
 # Inject dashboard title at the very top of the sidebar (above st.navigation)
 st.markdown(
     """

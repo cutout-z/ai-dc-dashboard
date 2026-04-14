@@ -108,7 +108,8 @@ if not df_annual.empty:
                 y=guide_by_year["guidance_usd_b"],
                 name="Combined Guidance",
                 mode="markers+lines",
-                marker=dict(size=14, symbol="diamond", color="white",
+                marker=dict(size=14, symbol="diamond",
+                            color=st.session_state["marker_line_color"],
                             line=dict(width=2, color="red")),
                 line=dict(dash="dash", color="red", width=2),
             ))
@@ -363,7 +364,7 @@ if guidance_path_b.exists():
                         symmetric=False,
                         array=[g_hi - g_bn],
                         arrayminus=[g_bn - g_lo],
-                        color="white",
+                        color=st.session_state["error_bar_color"],
                         thickness=2,
                         width=15,
                     ),
@@ -398,7 +399,7 @@ if guidance_path_b.exists():
                                 size=14,
                                 symbol="diamond",
                                 color="rgba(255,80,80,0.9)",
-                                line=dict(width=1.5, color="white"),
+                                line=dict(width=1.5, color=st.session_state["marker_line_color"]),
                             ),
                             name="Prior Guidance",
                             legendgroup="Prior Guidance",
@@ -420,7 +421,7 @@ if guidance_path_b.exists():
                 text=f"${g_bn:.0f}B",
                 showarrow=False,
                 yshift=14,
-                font=dict(size=11, color="white"),
+                font=dict(size=11, color=st.session_state["annotation_color"]),
             )
         )
         if cumul > 0:
@@ -431,7 +432,7 @@ if guidance_path_b.exists():
                     y=cumul / 2,
                     text=f"{pct:.0f}%",
                     showarrow=False,
-                    font=dict(size=12, color="white"),
+                    font=dict(size=12, color=st.session_state["annotation_color"]),
                 )
             )
 
