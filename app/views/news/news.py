@@ -62,11 +62,8 @@ for t in all_tickers:
     })
 
 df_earn = pd.DataFrame(rows).sort_values("_sort").drop(columns=["_sort"])
-# Mark past earnings dates (yfinance sometimes returns the last reported date)
-# For US stocks with frequent reporting, drop past rows; keep ANZ (half-yearly reporters)
-df_earn_us = df_earn[df_earn["Region"] == "US"]
-df_earn_us = df_earn_us[df_earn_us["Days Away"].isna() | (df_earn_us["Days Away"] >= 0)]
-df_earn_anz = df_earn[df_earn["Region"] == "ANZ"]
+# Drop past earnings (negative days) — yfinance sometimes returns the last reported date
+df_earn = df_earn[df_earn["Days Away"].isna() | (df_earn["Days Away"] >= 0)]
 
 # Split into two tiles: Global and ANZ
 col_global, col_anz = st.columns(2)
@@ -74,13 +71,13 @@ col_global, col_anz = st.columns(2)
 with col_global:
     with st.container(border=True):
         st.subheader("Global (Mag 7 + AI Infra + DC Operators)")
-        df_g = df_earn_us.drop(columns=["Region"])
+        df_g = df_earn[df_earn["Region"] == "US"].drop(columns=["Region"])
         st.dataframe(df_g, use_container_width=True, hide_index=True, height=35 * (len(df_g) + 1) + 3)
 
 with col_anz:
     with st.container(border=True):
         st.subheader("ANZ")
-        df_a = df_earn_anz.drop(columns=["Region"])
+        df_a = df_earn[df_earn["Region"] == "ANZ"].drop(columns=["Region"])
         st.dataframe(df_a, use_container_width=True, hide_index=True, height=35 * (len(df_a) + 1) + 3)
 
 # ══════════════════════════════════════════════
