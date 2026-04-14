@@ -32,12 +32,16 @@ COLOUR_PALETTE = {
     "CEFC High": "#dc2626",
 }
 
-CHART_LAYOUT = dict(
-    template="plotly_white",
-    font=dict(family="Inter, system-ui, sans-serif", size=12),
-    margin=dict(l=40, r=20, t=40, b=40),
-    hoverlabel=dict(bgcolor="white", font_size=12),
-)
+def _chart_layout():
+    import streamlit as _st
+    return dict(
+        template=_st.session_state.get("plotly_template", "plotly_dark"),
+        font=dict(family="Inter, system-ui, sans-serif", size=12),
+        margin=dict(l=40, r=20, t=40, b=40),
+        hoverlabel=dict(bgcolor=_st.session_state.get("hoverlabel_bg", "#333"), font_size=12),
+    )
+
+CHART_LAYOUT = _chart_layout()
 
 
 def capacity_by_region_bar(df: pd.DataFrame, title: str = "Capacity by Region") -> go.Figure:

@@ -340,9 +340,10 @@ if model_path.exists():
 # ══════════════════════════════════════════════
 
 CHART_LAYOUT = dict(
+    template=st.session_state.get("plotly_template", "plotly_dark"),
     font=dict(family="Inter, system-ui, sans-serif", size=12),
     margin=dict(l=40, r=20, t=40, b=40),
-    hoverlabel=dict(bgcolor="white", font_size=12),
+    hoverlabel=dict(bgcolor=st.session_state.get("hoverlabel_bg", "#333"), font_size=12),
 )
 
 
