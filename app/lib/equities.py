@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 import yfinance as yf
 
 from app.lib.yahoo_spark import run_spark, compute_returns_from_closes, _format_price
+
+REFERENCE_DIR = Path(__file__).parent.parent.parent / "data" / "reference"
 
 logger = logging.getLogger("ai_research")
 
@@ -57,11 +60,24 @@ def _extract_earnings_date(cal) -> str | None:
     return None
 
 
+def _load_earnings_fallback() -> dict[str, str | None]:
+    """Load earnings dates from reference CSV (fallback for Streamlit Cloud)."""
+    csv_path = REFERENCE_DIR / "earnings_dates.csv"
+    if not csv_path.exists():
+        return {}
+    df = pd.read_csv(csv_path)
+    return {
+        row["symbol"]: row["earnings_date"] if pd.notna(row["earnings_date"]) else None
+        for _, row in df.iterrows()
+    }
+
+
 @st.cache_data(ttl=3600)
 def fetch_earnings_dates(tickers: tuple[str, ...]) -> dict[str, str | None]:
     """Fetch next earnings date for an arbitrary list of tickers.
 
-    Tuple argument so the Streamlit cache key is hashable.
+    Tries yfinance first; falls back to reference CSV if all calls fail
+    (common on Streamlit Cloud where Yahoo rate-limits shared IPs).
     """
     results: dict[str, str | None] = {}
     for sym in tickers:
@@ -71,6 +87,14 @@ def fetch_earnings_dates(tickers: tuple[str, ...]) -> dict[str, str | None]:
         except Exception as e:
             logger.debug("Earnings %s error: %s", sym, e)
             results[sym] = None
+
+    # If yfinance returned nothing useful, fall back to reference CSV
+    if not any(results.values()):
+        fallback = _load_earnings_fallback()
+        for sym in tickers:
+            if sym in fallback:
+                results[sym] = fallback[sym]
+
     return results
 
 
