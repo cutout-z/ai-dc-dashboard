@@ -157,87 +157,6 @@ else:
     st.warning("No annual CAPEX data. Run: python scripts/fetch_financials.py")
 
 # ══════════════════════════════════════════════════════════════
-# Quarterly CAPEX
-# ══════════════════════════════════════════════════════════════
-st.subheader("Quarterly CAPEX")
-
-df_capex = pd.read_sql(
-    f"""
-    SELECT ticker, company, period, capex_usd
-    FROM v_hyperscaler_capex
-    WHERE company IN ({selected_sql})
-    ORDER BY period
-    """,
-    conn,
-)
-
-if not df_capex.empty:
-    df_capex["capex_bn"] = df_capex["capex_usd"] / 1e9
-    df_capex["period"] = pd.to_datetime(df_capex["period"])
-    df_capex["quarter"] = df_capex["period"].dt.to_period("Q").astype(str)
-    df_capex = df_capex.sort_values("period")
-
-    # Drop trailing quarter if incomplete (e.g. Oracle reports one quarter ahead)
-    co_per_q = df_capex.groupby("quarter")["company"].nunique()
-    last_q = sorted(co_per_q.index)[-1]
-    if co_per_q[last_q] < co_per_q.median():
-        df_capex = df_capex[df_capex["quarter"] != last_q]
-
-    quarter_order = sorted(df_capex["quarter"].unique())
-
-    fig_q = px.bar(
-        df_capex, x="quarter", y="capex_bn", color="company",
-        title="Quarterly CAPEX ($B)",
-        labels={"capex_bn": "CAPEX ($B)", "quarter": "Quarter"},
-        barmode="stack",
-        color_discrete_map=COMPANY_COLORS,
-        category_orders={"quarter": quarter_order},
-    )
-    fig_q.update_layout(height=450, xaxis_type="category",
-                        xaxis_tickangle=-45,
-                        legend=dict(orientation="h", yanchor="bottom", y=1.02,
-                                    title_text=""))
-    st.plotly_chart(fig_q, use_container_width=True)
-
-    fig_ind = px.line(
-        df_capex, x="quarter", y="capex_bn", color="company",
-        title="Individual CAPEX Trends",
-        labels={"capex_bn": "$B", "quarter": "Quarter"},
-        color_discrete_map=COMPANY_COLORS,
-        category_orders={"quarter": quarter_order},
-    )
-    fig_ind.update_layout(height=450, xaxis_type="category",
-                          xaxis_tickangle=-45,
-                          legend=dict(title_text=""))
-    st.plotly_chart(fig_ind, use_container_width=True)
-
-    # QoQ growth
-    df_total = df_capex.groupby("quarter")["capex_bn"].sum().reset_index()
-    df_total = df_total.sort_values("quarter").reset_index(drop=True)
-    df_total["qoq_pct"] = df_total["capex_bn"].pct_change() * 100
-
-    fig_total = go.Figure()
-    fig_total.add_trace(go.Bar(
-        x=df_total["quarter"], y=df_total["capex_bn"],
-        name="Total CAPEX", marker_color="#4A90D9"
-    ))
-    fig_total.add_trace(go.Scatter(
-        x=df_total["quarter"], y=df_total["qoq_pct"],
-        name="QoQ %", yaxis="y2", line=dict(color="red", width=2),
-        mode="lines+markers"
-    ))
-    fig_total.update_layout(
-        title="Aggregate CAPEX + QoQ Growth",
-        yaxis=dict(title="CAPEX ($B)"),
-        yaxis2=dict(title="QoQ %", overlaying="y", side="right"),
-        height=350, showlegend=False, xaxis_type="category",
-        xaxis_tickangle=-45,
-    )
-    st.plotly_chart(fig_total, use_container_width=True)
-else:
-    st.warning("No quarterly CAPEX data. Run: python scripts/fetch_financials.py")
-
-# ══════════════════════════════════════════════════════════════
 # Forecast Year Bridge
 # ══════════════════════════════════════════════════════════════
 st.subheader("Forecast Year Bridge")
@@ -445,5 +364,63 @@ if guidance_path_b.exists():
         annotations=annots,
     )
     st.plotly_chart(fig_bridge, use_container_width=True)
+
+# ══════════════════════════════════════════════════════════════
+# Quarterly CAPEX
+# ══════════════════════════════════════════════════════════════
+st.subheader("Quarterly CAPEX")
+
+df_capex = pd.read_sql(
+    f"""
+    SELECT ticker, company, period, capex_usd
+    FROM v_hyperscaler_capex
+    WHERE company IN ({selected_sql})
+    ORDER BY period
+    """,
+    conn,
+)
+
+if not df_capex.empty:
+    df_capex["capex_bn"] = df_capex["capex_usd"] / 1e9
+    df_capex["period"] = pd.to_datetime(df_capex["period"])
+    df_capex["quarter"] = df_capex["period"].dt.to_period("Q").astype(str)
+    df_capex = df_capex.sort_values("period")
+
+    # Drop trailing quarter if incomplete (e.g. Oracle reports one quarter ahead)
+    co_per_q = df_capex.groupby("quarter")["company"].nunique()
+    last_q = sorted(co_per_q.index)[-1]
+    if co_per_q[last_q] < co_per_q.median():
+        df_capex = df_capex[df_capex["quarter"] != last_q]
+
+    quarter_order = sorted(df_capex["quarter"].unique())
+
+    fig_q = px.bar(
+        df_capex, x="quarter", y="capex_bn", color="company",
+        title="Quarterly CAPEX ($B)",
+        labels={"capex_bn": "CAPEX ($B)", "quarter": "Quarter"},
+        barmode="stack",
+        color_discrete_map=COMPANY_COLORS,
+        category_orders={"quarter": quarter_order},
+    )
+    fig_q.update_layout(height=450, xaxis_type="category",
+                        xaxis_tickangle=-45,
+                        legend=dict(orientation="h", yanchor="bottom", y=1.02,
+                                    title_text=""))
+    st.plotly_chart(fig_q, use_container_width=True)
+
+    fig_ind = px.line(
+        df_capex, x="quarter", y="capex_bn", color="company",
+        title="Individual CAPEX Trends",
+        labels={"capex_bn": "$B", "quarter": "Quarter"},
+        color_discrete_map=COMPANY_COLORS,
+        category_orders={"quarter": quarter_order},
+    )
+    fig_ind.update_layout(height=450, xaxis_type="category",
+                          xaxis_tickangle=-45,
+                          legend=dict(title_text=""))
+    st.plotly_chart(fig_ind, use_container_width=True)
+
+else:
+    st.warning("No quarterly CAPEX data. Run: python scripts/fetch_financials.py")
 
 conn.close()
