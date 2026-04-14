@@ -5,6 +5,7 @@ import sqlite3
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import calendar
 from pathlib import Path
 
 DB_PATH = st.session_state["db_path"]
@@ -183,35 +184,31 @@ if not df_capex.empty:
 
     quarter_order = sorted(df_capex["quarter"].unique())
 
-    col1, col2 = st.columns(2)
+    fig_q = px.bar(
+        df_capex, x="quarter", y="capex_bn", color="company",
+        title="Quarterly CAPEX ($B)",
+        labels={"capex_bn": "CAPEX ($B)", "quarter": "Quarter"},
+        barmode="stack",
+        color_discrete_map=COMPANY_COLORS,
+        category_orders={"quarter": quarter_order},
+    )
+    fig_q.update_layout(height=450, xaxis_type="category",
+                        xaxis_tickangle=-45,
+                        legend=dict(orientation="h", yanchor="bottom", y=1.02,
+                                    title_text=""))
+    st.plotly_chart(fig_q, use_container_width=True)
 
-    with col1:
-        fig_q = px.bar(
-            df_capex, x="quarter", y="capex_bn", color="company",
-            title="Quarterly CAPEX ($B)",
-            labels={"capex_bn": "CAPEX ($B)", "quarter": "Quarter"},
-            barmode="stack",
-            color_discrete_map=COMPANY_COLORS,
-            category_orders={"quarter": quarter_order},
-        )
-        fig_q.update_layout(height=450, xaxis_type="category",
-                            xaxis_tickangle=-45,
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02,
-                                        title_text=""))
-        st.plotly_chart(fig_q, use_container_width=True)
-
-    with col2:
-        fig_ind = px.line(
-            df_capex, x="quarter", y="capex_bn", color="company",
-            title="Individual CAPEX Trends",
-            labels={"capex_bn": "$B", "quarter": "Quarter"},
-            color_discrete_map=COMPANY_COLORS,
-            category_orders={"quarter": quarter_order},
-        )
-        fig_ind.update_layout(height=450, xaxis_type="category",
-                              xaxis_tickangle=-45,
-                              legend=dict(title_text=""))
-        st.plotly_chart(fig_ind, use_container_width=True)
+    fig_ind = px.line(
+        df_capex, x="quarter", y="capex_bn", color="company",
+        title="Individual CAPEX Trends",
+        labels={"capex_bn": "$B", "quarter": "Quarter"},
+        color_discrete_map=COMPANY_COLORS,
+        category_orders={"quarter": quarter_order},
+    )
+    fig_ind.update_layout(height=450, xaxis_type="category",
+                          xaxis_tickangle=-45,
+                          legend=dict(title_text=""))
+    st.plotly_chart(fig_ind, use_container_width=True)
 
     # QoQ growth
     df_total = df_capex.groupby("quarter")["capex_bn"].sum().reset_index()
@@ -238,5 +235,214 @@ if not df_capex.empty:
     st.plotly_chart(fig_total, use_container_width=True)
 else:
     st.warning("No quarterly CAPEX data. Run: python scripts/fetch_financials.py")
+
+# ══════════════════════════════════════════════════════════════
+# Forecast Year Bridge
+# ══════════════════════════════════════════════════════════════
+st.subheader("Forecast Year Bridge")
+st.caption(
+    "Quarterly actuals filling toward full-year CAPEX guidance "
+    "for each company's current forecast year"
+)
+
+guidance_path_b = DATA_DIR / "capex_guidance.csv"
+history_path_b = DATA_DIR / "capex_guidance_history.csv"
+
+if guidance_path_b.exists():
+    df_guide_b = pd.read_csv(guidance_path_b)
+    df_guide_b = df_guide_b[
+        df_guide_b["guidance_usd_b"].notna() & df_guide_b["company"].isin(selected)
+    ]
+    df_guide_b["year_num"] = (
+        df_guide_b["fiscal_year"].str.extract(r"(\d{4})").astype(int)
+    )
+
+    # Forward-looking fiscal year per company (max year)
+    idx_b = df_guide_b.groupby("company")["year_num"].idxmax()
+    fwd_guide = df_guide_b.loc[idx_b].copy().sort_values("company")
+
+    # Fresh quarterly query (unfiltered — bridge needs all available quarters)
+    df_q_bridge = pd.read_sql(
+        f"""SELECT company, period, capex_usd
+            FROM v_hyperscaler_capex
+            WHERE company IN ({selected_sql})
+            ORDER BY period""",
+        conn,
+    )
+    df_q_bridge["period"] = pd.to_datetime(df_q_bridge["period"])
+    df_q_bridge["capex_bn"] = df_q_bridge["capex_usd"] / 1e9
+
+    # Revision history
+    df_hist_b = pd.DataFrame()
+    if history_path_b.exists():
+        df_hist_b = pd.read_csv(history_path_b)
+        df_hist_b = df_hist_b[df_hist_b["company"].isin(selected)]
+
+    Q_COLORS = {1: "#1B4F72", 2: "#2E86C1", 3: "#5DADE2", 4: "#85C1E9"}
+    REMAIN_CLR = "rgba(100,100,100,0.25)"
+    _shown = set()
+
+    fig_bridge = go.Figure()
+    annots = []
+
+    for _, gr in fwd_guide.iterrows():
+        co = gr["company"]
+        fy_m = int(gr["fy_end_month"])
+        yr = int(gr["year_num"])
+        g_bn = gr["guidance_usd_b"]
+        fy_lbl = gr["fiscal_year"]
+
+        # Fiscal year boundaries
+        fy_end_day = calendar.monthrange(yr, fy_m)[1]
+        fy_end_dt = pd.Timestamp(yr, fy_m, fy_end_day)
+        fy_start_dt = (
+            pd.Timestamp(yr, 1, 1)
+            if fy_m == 12
+            else pd.Timestamp(yr - 1, fy_m + 1, 1)
+        )
+
+        # Actuals falling within this fiscal year
+        m = (
+            (df_q_bridge["company"] == co)
+            & (df_q_bridge["period"] >= fy_start_dt)
+            & (df_q_bridge["period"] <= fy_end_dt)
+        )
+        df_fy = df_q_bridge[m].sort_values("period")
+
+        x_lbl = f"{co} ({fy_lbl})"
+        cumul = 0.0
+
+        for i, (_, qr) in enumerate(df_fy.iterrows(), start=1):
+            qn = min(i, 4)
+            lg = f"Q{qn}"
+            show = lg not in _shown
+            if show:
+                _shown.add(lg)
+            fig_bridge.add_trace(
+                go.Bar(
+                    x=[x_lbl],
+                    y=[qr["capex_bn"]],
+                    name=lg,
+                    legendgroup=lg,
+                    marker_color=Q_COLORS[qn],
+                    showlegend=show,
+                    hovertemplate=(
+                        f"Q{qn}: ${qr['capex_bn']:.1f}B<extra>{co}</extra>"
+                    ),
+                )
+            )
+            cumul += qr["capex_bn"]
+
+        # Remaining to guidance
+        remain = max(0.0, g_bn - cumul)
+        show_r = "Remaining" not in _shown
+        if show_r:
+            _shown.add("Remaining")
+        fig_bridge.add_trace(
+            go.Bar(
+                x=[x_lbl],
+                y=[remain],
+                name="Remaining",
+                legendgroup="Remaining",
+                marker=dict(color=REMAIN_CLR, line=dict(color="#888", width=1)),
+                showlegend=show_r,
+                hovertemplate=f"Remaining: ${remain:.1f}B<extra>{co}</extra>",
+            )
+        )
+
+        # Guidance range (low–high) as error bars
+        g_lo = gr["guidance_low"]
+        g_hi = gr["guidance_high"]
+        if pd.notna(g_lo) and pd.notna(g_hi):
+            fig_bridge.add_trace(
+                go.Scatter(
+                    x=[x_lbl],
+                    y=[g_bn],
+                    error_y=dict(
+                        type="data",
+                        symmetric=False,
+                        array=[g_hi - g_bn],
+                        arrayminus=[g_bn - g_lo],
+                        color="white",
+                        thickness=2,
+                        width=15,
+                    ),
+                    mode="markers",
+                    marker=dict(size=1, color="rgba(0,0,0,0)"),
+                    showlegend=False,
+                    hovertemplate=(
+                        f"Range: ${g_lo:.0f}B – ${g_hi:.0f}B"
+                        f"<extra>{co}</extra>"
+                    ),
+                )
+            )
+
+        # Prior guidance revisions (diamond markers)
+        if not df_hist_b.empty:
+            rev_m = (df_hist_b["company"] == co) & (
+                df_hist_b["fiscal_year"] == fy_lbl
+            )
+            df_rev = df_hist_b[rev_m].sort_values("announced_date")
+            if len(df_rev) > 1:
+                for _, rr in df_rev.iloc[:-1].iterrows():
+                    show_pg = "Prior Guidance" not in _shown
+                    if show_pg:
+                        _shown.add("Prior Guidance")
+                    notes_txt = rr.get("notes", "") or ""
+                    fig_bridge.add_trace(
+                        go.Scatter(
+                            x=[x_lbl],
+                            y=[rr["guidance_usd_b"]],
+                            mode="markers",
+                            marker=dict(
+                                size=14,
+                                symbol="diamond",
+                                color="rgba(255,80,80,0.9)",
+                                line=dict(width=1.5, color="white"),
+                            ),
+                            name="Prior Guidance",
+                            legendgroup="Prior Guidance",
+                            showlegend=show_pg,
+                            hovertemplate=(
+                                f"Prior: ${rr['guidance_usd_b']:.0f}B"
+                                f"<br>{rr['announced_date']}"
+                                f"<br>{notes_txt}"
+                                f"<extra>{co}</extra>"
+                            ),
+                        )
+                    )
+
+        # Annotations: guidance total on top, fill % inside actuals
+        annots.append(
+            dict(
+                x=x_lbl,
+                y=g_bn,
+                text=f"${g_bn:.0f}B",
+                showarrow=False,
+                yshift=14,
+                font=dict(size=11, color="white"),
+            )
+        )
+        if cumul > 0:
+            pct = cumul / g_bn * 100
+            annots.append(
+                dict(
+                    x=x_lbl,
+                    y=cumul / 2,
+                    text=f"{pct:.0f}%",
+                    showarrow=False,
+                    font=dict(size=12, color="white"),
+                )
+            )
+
+    fig_bridge.update_layout(
+        barmode="stack",
+        height=500,
+        yaxis_title="CAPEX ($B)",
+        xaxis_title="",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02),
+        annotations=annots,
+    )
+    st.plotly_chart(fig_bridge, use_container_width=True)
 
 conn.close()

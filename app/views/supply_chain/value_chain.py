@@ -19,6 +19,16 @@ SHOW_CROSS_SEGMENT = False
 TOP_N_PER_SEGMENT = 10
 TILE_ROW_HEIGHT = 35
 
+def _yf_ticker(sym: str) -> str:
+    """Convert Reuters RIC suffix to yfinance format.
+
+    Reuters uses .N (NYSE) and .O (NASDAQ) — yfinance uses no suffix for US stocks.
+    """
+    if sym.endswith(".N") or sym.endswith(".O"):
+        return sym.rsplit(".", 1)[0]
+    return sym
+
+
 @st.cache_data(ttl=3600)
 def _fetch_market_caps(tickers: tuple[str, ...]) -> dict[str, float | None]:
     """Fetch market caps for a batch of tickers via yfinance fast_info."""
@@ -26,7 +36,7 @@ def _fetch_market_caps(tickers: tuple[str, ...]) -> dict[str, float | None]:
 
     def _get(sym: str) -> tuple[str, float | None]:
         try:
-            fi = yf.Ticker(sym).fast_info
+            fi = yf.Ticker(_yf_ticker(sym)).fast_info
             return sym, getattr(fi, "market_cap", None)
         except Exception as e:
             logger.debug("Market cap %s error: %s", sym, e)
@@ -72,9 +82,9 @@ if not df_universe.empty:
             df_sun,
             path=["segment", "sub_bucket", "company"],
             title="AI Infrastructure — Stock Taxonomy",
-            height=600,
+            height=1200,
         )
-        fig_sun.update_traces(textinfo="label")
+        fig_sun.update_traces(textinfo="label", insidetextorientation="radial")
         st.plotly_chart(fig_sun, use_container_width=True)
 
 # ──────────────────────────────────────────────
@@ -128,6 +138,13 @@ for segment in segments:
             use_container_width=True,
             hide_index=True,
             height=tile_height,
+            column_config={
+                "Company": st.column_config.TextColumn(width=220),
+                "Ticker": st.column_config.TextColumn(width=120),
+                "Sub-bucket": st.column_config.TextColumn(width=220),
+                "Region": st.column_config.TextColumn(width=150),
+                "Market Cap": st.column_config.TextColumn(width=100),
+            },
         )
 
 # ──────────────────────────────────────────────

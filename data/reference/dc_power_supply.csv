@@ -1,0 +1,10 @@
+region,year,supply_type,capacity_gw,supply_twh,scenario,source,published_date,notes
+United States,2023,Total Grid,1190,,Actual,EIA Electric Power Annual,2024-10-01,"1,189,492 MW utility-scale nameplate capacity at end of 2023"
+United States,2024,Capacity Additions,48.6,,Actual,EIA Electric Power Monthly,2025-03-01,"Record year — 30 GW solar, 10.6 GW battery, rest gas/wind"
+United States,2025,Planned Additions (Solar),32.5,,Planned,EIA Preliminary Monthly Generator Inventory,2025-01-01,"Texas 11.6 GW + California 2.9 GW = almost half"
+United States,2025,Planned Additions (Battery),18.0,,Planned,EIA Preliminary Monthly Generator Inventory,2025-01-01,"Mostly 4-hour duration — extends solar but not 24/7 baseload"
+United States,2025,Planned Additions (Gas),4.4,,Planned,EIA Today in Energy,2025-01-01,"50% simple-cycle combustion turbines, 36% combined-cycle"
+United States,2025,Planned Additions (Wind),7.7,,Planned,EIA Preliminary Monthly Generator Inventory,2025-01-01,"Includes 800 MW Vineyard Wind + 715 MW Revolution Wind offshore"
+United States,2025,Planned Additions (Total),63.0,,Planned,EIA Today in Energy,2025-01-01,"Solar + battery = 81% of total additions"
+United States,2024,DC Consumption,,183,Actual,IEA Electricity 2025,2025-01-01,"45% of global DC consumption; ~4.4% of US electricity"
+Global,2024,DC Consumption,,415,Actual,IEA Electricity 2025,2025-01-01,"~1.5% of global electricity; 12% annual growth over prior 5 years"

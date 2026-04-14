@@ -1,0 +1,25 @@
+company,source_type,capacity_gw,status,counterparty,announced_date,details,reference
+Microsoft,Renewable PPA (Total Portfolio),40.0,Contracted,Various (400+ contracts),2026-02-18,"40 GW across 26 countries; 19 GW online, rest energising over 5 years. Largest single deal: 10.5 GW with Brookfield.",DCD Feb 2026 / Microsoft Blog 2026-02-18
+Microsoft,Nuclear (Restart),0.835,Contracted,Constellation Energy,2024-09-20,"20-year PPA to restart Three Mile Island Unit 1 (835 MW). Expected online 2027.",CNBC / ANS Nuclear Newswire 2024-09-20
+Microsoft,Nuclear (Fusion),0.05,PPA,Helion Energy,2023-05-01,"World's first fusion PPA — up to 50 MW from Helion's Orion plant by 2028. Speculative timeline.",Carbon Credits / press release
+Amazon,Renewable PPA (Tracked),35.0,Contracted,Various (600+ projects),2025-02-01,"Largest corporate buyer 5 years running. 68% US-based. S&P tracked figure.",S&P Global Corporate PPA Leaderboard
+Amazon,Nuclear (Existing),1.92,Contracted,Talen Energy,2025-06-11,"1,920 MW PPA from Susquehanna nuclear plant through 2042. Initial 960 MW Cumulus campus acquired for $650M.",Utility Dive / Talen IR 2025-06-11
+Amazon,Nuclear (SMR — Energy Northwest),0.32,Agreement,X-energy / Energy Northwest,2024-10-16,"320 MW initial phase (4x Xe-100 80 MW modules), option to expand to 960 MW. Washington state.",Utility Dive / Power Mag
+Amazon,Nuclear (SMR — Dominion),0.3,MOU,Dominion Energy,2024-10-16,"MOU to explore 300 MW SMR near North Anna nuclear station in Virginia.",Virginia Mercury 2024-10-17
+Amazon,Nuclear (X-energy Investment),,Investment,X-energy,2024-10-16,"Anchored $500M fundraising round. Investment supports 5 GW of X-energy SMR projects (not all for Amazon).",NucNet / Power Mag
+Google,Renewable PPA (Total Portfolio),22.0,Contracted,Various (170+ PPAs),2024-12-01,"22 GW since 2010. 24/7 carbon-free energy target.",Google Environmental Report / Kairos press release
+Google,Nuclear (SMR),0.5,PPA,Kairos Power,2024-10-14,"500 MW fleet by 2035. First 50 MW unit with TVA expected by 2030. Fluoride-salt-cooled reactors.",Google Blog / Kairos Power 2024-10-14
+Google,Geothermal,0.115,Contracted,Fervo Energy,2024-11-01,"115 MW enhanced geothermal PPA via NV Energy Clean Transition Tariff in Nevada. 24/7 baseload.",Fervo Energy 2024 Year in Review
+Meta,Renewable PPA (Contracted),12.0,Contracted,Various,2025-01-01,"12 GW contracted worldwide. 28 GW total backed across 27 US states. 100% clean electricity since 2020.",Meta Sustainability
+Meta,Nuclear (Vistra),2.6,PPA,Vistra,2026-01-09,"20-year PPAs covering 2.6 GW from Perry, Davis-Besse, Beaver Valley plants in OH/PA. Includes 433 MW uprates.",TechCrunch / Power Mag 2026-01-09
+Meta,Nuclear (TerraPower),2.8,Agreement,TerraPower,2026-01-09,"Up to 8 Natrium sodium fast reactors — 690 MW initial (2 units by 2032) + 2.1 GW from 6 more by 2035.",TechCrunch / Power Mag 2026-01-09
+Meta,Nuclear (Oklo),1.2,Agreement,Oklo,2026-01-09,"1.2 GW power campus in Pike County, Ohio.",TechCrunch 2026-01-09
+Meta,Nuclear (Constellation Clinton),1.121,PPA,Constellation Energy,2025-06-01,"20-year PPA for Clinton Clean Energy Center (1,121 MW) + 30 MW expansion via uprates.",Meta / Nat Law Review
+Meta,Geothermal,0.15,Contracted,Sage Geosystems,2024-08-01,"Up to 150 MW enhanced geothermal for DC baseload, delivery beginning 2027.",Meta Sustainability Blog
+Oracle,Nuclear (SMR),1.0,Planned,,2024-09-10,"Building permits secured for 3 SMRs to power 1 GW data center. No location or vendor disclosed.",CNBC / The Register 2024-09-10
+CoreWeave,Total Contracted Power,2.2,Contracted,Various,2025-06-30,"470 MW active; 2.2 GW contracted. Targeting 900 MW active by end 2025.",CoreWeave Q2 2025 earnings
+CoreWeave,Acquisition (Core Scientific),1.3,Pending,Core Scientific,2025-07-01,"1.3 GW gross power across Core Scientific DC footprint + 1 GW expansion potential. Closing expected Q4 2025.",CoreWeave / Core Scientific press release
+CoreWeave,Renewable PPA (Spain),0.1,Contracted,,2025-01-01,"Large-scale solar + wind PPA in Spain; 100 MW solar farm adjacent to new DC.",DCD
+Apple,Clean Energy (Total incl Supply Chain),19.0,Contracted,Various,2024-04-01,"19 GW total clean capacity worldwide — includes 18+ GW from supply chain commitments. Not all DC-specific.",Apple Newsroom 2023-04
+Apple,DC Consumption,,Actual,,2024-12-01,"2,500 GWh consumed by DCs + colocation in 2024. 100% matched with renewables.",Apple Environmental Progress Report
+Apple,Renewable PPA (Europe),0.65,Contracted,ENGIE / European Energy,2025-01-01,"650 MW new capacity: Italy 138 MW, Latvia 110 MW, Greece, Poland, Spain 105 MW. ~$600M investment.",DCD / Apple Newsroom
