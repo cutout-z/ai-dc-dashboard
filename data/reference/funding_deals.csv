@@ -1,0 +1,10 @@
+date,entity,amount_bn,type,is_circular,counterparty,source,notes
+2025-01-21,Stargate JV,500.0,hybrid,true,"OpenAI / SoftBank / Oracle",White House announcement,Joint venture with Oracle infrastructure + SoftBank capital; OpenAI as anchor tenant — circular: OpenAI consumes its own JV's capacity
+2025-01-22,Microsoft,80.0,balance_sheet,false,,Microsoft blog post,FY2025 AI datacenter commitment from operating cash flow
+2025-03-28,CoreWeave,1.5,ipo,false,,SEC S-1 filing,IPO at $40/share raised $1.5B; heavily debt-financed business model
+2025-05-15,CoreWeave,12.5,debt,true,Nvidia (collateral),Bloomberg,Debt facility backed by Nvidia GPU collateral — Nvidia supplies the GPUs that collateralize the loans
+2025-07-01,Anthropic,10.0,equity,false,Various,Anthropic press release,Series F at $183B valuation — pure equity round
+2025-09-01,OpenAI,10.0,equity,true,"Microsoft / Nvidia / others",FT,Equity round with major GPU supplier and cloud provider as investors
+2025-12-01,Oracle,38.0,debt,false,,Bloomberg,Corporate debt raise specifically for new data center construction
+2026-01-15,xAI,20.0,equity,true,Nvidia (investor),Bloomberg,Series E at $230B — Nvidia invested directly; xAI is major Nvidia GPU buyer
+2026-02-01,Anthropic,30.0,equity,false,"Various (incl. Google)",CNBC,Series at $380B valuation — Google is both investor and cloud provider (mild circularity)
