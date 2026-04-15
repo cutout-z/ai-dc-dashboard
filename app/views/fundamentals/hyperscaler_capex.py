@@ -423,4 +423,75 @@ if not df_capex.empty:
 else:
     st.warning("No quarterly CAPEX data. Run: python scripts/fetch_financials.py")
 
+# ══════════════════════════════════════════════════════════════
+# Economic Strain — CAPEX as % of GDP
+# ══════════════════════════════════════════════════════════════
+st.subheader("Economic Strain — CAPEX as % of GDP")
+st.caption(
+    "How much of the US economy is being consumed by AI infrastructure spend? "
+    "Compares trailing 4-quarter hyperscaler CAPEX to US nominal GDP. "
+    "Historical benchmark: US telecom boom peaked at ~1.3% of GDP (2000)."
+)
+
+gdp_path = DATA_DIR / "us_gdp_annual.csv"
+if gdp_path.exists():
+    df_gdp = pd.read_csv(gdp_path)
+    if not df_gdp.empty:
+        # Build annual CAPEX totals from quarterly data
+        df_all_capex = pd.read_sql(
+            "SELECT period, capex_usd FROM v_hyperscaler_capex ORDER BY period", conn,
+        )
+        if not df_all_capex.empty:
+            df_all_capex["period"] = pd.to_datetime(df_all_capex["period"])
+            df_all_capex["year"] = df_all_capex["period"].dt.year
+            annual_capex = df_all_capex.groupby("year")["capex_usd"].sum().reset_index()
+            annual_capex["capex_bn"] = annual_capex["capex_usd"] / 1e9
+
+            merged = annual_capex.merge(df_gdp, on="year", how="inner")
+            merged["capex_pct_gdp"] = merged["capex_bn"] / merged["gdp_nominal_bn"] * 100
+
+            if not merged.empty:
+                fig_strain = go.Figure()
+
+                fig_strain.add_trace(go.Bar(
+                    x=merged["year"], y=merged["capex_pct_gdp"],
+                    marker_color="#3b82f6",
+                    hovertemplate="<b>%{x}</b><br>CAPEX: $%{customdata[0]:.0f}B<br>"
+                                  "GDP: $%{customdata[1]:.1f}T<br>%{y:.2f}% of GDP<extra></extra>",
+                    customdata=list(zip(merged["capex_bn"], merged["gdp_nominal_bn"] / 1000)),
+                ))
+
+                # Telecom benchmark line
+                fig_strain.add_hline(
+                    y=1.3, line_dash="dash", line_color="#ef4444",
+                    annotation_text="Telecom peak (2000): 1.3%",
+                    annotation_position="top left",
+                )
+
+                # Zone shading
+                fig_strain.add_hrect(y0=0, y1=1.2, fillcolor="#22c55e", opacity=0.05,
+                                     line_width=0)
+                fig_strain.add_hrect(y0=1.2, y1=2.0, fillcolor="#f59e0b", opacity=0.05,
+                                     line_width=0)
+                fig_strain.add_hrect(y0=2.0, y1=4.0, fillcolor="#ef4444", opacity=0.05,
+                                     line_width=0)
+
+                fig_strain.update_layout(
+                    height=400,
+                    yaxis_title="CAPEX as % of GDP",
+                    xaxis_title="Year",
+                    xaxis=dict(dtick=1),
+                    showlegend=False,
+                )
+                st.plotly_chart(fig_strain, use_container_width=True)
+
+                latest_gdp_year = int(df_gdp["year"].max())
+                st.caption(
+                    f"GDP data through {latest_gdp_year} (BEA NIPA). "
+                    "Update `data/reference/us_gdp_annual.csv` with recent BEA/FRED data for current readings. "
+                    "Zone thresholds: Green <1.2% · Amber 1.2–2.0% · Red >2.0%."
+                )
+else:
+    st.info("Add `data/reference/us_gdp_annual.csv` (BEA NIPA) to enable CAPEX/GDP analysis.")
+
 conn.close()

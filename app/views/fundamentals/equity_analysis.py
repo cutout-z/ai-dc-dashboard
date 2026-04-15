@@ -227,3 +227,90 @@ with col2:
         st.plotly_chart(fig_tree, use_container_width=True)
     else:
         st.info("Market cap data not available.")
+
+# ──────────────────────────────────────────────
+# 3. VALUATION HEAT — bubble risk context
+# ──────────────────────────────────────────────
+st.header("Valuation Heat")
+st.caption(
+    "Bubble-risk context for current valuations. Nasdaq-100 PE via QQQ ETF (live). "
+    "Mag 7 market cap concentration compared to dot-com peak. "
+    "Framework: boomorbubble.ai (Exponential View)."
+)
+
+col_vh1, col_vh2 = st.columns(2)
+
+with col_vh1:
+    st.subheader("Nasdaq-100 PE Context")
+    try:
+        import yfinance as yf
+        qqq = yf.Ticker("QQQ")
+        qqq_info = qqq.info
+        qqq_pe = qqq_info.get("trailingPE")
+        if qqq_pe:
+            benchmarks = [
+                ("Dot-com Peak (Mar 2000)", 175, "#ef4444"),
+                ("Pre-COVID (2019)", 25, "#6b7280"),
+                ("Current QQQ", qqq_pe, "#3b82f6"),
+            ]
+            fig_pe_ctx = go.Figure()
+            for label, val, color in benchmarks:
+                fig_pe_ctx.add_trace(go.Bar(
+                    y=[label], x=[val], orientation="h",
+                    marker_color=color, showlegend=False,
+                    text=[f"{val:.0f}x"], textposition="outside",
+                    hovertemplate=f"{label}: {val:.1f}x<extra></extra>",
+                ))
+
+            # Zone shading
+            fig_pe_ctx.add_vrect(x0=0, x1=30, fillcolor="#22c55e", opacity=0.05, line_width=0)
+            fig_pe_ctx.add_vrect(x0=30, x1=40, fillcolor="#f59e0b", opacity=0.05, line_width=0)
+            fig_pe_ctx.add_vrect(x0=40, x1=200, fillcolor="#ef4444", opacity=0.05, line_width=0)
+
+            fig_pe_ctx.update_layout(
+                height=250, xaxis_title="Trailing P/E",
+                margin=dict(l=0, r=60, t=10, b=0),
+            )
+            st.plotly_chart(fig_pe_ctx, use_container_width=True)
+            st.caption(
+                f"QQQ trailing PE: **{qqq_pe:.1f}x** — "
+                f"{'Green (<30x)' if qqq_pe < 30 else 'Amber (30–40x)' if qqq_pe < 40 else 'Red (>40x)'}. "
+                "Dot-com peak was ~175x. Source: Yahoo Finance (live)."
+            )
+        else:
+            st.info("QQQ PE not available from yfinance.")
+    except Exception as e:
+        st.warning(f"Could not fetch QQQ data: {e}")
+
+with col_vh2:
+    st.subheader("Mag 7 Market Cap Concentration")
+    mag7_tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA"]
+    mag7_stocks = [s for s in stocks if s["symbol"] in mag7_tickers and s.get("market_cap")]
+
+    if mag7_stocks:
+        mag7_total = sum(s["market_cap"] for s in mag7_stocks) / 1e12
+        mag7_data = sorted(mag7_stocks, key=lambda s: s["market_cap"], reverse=True)
+
+        fig_conc = go.Figure()
+        fig_conc.add_trace(go.Bar(
+            x=[s["symbol"] for s in mag7_data],
+            y=[s["market_cap"] / 1e12 for s in mag7_data],
+            marker_color=[
+                "#3b82f6" if s["symbol"] != "NVDA" else "#76B900"
+                for s in mag7_data
+            ],
+            hovertemplate="%{x}: $%{y:.2f}T<extra></extra>",
+        ))
+        fig_conc.update_layout(
+            height=250, yaxis_title="Market Cap ($T)",
+            showlegend=False,
+            margin=dict(l=0, r=0, t=10, b=0),
+        )
+        st.plotly_chart(fig_conc, use_container_width=True)
+        st.caption(
+            f"Mag 7 combined: **${mag7_total:.1f}T**. "
+            f"At dot-com peak, top 5 were ~18% of S&P 500 (S&P Dow Jones). "
+            f"Today's Mag 7 share is estimated at ~33% — nearly 2x the dot-com concentration."
+        )
+    else:
+        st.info("Mag 7 market cap data not available.")

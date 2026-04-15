@@ -68,6 +68,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Overview
+landing = st.Page("views/landing.py", title="Overview", default=True, url_path="home")
+
 # Fundamentals Tracking
 model_performance = st.Page(
     "views/fundamentals/model_performance.py", title="LLM Performance Analysis"
@@ -100,7 +103,7 @@ prospecting = st.Page(
 )
 
 # News
-news = st.Page("views/news/news.py", title="News", default=True)
+news = st.Page("views/news/news.py", title="News")
 
 # System
 source_health = st.Page(
@@ -109,7 +112,7 @@ source_health = st.Page(
 
 # Australian Market
 au_landing = st.Page(
-    "views/au_dc/landing.py", title="Overview"
+    "views/au_dc/landing.py", title="Overview", url_path="au-overview"
 )
 au_market_overview = st.Page(
     "views/au_dc/market_overview.py", title="Market Overview"
@@ -126,6 +129,7 @@ au_project = st.Page(
 
 pg = st.navigation(
     {
+        "Dashboard": [landing],
         "Fundamentals Tracking": [
             model_performance,
             equity_analysis,
