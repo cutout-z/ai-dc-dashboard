@@ -17,3 +17,7 @@ venv/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Runtime-generated
+data/*.db
+logs/
