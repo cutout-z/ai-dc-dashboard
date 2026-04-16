@@ -249,9 +249,12 @@ if val_path.exists():
 # ══════════════════════════════════════════════
 st.header("GPU Lease Prices")
 st.caption(
-    "Spot GPU prices are the most real-time signal of AI compute supply/demand. "
-    "Declining spot prices indicate supply outpacing demand; rising prices indicate the opposite. "
-    "H100 spot at ~$1/hr (vs $4/hr peak) signals significant oversupply of prior-gen compute as Blackwell comes online."
+    "**What this measures**: Spot lease prices reflect the marginal clearing price for excess supply — "
+    "a **stranded asset pricing signal**, not a direct obsolescence measure. "
+    "H100 is not technically obsolete; the price decline reflects hyperscaler over-provisioning as Blackwell pulls workloads up-stack. "
+    "**Key watch**: H100 spot *re-inflating* would be the more concerning bubble signal — "
+    "it would mean demand is accelerating faster than Blackwell can absorb it. "
+    "⚠️ VAST.ai is a thin peer-to-peer market — treat spot prices as directional, not precise."
 )
 
 gpu_path = DATA_DIR / "gpu_lease_prices.csv"
@@ -259,43 +262,87 @@ if gpu_path.exists():
     df_gpu = pd.read_csv(gpu_path)
     df_gpu["date"] = pd.to_datetime(df_gpu["date"])
 
+    _h100_spot = df_gpu[(df_gpu["gpu_model"] == "H100 80GB") & (df_gpu["commitment"] == "spot")].sort_values("date")
+    _h100_od   = df_gpu[(df_gpu["gpu_model"] == "H100 80GB") & (df_gpu["commitment"] == "on-demand")].sort_values("date")
+    _b200_od   = df_gpu[(df_gpu["gpu_model"] == "B200") & (df_gpu["commitment"] == "on-demand")].sort_values("date")
+
+    if not _h100_spot.empty:
+        _spot_latest = _h100_spot.iloc[-1]["price_per_hour"]
+        _spot_peak   = _h100_spot["price_per_hour"].max()
+        _spot_pct    = (_spot_latest / _spot_peak - 1) * 100
+        _od_latest   = _h100_od.iloc[-1]["price_per_hour"] if not _h100_od.empty else None
+        _b200_latest = _b200_od.iloc[-1]["price_per_hour"] if not _b200_od.empty else None
+        _gen_gap     = _b200_latest / _spot_latest if _b200_latest else None
+        _struct_sprd = _od_latest / _spot_latest if _od_latest else None
+
+        _cm1, _cm2, _cm3, _cm4 = st.columns(4)
+        _cm1.metric("H100 Spot (VAST.ai)", f"${_spot_latest:.2f}/hr",
+                    f"{_spot_pct:+.0f}% from peak")
+        _cm2.metric("H100 On-Demand (Lambda)", f"${_od_latest:.2f}/hr" if _od_latest else "—")
+        _cm3.metric("Generation Gap", f"{_gen_gap:.1f}x" if _gen_gap else "—",
+                    help="B200 on-demand ÷ H100 spot — compute-per-dollar migration pressure")
+        _cm4.metric("Structured/Spot Spread", f"{_struct_sprd:.1f}x" if _struct_sprd else "—",
+                    help="Lambda on-demand ÷ VAST spot — widening = structured buyers not paying up = stronger stranded asset signal")
+
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("H100 80GB Pricing")
-        df_h100 = df_gpu[df_gpu["gpu_model"] == "H100 80GB"]
-        if not df_h100.empty:
+        st.subheader("H100 Price History")
+        st.caption("Spot (VAST.ai) vs on-demand (Lambda/CoreWeave) — spread between them is the structured buyer signal")
+        df_h100_all = df_gpu[df_gpu["gpu_model"] == "H100 80GB"]
+        if not df_h100_all.empty:
             fig_h100 = px.line(
-                df_h100, x="date", y="price_per_hour",
+                df_h100_all, x="date", y="price_per_hour",
                 color="provider", line_dash="commitment",
                 markers=True,
-                title="H100 $/hr by Provider",
                 labels={"price_per_hour": "$/hr", "date": ""},
             )
-            fig_h100.update_layout(height=400, margin=dict(l=0, r=0, t=30, b=0))
+            fig_h100.update_layout(
+                height=380,
+                yaxis_title="$/hr",
+                legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5),
+                margin=dict(l=0, r=0, t=10, b=80),
+            )
             st.plotly_chart(fig_h100, use_container_width=True)
 
     with col2:
-        st.subheader("Current GPU Pricing")
-        df_latest = df_gpu.sort_values("date").groupby(["gpu_model", "provider", "commitment"]).last().reset_index()
-        df_latest = df_latest.sort_values(["gpu_model", "price_per_hour"])
-
-        fig_gpu_bar = px.bar(
-            df_latest, x="gpu_model", y="price_per_hour",
-            color="provider", pattern_shape="commitment",
-            barmode="group",
-            title="Latest Prices by GPU Model",
-            labels={"price_per_hour": "$/hr", "gpu_model": "GPU"},
+        st.subheader("Generation Gap")
+        st.caption("H100 spot vs H100/H200/B200 on-demand — the spread is the compute-per-dollar cost of not upgrading to Blackwell")
+        _GEN_COLORS = {
+            ("H100 80GB", "spot"):      "#ef4444",
+            ("H100 80GB", "on-demand"): "#f59e0b",
+            ("H200",      "on-demand"): "#3b82f6",
+            ("B200",      "on-demand"): "#22c55e",
+        }
+        fig_gen = go.Figure()
+        for (model, commitment), sub in df_gpu.groupby(["gpu_model", "commitment"]):
+            color = _GEN_COLORS.get((model, commitment))
+            if color is None:
+                continue
+            sub = sub.sort_values("date")
+            fig_gen.add_trace(go.Scatter(
+                x=sub["date"], y=sub["price_per_hour"],
+                name=f"{model} ({commitment})",
+                mode="lines+markers",
+                line=dict(color=color, width=2),
+                hovertemplate=f"{model} {commitment}: $%{{y:.2f}}/hr<extra></extra>",
+            ))
+        fig_gen.update_layout(
+            height=380,
+            yaxis_title="$/hr",
+            legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5),
+            margin=dict(l=0, r=0, t=10, b=80),
         )
-        fig_gpu_bar.update_layout(height=400, margin=dict(l=0, r=0, t=30, b=0))
-        st.plotly_chart(fig_gpu_bar, use_container_width=True)
+        st.plotly_chart(fig_gen, use_container_width=True)
 
-    df_h100_spot = df_gpu[(df_gpu["gpu_model"] == "H100 80GB") & (df_gpu["commitment"] == "spot")]
-    if not df_h100_spot.empty and len(df_h100_spot) >= 2:
-        first_spot = df_h100_spot.iloc[0]["price_per_hour"]
-        last_spot = df_h100_spot.iloc[-1]["price_per_hour"]
-        spot_change = ((last_spot / first_spot) - 1) * 100
-        st.caption(f"H100 spot market: ${first_spot:.2f}/hr → ${last_spot:.2f}/hr ({spot_change:+.0f}% since first tracked)")
+    if not _h100_spot.empty and len(_h100_spot) >= 2:
+        _first = _h100_spot.iloc[0]["price_per_hour"]
+        _last  = _h100_spot.iloc[-1]["price_per_hour"]
+        st.caption(
+            f"H100 spot: ${_first:.2f}/hr → ${_last:.2f}/hr "
+            f"({(_last/_first - 1)*100:+.0f}% since {_h100_spot.iloc[0]['date'].strftime('%b %Y')}). "
+            "For a more robust series, see Epoch AI and SemiAnalysis compute price indices."
+        )
 
 # --- Model Release Timeline ---
 st.subheader("Frontier Model Release Timeline")
@@ -439,113 +486,5 @@ else:
     )
     st.plotly_chart(fig_ppw, use_container_width=True)
 
-    st.subheader("H100 Rental Prices")
-    with st.expander("About this chart"):
-        st.markdown("**What it shows.** Monthly median H100 rental price in $/GPU-hour, broken out by provider tier.")
-        st.markdown("**Why it matters.** H100 lease rates are the cleanest public proxy for GPU depreciation and chip obsolescence. Sharp 2025 declines reflect Blackwell supply coming online.")
-        st.markdown("**Source.** Silicon Data — *H100 Rental Index* (silicondata.com/blog/h100-rental-price-over-time).")
-
-    @st.cache_data(ttl=86400)
-    def load_h100_prices() -> pd.DataFrame:
-        csv = DATA_DIR / "h100_rental_prices.csv"
-        if not csv.exists():
-            return pd.DataFrame()
-        df = pd.read_csv(csv)
-        df["month"] = pd.to_datetime(df["month"])
-        return df
-
-    h100_df = load_h100_prices()
-    if h100_df.empty:
-        st.warning("H100 rental price CSV missing.")
-    else:
-        tier_colours = {
-            "Hyperscaler": "#3b82f6",
-            "Neocloud":    "#a855f7",
-            "Marketplace": "#10b981",
-        }
-
-        fig_h100 = go.Figure()
-        for tier in ["Hyperscaler", "Neocloud", "Marketplace"]:
-            sub = h100_df[h100_df["tier"] == tier].sort_values("month")
-            if sub.empty:
-                continue
-            fig_h100.add_trace(go.Scatter(
-                x=sub["month"],
-                y=sub["price_usd_per_gpu_hr"],
-                name=tier,
-                mode="lines+markers",
-                line=dict(color=tier_colours[tier], width=2),
-                marker=dict(size=6, color=tier_colours[tier]),
-                hovertemplate=f"{tier}<br>%{{x|%b %Y}}: $%{{y:.2f}}/GPU-hr<extra></extra>",
-            ))
-
-        y_min, y_max = _compute_y_range(
-            h100_df["price_usd_per_gpu_hr"].tolist(), max_score=12, floor=0.5
-        )
-        fig_h100.update_layout(
-            yaxis_title="$ per GPU-hour",
-            yaxis_range=[y_min, y_max],
-            **CHART_LAYOUT,
-        )
-        st.plotly_chart(fig_h100, use_container_width=True)
-
-# ══════════════════════════════════════════════
-# 5-GAUGE BUBBLE RISK SUMMARY
-# ══════════════════════════════════════════════
-st.header("Bubble Risk Dashboard")
-st.caption(
-    "5-gauge framework inspired by [boomorbubble.ai](https://boomorbubble.ai/) "
-    "(Azeem Azhar, Exponential View). "
-    "Rule: 0–1 red = Boom · 2 red = Caution · 3+ red = Bubble."
-)
-
-from app.lib.bubble_gauges import all_gauges, overall_assessment, DIRECTION_ARROWS
-
-gauges = all_gauges(DB_PATH)
-assessment = overall_assessment(gauges)
-
-# Overall badge
-st.markdown(
-    f'<div style="text-align:center; padding:0.5rem 0;">'
-    f'<span style="font-size:1.4rem; font-weight:700; color:{assessment["color"]};">'
-    f'{assessment["label"]}</span>'
-    f'<span style="font-size:0.85rem; color:#9ca3af; margin-left:0.75rem;">'
-    f'{assessment["detail"]}</span></div>',
-    unsafe_allow_html=True,
-)
-
-# Gauge table
-gauge_rows = []
-for g in gauges:
-    zone_color = ZONE_COLORS.get(g["zone"], "#6b7280")
-    arrow = DIRECTION_ARROWS.get(g["direction"], "→")
-    gauge_rows.append({
-        "Gauge": g["name"],
-        "Reading": g["value_fmt"],
-        "Zone": g["zone"].upper(),
-        "Trend": arrow,
-        "Benchmark": g["benchmark"],
-        "Detail": g["detail"],
-    })
-df_gauges = pd.DataFrame(gauge_rows)
-st.dataframe(df_gauges, use_container_width=True, hide_index=True)
-
-# Qualitative signals table (preserved from original)
-st.subheader("Qualitative Signals")
-st.markdown("""
-| Indicator | Signal | Direction | Notes |
-|-----------|--------|-----------|-------|
-| Hyperscaler CAPEX | Accelerating | Higher risk | Combined guidance >$350B for 2026, continued upward revisions |
-| Semi demand | Strong | Supports thesis | TSMC revenue growth 35-45% YoY sustained through Q1 2026 |
-| AI demand / tokens | Surging | Supports thesis | OpenAI ARR $25B, 900M WAU; Anthropic ARR $30B, surpassed OpenAI |
-| Frontier lab valuations | Extreme | Higher risk | Anthropic $380B at ~13x ARR, xAI $230B, OpenAI TBD |
-| GPU lease prices | Declining | Mixed | H100 spot <$1/hr, down >75% from peak — Blackwell driving migration |
-| LLM capability | Advancing | Lower risk | GPQA >94%, HLE >53%, SWE-Bench >80% — continued rapid gains |
-| Model cost deflation | Rapid | Mixed | Enables adoption, compresses enabler margins |
-| Open source gap | Narrowing | Higher risk | Qwen3.5, Kimi K2.5 competitive with frontier on benchmarks |
-| DC power demand | Surging | Higher risk | All forecasters projecting near-doubling by 2030 |
-
-*Updated April 2026. Quantitative gauges auto-computed from reference data + live feeds.*
-""")
 
 conn.close()

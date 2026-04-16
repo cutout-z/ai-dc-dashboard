@@ -404,21 +404,50 @@ with st.expander("How quickly frontier capability is improving, and how tightly 
             st.caption(_ATTR)
 
         st.subheader("Lab Progress")
-        st.caption("Best GPQA and SWE-Bench score per organisation.")
-        for _score_col, _label in [("gpqa_score", "GPQA"), ("swe_bench_verified_score", "SWE-Bench")]:
-            _lab = (_df.dropna(subset=[_score_col])
-                       .groupby("organization")[_score_col].max()
-                       .mul(100).reset_index()
-                       .rename(columns={_score_col: "score", "organization": "org"})
-                       .sort_values("score").tail(12))
-            _lab["colour"] = _lab["org"].map(_ORG_TO_PROVIDER).map(PROVIDER_COLOURS).fillna("#6b7280")
-            fig_lab = go.Figure(go.Bar(
-                x=_lab["score"], y=_lab["org"], orientation="h",
-                marker_color=_lab["colour"].tolist(),
-                hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
-            ))
-            fig_lab.update_layout(title=f"Best {_label} by Org", xaxis_title=f"{_label} Score (%)", height=380, showlegend=False, **CHART_LAYOUT)
-            st.plotly_chart(fig_lab, use_container_width=True)
+        st.caption("GPQA and SWE-Bench improvement over the last 12 months")
+        _cutoff_12mo = pd.Timestamp.today() - pd.DateOffset(months=12)
+        _col_lab1, _col_lab2 = st.columns(2)
+        for _col, (_score_col, _label, _gain_color) in zip(
+            [_col_lab1, _col_lab2],
+            [("gpqa_score", "GPQA · General Knowledge", "#22c55e"),
+             ("swe_bench_verified_score", "SWE-Bench · Coding", "#3b82f6")],
+        ):
+            with _col:
+                _cur = (_df.dropna(subset=[_score_col])
+                           .groupby("organization")[_score_col].max()
+                           .mul(100).reset_index()
+                           .rename(columns={_score_col: "current", "organization": "org"}))
+                _old = (_df[_df["release_date"] <= _cutoff_12mo]
+                           .dropna(subset=[_score_col])
+                           .groupby("organization")[_score_col].max()
+                           .mul(100).reset_index()
+                           .rename(columns={_score_col: "base", "organization": "org"}))
+                _lab = _cur.merge(_old, on="org", how="left")
+                _lab["base"] = _lab["base"].fillna(0)
+                _lab["gain"] = _lab["current"] - _lab["base"]
+                _lab = _lab.sort_values("current").tail(12)
+
+                fig_lab = go.Figure()
+                fig_lab.add_trace(go.Bar(
+                    x=_lab["base"], y=_lab["org"], orientation="h",
+                    marker_color="#6b7280", name="12mo ago",
+                    hovertemplate="%{y}: %{x:.1f}% (12mo ago)<extra></extra>",
+                ))
+                fig_lab.add_trace(go.Bar(
+                    x=_lab["gain"], y=_lab["org"], orientation="h",
+                    marker_color=_gain_color, name="Gain",
+                    text=[f"{v:.0f}%" for v in _lab["current"]],
+                    textposition="outside",
+                    hovertemplate="%{y}: +%{x:.1f}% gain<extra></extra>",
+                ))
+                fig_lab.update_layout(
+                    title=_label,
+                    barmode="stack",
+                    xaxis=dict(tickformat=".0f", ticksuffix="%", range=[0, 108]),
+                    height=420,
+                    **CHART_LAYOUT,
+                )
+                st.plotly_chart(fig_lab, use_container_width=True)
         st.caption(_ATTR)
 
         st.subheader("Organization Progress")
@@ -666,6 +695,7 @@ with st.expander("How fast intelligence is getting cheaper, which models deliver
         fig_price.update_layout(
             yaxis_title="$ per million tokens (blended 3×input + 1×output)",
             yaxis_type="log",
+            xaxis_range=["2023-01-01", None],
             **CHART_LAYOUT,
         )
         st.plotly_chart(fig_price, use_container_width=True)
