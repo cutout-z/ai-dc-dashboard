@@ -16,8 +16,9 @@ def _chart_layout():
     return dict(
         template=st.session_state.get("plotly_template", "plotly_dark"),
         font=dict(family="Inter, system-ui, sans-serif", size=12),
-        margin=dict(l=40, r=20, t=40, b=40),
+        margin=dict(l=40, r=20, t=40, b=80),
         hoverlabel=dict(bgcolor=st.session_state.get("hoverlabel_bg", "#333"), font_size=12),
+        legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5),
     )
 
 CHART_LAYOUT = _chart_layout()
@@ -354,8 +355,8 @@ st.caption(
 # ═════════════════════════════════════════════════════════════════════════
 # BENCHMARK PERFORMANCE
 # ═════════════════════════════════════════════════════════════════════════
-with st.expander("Benchmark Performance", expanded=True):
-    st.caption("How quickly frontier capability is improving, and how tightly packed the leaders have become.")
+st.markdown('<h2 style="font-size:1.8rem;font-weight:600;margin:1.5rem 0 0 0;">Benchmark Performance</h2>', unsafe_allow_html=True)
+with st.expander("How quickly frontier capability is improving, and how tightly packed the leaders have become.", expanded=True):
     if _ze_df.empty:
         st.info("Live data unavailable — ZeroEval API offline.")
     else:
@@ -404,8 +405,7 @@ with st.expander("Benchmark Performance", expanded=True):
 
         st.subheader("Lab Progress")
         st.caption("Best GPQA and SWE-Bench score per organisation.")
-        _col1, _col2 = st.columns(2)
-        for _col_ui, _score_col, _label in [(_col1, "gpqa_score", "GPQA"), (_col2, "swe_bench_verified_score", "SWE-Bench")]:
+        for _score_col, _label in [("gpqa_score", "GPQA"), ("swe_bench_verified_score", "SWE-Bench")]:
             _lab = (_df.dropna(subset=[_score_col])
                        .groupby("organization")[_score_col].max()
                        .mul(100).reset_index()
@@ -417,8 +417,8 @@ with st.expander("Benchmark Performance", expanded=True):
                 marker_color=_lab["colour"].tolist(),
                 hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
             ))
-            fig_lab.update_layout(title=f"Best {_label} by Org", xaxis_title=f"{_label} Score (%)", height=380, **CHART_LAYOUT)
-            _col_ui.plotly_chart(fig_lab, use_container_width=True)
+            fig_lab.update_layout(title=f"Best {_label} by Org", xaxis_title=f"{_label} Score (%)", height=380, showlegend=False, **CHART_LAYOUT)
+            st.plotly_chart(fig_lab, use_container_width=True)
         st.caption(_ATTR)
 
         st.subheader("Organization Progress")
@@ -444,12 +444,11 @@ with st.expander("Benchmark Performance", expanded=True):
 # ═════════════════════════════════════════════════════════════════════════
 # LABS AND COUNTRIES
 # ═════════════════════════════════════════════════════════════════════════
-with st.expander("Labs and Countries", expanded=True):
-    st.caption("Who is leading, who is shipping the most, and how the balance of power is shifting.")
+st.markdown('<h2 style="font-size:1.8rem;font-weight:600;margin:1.5rem 0 0 0;">Labs and Countries</h2>', unsafe_allow_html=True)
+with st.expander("Who is leading, who is shipping the most, and how the balance of power is shifting.", expanded=True):
     if _ze_df.empty:
         st.info("Live data unavailable — ZeroEval API offline.")
     else:
-        _col1, _col2 = st.columns(2)
         _ctry_counts = _df["country"].value_counts().reset_index()
         _ctry_counts.columns = ["country", "count"]
         fig_ctry = go.Figure(go.Bar(
@@ -457,8 +456,8 @@ with st.expander("Labs and Countries", expanded=True):
             marker_color="#3b82f6",
             hovertemplate="%{y}: %{x} models<extra></extra>",
         ))
-        fig_ctry.update_layout(title="Cumulative Releases by Country", xaxis_title="Models", yaxis=dict(autorange="reversed"), height=300, **CHART_LAYOUT)
-        _col1.plotly_chart(fig_ctry, use_container_width=True)
+        fig_ctry.update_layout(title="Cumulative Releases by Country", xaxis_title="Models", yaxis=dict(autorange="reversed"), height=300, showlegend=False, **CHART_LAYOUT)
+        st.plotly_chart(fig_ctry, use_container_width=True)
 
         _hm = _df.groupby(["year", "month"]).size().reset_index(name="count")
         _hm_piv = _hm.pivot(index="year", columns="month", values="count").fillna(0)
@@ -469,10 +468,9 @@ with st.expander("Labs and Countries", expanded=True):
             colorscale="Blues", text=_hm_piv.values.astype(int), texttemplate="%{text}",
             hovertemplate="Year: %{y} · %{x}: %{z} releases<extra></extra>",
         ))
-        fig_hm.update_layout(title="Release Heatmap", height=300, **CHART_LAYOUT)
-        _col2.plotly_chart(fig_hm, use_container_width=True)
+        fig_hm.update_layout(title="Release Heatmap", height=300, showlegend=False, **CHART_LAYOUT)
+        st.plotly_chart(fig_hm, use_container_width=True)
 
-        _col1, _col2 = st.columns(2)
         _top5c = _df["country"].value_counts().head(5).index.tolist()
         _df["country_grp"] = _df["country"].apply(lambda c: c if c in _top5c else "Other")
         _qc = _df.groupby(["quarter", "country_grp"]).size().reset_index(name="count")
@@ -497,7 +495,7 @@ with st.expander("Labs and Countries", expanded=True):
                 hovertemplate=f"{label}: %{{y:.1f}}%<extra></extra>",
             ))
         fig_ctry_area.update_layout(title="Model Releases by Country (% share)", yaxis_title="Share (%)", height=320, **CHART_LAYOUT)
-        _col1.plotly_chart(fig_ctry_area, use_container_width=True)
+        st.plotly_chart(fig_ctry_area, use_container_width=True)
 
         _top8labs = _df["organization"].value_counts().head(8).index.tolist()
         _total = len(_df)
@@ -513,18 +511,17 @@ with st.expander("Labs and Countries", expanded=True):
                 hovertemplate=f"{org}: %{{y:.1f}}%<extra></extra>",
             ))
         fig_labs.update_layout(title="Cumulative Releases by Lab (% of total)", yaxis_title="Cumulative Share (%)", height=320, **CHART_LAYOUT)
-        _col2.plotly_chart(fig_labs, use_container_width=True)
+        st.plotly_chart(fig_labs, use_container_width=True)
         st.caption(_ATTR)
 
 # ═════════════════════════════════════════════════════════════════════════
 # OPEN MODELS
 # ═════════════════════════════════════════════════════════════════════════
-with st.expander("Open Models", expanded=True):
-    st.caption("How open-weight models are growing, how close they are to proprietary systems, and where the open race is happening.")
+st.markdown('<h2 style="font-size:1.8rem;font-weight:600;margin:1.5rem 0 0 0;">Open Models</h2>', unsafe_allow_html=True)
+with st.expander("How open-weight models are growing, how close they are to proprietary systems, and where the open race is happening.", expanded=True):
     if _ze_df.empty:
         st.info("Live data unavailable — ZeroEval API offline.")
     else:
-        _col1, _col2 = st.columns(2)
         _ql = _df.groupby(["quarter", "is_open"]).size().reset_index(name="count")
         _ql["pct"] = _ql.groupby("quarter")["count"].transform(lambda x: x / x.sum() * 100)
         fig_open = go.Figure()
@@ -536,7 +533,7 @@ with st.expander("Open Models", expanded=True):
                 hovertemplate=f"{lic}: %{{y:.1f}}%<extra></extra>",
             ))
         fig_open.update_layout(title="Open vs Proprietary Releases (%)", yaxis_title="Share (%)", height=320, **CHART_LAYOUT)
-        _col1.plotly_chart(fig_open, use_container_width=True)
+        st.plotly_chart(fig_open, use_container_width=True)
 
         fig_gap = go.Figure()
         for grp, colour in [("Proprietary", "#f59e0b"), ("Open Source", "#10b981")]:
@@ -550,7 +547,7 @@ with st.expander("Open Models", expanded=True):
                 hovertemplate=f"{grp} SOTA: %{{y:.1f}}%<extra></extra>",
             ))
         fig_gap.update_layout(title="The Closing Gap — GPQA SOTA", yaxis_title="GPQA Score (%)", height=320, **CHART_LAYOUT)
-        _col2.plotly_chart(fig_gap, use_container_width=True)
+        st.plotly_chart(fig_gap, use_container_width=True)
 
         _df["race_grp"] = _df.apply(
             lambda r: f"{'US' if r['country'] == 'US' else 'CN'} {r['is_open']}"
@@ -578,8 +575,8 @@ with st.expander("Open Models", expanded=True):
 # ═════════════════════════════════════════════════════════════════════════
 # MODEL CAPABILITIES
 # ═════════════════════════════════════════════════════════════════════════
-with st.expander("Model Capabilities", expanded=True):
-    st.caption("Capability progression, model type mix, and architectural shifts.")
+st.markdown('<h2 style="font-size:1.8rem;font-weight:600;margin:1.5rem 0 0 0;">Model Capabilities</h2>', unsafe_allow_html=True)
+with st.expander("Capability progression, model type mix, and architectural shifts.", expanded=True):
 
     st.subheader("Task Complexity Over Time")
     _explainer(
@@ -597,11 +594,10 @@ with st.expander("Model Capabilities", expanded=True):
         marker=dict(size=8, color="#f59e0b"),
         hovertemplate="%{text}<br>Complexity: %{y}<extra></extra>",
     ))
-    fig_complexity.update_layout(yaxis_title="Capability Level", yaxis_range=[0, 10], **CHART_LAYOUT)
+    fig_complexity.update_layout(yaxis_title="Capability Level", yaxis_range=[0, 10], showlegend=False, **CHART_LAYOUT)
     st.plotly_chart(fig_complexity, use_container_width=True)
 
     if not _ze_df.empty:
-        _col1, _col2 = st.columns(2)
         _qmm = (_df.groupby("quarter").apply(
             lambda g: pd.Series({
                 "Multimodal": (g["multimodal"] == True).sum() / len(g) * 100,  # noqa: E712
@@ -616,7 +612,7 @@ with st.expander("Model Capabilities", expanded=True):
                 hovertemplate=f"{typ}: %{{y:.1f}}%<extra></extra>",
             ))
         fig_mm.update_layout(title="The Multimodal Shift", yaxis_title="% of New Releases", height=320, **CHART_LAYOUT)
-        _col1.plotly_chart(fig_mm, use_container_width=True)
+        st.plotly_chart(fig_mm, use_container_width=True)
 
         _moe_df = _df[_df["is_open"] == "Open Source"].dropna(subset=["gpqa_score"]).copy()
         if not _moe_df.empty:
@@ -630,15 +626,15 @@ with st.expander("Model Capabilities", expanded=True):
                     marker=dict(color=colour, size=8, opacity=0.8),
                     hovertemplate="%{text}: %{y:.1f}%<extra></extra>",
                 ))
-            fig_moe.update_layout(title="MoE Adoption — Open Models", xaxis_title="Release Date", yaxis_title="GPQA Score (%)", height=320, **CHART_LAYOUT)
-            _col2.plotly_chart(fig_moe, use_container_width=True)
+            fig_moe.update_layout(title="MoE Adoption — Open Models", xaxis_title="", xaxis_range=["2023-01-01", None], yaxis_title="GPQA Score (%)", height=320, **CHART_LAYOUT)
+            st.plotly_chart(fig_moe, use_container_width=True)
         st.caption(_ATTR)
 
 # ═════════════════════════════════════════════════════════════════════════
 # PRICES AND VALUE
 # ═════════════════════════════════════════════════════════════════════════
-with st.expander("Prices and Value", expanded=True):
-    st.caption("How fast intelligence is getting cheaper, which models deliver the most value, and where prices differ.")
+st.markdown('<h2 style="font-size:1.8rem;font-weight:600;margin:1.5rem 0 0 0;">Prices and Value</h2>', unsafe_allow_html=True)
+with st.expander("How fast intelligence is getting cheaper, which models deliver the most value, and where prices differ.", expanded=True):
 
     if not token_df.empty:
         st.subheader("Blended API Cost Over Time")
@@ -690,14 +686,13 @@ with st.expander("Prices and Value", expanded=True):
                     text=sub["name"].tolist(),
                     hovertemplate="%{text}: $%{y:.3f}/M tokens<extra></extra>",
                 ))
-            fig_pbc.update_layout(yaxis_title="Input Price ($/1M tokens)", yaxis_type="log", **CHART_LAYOUT)
+            fig_pbc.update_layout(yaxis_title="Input Price ($/1M tokens)", yaxis_type="log", showlegend=False, **CHART_LAYOUT)
             st.plotly_chart(fig_pbc, use_container_width=True)
             st.caption(_ATTR)
 
         st.subheader("Price Frontiers")
         st.caption("Capability vs API cost — Pareto frontier shows the best value per dollar.")
-        _col1, _col2 = st.columns(2)
-        for _col_ui, _sc, _lb in [(_col1, "gpqa_score", "GPQA"), (_col2, "swe_bench_verified_score", "SWE-Bench")]:
+        for _sc, _lb in [("gpqa_score", "GPQA"), ("swe_bench_verified_score", "SWE-Bench")]:
             _pp = _df.dropna(subset=[_sc, "input_price"])
             _pp = _pp[_pp["input_price"] > 0].copy()
             if _pp.empty:
@@ -720,7 +715,7 @@ with st.expander("Prices and Value", expanded=True):
                 ))
             fig_pp.update_layout(title=f"{_lb} vs Price", xaxis_title="Input Price ($/1M tokens)",
                 yaxis_title=f"{_lb} Score (%)", height=380, showlegend=False, **CHART_LAYOUT)
-            _col_ui.plotly_chart(fig_pp, use_container_width=True)
+            st.plotly_chart(fig_pp, use_container_width=True)
         st.caption(_ATTR)
 
         st.subheader("Intelligence vs Cost Frontier")
@@ -792,12 +787,11 @@ with st.expander("Prices and Value", expanded=True):
 # ═════════════════════════════════════════════════════════════════════════
 # EFFICIENCY AND SCALE
 # ═════════════════════════════════════════════════════════════════════════
-with st.expander("Efficiency and Scale", expanded=True):
-    st.caption("How architecture, parameters, and training scale affect capability.")
+st.markdown('<h2 style="font-size:1.8rem;font-weight:600;margin:1.5rem 0 0 0;">Efficiency and Scale</h2>', unsafe_allow_html=True)
+with st.expander("How architecture, parameters, and training scale affect capability.", expanded=True):
     if _ze_df.empty:
         st.info("Live data unavailable — ZeroEval API offline.")
     else:
-        _col1, _col2 = st.columns(2)
         _mp = _df.dropna(subset=["gpqa_score", "blended_price"])
         _mp = _mp[_mp["blended_price"] > 0].copy()
         if not _mp.empty:
@@ -814,7 +808,7 @@ with st.expander("Efficiency and Scale", expanded=True):
             fig_moe_p.update_layout(title="Performance vs Price by Architecture (MoE vs Dense)",
                 xaxis_title="Blended Price ($/1M tokens)", xaxis_type="log",
                 yaxis_title="GPQA Score (%)", height=360, **CHART_LAYOUT)
-            _col1.plotly_chart(fig_moe_p, use_container_width=True)
+            st.plotly_chart(fig_moe_p, use_container_width=True)
 
         _t2 = _df.dropna(subset=["gpqa_score", "params"])
         _t2 = _t2[_t2["params"] > 0].copy()
@@ -838,7 +832,7 @@ with st.expander("Efficiency and Scale", expanded=True):
             fig_t2.update_layout(title="GPQA Score by Model Size Tier",
                 xaxis_title="Model Tier", yaxis_title="GPQA Score (%)",
                 showlegend=False, height=360, **CHART_LAYOUT)
-            _col2.plotly_chart(fig_t2, use_container_width=True)
+            st.plotly_chart(fig_t2, use_container_width=True)
 
         st.subheader("The Efficiency Curve")
         st.caption("Smallest model to reach each GPQA threshold — intelligence is getting smaller.")
@@ -872,8 +866,8 @@ with st.expander("Efficiency and Scale", expanded=True):
 # ═════════════════════════════════════════════════════════════════════════
 # SPEED AND CONTEXT
 # ═════════════════════════════════════════════════════════════════════════
-with st.expander("Speed and Context", expanded=True):
-    st.caption("What you trade off when deploying models: throughput, context length, and how speed costs capability.")
+st.markdown('<h2 style="font-size:1.8rem;font-weight:600;margin:1.5rem 0 0 0;">Speed and Context</h2>', unsafe_allow_html=True)
+with st.expander("What you trade off when deploying models: throughput, context length, and how speed costs capability.", expanded=True):
 
     st.subheader("Context Window Expansion")
     _explainer(
@@ -892,7 +886,6 @@ with st.expander("Speed and Context", expanded=True):
     st.plotly_chart(fig_ctx_win, use_container_width=True)
 
     if not _ze_df.empty:
-        _col1, _col2 = st.columns(2)
         _sp = _df.dropna(subset=["gpqa_score", "throughput"])
         _sp = _sp[_sp["throughput"] > 0].copy()
         if not _sp.empty:
@@ -914,7 +907,7 @@ with st.expander("Speed and Context", expanded=True):
                 ))
             fig_sp.update_layout(title="The Speed Tax — GPQA vs Throughput",
                 xaxis_title="Throughput (tok/s)", yaxis_title="GPQA Score (%)", height=360, **CHART_LAYOUT)
-            _col1.plotly_chart(fig_sp, use_container_width=True)
+            st.plotly_chart(fig_sp, use_container_width=True)
 
         _ss = _df.dropna(subset=["swe_bench_verified_score", "throughput"])
         _ss = _ss[_ss["throughput"] > 0].copy()
@@ -937,14 +930,14 @@ with st.expander("Speed and Context", expanded=True):
                 ))
             fig_ss.update_layout(title="SWE-Bench vs Throughput",
                 xaxis_title="Throughput (tok/s)", yaxis_title="SWE-Bench Score (%)", height=360, **CHART_LAYOUT)
-            _col2.plotly_chart(fig_ss, use_container_width=True)
+            st.plotly_chart(fig_ss, use_container_width=True)
         st.caption(_ATTR)
 
 # ═════════════════════════════════════════════════════════════════════════
 # HUMAN PREFERENCE
 # ═════════════════════════════════════════════════════════════════════════
-with st.expander("Human Preference", expanded=True):
-    st.caption("How models rank when humans judge them head-to-head, vs. how they score on automated benchmarks.")
+st.markdown('<h2 style="font-size:1.8rem;font-weight:600;margin:1.5rem 0 0 0;">Human Preference</h2>', unsafe_allow_html=True)
+with st.expander("How models rank when humans judge them head-to-head, vs. how they score on automated benchmarks.", expanded=True):
 
     st.subheader("Arena Elo Ratings")
     _explainer(
@@ -983,10 +976,29 @@ with st.expander("Human Preference", expanded=True):
         _bench_score["composite"] = _bench_score[_BENCH_COLS].mean(axis=1, skipna=True).mul(100)
         _bench_score = _bench_score.dropna(subset=["composite"])
         _bench_score["provider"] = _bench_score["organization"].map(_ORG_TO_PROVIDER).fillna(_bench_score["organization"])
-        _bench_score["_key"] = _bench_score["name"].str.lower().str.strip()
+
+        def _norm_key(s):
+            return "".join(c for c in str(s).lower() if c.isalnum())
+
+        _bench_score["_key"] = _bench_score["name"].apply(_norm_key)
         _elo_join = df_elo.copy()
-        _elo_join["_key"] = _elo_join["model"].str.lower().str.strip()
-        _hp = _bench_score.merge(_elo_join[["_key", "elo"]], on="_key", how="inner")
+        _elo_join["_norm"] = _elo_join["model"].apply(_norm_key)
+
+        # Build elo lookup: normalized arena key → max elo (handles duplicates like -thinking variants)
+        _elo_lookup: dict[str, float] = {}
+        for _, _er in _elo_join.iterrows():
+            if pd.notna(_er["elo"]):
+                _elo_lookup[_er["_norm"]] = max(_elo_lookup.get(_er["_norm"], 0), float(_er["elo"]))
+
+        def _best_elo(bkey: str):
+            if bkey in _elo_lookup:
+                return _elo_lookup[bkey]
+            # prefix match: "claudeopus46" matches "claudeopus46thinking", "gpt52" matches "gpt52chatlat"
+            hits = [v for k, v in _elo_lookup.items() if k.startswith(bkey) or bkey.startswith(k)]
+            return max(hits) if hits else None
+
+        _bench_score["elo"] = _bench_score["_key"].apply(_best_elo)
+        _hp = _bench_score.dropna(subset=["elo", "composite"])
         if not _hp.empty:
             fig_hp = go.Figure()
             for prov in sorted(_hp["provider"].unique()):
