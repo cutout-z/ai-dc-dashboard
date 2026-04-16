@@ -29,55 +29,76 @@ DATA_DIR = Path(__file__).parent.parent.parent.parent / "data" / "reference"
 DB_PATH = st.session_state["db_path"]
 
 # ═════════════════════════════════════════════════════════════════════════
-# LLM LEADERBOARD — top 30 models from llm-stats.com
+# LLM LEADERBOARD — live from api.zeroeval.com
 # ═════════════════════════════════════════════════════════════════════════
 
-@st.cache_data(ttl=86400)
-def _load_leaderboard() -> pd.DataFrame:
-    path = DATA_DIR / "llm_leaderboard.json"
-    if not path.exists():
+_BENCH_COLS = ["gpqa_score", "swe_bench_verified_score", "hle_score", "aime_2025_score"]
+
+_ORG_TO_PROVIDER = {
+    "Anthropic": "Anthropic",
+    "OpenAI": "OpenAI",
+    "Google": "Google",
+    "Google DeepMind": "Google",
+    "Meta": "Meta",
+    "Meta AI": "Meta",
+    "xAI": "xAI",
+    "DeepSeek": "DeepSeek",
+    "Mistral AI": "Mistral",
+    "Mistral": "Mistral",
+    "Alibaba Cloud": "Alibaba",
+    "Alibaba Cloud/Qwen Team": "Alibaba",
+    "Qwen Team": "Alibaba",
+}
+
+
+@st.cache_data(ttl=3600)
+def _fetch_zeroeval_models() -> pd.DataFrame:
+    """Fetch live model data from api.zeroeval.com. Cached for 1 hour."""
+    try:
+        resp = requests.get(
+            "https://api.zeroeval.com/leaderboard/models/full",
+            params={"justCanonicals": "true"},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        return pd.DataFrame(resp.json())
+    except Exception as e:
+        st.warning(f"ZeroEval API unavailable: {e}")
         return pd.DataFrame()
-    with open(path) as f:
-        data = json.load(f)
-    return pd.DataFrame(data["models"])
 
 
-_lb_df = _load_leaderboard()
+_ze_df = _fetch_zeroeval_models()
 
-if not _lb_df.empty:
+if not _ze_df.empty:
     st.header("LLM Leaderboard")
     st.caption(
-        "Top 30 models ranked by composite Code Arena score — combined from "
-        "[LLM Leaderboard](https://llm-stats.com/leaderboards/llm-leaderboard) + "
-        "[Open LLM Leaderboard](https://llm-stats.com/leaderboards/open-llm-leaderboard) "
-        "on llm-stats.com."
+        "Frontier models ranked by composite benchmark score (mean of GPQA, SWE-Bench Verified, HLE, AIME-2025). "
+        "Live data from [llm-stats.com](https://llm-stats.com) · updated hourly."
     )
 
-    # Build display table
-    _display = _lb_df.copy()
-    if "source_board" in _display.columns:
-        _display["type"] = _display["source_board"].map({"llm": "Closed", "open": "Open"}).fillna("")
-    else:
-        _display["type"] = ""
-    _display = _display.rename(columns={
-        "rank": "#",
-        "name": "Model",
-        "org": "Org",
-        "type": "Type",
-        "composite_score": "Score",
-        "gpqa": "GPQA",
-        "aime_2025": "AIME '25",
-        "swe_bench": "SWE-Bench",
-        "hle": "HLE",
-        "input_price": "In $/M",
-        "output_price": "Out $/M",
-        "context_k": "Ctx (K)",
-        "speed_cps": "Speed",
+    _lb = _ze_df.copy()
+    _lb["composite_score"] = _lb[_BENCH_COLS].mean(axis=1, skipna=True).mul(100).round(1)
+    _lb = _lb.dropna(subset=["composite_score"])
+    _lb = _lb.sort_values("composite_score", ascending=False).reset_index(drop=True)
+    _lb["rank"] = range(1, len(_lb) + 1)
+    _lb["type"] = _lb["license"].apply(lambda x: "Closed" if x == "proprietary" else "Open")
+    _lb["context_k"] = (_lb["context"].fillna(0) / 1000).round(0)
+
+    _display = pd.DataFrame({
+        "#": _lb["rank"],
+        "Model": _lb["name"],
+        "Org": _lb["organization"],
+        "Type": _lb["type"],
+        "Score": _lb["composite_score"],
+        "GPQA": (_lb["gpqa_score"] * 100).round(1),
+        "AIME '25": (_lb["aime_2025_score"] * 100).round(1),
+        "SWE-Bench": (_lb["swe_bench_verified_score"] * 100).round(1),
+        "HLE": (_lb["hle_score"] * 100).round(1),
+        "In $/M": _lb["input_price"],
+        "Out $/M": _lb["output_price"],
+        "Ctx (K)": _lb["context_k"],
+        "Speed": _lb["throughput"],
     })
-    _cols = ["#", "Model", "Org", "Type", "Score", "GPQA", "AIME '25", "SWE-Bench", "HLE",
-             "In $/M", "Out $/M", "Ctx (K)", "Speed"]
-    _cols = [c for c in _cols if c in _display.columns]
-    _display = _display[_cols]
 
     st.dataframe(
         _display,
@@ -89,21 +110,21 @@ if not _lb_df.empty:
             "Model": st.column_config.TextColumn(width="medium"),
             "Org": st.column_config.TextColumn(width="small"),
             "Type": st.column_config.TextColumn(width="small"),
-            "Score": st.column_config.NumberColumn(format="%d", width="small"),
+            "Score": st.column_config.NumberColumn(format="%.1f", width="small"),
             "GPQA": st.column_config.NumberColumn(format="%.1f%%"),
             "AIME '25": st.column_config.NumberColumn(format="%.1f%%"),
             "SWE-Bench": st.column_config.NumberColumn(format="%.1f%%"),
             "HLE": st.column_config.NumberColumn(format="%.1f%%"),
             "In $/M": st.column_config.NumberColumn(format="$%.2f"),
             "Out $/M": st.column_config.NumberColumn(format="$%.2f"),
-            "Ctx (K)": st.column_config.NumberColumn(format="%d"),
-            "Speed": st.column_config.NumberColumn(format="%d c/s"),
+            "Ctx (K)": st.column_config.NumberColumn(format="%dK"),
+            "Speed": st.column_config.NumberColumn(format="%d tok/s"),
         },
     )
-    with open(DATA_DIR / "llm_leaderboard.json") as _f:
-        _lb_meta = json.load(_f)["_meta"]
-    _updated = _lb_meta.get("updated", "unknown")
-    st.caption(f"Last updated: {_updated}. Score = Code Arena composite. Scores as percentages. Speed in characters/second.")
+    st.caption(
+        f"api.zeroeval.com · {len(_lb)} models · Score = mean(GPQA, SWE-Bench, HLE, AIME-2025) as %. "
+        "Blanks = no published score. Speed in tokens/sec."
+    )
     st.markdown("")
 
 
@@ -151,168 +172,6 @@ CONTEXT_WINDOWS = [
     {"model": "Gemini 3.1 Pro",   "date": "2026-02", "tokens": 1048576,  "provider": "Google"},
     {"model": "GPT-5.4",          "date": "2026-03", "tokens": 1000000,  "provider": "OpenAI"},
 ]
-
-# ═════════════════════════════════════════════════════════════════════════
-# DATA — Benchmarks
-# ═════════════════════════════════════════════════════════════════════════
-BENCHMARKS = {
-    "MMLU": {
-        "description": "Massive Multitask Language Understanding — 57 subjects, knowledge breadth. Now largely saturated above ~90%.",
-        "why": "The 'SAT for LLMs' — first benchmark to demonstrate broad general knowledge. Now saturated; newer benchmarks (MMLU-Pro, GPQA) have replaced it as frontier signal.",
-        "source": "Hendrycks et al. 2020 (arXiv:2009.03300); scores from model cards & papers.",
-        "max_score": 100,
-        "scores": [
-            {"model": "GPT-4",              "date": "2023-03", "score": 86.4, "provider": "OpenAI"},
-            {"model": "Claude 2",           "date": "2023-07", "score": 78.5, "provider": "Anthropic"},
-            {"model": "Gemini Ultra",       "date": "2023-12", "score": 90.0, "provider": "Google"},
-            {"model": "Mixtral 8x22B",      "date": "2024-04", "score": 77.8, "provider": "Mistral"},
-            {"model": "Llama 3 70B",        "date": "2024-04", "score": 82.0, "provider": "Meta"},
-            {"model": "DeepSeek V2",        "date": "2024-05", "score": 78.5, "provider": "DeepSeek"},
-            {"model": "GPT-4o",             "date": "2024-05", "score": 88.7, "provider": "OpenAI"},
-            {"model": "Claude 3.5 Sonnet",  "date": "2024-06", "score": 88.7, "provider": "Anthropic"},
-            {"model": "Llama 3.1 405B",     "date": "2024-07", "score": 87.3, "provider": "Meta"},
-            {"model": "Mistral Large 2",    "date": "2024-07", "score": 84.0, "provider": "Mistral"},
-            {"model": "Grok 2",             "date": "2024-08", "score": 87.5, "provider": "xAI"},
-            {"model": "Gemini 1.5 Pro",     "date": "2024-08", "score": 85.9, "provider": "Google"},
-            {"model": "Qwen 2.5 72B",       "date": "2024-09", "score": 85.0, "provider": "Alibaba"},
-            {"model": "o1",                 "date": "2024-09", "score": 92.3, "provider": "OpenAI"},
-            {"model": "DeepSeek V3",        "date": "2024-12", "score": 88.5, "provider": "DeepSeek"},
-            {"model": "Llama 3.3 70B",      "date": "2024-12", "score": 86.0, "provider": "Meta"},
-            {"model": "DeepSeek R1",        "date": "2025-01", "score": 90.8, "provider": "DeepSeek"},
-            {"model": "Claude 4 Opus",      "date": "2025-05", "score": 93.0, "provider": "Anthropic"},
-        ],
-    },
-    "MMLU-Pro": {
-        "description": "Harder, more discriminating MMLU variant — 10-option MCQ, expert-level questions. Top frontier models now sit ~80-87%.",
-        "why": "MMLU became saturated in 2024; MMLU-Pro re-opens headroom with harder questions and more distractor options. Good current proxy for 'general-purpose intelligence'.",
-        "source": "TIGER-Lab MMLU-Pro paper (2024); scores from model cards & Artificial Analysis.",
-        "max_score": 100,
-        "scores": [
-            {"model": "GPT-4o",              "date": "2024-05", "score": 72.6, "provider": "OpenAI"},
-            {"model": "Claude 3.5 Sonnet",   "date": "2024-06", "score": 78.0, "provider": "Anthropic"},
-            {"model": "Llama 3.1 405B",      "date": "2024-07", "score": 73.4, "provider": "Meta"},
-            {"model": "Mistral Large 2",     "date": "2024-07", "score": 68.4, "provider": "Mistral"},
-            {"model": "Gemini 1.5 Pro",      "date": "2024-08", "score": 75.8, "provider": "Google"},
-            {"model": "Qwen 2.5 72B",        "date": "2024-09", "score": 71.1, "provider": "Alibaba"},
-            {"model": "o1",                  "date": "2024-09", "score": 80.3, "provider": "OpenAI"},
-            {"model": "Llama 3.3 70B",       "date": "2024-12", "score": 68.9, "provider": "Meta"},
-            {"model": "DeepSeek V3",         "date": "2024-12", "score": 75.9, "provider": "DeepSeek"},
-            {"model": "Gemini 2.0 Flash",    "date": "2024-12", "score": 77.6, "provider": "Google"},
-            {"model": "DeepSeek R1",         "date": "2025-01", "score": 84.0, "provider": "DeepSeek"},
-            {"model": "Qwen 2.5 Max",        "date": "2025-01", "score": 76.1, "provider": "Alibaba"},
-            {"model": "Grok 3",              "date": "2025-02", "score": 79.9, "provider": "xAI"},
-            {"model": "Gemini 2.5 Pro",      "date": "2025-03", "score": 86.0, "provider": "Google"},
-            {"model": "Llama 4 Maverick",    "date": "2025-04", "score": 80.5, "provider": "Meta"},
-            {"model": "Llama 4 Behemoth",    "date": "2025-04", "score": 82.2, "provider": "Meta"},
-            {"model": "Claude 4 Opus",       "date": "2025-05", "score": 84.0, "provider": "Anthropic"},
-            {"model": "Mistral Medium 3",    "date": "2025-05", "score": 77.2, "provider": "Mistral"},
-            {"model": "Grok 4",              "date": "2025-07", "score": 86.6, "provider": "xAI"},
-            {"model": "Qwen3-235B Thinking", "date": "2025-07", "score": 84.4, "provider": "Alibaba"},
-            {"model": "Gemini 3 Pro",        "date": "2025-11", "score": 81.0, "provider": "Google"},
-            {"model": "GPT-5.2",             "date": "2025-12", "score": 79.5, "provider": "OpenAI"},
-            {"model": "Gemini 3 Flash",      "date": "2025-12", "score": 81.2, "provider": "Google"},
-            {"model": "Gemini 3.1 Pro",      "date": "2026-02", "score": 80.5, "provider": "Google"},
-            {"model": "GPT-5.4",             "date": "2026-03", "score": 81.2, "provider": "OpenAI"},
-        ],
-    },
-    "GPQA Diamond": {
-        "description": "Graduate-level science QA — physics, chemistry, biology expert questions (diamond subset is the hardest).",
-        "why": "Tests reasoning at PhD-level science — 'Google-proof' questions that can't be answered by search. One of the clearest signals of reasoning capability.",
-        "source": "Rein et al. 2023 (arXiv:2311.12022); scores from model cards & provider blogs.",
-        "max_score": 100,
-        "scores": [
-            {"model": "GPT-4",               "date": "2023-03", "score": 39.7, "provider": "OpenAI"},
-            {"model": "Claude 3 Opus",       "date": "2024-03", "score": 60.4, "provider": "Anthropic"},
-            {"model": "GPT-4o",              "date": "2024-05", "score": 53.6, "provider": "OpenAI"},
-            {"model": "Claude 3.5 Sonnet",   "date": "2024-06", "score": 65.0, "provider": "Anthropic"},
-            {"model": "Llama 3.1 405B",      "date": "2024-07", "score": 50.7, "provider": "Meta"},
-            {"model": "Grok 2",              "date": "2024-08", "score": 56.0, "provider": "xAI"},
-            {"model": "Gemini 1.5 Pro",      "date": "2024-08", "score": 59.1, "provider": "Google"},
-            {"model": "Qwen 2.5 72B",        "date": "2024-09", "score": 49.0, "provider": "Alibaba"},
-            {"model": "o1",                  "date": "2024-09", "score": 78.0, "provider": "OpenAI"},
-            {"model": "Llama 3.3 70B",       "date": "2024-12", "score": 50.5, "provider": "Meta"},
-            {"model": "DeepSeek V3",         "date": "2024-12", "score": 59.1, "provider": "DeepSeek"},
-            {"model": "Gemini 2.0 Flash",    "date": "2024-12", "score": 60.1, "provider": "Google"},
-            {"model": "DeepSeek R1",         "date": "2025-01", "score": 71.5, "provider": "DeepSeek"},
-            {"model": "Qwen 2.5 Max",        "date": "2025-01", "score": 60.1, "provider": "Alibaba"},
-            {"model": "Grok 3 (Think)",      "date": "2025-02", "score": 84.6, "provider": "xAI"},
-            {"model": "Gemini 2.5 Pro",      "date": "2025-03", "score": 84.0, "provider": "Google"},
-            {"model": "Llama 4 Maverick",    "date": "2025-04", "score": 69.8, "provider": "Meta"},
-            {"model": "Llama 4 Behemoth",    "date": "2025-04", "score": 73.7, "provider": "Meta"},
-            {"model": "Claude 4 Opus",       "date": "2025-05", "score": 75.0, "provider": "Anthropic"},
-            {"model": "Mistral Medium 3",    "date": "2025-05", "score": 57.1, "provider": "Mistral"},
-            {"model": "DeepSeek R1-0528",    "date": "2025-05", "score": 81.0, "provider": "DeepSeek"},
-            {"model": "Grok 4",              "date": "2025-07", "score": 88.0, "provider": "xAI"},
-            {"model": "Qwen3-235B Thinking", "date": "2025-07", "score": 81.1, "provider": "Alibaba"},
-            {"model": "Claude Sonnet 4.5",   "date": "2025-09", "score": 83.4, "provider": "Anthropic"},
-            {"model": "Claude Opus 4.1",     "date": "2025-10", "score": 80.9, "provider": "Anthropic"},
-            {"model": "Gemini 3 Pro",        "date": "2025-11", "score": 91.9, "provider": "Google"},
-            {"model": "GPT-5.2",             "date": "2025-12", "score": 92.4, "provider": "OpenAI"},
-            {"model": "Gemini 3 Flash",      "date": "2025-12", "score": 90.4, "provider": "Google"},
-            {"model": "Claude Opus 4.6",     "date": "2026-02", "score": 91.3, "provider": "Anthropic"},
-            {"model": "Claude Sonnet 4.6",   "date": "2026-02", "score": 89.9, "provider": "Anthropic"},
-            {"model": "Gemini 3.1 Pro",      "date": "2026-02", "score": 94.3, "provider": "Google"},
-            {"model": "GPT-5.4",             "date": "2026-03", "score": 92.8, "provider": "OpenAI"},
-        ],
-    },
-    "Humanity's Last Exam": {
-        "description": "Extremely hard questions from domain experts — ceiling test for frontier models. Current SOTA ~53%.",
-        "why": "Designed to be the 'last' benchmark humans can beat frontier models on. Scores near zero for all pre-2025 models, starting to climb now — watched closely as a capability ceiling indicator.",
-        "source": "Scale AI & Center for AI Safety (agi.safe.ai); scores from HLE leaderboard.",
-        "max_score": 100,
-        "scores": [
-            {"model": "GPT-4o",              "date": "2024-05", "score": 3.3,  "provider": "OpenAI"},
-            {"model": "Claude 3.5 Sonnet",   "date": "2024-06", "score": 4.3,  "provider": "Anthropic"},
-            {"model": "o1",                  "date": "2024-09", "score": 9.1,  "provider": "OpenAI"},
-            {"model": "Gemini 2.0 Flash",    "date": "2024-12", "score": 6.2,  "provider": "Google"},
-            {"model": "DeepSeek R1",         "date": "2025-01", "score": 9.4,  "provider": "DeepSeek"},
-            {"model": "o3",                  "date": "2025-01", "score": 18.6, "provider": "OpenAI"},
-            {"model": "Grok 3",              "date": "2025-02", "score": 14.0, "provider": "xAI"},
-            {"model": "Gemini 2.5 Pro",      "date": "2025-03", "score": 18.8, "provider": "Google"},
-            {"model": "Claude 4 Opus",       "date": "2025-05", "score": 14.0, "provider": "Anthropic"},
-            {"model": "DeepSeek R1-0528",    "date": "2025-05", "score": 17.7, "provider": "DeepSeek"},
-            {"model": "Grok 4",              "date": "2025-07", "score": 24.0, "provider": "xAI"},
-            {"model": "Qwen3-235B Thinking", "date": "2025-07", "score": 18.2, "provider": "Alibaba"},
-            {"model": "Gemini 3 Pro",        "date": "2025-11", "score": 45.8, "provider": "Google"},
-            {"model": "GPT-5.2",             "date": "2025-12", "score": 34.5, "provider": "OpenAI"},
-            {"model": "Gemini 3 Flash",      "date": "2025-12", "score": 43.5, "provider": "Google"},
-            {"model": "Claude Opus 4.6",     "date": "2026-02", "score": 53.1, "provider": "Anthropic"},
-            {"model": "Claude Sonnet 4.6",   "date": "2026-02", "score": 49.0, "provider": "Anthropic"},
-            {"model": "Gemini 3.1 Pro",      "date": "2026-02", "score": 51.4, "provider": "Google"},
-            {"model": "GPT-5.4",             "date": "2026-03", "score": 39.8, "provider": "OpenAI"},
-        ],
-    },
-    "SWE-Bench Verified": {
-        "description": "Real-world GitHub issue resolution — end-to-end software engineering. Verified subset (500 tasks) is human-reviewed for tractability.",
-        "why": "Most direct measure of frontier models' ability to do useful agentic coding work. Jumped from 1% to 70%+ in under 2 years — the single most dramatic capability gain.",
-        "source": "Princeton NLP SWE-Bench (swebench.com) + Verified subset (OpenAI, 2024). Scores vary by scaffold.",
-        "max_score": 100,
-        "scores": [
-            {"model": "GPT-4",                  "date": "2023-03", "score": 1.7,  "provider": "OpenAI"},
-            {"model": "Claude 3 Opus",          "date": "2024-03", "score": 4.7,  "provider": "Anthropic"},
-            {"model": "Claude 3.5 Sonnet",      "date": "2024-06", "score": 49.0, "provider": "Anthropic"},
-            {"model": "o1",                     "date": "2024-09", "score": 41.0, "provider": "OpenAI"},
-            {"model": "Claude 3.5 Sonnet (new)","date": "2024-10", "score": 53.6, "provider": "Anthropic"},
-            {"model": "DeepSeek V3",            "date": "2024-12", "score": 42.0, "provider": "DeepSeek"},
-            {"model": "Gemini 2.0 Flash",       "date": "2024-12", "score": 51.8, "provider": "Google"},
-            {"model": "DeepSeek R1",            "date": "2025-01", "score": 49.2, "provider": "DeepSeek"},
-            {"model": "o3",                     "date": "2025-01", "score": 71.7, "provider": "OpenAI"},
-            {"model": "Grok 3",                 "date": "2025-02", "score": 63.8, "provider": "xAI"},
-            {"model": "Gemini 2.5 Pro",         "date": "2025-03", "score": 63.8, "provider": "Google"},
-            {"model": "Llama 4 Maverick",       "date": "2025-04", "score": 70.3, "provider": "Meta"},
-            {"model": "Claude 4 Opus",          "date": "2025-05", "score": 72.5, "provider": "Anthropic"},
-            {"model": "DeepSeek R1-0528",       "date": "2025-05", "score": 57.6, "provider": "DeepSeek"},
-            {"model": "Grok 4",                 "date": "2025-07", "score": 72.0, "provider": "xAI"},
-            {"model": "Claude Opus 4.1",        "date": "2025-10", "score": 74.5, "provider": "Anthropic"},
-            {"model": "Gemini 3 Pro",            "date": "2025-11", "score": 76.2, "provider": "Google"},
-            {"model": "GPT-5.2",                 "date": "2025-12", "score": 80.0, "provider": "OpenAI"},
-            {"model": "Gemini 3 Flash",          "date": "2025-12", "score": 78.0, "provider": "Google"},
-            {"model": "Claude Opus 4.6",         "date": "2026-02", "score": 80.8, "provider": "Anthropic"},
-            {"model": "Claude Sonnet 4.6",       "date": "2026-02", "score": 79.6, "provider": "Anthropic"},
-            {"model": "Gemini 3.1 Pro",          "date": "2026-02", "score": 80.6, "provider": "Google"},
-        ],
-    },
-}
 
 # ═════════════════════════════════════════════════════════════════════════
 # DATA — Task complexity milestones (no provider dimension)
@@ -459,47 +318,643 @@ fig_ctx.update_layout(
 st.plotly_chart(fig_ctx, use_container_width=True)
 
 
-# ═════════════════════════════════════════════════════════════════════════
-# SECTION 2 — Benchmark Performance
-# ═════════════════════════════════════════════════════════════════════════
-st.header("Benchmark Performance")
-st.caption("Five benchmarks spanning general knowledge (MMLU, MMLU-Pro), reasoning (GPQA), frontier (HLE), and agentic coding (SWE-Bench).")
+# ─── Load Arena Elo early (used in Human Preference Map + Live Leaderboard) ───
+_conn = sqlite3.connect(DB_PATH)
+df_elo = pd.read_sql("SELECT * FROM llm_arena_elo ORDER BY elo DESC", _conn)
+_conn.close()
 
-for bench_name, bench_data in BENCHMARKS.items():
-    st.subheader(bench_name)
-    st.caption(bench_data["description"])
+# ═════════════════════════════════════════════════════════════════════════
+# SECTIONS 2–9 — Live charts (llm-stats.com/ai-trends via api.zeroeval.com)
+# ═════════════════════════════════════════════════════════════════════════
+
+if not _ze_df.empty:
+    import numpy as np
+
+    _df = _ze_df.copy()
+    _df["release_date"] = pd.to_datetime(_df["release_date"], errors="coerce")
+    _df = _df.dropna(subset=["release_date"]).sort_values("release_date")
+    _df["quarter"] = _df["release_date"].dt.to_period("Q").dt.start_time
+    _df["year"] = _df["release_date"].dt.year.astype(int)
+    _df["month"] = _df["release_date"].dt.month.astype(int)
+    _df["provider"] = _df["organization"].map(_ORG_TO_PROVIDER).fillna(_df["organization"])
+    _df["is_open"] = _df["license"].apply(lambda x: "Open Source" if x != "proprietary" else "Proprietary")
+    _df["country"] = _df["organization_country"].fillna("Unknown")
+    _df["blended_price"] = ((3 * _df["input_price"].fillna(0) + _df["output_price"].fillna(0)) / 4).replace(0, float("nan"))
+
+    _BENCH_MAP = {
+        "gpqa_score":               "GPQA",
+        "swe_bench_verified_score": "SWE-Bench",
+        "hle_score":                "HLE",
+        "aime_2025_score":          "AIME 2025",
+        "mmmlu_score":              "MMMLU",
+        "simpleqa_score":           "SimpleQA",
+        "browsecomp_score":         "BrowseComp",
+        "terminal_bench_score":     "Terminal Bench",
+        "mrcr_v2_score":            "MRCR v2",
+        "scicode_score":            "SciCode",
+    }
+
+    _ATTR = "Data: [llm-stats.com/ai-trends](https://llm-stats.com/ai-trends) · [api.zeroeval.com](https://api.zeroeval.com)"
+
+    def _sota_prog(df, score_col, group_col=None):
+        """SOTA step-function progression. Returns df with date, score, model."""
+        if group_col:
+            rows = []
+            for grp, sub in df.groupby(group_col):
+                sub = sub.dropna(subset=[score_col]).sort_values("release_date")
+                sota = -1.0
+                for _, r in sub.iterrows():
+                    if r[score_col] > sota:
+                        sota = r[score_col]
+                        rows.append({"date": r["release_date"], "score": sota * 100, "model": r["name"], group_col: grp})
+            return pd.DataFrame(rows)
+        else:
+            valid = df.dropna(subset=[score_col]).sort_values("release_date")
+            sota, rows = -1.0, []
+            for _, r in valid.iterrows():
+                if r[score_col] > sota:
+                    sota = r[score_col]
+                    rows.append({"date": r["release_date"], "score": sota * 100, "model": r["name"]})
+            return pd.DataFrame(rows)
+
+    def _pareto_front(df, x_col, y_col):
+        """Pareto-optimal points: max y at increasing x."""
+        d = df.dropna(subset=[x_col, y_col]).sort_values(x_col)
+        best_y, rows = -1e9, []
+        for _, r in d.iterrows():
+            if r[y_col] > best_y:
+                best_y = r[y_col]
+                rows.append(r)
+        return pd.DataFrame(rows)
+
+    st.caption(
+        "Sections 2–9 replicate the analysis from "
+        "[llm-stats.com/ai-trends](https://llm-stats.com/ai-trends) "
+        "using live data from api.zeroeval.com. "
+        "Please visit the original for the full interactive experience."
+    )
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SECTION 2 — Benchmark Performance
+    # ═══════════════════════════════════════════════════════════════════
+    st.header("Benchmark Performance")
+    st.caption("How quickly frontier capability is improving, and how tightly packed the leaders have become.")
+
+    # Benchmark Saturation
+    st.subheader("Benchmark Saturation")
+    st.caption("SOTA score progression over time — each step is a new best model.")
+    _BENCH_COLOURS = px.colors.qualitative.Dark24
+    fig_sat = go.Figure()
+    for i, (col, label) in enumerate(_BENCH_MAP.items()):
+        _prog = _sota_prog(_df, col)
+        if _prog.empty:
+            continue
+        colour = _BENCH_COLOURS[i % len(_BENCH_COLOURS)]
+        _prog_ext = pd.concat([_prog, pd.DataFrame([{"date": _df["release_date"].max(), "score": _prog["score"].iloc[-1], "model": ""}])], ignore_index=True)
+        fig_sat.add_trace(go.Scatter(
+            x=_prog_ext["date"], y=_prog_ext["score"],
+            name=label, mode="lines",
+            line=dict(color=colour, width=1.5, shape="hv"),
+            hovertemplate=f"{label}: %{{y:.1f}}%<br>%{{x|%b %Y}}<extra></extra>",
+        ))
+    fig_sat.update_layout(yaxis_title="SOTA Score (%)", yaxis_range=[0, 105], **CHART_LAYOUT)
+    st.plotly_chart(fig_sat, use_container_width=True)
+    st.caption(_ATTR)
+
+    # The Convergence
+    st.subheader("The Convergence")
+    st.caption("The gap between the #1 and #10 GPQA score — the frontier is getting crowded.")
+    _gpqa_valid = _df.dropna(subset=["gpqa_score"]).sort_values("release_date")
+    _conv_rows = []
+    for dt in _gpqa_valid["release_date"].unique():
+        pool = _gpqa_valid[_gpqa_valid["release_date"] <= dt]["gpqa_score"].sort_values(ascending=False)
+        if len(pool) >= 10:
+            _conv_rows.append({"date": dt, "rank": "#1",  "score": pool.iloc[0] * 100})
+            _conv_rows.append({"date": dt, "rank": "#10", "score": pool.iloc[9] * 100})
+    if _conv_rows:
+        _conv_df = pd.DataFrame(_conv_rows)
+        fig_conv = go.Figure()
+        for rank, colour in [("#1", "#3b82f6"), ("#10", "#8b5cf6")]:
+            sub = _conv_df[_conv_df["rank"] == rank]
+            fig_conv.add_trace(go.Scatter(
+                x=sub["date"], y=sub["score"], name=rank,
+                mode="lines+markers", line=dict(color=colour, width=2, shape="hv"),
+                hovertemplate=f"{rank} GPQA: %{{y:.1f}}%<extra></extra>",
+            ))
+        fig_conv.update_layout(yaxis_title="GPQA Score (%)", **CHART_LAYOUT)
+        st.plotly_chart(fig_conv, use_container_width=True)
+        st.caption(_ATTR)
+
+    # Lab Progress
+    st.subheader("Lab Progress")
+    st.caption("Best GPQA and SWE-Bench score per organisation over the last 12 months.")
+    _col1, _col2 = st.columns(2)
+    for _col_ui, _score_col, _label in [(_col1, "gpqa_score", "GPQA"), (_col2, "swe_bench_verified_score", "SWE-Bench")]:
+        _lab = (_df.dropna(subset=[_score_col])
+                   .groupby("organization")[_score_col].max()
+                   .mul(100).reset_index()
+                   .rename(columns={_score_col: "score", "organization": "org"})
+                   .sort_values("score").tail(12))
+        _lab["colour"] = _lab["org"].map(_ORG_TO_PROVIDER).map(PROVIDER_COLOURS).fillna("#6b7280")
+        fig_lab = go.Figure(go.Bar(
+            x=_lab["score"], y=_lab["org"], orientation="h",
+            marker_color=_lab["colour"].tolist(),
+            hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
+        ))
+        fig_lab.update_layout(title=f"Best {_label} by Org", xaxis_title=f"{_label} Score (%)", height=380, **CHART_LAYOUT)
+        _col_ui.plotly_chart(fig_lab, use_container_width=True)
+    st.caption(_ATTR)
+
+    # Organisation SOTA Progress
+    st.subheader("Organization Progress")
+    st.caption("Best GPQA score per organisation over time.")
+    _top_orgs = (_df.dropna(subset=["gpqa_score"]).groupby("organization")["gpqa_score"].max()
+                    .sort_values(ascending=False).head(8).index.tolist())
+    fig_org = go.Figure()
+    for org in _top_orgs:
+        _prog = _sota_prog(_df[_df["organization"] == org], "gpqa_score")
+        if _prog.empty:
+            continue
+        colour = PROVIDER_COLOURS.get(_ORG_TO_PROVIDER.get(org, ""), "#6b7280")
+        _prog_ext = pd.concat([_prog, pd.DataFrame([{"date": _df["release_date"].max(), "score": _prog["score"].iloc[-1], "model": ""}])], ignore_index=True)
+        fig_org.add_trace(go.Scatter(
+            x=_prog_ext["date"], y=_prog_ext["score"], name=org,
+            mode="lines", line=dict(color=colour, width=2, shape="hv"),
+            hovertemplate=f"{org}: %{{y:.1f}}%<extra></extra>",
+        ))
+    fig_org.update_layout(yaxis_title="GPQA Score (%)", **CHART_LAYOUT)
+    st.plotly_chart(fig_org, use_container_width=True)
+    st.caption(_ATTR)
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SECTION 3 — Labs and Countries
+    # ═══════════════════════════════════════════════════════════════════
+    st.header("Labs and Countries")
+    st.caption("Who is leading, who is shipping the most, and how the balance of power is shifting.")
+
+    _col1, _col2 = st.columns(2)
+    # Country totals bar
+    _ctry_counts = _df["country"].value_counts().reset_index()
+    _ctry_counts.columns = ["country", "count"]
+    fig_ctry = go.Figure(go.Bar(
+        x=_ctry_counts["count"], y=_ctry_counts["country"], orientation="h",
+        marker_color="#3b82f6",
+        hovertemplate="%{y}: %{x} models<extra></extra>",
+    ))
+    fig_ctry.update_layout(title="Cumulative Releases by Country", xaxis_title="Models", yaxis=dict(autorange="reversed"), height=300, **CHART_LAYOUT)
+    _col1.plotly_chart(fig_ctry, use_container_width=True)
+
+    # Release heatmap
+    _hm = _df.groupby(["year", "month"]).size().reset_index(name="count")
+    _hm_piv = _hm.pivot(index="year", columns="month", values="count").fillna(0)
+    _month_abbr = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    _hm_piv.columns = [_month_abbr[c - 1] for c in _hm_piv.columns]
+    fig_hm = go.Figure(go.Heatmap(
+        z=_hm_piv.values, x=_hm_piv.columns.tolist(), y=_hm_piv.index.tolist(),
+        colorscale="Blues", text=_hm_piv.values.astype(int), texttemplate="%{text}",
+        hovertemplate="Year: %{y} · %{x}: %{z} releases<extra></extra>",
+    ))
+    fig_hm.update_layout(title="Release Heatmap", height=300, **CHART_LAYOUT)
+    _col2.plotly_chart(fig_hm, use_container_width=True)
+
+    _col1, _col2 = st.columns(2)
+    # Country share over time
+    _top5c = _df["country"].value_counts().head(5).index.tolist()
+    _df["country_grp"] = _df["country"].apply(lambda c: c if c in _top5c else "Other")
+    _qc = _df.groupby(["quarter", "country_grp"]).size().reset_index(name="count")
+    _qc["pct"] = _qc.groupby("quarter")["count"].transform(lambda x: x / x.sum() * 100)
+    _ctry_clrs = {"US": "#3b82f6", "CN": "#ef4444", "FR": "#10b981",
+                  "GB": "#f59e0b", "IL": "#8b5cf6", "KR": "#ec4899",
+                  "IN": "#06b6d4", "CA": "#a78bfa", "Other": "#6b7280"}
+    _ctry_labels = {"US": "United States", "CN": "China", "FR": "France",
+                    "GB": "United Kingdom", "IL": "Israel", "KR": "South Korea",
+                    "IN": "India", "CA": "Canada", "Other": "Other"}
+    fig_ctry_area = go.Figure()
+    for ctry in _top5c + ["Other"]:
+        colour = _ctry_clrs.get(ctry, "#6b7280")
+        label = _ctry_labels.get(ctry, ctry)
+        sub = _qc[_qc["country_grp"] == ctry]
+        if sub.empty:
+            continue
+        fig_ctry_area.add_trace(go.Scatter(
+            x=sub["quarter"], y=sub["pct"], name=label, stackgroup="one",
+            line=dict(color=colour, width=0),
+            fillcolor=colour,
+            hovertemplate=f"{label}: %{{y:.1f}}%<extra></extra>",
+        ))
+    fig_ctry_area.update_layout(title="Model Releases by Country (% share)", yaxis_title="Share (%)", height=320, **CHART_LAYOUT)
+    _col1.plotly_chart(fig_ctry_area, use_container_width=True)
+
+    # Cumulative releases by lab
+    _top8labs = _df["organization"].value_counts().head(8).index.tolist()
+    _total = len(_df)
+    fig_labs = go.Figure()
+    for org in _top8labs:
+        sub = _df[_df["organization"] == org].groupby("quarter").size().reset_index(name="n")
+        sub = sub.sort_values("quarter")
+        sub["cum_pct"] = sub["n"].cumsum() / _total * 100
+        colour = PROVIDER_COLOURS.get(_ORG_TO_PROVIDER.get(org, ""), "#6b7280")
+        fig_labs.add_trace(go.Scatter(
+            x=sub["quarter"], y=sub["cum_pct"], name=org,
+            mode="lines", line=dict(color=colour, width=1.5),
+            hovertemplate=f"{org}: %{{y:.1f}}%<extra></extra>",
+        ))
+    fig_labs.update_layout(title="Cumulative Releases by Lab (% of total)", yaxis_title="Cumulative Share (%)", height=320, **CHART_LAYOUT)
+    _col2.plotly_chart(fig_labs, use_container_width=True)
+    st.caption(_ATTR)
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SECTION 4 — Open Models
+    # ═══════════════════════════════════════════════════════════════════
+    st.header("Open Models")
+    st.caption("How open-weight models are growing, how close they are to proprietary systems, and where the open race is happening.")
+
+    _col1, _col2 = st.columns(2)
+    # Open vs Proprietary share
+    _ql = _df.groupby(["quarter", "is_open"]).size().reset_index(name="count")
+    _ql["pct"] = _ql.groupby("quarter")["count"].transform(lambda x: x / x.sum() * 100)
+    fig_open = go.Figure()
+    for lic, colour in [("Open Source", "#10b981"), ("Proprietary", "#f59e0b")]:
+        sub = _ql[_ql["is_open"] == lic]
+        fig_open.add_trace(go.Scatter(
+            x=sub["quarter"], y=sub["pct"], name=lic,
+            mode="lines+markers", line=dict(color=colour, width=2),
+            hovertemplate=f"{lic}: %{{y:.1f}}%<extra></extra>",
+        ))
+    fig_open.update_layout(title="Open vs Proprietary Releases (%)", yaxis_title="Share (%)", height=320, **CHART_LAYOUT)
+    _col1.plotly_chart(fig_open, use_container_width=True)
+
+    # Closing gap: closed vs open SOTA GPQA
+    fig_gap = go.Figure()
+    for grp, colour in [("Proprietary", "#f59e0b"), ("Open Source", "#10b981")]:
+        _prog = _sota_prog(_df[_df["is_open"] == grp], "gpqa_score")
+        if _prog.empty:
+            continue
+        _prog_ext = pd.concat([_prog, pd.DataFrame([{"date": _df["release_date"].max(), "score": _prog["score"].iloc[-1], "model": ""}])], ignore_index=True)
+        fig_gap.add_trace(go.Scatter(
+            x=_prog_ext["date"], y=_prog_ext["score"], name=grp,
+            mode="lines", line=dict(color=colour, width=2, shape="hv"),
+            hovertemplate=f"{grp} SOTA: %{{y:.1f}}%<extra></extra>",
+        ))
+    fig_gap.update_layout(title="The Closing Gap — GPQA SOTA", yaxis_title="GPQA Score (%)", height=320, **CHART_LAYOUT)
+    _col2.plotly_chart(fig_gap, use_container_width=True)
+
+    # US vs China: open vs closed race
+    _df["race_grp"] = _df.apply(
+        lambda r: f"{'US' if r['country'] == 'US' else 'CN'} {r['is_open']}"
+        if r["country"] in ("US", "CN") else None, axis=1)
+    fig_race = go.Figure()
+    for grp, colour in [("US Open Source", "#10b981"), ("US Proprietary", "#3b82f6"),
+                         ("CN Open Source", "#f59e0b"), ("CN Proprietary", "#ef4444")]:
+        mask = _df["race_grp"] == grp
+        if not mask.any():
+            continue
+        _prog = _sota_prog(_df[mask], "gpqa_score")
+        if _prog.empty:
+            continue
+        _prog_ext = pd.concat([_prog, pd.DataFrame([{"date": _df["release_date"].max(), "score": _prog["score"].iloc[-1], "model": ""}])], ignore_index=True)
+        fig_race.add_trace(go.Scatter(
+            x=_prog_ext["date"], y=_prog_ext["score"], name=grp,
+            mode="lines", line=dict(color=colour, width=2, shape="hv"),
+            hovertemplate=f"{grp}: %{{y:.1f}}%<extra></extra>",
+        ))
+    fig_race.update_layout(title="Open Weights Race: US vs China (GPQA SOTA)",
+        yaxis_title="GPQA Score (%)", yaxis_range=[0, 105], **CHART_LAYOUT)
+    st.plotly_chart(fig_race, use_container_width=True)
+    st.caption(_ATTR)
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SECTION 5 — Model Capabilities
+    # ═══════════════════════════════════════════════════════════════════
+    st.header("Model Capabilities")
+    st.caption("What kinds of models are being released, from multimodal systems to MoE-based open models.")
+
+    _col1, _col2 = st.columns(2)
+    # Multimodal shift
+    _qmm = (_df.groupby("quarter").apply(
+        lambda g: pd.Series({
+            "Multimodal": (g["multimodal"] == True).sum() / len(g) * 100,  # noqa: E712
+            "Text-only":  (g["multimodal"] != True).sum() / len(g) * 100,  # noqa: E712
+        })).reset_index().melt(id_vars="quarter", var_name="type", value_name="pct"))
+    fig_mm = go.Figure()
+    for typ, colour in [("Multimodal", "#8b5cf6"), ("Text-only", "#3b82f6")]:
+        sub = _qmm[_qmm["type"] == typ]
+        fig_mm.add_trace(go.Scatter(
+            x=sub["quarter"], y=sub["pct"], name=typ,
+            mode="lines+markers", line=dict(color=colour, width=2),
+            hovertemplate=f"{typ}: %{{y:.1f}}%<extra></extra>",
+        ))
+    fig_mm.update_layout(title="The Multimodal Shift", yaxis_title="% of New Releases", height=320, **CHART_LAYOUT)
+    _col1.plotly_chart(fig_mm, use_container_width=True)
+
+    # MoE adoption scatter (open models)
+    _moe_df = _df[_df["is_open"] == "Open Source"].dropna(subset=["gpqa_score"]).copy()
+    if not _moe_df.empty:
+        _moe_df["arch"] = _moe_df["is_moe"].apply(lambda x: "MoE" if x is True else "Dense")
+        fig_moe = go.Figure()
+        for arch, colour in [("MoE", "#10b981"), ("Dense", "#6b7280")]:
+            sub = _moe_df[_moe_df["arch"] == arch]
+            fig_moe.add_trace(go.Scatter(
+                x=sub["release_date"], y=sub["gpqa_score"] * 100, text=sub["name"],
+                name=arch, mode="markers",
+                marker=dict(color=colour, size=8, opacity=0.8),
+                hovertemplate="%{text}: %{y:.1f}%<extra></extra>",
+            ))
+        fig_moe.update_layout(title="MoE Adoption — Open Models", xaxis_title="Release Date", yaxis_title="GPQA Score (%)", height=320, **CHART_LAYOUT)
+        _col2.plotly_chart(fig_moe, use_container_width=True)
+    st.caption(_ATTR)
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SECTION 6 — Prices and Value
+    # ═══════════════════════════════════════════════════════════════════
+    st.header("Prices and Value")
+    st.caption("How fast intelligence is getting cheaper, which models deliver the most value, and where prices differ.")
+
+    # Price by country strip/box
+    st.subheader("Price by Country")
+    _pd = _df.dropna(subset=["input_price", "country"])
+    _pd = _pd[_pd["input_price"] > 0]
+    if not _pd.empty:
+        _top4c = _pd["country"].value_counts().head(4).index.tolist()
+        _pd_top = _pd[_pd["country"].isin(_top4c)]
+        fig_pbc = go.Figure()
+        for ctry in _top4c:
+            sub = _pd_top[_pd_top["country"] == ctry]
+            fig_pbc.add_trace(go.Box(
+                y=sub["input_price"], name=ctry, boxpoints="all", jitter=0.5,
+                pointpos=0, marker_size=5,
+                text=sub["name"].tolist(),
+                hovertemplate="%{text}: $%{y:.3f}/M tokens<extra></extra>",
+            ))
+        fig_pbc.update_layout(yaxis_title="Input Price ($/1M tokens)", yaxis_type="log", **CHART_LAYOUT)
+        st.plotly_chart(fig_pbc, use_container_width=True)
+        st.caption(_ATTR)
+
+    # Performance vs Price — GPQA and SWE-Bench Pareto frontiers
+    st.subheader("Price Frontiers")
+    st.caption("Capability vs API cost — Pareto frontier shows the best value per dollar.")
+    _col1, _col2 = st.columns(2)
+    for _col_ui, _sc, _lb in [(_col1, "gpqa_score", "GPQA"), (_col2, "swe_bench_verified_score", "SWE-Bench")]:
+        _pp = _df.dropna(subset=[_sc, "input_price"])
+        _pp = _pp[_pp["input_price"] > 0].copy()
+        if _pp.empty:
+            continue
+        _pf = _pareto_front(_pp, "input_price", _sc)
+        fig_pp = go.Figure()
+        for prov in sorted(_pp["provider"].unique()):
+            sub = _pp[_pp["provider"] == prov]
+            fig_pp.add_trace(go.Scatter(
+                x=sub["input_price"], y=sub[_sc] * 100, text=sub["name"],
+                name=prov, mode="markers",
+                marker=dict(color=PROVIDER_COLOURS.get(prov, "#6b7280"), size=7, opacity=0.8),
+                hovertemplate="%{text}<br>$%{x:.3f}/M · %{y:.1f}%<extra></extra>",
+            ))
+        if not _pf.empty:
+            fig_pp.add_trace(go.Scatter(
+                x=_pf["input_price"], y=_pf[_sc] * 100,
+                mode="lines", name="Pareto front",
+                line=dict(color="#ffffff", width=1.5, dash="dot", shape="hv"), showlegend=False,
+            ))
+        fig_pp.update_layout(title=f"{_lb} vs Price", xaxis_title="Input Price ($/1M tokens)",
+            yaxis_title=f"{_lb} Score (%)", height=380, showlegend=False, **CHART_LAYOUT)
+        _col_ui.plotly_chart(fig_pp, use_container_width=True)
+    st.caption(_ATTR)
+
+    # Value Evolution
+    st.subheader("Value Evolution")
+    st.caption("GPQA score per dollar by release quarter — the rising value of intelligence.")
+    _ve = _df.dropna(subset=["gpqa_score", "input_price"])
+    _ve = _ve[_ve["input_price"] > 0].copy()
+    _ve["gpqa_per_dollar"] = (_ve["gpqa_score"] * 100) / _ve["input_price"]
+    if not _ve.empty:
+        _ve_q = _ve.groupby(["quarter", "provider"])["gpqa_per_dollar"].median().reset_index()
+        fig_ve = go.Figure()
+        for prov in sorted(_ve_q["provider"].unique()):
+            sub = _ve_q[_ve_q["provider"] == prov]
+            fig_ve.add_trace(go.Scatter(
+                x=sub["quarter"], y=sub["gpqa_per_dollar"], name=prov,
+                mode="lines+markers",
+                line=dict(color=PROVIDER_COLOURS.get(prov, "#6b7280"), width=1.5),
+                hovertemplate=f"{prov}: %{{y:.1f}} GPQA pts/$1M<extra></extra>",
+            ))
+        fig_ve.update_layout(yaxis_title="GPQA pts per $1M tokens", yaxis_type="log", **CHART_LAYOUT)
+        st.plotly_chart(fig_ve, use_container_width=True)
+        st.caption(_ATTR)
+
+    # Cost Efficiency by Tier
+    st.subheader("Cost Efficiency by Tier")
+    st.caption("Cost per GPQA point across model size tiers.")
+    _ct = _df.dropna(subset=["gpqa_score", "input_price", "params"])
+    _ct = _ct[(_ct["input_price"] > 0) & (_ct["params"] > 0)].copy()
+    if not _ct.empty:
+        _ct["tier"] = pd.cut(_ct["params"],
+            bins=[0, 10e9, 70e9, 200e9, float("inf")],
+            labels=["Tiny (<10B)", "Small (10–70B)", "Large (70–200B)", "Frontier (200B+)"])
+        _ct["cost_per_gpqa"] = _ct["input_price"] / (_ct["gpqa_score"] * 100)
+        fig_ct = go.Figure()
+        for typ, colour in [("Open Source", "#10b981"), ("Proprietary", "#f59e0b")]:
+            sub = _ct[_ct["is_open"] == typ]
+            if sub.empty:
+                continue
+            fig_ct.add_trace(go.Box(
+                x=sub["tier"].astype(str), y=sub["cost_per_gpqa"], name=typ,
+                boxpoints="all", jitter=0.5, pointpos=0, marker_size=5,
+                marker_color=colour, text=sub["name"].tolist(),
+                hovertemplate="%{text}: $%{y:.5f}/GPQA pt<extra></extra>",
+            ))
+        fig_ct.update_layout(yaxis_title="$/GPQA point (input price)", yaxis_type="log", **CHART_LAYOUT)
+        st.plotly_chart(fig_ct, use_container_width=True)
+        st.caption(_ATTR)
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SECTION 7 — Efficiency and Scale
+    # ═══════════════════════════════════════════════════════════════════
+    st.header("Efficiency and Scale")
+    st.caption("How architecture, parameters, and training scale affect capability.")
+
+    _col1, _col2 = st.columns(2)
+    # Performance vs Price by MoE
+    _mp = _df.dropna(subset=["gpqa_score", "blended_price"])
+    _mp = _mp[_mp["blended_price"] > 0].copy()
+    if not _mp.empty:
+        _mp["arch"] = _mp["is_moe"].apply(lambda x: "MoE" if x is True else "Dense")
+        fig_moe_p = go.Figure()
+        for arch, colour in [("MoE", "#10b981"), ("Dense", "#6b7280")]:
+            sub = _mp[_mp["arch"] == arch]
+            fig_moe_p.add_trace(go.Scatter(
+                x=sub["blended_price"], y=sub["gpqa_score"] * 100, text=sub["name"],
+                name=arch, mode="markers",
+                marker=dict(color=colour, size=7, opacity=0.8),
+                hovertemplate="%{text}<br>$%{x:.3f}/M · %{y:.1f}%<extra></extra>",
+            ))
+        fig_moe_p.update_layout(title="Performance vs Price by Architecture (MoE vs Dense)",
+            xaxis_title="Blended Price ($/1M tokens)", xaxis_type="log",
+            yaxis_title="GPQA Score (%)", height=360, **CHART_LAYOUT)
+        _col1.plotly_chart(fig_moe_p, use_container_width=True)
+
+    # GPQA by model size tier
+    _t2 = _df.dropna(subset=["gpqa_score", "params"])
+    _t2 = _t2[_t2["params"] > 0].copy()
+    if not _t2.empty:
+        _t2["tier"] = pd.cut(_t2["params"],
+            bins=[0, 10e9, 70e9, 200e9, float("inf")],
+            labels=["Tiny (<10B)", "Small (10–70B)", "Large (70–200B)", "Frontier (200B+)"])
+        fig_t2 = go.Figure()
+        for tier_lbl, colour in [("Tiny (<10B)", "#6b7280"), ("Small (10–70B)", "#3b82f6"),
+                                  ("Large (70–200B)", "#f59e0b"), ("Frontier (200B+)", "#ef4444")]:
+            sub = _t2[_t2["tier"].astype(str) == tier_lbl]
+            if sub.empty:
+                continue
+            fig_t2.add_trace(go.Box(
+                x=sub["tier"].astype(str), y=sub["gpqa_score"] * 100, name=tier_lbl,
+                boxpoints="all", jitter=0.5, pointpos=0,
+                marker_color=colour, marker_size=5,
+                text=sub["name"].tolist(),
+                hovertemplate="%{text}: %{y:.1f}%<extra></extra>",
+            ))
+        fig_t2.update_layout(title="GPQA Score by Model Size Tier",
+            xaxis_title="Model Tier", yaxis_title="GPQA Score (%)",
+            showlegend=False, height=360, **CHART_LAYOUT)
+        _col2.plotly_chart(fig_t2, use_container_width=True)
+
+    # The Efficiency Curve
+    st.subheader("The Efficiency Curve")
+    st.caption("Smallest model to reach each GPQA threshold — intelligence is getting smaller.")
+    _eff = _df.dropna(subset=["gpqa_score", "params"])
+    _eff = _eff[_eff["params"] > 0].sort_values("release_date")
+    if not _eff.empty:
+        fig_eff = go.Figure()
+        for thresh, colour in [(0.4, "#6b7280"), (0.5, "#3b82f6"), (0.6, "#10b981"), (0.7, "#f59e0b"), (0.8, "#ef4444")]:
+            _above = _eff[_eff["gpqa_score"] >= thresh]
+            if _above.empty:
+                continue
+            rows, min_p = [], float("inf")
+            for _, r in _above.iterrows():
+                if r["params"] < min_p:
+                    min_p = r["params"]
+                    rows.append({"date": r["release_date"], "params": min_p, "model": r["name"]})
+            if not rows:
+                continue
+            _ep = pd.DataFrame(rows)
+            _ep_ext = pd.concat([_ep, pd.DataFrame([{"date": _df["release_date"].max(), "params": _ep["params"].iloc[-1], "model": ""}])], ignore_index=True)
+            fig_eff.add_trace(go.Scatter(
+                x=_ep_ext["date"], y=_ep_ext["params"],
+                name=f"{int(thresh*100)}% GPQA", mode="lines",
+                line=dict(color=colour, width=2, shape="hv"),
+                hovertemplate=f"{int(thresh*100)}% GPQA: %{{y:.2e}} params<extra></extra>",
+            ))
+        fig_eff.update_layout(yaxis_title="Parameters", yaxis_type="log", **CHART_LAYOUT)
+        st.plotly_chart(fig_eff, use_container_width=True)
+    st.caption(_ATTR)
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SECTION 8 — Speed and Context
+    # ═══════════════════════════════════════════════════════════════════
+    st.header("Speed and Context")
+    st.caption("What you trade off when deploying models: throughput, context length, and how speed costs capability.")
+
+    _col1, _col2 = st.columns(2)
+    # Speed Tax: GPQA vs throughput
+    _sp = _df.dropna(subset=["gpqa_score", "throughput"])
+    _sp = _sp[_sp["throughput"] > 0].copy()
+    if not _sp.empty:
+        _pf_sp = _pareto_front(_sp, "throughput", "gpqa_score")
+        fig_sp = go.Figure()
+        for typ, colour, sym in [("Open Source", "#10b981", "circle"), ("Proprietary", "#f59e0b", "diamond")]:
+            sub = _sp[_sp["is_open"] == typ]
+            fig_sp.add_trace(go.Scatter(
+                x=sub["throughput"], y=sub["gpqa_score"] * 100, text=sub["name"],
+                name=typ, mode="markers",
+                marker=dict(color=colour, size=7, opacity=0.8, symbol=sym),
+                hovertemplate="%{text}<br>%{x:.0f} tok/s · %{y:.1f}%<extra></extra>",
+            ))
+        if not _pf_sp.empty:
+            fig_sp.add_trace(go.Scatter(
+                x=_pf_sp["throughput"], y=_pf_sp["gpqa_score"] * 100,
+                mode="lines", showlegend=False,
+                line=dict(color="#ffffff", width=1.5, dash="dot"),
+            ))
+        fig_sp.update_layout(title="The Speed Tax — GPQA vs Throughput",
+            xaxis_title="Throughput (tok/s)", yaxis_title="GPQA Score (%)", height=360, **CHART_LAYOUT)
+        _col1.plotly_chart(fig_sp, use_container_width=True)
+
+    # SWE-Bench vs throughput
+    _ss = _df.dropna(subset=["swe_bench_verified_score", "throughput"])
+    _ss = _ss[_ss["throughput"] > 0].copy()
+    if not _ss.empty:
+        _pf_ss = _pareto_front(_ss, "throughput", "swe_bench_verified_score")
+        fig_ss = go.Figure()
+        for typ, colour in [("Open Source", "#10b981"), ("Proprietary", "#f59e0b")]:
+            sub = _ss[_ss["is_open"] == typ]
+            fig_ss.add_trace(go.Scatter(
+                x=sub["throughput"], y=sub["swe_bench_verified_score"] * 100, text=sub["name"],
+                name=typ, mode="markers",
+                marker=dict(color=colour, size=7, opacity=0.8),
+                hovertemplate="%{text}<br>%{x:.0f} tok/s · %{y:.1f}%<extra></extra>",
+            ))
+        if not _pf_ss.empty:
+            fig_ss.add_trace(go.Scatter(
+                x=_pf_ss["throughput"], y=_pf_ss["swe_bench_verified_score"] * 100,
+                mode="lines", showlegend=False,
+                line=dict(color="#ffffff", width=1.5, dash="dot"),
+            ))
+        fig_ss.update_layout(title="SWE-Bench vs Throughput",
+            xaxis_title="Throughput (tok/s)", yaxis_title="SWE-Bench Score (%)", height=360, **CHART_LAYOUT)
+        _col2.plotly_chart(fig_ss, use_container_width=True)
+    st.caption(_ATTR)
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SECTION 9 — Human Preference Map
+    # ═══════════════════════════════════════════════════════════════════
+    st.header("Human Preference")
+    st.caption("How models rank when humans judge them head-to-head, vs. how they score on automated benchmarks.")
+
+    st.subheader("Human Preference Map")
     _explainer(
-        what=bench_data["description"],
-        why=bench_data["why"],
-        source=bench_data["source"],
+        what="Each dot is a model. X-axis: composite benchmark score (mean of GPQA, SWE-Bench, HLE, AIME-2025). Y-axis: Chatbot Arena Elo — human-rated preference from blind head-to-head votes. Hover for model name.",
+        why="A model can ace benchmarks but rank poorly on human preference (e.g. too terse, poor formatting). The map shows whether labs are optimising for benchmark leaderboards or real-world usability, and which models are genuinely best by both measures.",
+        source="Benchmark scores: api.zeroeval.com. Arena Elo: LMSYS Chatbot Arena — updated via /ai-research skill.",
     )
+    if not df_elo.empty:
+        _bench_score = _df[["name", "organization"] + _BENCH_COLS].copy()
+        _bench_score["composite"] = _bench_score[_BENCH_COLS].mean(axis=1, skipna=True).mul(100)
+        _bench_score = _bench_score.dropna(subset=["composite"])
+        _bench_score["provider"] = _bench_score["organization"].map(_ORG_TO_PROVIDER).fillna(_bench_score["organization"])
 
-    # Filter scores to selected providers
-    visible_scores = [s for s in bench_data["scores"] if s["provider"] in sel_providers]
-    visible_vals = [s["score"] for s in visible_scores]
-    y_min, y_max = _compute_y_range(visible_vals, max_score=bench_data["max_score"])
+        # Fuzzy join: lowercase strip both sides
+        _bench_score["_key"] = _bench_score["name"].str.lower().str.strip()
+        _elo_join = df_elo.copy()
+        _elo_join["_key"] = _elo_join["model"].str.lower().str.strip()
+        _hp = _bench_score.merge(_elo_join[["_key", "elo"]], on="_key", how="inner")
 
-    fig_bench = go.Figure()
-    for trace in _provider_traces(
-        bench_data["scores"], x_key="date", y_key="score",
-        sel_providers=sel_providers,
-        hover_fmt="%{text}: %{y:.1f}%",
-    ):
-        fig_bench.add_trace(trace)
-
-    fig_bench.update_layout(
-        yaxis_title="Score (%)",
-        yaxis_range=[y_min, y_max],
-        **CHART_LAYOUT,
-    )
-    st.plotly_chart(fig_bench, use_container_width=True)
-    st.markdown("")  # spacer
+        if not _hp.empty:
+            fig_hp = go.Figure()
+            for prov in sorted(_hp["provider"].unique()):
+                sub = _hp[_hp["provider"] == prov]
+                fig_hp.add_trace(go.Scatter(
+                    x=sub["composite"], y=sub["elo"], text=sub["name"],
+                    name=prov, mode="markers", showlegend=False,
+                    marker=dict(color=PROVIDER_COLOURS.get(prov, "#6b7280"), size=9, opacity=0.85,
+                                line=dict(width=1, color="rgba(255,255,255,0.3)")),
+                    hovertemplate="%{text}<br>Composite: %{x:.1f}%<br>Elo: %{y:,d}<extra></extra>",
+                ))
+            fig_hp.update_layout(
+                xaxis_title="Composite Benchmark Score (%)",
+                yaxis_title="Arena Elo (Human Preference)",
+                height=480, **CHART_LAYOUT,
+            )
+            st.plotly_chart(fig_hp, use_container_width=True)
+            st.caption(_ATTR + " · Arena Elo from LMSYS Chatbot Arena via /ai-research skill.")
+        else:
+            st.info("No model overlap between ZeroEval benchmarks and Arena Elo — run /ai-research to populate Arena Elo.")
+    else:
+        st.info("Arena Elo data not yet loaded. Run /ai-research to populate.")
 
 
 # ═════════════════════════════════════════════════════════════════════════
-# SECTION 3 — API Pricing Over Time
+# SECTION 10 — API Pricing Over Time
 # ═════════════════════════════════════════════════════════════════════════
-st.header("API Pricing")
+st.header("API Pricing (Historical)")
 
 
 @st.cache_data(ttl=86400)
@@ -562,12 +1017,19 @@ else:
 # SECTION 4 — Live Leaderboard
 # ═════════════════════════════════════════════════════════════════════════
 st.header("Live Leaderboard")
-st.caption("Arena Elo ratings, intelligence-vs-cost frontier, and context window leaders — updated via /ai-research skill.")
+st.caption("Arena Elo ratings, intelligence-vs-cost frontier, and context window leaders.")
 
-_conn = sqlite3.connect(DB_PATH)
-df_elo = pd.read_sql("SELECT * FROM llm_arena_elo ORDER BY elo DESC", _conn)
-df_specs = pd.read_sql("SELECT * FROM llm_model_specs ORDER BY intelligence_score DESC NULLS LAST", _conn)
-_conn.close()
+# Build df_specs from live ZeroEval data
+if not _ze_df.empty:
+    df_specs = _ze_df.copy()
+    df_specs["provider"] = df_specs["organization"].map(_ORG_TO_PROVIDER).fillna(df_specs["organization"])
+    df_specs["model"] = df_specs["name"]
+    df_specs["input_price_per_m_tokens"] = df_specs["input_price"]
+    df_specs["context_window"] = df_specs["context"]
+    _bench_cols_full = ["gpqa_score", "swe_bench_verified_score", "hle_score", "aime_2025_score", "mmmlu_score"]
+    df_specs["intelligence_score"] = df_specs[_bench_cols_full].mean(axis=1, skipna=True).mul(100)
+else:
+    df_specs = pd.DataFrame()
 
 st.subheader("Arena Elo Ratings")
 _explainer(
@@ -597,7 +1059,7 @@ st.subheader("Intelligence vs Cost Frontier")
 _explainer(
     what="Each model plotted at its list input price (x-axis) vs composite intelligence index (y-axis). The Pareto frontier moves left and up over time — models that were SOTA 12 months ago are now dominated on both axes.",
     why="As intelligence commoditises, can any provider maintain pricing power? This chart shows how fast the frontier is shifting — and whether there is still a capability moat at the top end that justifies premium pricing.",
-    source="Artificial Analysis intelligence index + provider list pricing. Updated via /ai-research skill.",
+    source="api.zeroeval.com — benchmark scores (GPQA, SWE-Bench, HLE, AIME-2025, MMMLU) averaged for composite intelligence index. Pricing from provider API list rates.",
 )
 if not df_specs.empty:
     df_plot = df_specs.dropna(subset=["intelligence_score", "input_price_per_m_tokens"])
@@ -623,7 +1085,7 @@ if not df_specs.empty:
         _explainer(
             what="Current snapshot: the 10 models with the largest maximum context windows, in thousands of tokens. Companion to the Context Window Expansion time-series above.",
             why="Context window is a hard application constraint. Models that can ingest entire codebases or documents without chunking enable qualitatively different workflows. The jump from 4K → 1M+ tokens represents a category shift, not just a spec improvement.",
-            source="Model cards and provider announcements. Updated via /ai-research skill.",
+            source="api.zeroeval.com — context window from model metadata, updated hourly.",
         )
         df_ctx = df_ctx.copy()
         df_ctx["ctx_k"] = df_ctx["context_window"] / 1000
