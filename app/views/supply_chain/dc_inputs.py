@@ -45,7 +45,15 @@ st.markdown("---")
 # ──────────────────────────────────────────────
 # 2. GROUPED PRICE TABLES (Tabs)
 # ──────────────────────────────────────────────
-tabs = st.tabs(list(data.keys()))
+MEMORY_ITEMS = [
+    {"symbol": "MU",        "name": "Micron Technology",   "relevance": "US HBM3E, DRAM & NAND — NVIDIA's second HBM3E supplier"},
+    {"symbol": "000660.KS", "name": "SK Hynix",            "relevance": "Primary NVIDIA HBM3E/HBM4 supplier — dominant AI memory share"},
+    {"symbol": "005930.KS", "name": "Samsung Electronics", "relevance": "DRAM/NAND leader, ramping HBM4 for 2026 GPU generation"},
+    {"symbol": "WDC",       "name": "Western Digital",     "relevance": "NAND Flash — enterprise SSD for AI training clusters"},
+    {"symbol": "STX",       "name": "Seagate Technology",  "relevance": "High-capacity HDD — mass cold storage for AI data lakes"},
+]
+
+tabs = st.tabs(list(data.keys()) + ["Memory"])
 
 return_periods = ["1D", "1M", "3M", "6M", "1Y"]
 
@@ -70,7 +78,7 @@ def _fmt_price(val):
     return f"${val:,.2f}"
 
 
-for tab, (category, items) in zip(tabs, data.items()):
+for tab, (category, items) in zip(tabs[:-1], data.items()):
     with tab:
         rows = []
         for item in items:
@@ -98,6 +106,41 @@ for tab, (category, items) in zip(tabs, data.items()):
             .map(_color_val, subset=pct_cols)
         )
         st.dataframe(styled, use_container_width=True, hide_index=True)
+
+with tabs[-1]:
+    from app.lib.yahoo_spark import run_spark, compute_returns_from_closes, _format_price as _fp
+
+    _mem_syms = [m["symbol"] for m in MEMORY_ITEMS]
+    _mem_spark = run_spark(_mem_syms, time_range="5y")
+
+    mem_rows = []
+    for item in MEMORY_ITEMS:
+        sd = _mem_spark.get(item["symbol"])
+        if sd and sd["closes"] and len(sd["closes"]) >= 2:
+            price = _fp(sd["closes"][-1])
+            prev = sd["closes"][-2]
+            change_pct = round((sd["closes"][-1] / prev - 1) * 100, 2) if prev else None
+            ret = compute_returns_from_closes(sd["closes"])
+        else:
+            price, change_pct, ret = None, None, {}
+        mem_rows.append({
+            "Name": item["name"],
+            "Symbol": item["symbol"],
+            "Price": price,
+            "Daily %": change_pct,
+            "1M %": ret.get("1M"),
+            "3M %": ret.get("3M"),
+            "6M %": ret.get("6M"),
+            "1Y %": ret.get("1Y"),
+            "DC/AI Relevance": item["relevance"],
+        })
+
+    df_mem = pd.DataFrame(mem_rows)
+    pct_cols = ["Daily %", "1M %", "3M %", "6M %", "1Y %"]
+    fmt_map = {col: _fmt_pct for col in pct_cols}
+    fmt_map["Price"] = _fmt_price
+    styled_mem = df_mem.style.format(fmt_map).map(_color_val, subset=pct_cols)
+    st.dataframe(styled_mem, use_container_width=True, hide_index=True)
 
 # ──────────────────────────────────────────────
 # 3. HISTORICAL PRICE CHART

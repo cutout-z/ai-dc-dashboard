@@ -314,3 +314,68 @@ with col_vh2:
         )
     else:
         st.info("Mag 7 market cap data not available.")
+
+# ══════════════════════════════════════════════
+# ROUNDHILL GENERATIVE AI & TECH ETF (CHAT)
+# ══════════════════════════════════════════════
+st.header("Roundhill Generative AI & Tech ETF (CHAT)")
+st.caption(
+    "Actively managed ETF tracking the generative AI value chain across four segments: "
+    "**Platforms** (LLM development), **Infrastructure** (GPUs, semis), "
+    "**Enterprise Software** (business AI apps), and **Consumer Software** (consumer AI apps). "
+    "Includes non-US exposure (Chinese AI, Korean semiconductors). "
+    "[Fund details →](https://www.roundhillinvestments.com/etf/chat/)"
+)
+
+try:
+    import yfinance as yf
+
+    _chat_etf = yf.Ticker("CHAT")
+    _chat_info = _chat_etf.info
+    _chat_price = _chat_info.get("regularMarketPrice") or _chat_info.get("previousClose")
+    _chat_aum = _chat_info.get("totalAssets")
+    _chat_pe = _chat_info.get("trailingPE")
+    _chat_ytd = _chat_info.get("ytdReturn")
+    _chat_52lo = _chat_info.get("fiftyTwoWeekLow")
+    _chat_52hi = _chat_info.get("fiftyTwoWeekHigh")
+
+    col_chat1, col_chat2, col_chat3, col_chat4 = st.columns(4)
+    if _chat_price:
+        col_chat1.metric("Price", f"${_chat_price:.2f}")
+    if _chat_aum:
+        col_chat2.metric("AUM", f"${_chat_aum / 1e9:.2f}B")
+    if _chat_pe:
+        col_chat3.metric("Trailing PE", f"{_chat_pe:.1f}x")
+    if _chat_ytd is not None:
+        col_chat4.metric("YTD Return", f"{_chat_ytd * 100:+.1f}%")
+
+    col_ch1, col_ch2 = st.columns([2, 1])
+    with col_ch1:
+        _chat_holdings = _chat_etf.get_funds_data()
+        if hasattr(_chat_holdings, "top_holdings") and _chat_holdings.top_holdings is not None:
+            df_hold = _chat_holdings.top_holdings.head(10).copy()
+            df_hold = df_hold.reset_index()
+            df_hold.columns = ["Ticker", "Name", "Weight"]
+            df_hold["Weight"] = df_hold["Weight"].apply(lambda x: f"{x * 100:.1f}%")
+            st.dataframe(df_hold, use_container_width=True, hide_index=True)
+        else:
+            st.info("Holdings data not available from yfinance.")
+
+    with col_ch2:
+        if _chat_52lo and _chat_52hi and _chat_price:
+            pct_of_range = (_chat_price - _chat_52lo) / (_chat_52hi - _chat_52lo) * 100 if _chat_52hi > _chat_52lo else 50
+            st.markdown(
+                f"**52-Week Range**  \n"
+                f"${_chat_52lo:.2f} — ${_chat_52hi:.2f}  \n"
+                f"Currently at {pct_of_range:.0f}% of range"
+            )
+        st.markdown(
+            "**Why track CHAT?**  \n"
+            "CHAT is the closest pure-play ETF to the AI infrastructure thesis this dashboard monitors. "
+            "Its price action reflects market consensus on the generative AI value chain — "
+            "a useful cross-check against the individual signals tracked above."
+        )
+        st.caption("Expense ratio: 0.75% · Inception: May 2023 · Actively managed")
+
+except Exception as e:
+    st.warning(f"Could not fetch CHAT ETF data: {e}")
