@@ -8,3 +8,13 @@ date,entity,amount_bn,type,is_circular,counterparty,source,notes
 2025-12-01,Oracle,38.0,debt,false,,Bloomberg,Corporate debt raise specifically for new data center construction
 2026-01-15,xAI,20.0,equity,true,Nvidia (investor),Bloomberg,Series E at $230B — Nvidia invested directly; xAI is major Nvidia GPU buyer
 2026-02-01,Anthropic,30.0,equity,false,"Various (incl. Google)",CNBC,Series at $380B valuation — Google is both investor and cloud provider (mild circularity)
+2025-03-31,OpenAI,40.0,equity,false,"SoftBank / syndicate",CNBC March 31 2025,SoftBank-led Series at $300B valuation — largest private fundraise on record; SoftBank also anchor of Stargate JV (mild circularity)
+2025-06-10,Scale AI,14.3,equity,true,Meta,TechCrunch June 13 2025,Meta acquired 49% non-voting stake at $29B valuation — circular: Meta is both investor and primary data-labeling customer; CEO Wang departed to Meta
+2025-07-01,xAI,10.0,hybrid,false,,CNBC July 1 2025,Combined debt+equity raise at ~$150B valuation; precursor to September pure-equity round
+2025-09-19,xAI,10.0,equity,false,"Qatar Investment Authority / Valor Capital",Bloomberg September 19 2025,Pure equity raise at $200B valuation; investors include QIA and Valor Capital
+2025-10-07,xAI,20.0,hybrid,true,Nvidia (SPV equity investor),Bloomberg October 7 2025,SPV: $7.5B equity + $12.5B debt secured by Nvidia GPUs — highly circular: Nvidia invests $2B equity to finance purchase of its own chips; off-balance-sheet for xAI
+2025-10-21,Meta / Blue Owl,27.0,hybrid,false,Blue Owl Capital,Meta press release October 21 2025,Hyperion campus JV in Richland Parish LA — Blue Owl holds 80% stake; largest-ever private credit DC transaction
+2026-04-01,Related Digital / Oracle,16.0,debt,true,"Oracle (tenant) / Blackstone / BofA",Bloomberg April 1 2026,Saline Township MI DC: $2B equity (Blackstone) + $14B debt (BofA); Oracle is tenant and Stargate JV partner — mild circularity
+2026-03-30,Mistral AI,0.83,debt,true,Nvidia (GPU supplier),CNBC March 30 2026,830M debt from 7-bank consortium (led Bpifrance) to purchase 13800 Nvidia GB300 GPUs + 44 MW Paris DC — potential circular: Nvidia supplies GPUs that may collateralize the loan
+2026-01-01,Nebius,4.34,debt,false,,IndexBox 2026,Convertible debt for AI infrastructure; 2026 capex plan $16-20B; European AI infrastructure firm (Yandex spinout)
+2026-01-01,Oracle,50.0,hybrid,true,"OpenAI / xAI / Meta / Nvidia (customers)",DCD 2026,Oracle plans $45-50B debt+equity in 2026 for cloud buildout; key customers include OpenAI, xAI, Meta, Nvidia — circular: same parties are both customers and financing counterparties

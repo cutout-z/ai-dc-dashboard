@@ -1,8 +1,8 @@
 {
   "_meta": {
     "source_boards": [
-      "llm-stats.com/leaderboards/llm-leaderboard",
-      "llm-stats.com/leaderboards/open-llm-leaderboard"
+      "https://llm-stats.com/leaderboards/llm-leaderboard",
+      "https://llm-stats.com/leaderboards/open-llm-leaderboard"
     ],
     "updated": "2026-04-16",
     "note": "Combined top 30 from LLM + Open LLM leaderboards, ranked by Code Arena composite score."
@@ -46,7 +46,7 @@
       "context_k": 1000,
       "input_price": 2.5,
       "output_price": 15.0,
-      "speed_cps": 33,
+      "speed_cps": 34,
       "gpqa": 92.8,
       "aime_2025": null,
       "swe_bench": null,
@@ -106,7 +106,7 @@
       "context_k": 1000,
       "input_price": 0.5,
       "output_price": 3.0,
-      "speed_cps": 262,
+      "speed_cps": 265,
       "gpqa": 90.4,
       "aime_2025": 99.7,
       "swe_bench": 78.0,
@@ -294,21 +294,6 @@
       "rank": 19
     },
     {
-      "name": "GPT-5.4 mini",
-      "org": "OpenAI",
-      "source_board": "llm",
-      "composite_score": 1100,
-      "context_k": 400,
-      "input_price": 0.75,
-      "output_price": 4.5,
-      "speed_cps": 100,
-      "gpqa": 88.0,
-      "aime_2025": null,
-      "swe_bench": null,
-      "hle": 28.2,
-      "rank": 20
-    },
-    {
       "name": "Claude Sonnet 4.5",
       "org": "Anthropic",
       "source_board": "llm",
@@ -316,9 +301,24 @@
       "context_k": 200,
       "input_price": 3.0,
       "output_price": 15.0,
-      "speed_cps": 124,
+      "speed_cps": null,
       "gpqa": 83.4,
       "aime_2025": 87.0,
+      "swe_bench": null,
+      "hle": null,
+      "rank": 20
+    },
+    {
+      "name": "MiniMax M2.7",
+      "org": "MiniMax",
+      "source_board": "llm",
+      "composite_score": 1086,
+      "context_k": 204,
+      "input_price": 0.3,
+      "output_price": 1.2,
+      "speed_cps": 43,
+      "gpqa": null,
+      "aime_2025": null,
       "swe_bench": null,
       "hle": null,
       "rank": 21
@@ -399,21 +399,6 @@
       "rank": 26
     },
     {
-      "name": "MiniMax M2.7",
-      "org": "MiniMax",
-      "source_board": "llm",
-      "composite_score": 1008,
-      "context_k": 204,
-      "input_price": 0.3,
-      "output_price": 1.2,
-      "speed_cps": 43,
-      "gpqa": null,
-      "aime_2025": null,
-      "swe_bench": null,
-      "hle": null,
-      "rank": 27
-    },
-    {
       "name": "Kimi K2 0905",
       "org": "MoonshotAI",
       "source_board": "llm",
@@ -426,7 +411,7 @@
       "aime_2025": null,
       "swe_bench": null,
       "hle": null,
-      "rank": 28
+      "rank": 27
     },
     {
       "name": "Grok-4.20 Beta Non-Reasoning",
@@ -441,7 +426,7 @@
       "aime_2025": null,
       "swe_bench": null,
       "hle": null,
-      "rank": 29
+      "rank": 28
     },
     {
       "name": "Gemma 4 26B-A4B",
@@ -456,6 +441,21 @@
       "aime_2025": null,
       "swe_bench": null,
       "hle": 17.2,
+      "rank": 29
+    },
+    {
+      "name": "MiniMax M2.5",
+      "org": "MiniMax",
+      "source_board": "llm",
+      "composite_score": 972,
+      "context_k": 1000,
+      "input_price": 0.3,
+      "output_price": 1.2,
+      "speed_cps": 183,
+      "gpqa": null,
+      "aime_2025": null,
+      "swe_bench": 80.2,
+      "hle": null,
       "rank": 30
     }
   ]
