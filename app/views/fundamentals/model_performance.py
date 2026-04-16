@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import json
 import sqlite3
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import requests
 import streamlit as st
 
 
@@ -46,13 +46,25 @@ _lb_df = _load_leaderboard()
 
 if not _lb_df.empty:
     st.header("LLM Leaderboard")
-    st.caption("Top 30 frontier models ranked by composite score — sourced from [llm-stats.com](https://llm-stats.com/leaderboards/llm-leaderboard).")
+    st.caption(
+        "Top 30 models ranked by composite Code Arena score — combined from "
+        "[LLM Leaderboard](https://llm-stats.com/leaderboards/llm-leaderboard) + "
+        "[Open LLM Leaderboard](https://llm-stats.com/leaderboards/open-llm-leaderboard) "
+        "on llm-stats.com."
+    )
 
     # Build display table
-    _display = _lb_df.rename(columns={
+    _display = _lb_df.copy()
+    if "source_board" in _display.columns:
+        _display["type"] = _display["source_board"].map({"llm": "Closed", "open": "Open"}).fillna("")
+    else:
+        _display["type"] = ""
+    _display = _display.rename(columns={
         "rank": "#",
         "name": "Model",
         "org": "Org",
+        "type": "Type",
+        "composite_score": "Score",
         "gpqa": "GPQA",
         "aime_2025": "AIME '25",
         "swe_bench": "SWE-Bench",
@@ -62,8 +74,10 @@ if not _lb_df.empty:
         "context_k": "Ctx (K)",
         "speed_cps": "Speed",
     })
-    _display = _display[["#", "Model", "Org", "GPQA", "AIME '25", "SWE-Bench", "HLE",
-                          "In $/M", "Out $/M", "Ctx (K)", "Speed"]]
+    _cols = ["#", "Model", "Org", "Type", "Score", "GPQA", "AIME '25", "SWE-Bench", "HLE",
+             "In $/M", "Out $/M", "Ctx (K)", "Speed"]
+    _cols = [c for c in _cols if c in _display.columns]
+    _display = _display[_cols]
 
     st.dataframe(
         _display,
@@ -74,6 +88,8 @@ if not _lb_df.empty:
             "#": st.column_config.NumberColumn(width="small"),
             "Model": st.column_config.TextColumn(width="medium"),
             "Org": st.column_config.TextColumn(width="small"),
+            "Type": st.column_config.TextColumn(width="small"),
+            "Score": st.column_config.NumberColumn(format="%d", width="small"),
             "GPQA": st.column_config.NumberColumn(format="%.1f%%"),
             "AIME '25": st.column_config.NumberColumn(format="%.1f%%"),
             "SWE-Bench": st.column_config.NumberColumn(format="%.1f%%"),
@@ -86,8 +102,8 @@ if not _lb_df.empty:
     )
     with open(DATA_DIR / "llm_leaderboard.json") as _f:
         _lb_meta = json.load(_f)["_meta"]
-    st.caption(f"Last updated: {_lb_meta['updated']}. "
-               "Scores as percentages. Speed in characters/second. Awaiting LLM Stats API for live updates.")
+    _updated = _lb_meta.get("updated", "unknown")
+    st.caption(f"Last updated: {_updated}. Score = Code Arena composite. Scores as percentages. Speed in characters/second.")
     st.markdown("")
 
 
