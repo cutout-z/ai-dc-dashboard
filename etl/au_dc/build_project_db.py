@@ -9,14 +9,15 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from models.risk_model import apply_risk_weight
-from models.capex_model import estimate_capex
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+from models.au_dc.risk_model import apply_risk_weight
+from models.au_dc.capex_model import estimate_capex
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-SEED_CSV = BASE_DIR / "data" / "reference" / "projects_seed.csv"
-OPERATOR_CSV = BASE_DIR / "data" / "reference" / "operator_types.csv"
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+BASE_DIR = PROJECT_ROOT
+SEED_CSV = BASE_DIR / "data" / "au_dc" / "reference" / "projects_seed.csv"
+OPERATOR_CSV = BASE_DIR / "data" / "au_dc" / "reference" / "operator_types.csv"
+PROCESSED_DIR = BASE_DIR / "data" / "au_dc" / "processed"
 
 
 def build():
