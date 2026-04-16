@@ -351,15 +351,66 @@ try:
 
     col_ch1, col_ch2 = st.columns([2, 1])
     with col_ch1:
-        _chat_holdings = _chat_etf.get_funds_data()
-        if hasattr(_chat_holdings, "top_holdings") and _chat_holdings.top_holdings is not None:
-            df_hold = _chat_holdings.top_holdings.head(10).copy()
-            df_hold = df_hold.reset_index()
-            df_hold.columns = ["Ticker", "Name", "Weight"]
-            df_hold["Weight"] = df_hold["Weight"].apply(lambda x: f"{x * 100:.1f}%")
+        import requests as _req
+        import concurrent.futures as _cf
+
+        # Yahoo Finance quoteSummary returns full holdings list (beyond top 10)
+        df_hold = None
+        try:
+            _qs = _req.get(
+                "https://query2.finance.yahoo.com/v10/finance/quoteSummary/CHAT",
+                params={"modules": "topHoldings"},
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=10,
+            )
+            if _qs.status_code == 200:
+                _raw = (_qs.json().get("quoteSummary", {})
+                                  .get("result", [{}])[0]
+                                  .get("topHoldings", {})
+                                  .get("holdings", []))
+                if _raw:
+                    df_hold = pd.DataFrame([{
+                        "Ticker": h.get("symbol", ""),
+                        "Name":   h.get("holdingName", ""),
+                        "_weight_raw": h.get("holdingPercent", {}).get("raw", 0),
+                    } for h in _raw])
+        except Exception:
+            pass
+
+        # Fallback to yfinance funds_data if direct API failed
+        if df_hold is None or df_hold.empty:
+            _chat_hd = _chat_etf.get_funds_data()
+            if hasattr(_chat_hd, "top_holdings") and _chat_hd.top_holdings is not None:
+                df_hold = _chat_hd.top_holdings.copy().reset_index()
+                df_hold.columns = ["Ticker", "Name", "_weight_raw"]
+
+        if df_hold is not None and not df_hold.empty:
+            df_hold["Weight"] = df_hold["_weight_raw"].apply(lambda x: f"{x * 100:.1f}%")
+            df_hold = df_hold.drop(columns=["_weight_raw"])
+
+            # Parallel forward + trailing P/E fetch
+            def _fetch_pe(sym):
+                try:
+                    info = yf.Ticker(sym).info
+                    fpe = info.get("forwardPE")
+                    tpe = info.get("trailingPE")
+                    return sym, (
+                        f"{fpe:.1f}x" if fpe and 0 < fpe < 5000 else "—",
+                        f"{tpe:.1f}x" if tpe and 0 < tpe < 5000 else "—",
+                    )
+                except Exception:
+                    return sym, ("—", "—")
+
+            with _cf.ThreadPoolExecutor(max_workers=8) as _pool:
+                _pe_map = dict(_pool.map(_fetch_pe, df_hold["Ticker"].tolist()))
+
+            df_hold["Fwd P/E"]   = df_hold["Ticker"].map(lambda s: _pe_map.get(s, ("—", "—"))[0])
+            df_hold["Trail P/E"] = df_hold["Ticker"].map(lambda s: _pe_map.get(s, ("—", "—"))[1])
+
+            st.caption(f"Top {len(df_hold)} holdings · P/E unavailable for non-US listings (HK, KS)")
             st.dataframe(df_hold, use_container_width=True, hide_index=True)
         else:
-            st.info("Holdings data not available from yfinance.")
+            st.info("Holdings data not available.")
 
     with col_ch2:
         if _chat_52lo and _chat_52hi and _chat_price:
