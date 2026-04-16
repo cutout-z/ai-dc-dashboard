@@ -109,6 +109,9 @@ news = st.Page("views/news/news.py", title="News")
 source_health = st.Page(
     "views/system/source_health.py", title="Source Health"
 )
+acronyms = st.Page(
+    "views/system/acronyms.py", title="Acronyms & Glossary"
+)
 
 # Australian Market
 au_landing = st.Page(
@@ -146,7 +149,7 @@ pg = st.navigation(
             au_company,
             au_project,
         ],
-        "Other": [news, source_health],
+        "Other": [news, source_health, acronyms],
     }
 )
 
