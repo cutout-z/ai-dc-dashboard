@@ -72,9 +72,6 @@ st.markdown(
 landing = st.Page("views/landing.py", title="Overview", default=True, url_path="home")
 
 # Fundamentals Tracking
-model_performance = st.Page(
-    "views/fundamentals/model_performance.py", title="LLM Performance Analysis"
-)
 equity_analysis = st.Page(
     "views/fundamentals/equity_analysis.py", title="Equity Analysis (key players)"
 )
@@ -87,8 +84,43 @@ hyperscaler_capex = st.Page(
 other_signals = st.Page(
     "views/fundamentals/other_signals.py", title="Other Signals"
 )
-power = st.Page(
-    "views/fundamentals/power.py", title="Power"
+
+# LLM Performance (sub-section under Fundamentals Tracking)
+llm_leaderboard = st.Page(
+    "views/fundamentals/llm_performance/leaderboard.py", title="LLM Leaderboard"
+)
+llm_benchmark = st.Page(
+    "views/fundamentals/llm_performance/benchmark_performance.py", title="Benchmark Performance"
+)
+llm_labs = st.Page(
+    "views/fundamentals/llm_performance/labs_and_countries.py", title="Labs and Countries"
+)
+llm_open = st.Page(
+    "views/fundamentals/llm_performance/open_models.py", title="Open Models"
+)
+llm_capabilities = st.Page(
+    "views/fundamentals/llm_performance/model_capabilities.py", title="Model Capabilities"
+)
+llm_prices = st.Page(
+    "views/fundamentals/llm_performance/prices_and_value.py", title="Prices and Value"
+)
+llm_efficiency = st.Page(
+    "views/fundamentals/llm_performance/efficiency_and_scale.py", title="Efficiency and Scale"
+)
+llm_speed = st.Page(
+    "views/fundamentals/llm_performance/speed_and_context.py", title="Speed and Context"
+)
+llm_preference = st.Page(
+    "views/fundamentals/llm_performance/human_preference.py", title="Human Preference"
+)
+llm_ai_demand = st.Page(
+    "views/fundamentals/llm_performance/ai_demand_indicators.py", title="AI Demand Indicators"
+)
+llm_lab_revenue = st.Page(
+    "views/fundamentals/llm_performance/frontier_lab_revenue.py", title="Frontier Lab Revenue & Valuations"
+)
+llm_gpu_hardware = st.Page(
+    "views/fundamentals/llm_performance/gpu_hardware.py", title="GPU Hardware & Pricing"
 )
 
 # Supply Chain
@@ -98,10 +130,18 @@ value_chain = st.Page(
 dc_inputs = st.Page(
     "views/supply_chain/dc_inputs.py", title="DC & AI Inputs"
 )
+power = st.Page(
+    "views/fundamentals/power.py", title="Power"
+)
 # prospecting = st.Page(
 #     "views/supply_chain/prospecting.py", title="Prospecting"
 # )
 # HIDDEN: uses private AI_Mapping_5.0.xlsx data — rebuild with own logic before re-enabling
+
+# Other
+guidance_revisions = st.Page(
+    "views/fundamentals/guidance_revisions.py", title="Historical Guidance Revisions"
+)
 
 # News
 news = st.Page("views/news/news.py", title="News")
@@ -134,15 +174,28 @@ au_project = st.Page(
 pg = st.navigation(
     {
         "Dashboard": [landing],
-        "Fundamentals Tracking": [
-            model_performance,
+        "Financial Analysis": [
             equity_analysis,
             financials,
             hyperscaler_capex,
+            guidance_revisions,
             other_signals,
-            power,
         ],
-        "Supply Chain": [value_chain, dc_inputs],
+        "LLM & GPU Performance": [
+            llm_leaderboard,
+            llm_benchmark,
+            llm_labs,
+            llm_open,
+            llm_capabilities,
+            llm_prices,
+            llm_efficiency,
+            llm_speed,
+            llm_preference,
+            llm_ai_demand,
+            llm_lab_revenue,
+            llm_gpu_hardware,
+        ],
+        "Supply Chain": [value_chain, dc_inputs, power],
         "Australian Market - Alpha/WIP": [
             au_landing,
             au_market_overview,
