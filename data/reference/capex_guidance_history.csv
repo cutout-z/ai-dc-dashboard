@@ -1,20 +1,32 @@
 ticker,company,fiscal_year,fy_end_month,guidance_usd_b,guidance_low,guidance_high,announced_date,source,notes
-MSFT,Microsoft,FY2025,6,60.0,,,2024-07-30,Q4 FY2024 earnings,"Initial FY2025 guidance ~$60B"
-MSFT,Microsoft,FY2025,6,80.0,,,2025-01-29,Q2 FY2025 earnings,"Revised up to $80B from ~$60B"
-MSFT,Microsoft,FY2025,6,63.0,,,2025-07-22,FY2025 earnings,"Actual full-year result — came in below elevated guidance"
-MSFT,Microsoft,FY2026,6,120.0,,,2026-01-29,Q2 FY2026 earnings,"Guided $120B+; H1 FY2026 was $72.4B"
-GOOGL,Alphabet,CY2025,12,50.0,,,2025-02-04,Q4 CY2024 earnings,"Initial CY2025 guidance ~$50B"
-GOOGL,Alphabet,CY2025,12,75.0,,,2025-02-04,Q4 CY2024 earnings,"Revised up to $75B from ~$50B"
-GOOGL,Alphabet,CY2025,12,91.0,,,2026-02-04,Q4 CY2025 earnings,"Actual full-year result — $91B"
-GOOGL,Alphabet,CY2026,12,180.0,175.0,185.0,2026-02-04,Q4 CY2025 earnings,"$175-185B range"
-AMZN,Amazon,CY2025,12,100.0,,,2025-02-06,Q4 CY2024 earnings,"Guided ~$100B for CY2025"
-AMZN,Amazon,CY2025,12,131.0,,,2026-02-06,Q4 CY2025 earnings,"Actual full-year result — $131B, well above guidance"
-AMZN,Amazon,CY2026,12,200.0,,,2026-02-06,Q4 CY2025 earnings,"Guided ~$200B"
-META,Meta,CY2025,12,40.0,37.0,40.0,2024-10-30,Q3 CY2024 earnings,"Initial CY2025 guidance $37-40B"
-META,Meta,CY2025,12,62.5,60.0,65.0,2025-01-29,Q4 CY2024 earnings,"Revised up to $60-65B from $37-40B"
-META,Meta,CY2025,12,72.0,,,2026-01-29,Q4 CY2025 earnings,"Actual full-year result — $72B"
-META,Meta,CY2026,12,125.0,115.0,135.0,2026-01-29,Q4 CY2025 earnings,"$115-135B range"
-ORCL,Oracle,FY2026,5,35.0,,,2025-09-09,Q1 FY2026 earnings,"Initial FY2026 guidance $35B"
-ORCL,Oracle,FY2026,5,50.0,,,2025-12-09,Q2 FY2026 earnings,"Revised up to $50B from $35B — added RPO"
-CRWV,CoreWeave,CY2026,12,32.5,30.0,35.0,2026-02-24,Q4 CY2025 earnings,"$30-35B guided, >2x CY2025"
-AAPL,Apple,FY2026,9,14.0,,,2026-01-30,Q1 FY2026 earnings,"Guided ~$14B — modest increase for AI server buildout"
+MSFT,Microsoft,FY2025,6,60.0,,,2024-07-30,Q4 FY2024 earnings,Initial FY2025 guidance ~$60B — directional increase from FY2024 ($55.7B)
+MSFT,Microsoft,FY2025,6,80.0,,,2025-01-29,Q2 FY2025 earnings,Revised up to ~$80B — accelerated AI infrastructure spend
+MSFT,Microsoft,FY2025,6,63.0,,,2025-07-22,Q4 FY2025 earnings,Actual full-year PP&E capex (total infra incl. finance leases was ~$97.7B per 10-K)
+MSFT,Microsoft,FY2026,6,120.0,,,2026-01-29,Q2 FY2026 earnings,Analyst consensus ~$120B+ based on H1 run-rate ($72.4B); Microsoft gave directional guidance only: FY26 growth rate higher than FY25 — no explicit annual figure stated
+GOOGL,Alphabet,CY2025,12,75.0,,,2025-02-04,Q4 CY2024 earnings,Initial CY2025 guidance ~$75B — CFO Anat Ashkenazi stated explicitly (~$16-18B in Q1)
+GOOGL,Alphabet,CY2025,12,85.0,,,2025-07-23,Q2 CY2025 earnings,Revised up to ~$85B from $75B — accelerated server timing and data centre construction
+GOOGL,Alphabet,CY2025,12,92.0,91.0,93.0,2025-10-29,Q3 CY2025 earnings,Raised to $91-93B range for full year 2025
+GOOGL,Alphabet,CY2025,12,91.4,,,2026-02-04,Q4 CY2025 earnings,Actual full-year result — $91.4B (in line with $91-93B guidance)
+GOOGL,Alphabet,CY2026,12,180.0,175.0,185.0,2026-02-04,Q4 CY2025 earnings,Initial CY2026 guidance $175-185B range
+AMZN,Amazon,CY2025,12,100.0,,,2025-02-06,Q4 CY2024 earnings,Initial CY2025 guidance >$100B — directional floor stated by CFO; no hard ceiling given
+AMZN,Amazon,CY2025,12,125.0,,,2025-10-30,Q3 CY2025 earnings,First explicit annual revision: ~$125B for CY2025 stated at Q3 earnings
+AMZN,Amazon,CY2025,12,131.0,,,2026-02-06,Q4 CY2025 earnings,Actual full-year result — $131B (exceeded $125B guidance)
+AMZN,Amazon,CY2026,12,200.0,,,2026-02-06,Q4 CY2025 earnings,Initial CY2026 guidance ~$200B — predominantly AI infrastructure
+META,Meta,CY2025,12,62.5,60.0,65.0,2025-01-29,Q4 CY2024 earnings,Initial CY2025 guidance $60-65B — first specific 2025 range (note: prior $37-40B was CY2024 guidance not CY2025)
+META,Meta,CY2025,12,68.0,64.0,72.0,2025-04-30,Q1 CY2025 earnings,Revised up to $64-72B from $60-65B
+META,Meta,CY2025,12,69.0,66.0,72.0,2025-07-30,Q2 CY2025 earnings,Narrowed to $66-72B from $64-72B
+META,Meta,CY2025,12,71.0,70.0,72.0,2025-10-29,Q3 CY2025 earnings,Raised to $70-72B from $66-72B
+META,Meta,CY2025,12,72.0,,,2026-01-29,Q4 CY2025 earnings,Actual full-year result — $72.2B
+META,Meta,CY2026,12,125.0,115.0,135.0,2026-01-29,Q4 CY2025 earnings,Initial CY2026 guidance $115-135B range
+ORCL,Oracle,FY2025,5,13.8,,,2024-06-11,Q4 FY2024 earnings,Initial FY2025 guidance: capex to double FY2024 ($6.9B actual) — implied ~$13.8B floor; no hard target stated
+ORCL,Oracle,FY2025,5,16.0,,,2025-03-10,Q3 FY2025 earnings,Revised up: capex to surpass $16B — first explicit floor stated mid-year (Q3 actual $5.9B beat estimates of ~$3.8B)
+ORCL,Oracle,FY2025,5,21.2,,,2025-06-11,Q4 FY2025 earnings,Actual full-year result — $21.2B (far exceeded initial ~$13.8B implied guide; Q4 alone was $9.1B)
+ORCL,Oracle,FY2026,5,25.0,,,2025-06-11,Q4 FY2025 earnings,Initial FY2026 guidance: capex to exceed $25B — first stated at Q4 FY2025 call (same call as FY2025 actual)
+ORCL,Oracle,FY2026,5,35.0,,,2025-09-09,Q1 FY2026 earnings,Revised up to ~$35B from >$25B — Safra Catz noted it could be slightly higher
+ORCL,Oracle,FY2026,5,50.0,,,2025-12-10,Q2 FY2026 earnings,Revised up to ~$50B (stated as $35B + ~$15B higher) — presented by Doug Caring; stock fell ~11% AH
+CRWV,CoreWeave,CY2025,12,21.5,20.0,23.0,2025-05-14,Q1 CY2025 earnings,Initial CY2025 guidance $20-23B — first earnings as public company (IPO Mar 28 2025); exceeded Street est. of ~$18.3B
+CRWV,CoreWeave,CY2025,12,13.0,12.0,14.0,2025-11-10,Q3 CY2025 earnings,Revised down to $12-14B — ~40% cut due to third-party DC developer delay (power shells behind schedule); slip pushed capex to 2026
+CRWV,CoreWeave,CY2025,12,14.9,,,2026-02-26,Q4 CY2025 earnings,Actual full-year result — $14.9B (slightly above top of revised range; Q4 alone was $8.2B surge)
+CRWV,CoreWeave,CY2026,12,32.5,30.0,35.0,2026-02-26,Q4 CY2025 earnings,Initial CY2026 guidance $30-35B — >2x CY2025; substantially tied to $66.8B contracted revenue backlog
+AAPL,Apple,FY2025,9,12.715,,,2025-10-30,Q4 FY2025 earnings,Actual full-year result — $12.715B; Apple does not give formal capex guidance (CFO describes capex as volatile)
+AAPL,Apple,FY2026,9,14.3,,,2026-01-30,Q1 FY2026 earnings,Analyst consensus ~$14.3B (FactSet) — Apple gave no explicit annual figure; directional only: expects increases in AI-related capex spending
