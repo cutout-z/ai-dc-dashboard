@@ -33,5 +33,6 @@ date,company,metric,value,unit,source,notes
 2026-02-01,Anthropic,valuation,380.0,USD_B,CNBC,$30B round at $380B post-money
 2026-02-01,Anthropic,arr,14.0,USD_B,Anthropic,ARR $14B — disclosed at funding round
 2026-02-01,OpenAI,arr,25.0,USD_B,The Information,ARR $25B
+2026-03-01,OpenAI,valuation,852.0,USD_B,Bloomberg,$122B round closed Mar 31 — $852B post-money
 2026-03-01,Anthropic,arr,19.0,USD_B,Bloomberg,ARR $19B — surging growth
 2026-04-01,Anthropic,arr,30.0,USD_B,Anthropic,ARR $30B — surpassed OpenAI

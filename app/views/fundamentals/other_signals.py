@@ -64,7 +64,7 @@ if not df_semi.empty:
         labels={"revenue_bn": "Revenue ($B)"},
         color_discrete_map={"TSMC": "#CC0000", "ASML": "#00529B", "NVIDIA": "#76B900"},
     )
-    fig_semi.update_layout(height=400)
+    fig_semi.update_layout(height=800)
     st.plotly_chart(fig_semi, use_container_width=True)
 
 # --- TSMC Monthly Revenue ---
@@ -80,29 +80,32 @@ if tsmc_path.exists():
         df_tsmc["revenue_twd_b"], df_tsmc["date"], "USDTWD=X"
     )
 
-    col1, col2 = st.columns(2)
-    with col1:
-        fig_rev = go.Figure()
-        fig_rev.add_trace(go.Bar(
-            x=df_tsmc["date"],
-            y=df_tsmc["revenue_usd_b"],
-            marker_color="#CC0000",
-            customdata=df_tsmc["revenue_twd_b"],
-            hovertemplate="%{x|%b %Y}<br>$%{y:.2f}B USD<br>%{customdata:.1f}B TWD<extra></extra>",
-        ))
-        fig_rev.update_layout(
-            title="Monthly Revenue ($B USD)",
-            yaxis_title="$B USD",
-            height=350,
-            margin=dict(l=0, r=0, t=30, b=0),
-        )
-        st.plotly_chart(fig_rev, use_container_width=True)
-    with col2:
-        fig_yoy = go.Figure()
-        fig_yoy.add_trace(go.Scatter(x=df_tsmc["date"], y=df_tsmc["yoy_pct"], mode="lines+markers",
-                                      line=dict(color="#76B900", width=2), fill="tozeroy", fillcolor="rgba(118,185,0,0.1)"))
-        fig_yoy.add_hline(y=0, line_dash="dash", line_color="gray")
-        fig_yoy.update_layout(title="YoY Growth %", yaxis_title="YoY %", height=350, margin=dict(l=0, r=0, t=30, b=0))
-        st.plotly_chart(fig_yoy, use_container_width=True)
+    df_tsmc["ttm_avg"] = df_tsmc["revenue_usd_b"].rolling(12).mean()
+
+    fig_rev = go.Figure()
+    fig_rev.add_trace(go.Bar(
+        x=df_tsmc["date"],
+        y=df_tsmc["revenue_usd_b"],
+        marker_color="#CC0000",
+        name="Monthly Revenue",
+        customdata=df_tsmc["revenue_twd_b"],
+        hovertemplate="%{x|%b %Y}<br>$%{y:.2f}B USD<br>%{customdata:.1f}B TWD<extra></extra>",
+    ))
+    fig_rev.add_trace(go.Scatter(
+        x=df_tsmc["date"],
+        y=df_tsmc["ttm_avg"],
+        mode="lines",
+        name="12-month avg",
+        line=dict(color="#76B900", width=2),
+        hovertemplate="%{x|%b %Y}<br>12mo avg: $%{y:.2f}B USD<extra></extra>",
+    ))
+    fig_rev.update_layout(
+        title="Monthly Revenue ($B USD)",
+        yaxis_title="$B USD",
+        height=350,
+        margin=dict(l=0, r=0, t=30, b=0),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+    )
+    st.plotly_chart(fig_rev, use_container_width=True)
 
 conn.close()

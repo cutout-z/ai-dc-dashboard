@@ -49,24 +49,71 @@ mw_col = "risked_mw" if risk_view == "Risked" else "facility_mw"
 st.markdown("## Power & Supply Trends")
 
 if dc_demand is not None:
-    col1, col2 = st.columns(2)
-    with col1:
-        fig = dc_demand_scenarios_line(dc_demand)
-        st.plotly_chart(fig, use_container_width=True)
-    with col2:
-        fig = dc_share_of_nem_line(dc_demand)
-        st.plotly_chart(fig, use_container_width=True)
+    fig = dc_demand_scenarios_line(dc_demand)
+    st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("### Data Centre vs Non-Data Centre Demand")
-    scenario = st.selectbox("Scenario", dc_demand["scenario"].unique(), index=1, key="au_reg_scenario")
-    sdf = dc_demand[dc_demand["scenario"] == scenario].sort_values("year")
+    fig = dc_share_of_nem_line(dc_demand)
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("### DC Consumption by Scenario")
+
+    _SCENARIO_COLORS = {
+        "Baseline": "#6b7280",
+        "Step Change": "#2563eb",
+        "Progressive Change": "#f59e0b",
+        "CEFC High": "#dc2626",
+    }
+    _LINE_SCENARIOS = ["Step Change", "Progressive Change", "CEFC High"]
+    _all_scenarios = [s for s in _SCENARIO_COLORS if s in dc_demand["scenario"].unique()]
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=sdf["year"], y=sdf["dc_consumption_twh"], name="Data Centre", marker_color="#2563eb"))
-    fig.add_trace(go.Bar(x=sdf["year"], y=sdf["total_nem_demand_twh"] - sdf["dc_consumption_twh"],
-                         name="Non-Data Centre", marker_color="#d1d5db"))
-    fig.update_layout(barmode="stack", title=f"NEM Electricity Demand Composition — {scenario}",
-                      xaxis_title="Year", yaxis_title="Consumption (TWh)", **CHART_LAYOUT)
+
+    _dc_fwd = dc_demand[dc_demand["year"] >= 2026]
+
+    # Clustered bars — DC TWh per scenario
+    for sc in _all_scenarios:
+        sdf = _dc_fwd[_dc_fwd["scenario"] == sc].sort_values("year")
+        fig.add_trace(go.Bar(
+            x=sdf["year"],
+            y=sdf["dc_consumption_twh"],
+            name=sc,
+            marker_color=_SCENARIO_COLORS[sc],
+            legendgroup=sc,
+            yaxis="y1",
+        ))
+
+    # Lines — DC % of NEM on right axis (Step Change, Progressive, CEFC High only)
+    for sc in _LINE_SCENARIOS:
+        if sc not in _dc_fwd["scenario"].unique():
+            continue
+        sdf = _dc_fwd[_dc_fwd["scenario"] == sc].sort_values("year")
+        fig.add_trace(go.Scatter(
+            x=sdf["year"],
+            y=sdf["dc_share_pct"],
+            name=f"{sc} (% NEM)",
+            mode="lines+markers",
+            line=dict(color=_SCENARIO_COLORS[sc], dash="dot", width=2),
+            marker=dict(size=5),
+            legendgroup=sc,
+            showlegend=True,
+            yaxis="y2",
+        ))
+
+    fig.update_layout(
+        barmode="group",
+        xaxis_title="Year",
+        yaxis=dict(title="DC Consumption (TWh)", rangemode="tozero"),
+        yaxis2=dict(
+            title="DC as % of NEM",
+            overlaying="y",
+            side="right",
+            ticksuffix="%",
+            rangemode="tozero",
+            showgrid=False,
+        ),
+        legend=dict(orientation="h", yanchor="top", y=-0.15, x=0),
+        **{**CHART_LAYOUT, "margin": dict(l=40, r=60, t=20, b=100)},
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("---")
