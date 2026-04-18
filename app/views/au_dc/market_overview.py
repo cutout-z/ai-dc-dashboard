@@ -9,8 +9,7 @@ from app.lib.au_dc_charts import (
     capacity_by_region_bar,
     capacity_by_operator_bar,
     market_breakdown_pie,
-    dc_demand_scenarios_line,
-    capacity_trajectory_line,
+    capacity_forecast_chart,
     COLOUR_PALETTE,
 )
 
@@ -20,14 +19,12 @@ st.title("Market Overview")
 
 # Load data
 projects_path = DATA_DIR / "projects.parquet"
-dc_demand_path = DATA_DIR / "dc_demand.parquet"
 
 if not projects_path.exists():
     st.error("Project database not found. Run `python etl/build_project_db.py` in au-dc-analysis first.")
     st.stop()
 
 projects = pd.read_parquet(projects_path)
-dc_demand = pd.read_parquet(dc_demand_path) if dc_demand_path.exists() else None
 
 # --- Controls ---
 st.sidebar.header("Controls")
@@ -36,7 +33,7 @@ mw_col = "risked_mw" if risk_view == "Risked" else "facility_mw"
 
 # --- KPI Row ---
 st.markdown("### Key Metrics")
-k1, k2, k3, k4, k5 = st.columns(5)
+k1, k2, k3, k4 = st.columns(4)
 
 total_projects = len(projects)
 operating = projects[projects["status"] == "Operating"]
@@ -50,17 +47,44 @@ with k3:
 with k4:
     total_cap = projects[mw_col].sum()
     st.metric(f"Total Capacity ({risk_view})", f"{total_cap:,.0f} MW")
-with k5:
-    if dc_demand is not None:
-        baseline = dc_demand[dc_demand["scenario"] == "Baseline"]
-        if not baseline.empty:
-            latest = baseline.iloc[-1]
-            st.metric("DC Consumption (FY25)", f"{latest['dc_consumption_twh']:.1f} TWh",
-                      delta=f"{latest['dc_share_pct']:.1f}% of NEM")
-        else:
-            st.metric("DC Consumption", "No baseline data")
-    else:
-        st.metric("DC Consumption", "No data")
+
+with st.expander("Data sources & methodology", icon=":material/info:"):
+    st.markdown(
+        """
+**Coverage note:** This dataset tracks publicly announced and verifiable projects. It will not capture
+every data centre — undisclosed hyperscaler on-premises deployments, small enterprise facilities (<10 MW),
+and government classified infrastructure are not included. Figures reflect publicly available information
+at the time of last update.
+
+**Project database**
+Manually curated from named public sources: ASX/NZX announcements, company IR pages, NSW/VIC/QLD State
+Significant Development (SSD) portals, Data Center Dynamics, datacentermap.com, datacenterhawk.com, and
+press releases. Each project is traced to a specific source — no estimated or synthesised entries.
+Updated periodically as announcements are made; there is no automated refresh.
+
+**Capacity methodology**
+- *Unrisked*: total stated facility MW at full build-out (as disclosed by operator)
+- *Risked*: probability-weighted MW based on development status and power/grid connection certainty —
+
+  | Status | Weight | Rationale |
+  |---|---|---|
+  | Operating | 100% | Built and running |
+  | Under Construction | 100% | Power and site secured; build in progress |
+  | Approved — power secured | 75% | Planning approved and grid connection confirmed |
+  | Approved — grid connection pending | 25% | Planning approved; grid connection not yet secured |
+  | Proposed | 0% | Announced only; no power pathway confirmed |
+
+- Where only a partial phase is funded, the figure reflects what has been disclosed (not full campus aspiration)
+- *Power secured* status is manually assessed from public disclosures; defaults to unconfirmed if not explicitly announced
+
+**Other providers that track Australian DC builds**
+[Data Center Dynamics](https://www.datacenterdynamics.com/en/market/australasia/) ·
+[datacentermap.com](https://www.datacentermap.com/australia/) ·
+[datacenterhawk.com](https://datacenterhawk.com/market/australia) ·
+[AIIA Data Centre Industry Report](https://www.aiia.com.au/)
+        """,
+        unsafe_allow_html=False,
+    )
 
 st.markdown("---")
 
@@ -76,12 +100,25 @@ with col1:
                      color_discrete_map=COLOUR_PALETTE, title="Capacity by Region (Risked)",
                      labels={"risked_mw": "Capacity (MW)", "nem_region": "NEM Region"},
                      barmode="stack")
-        fig.update_layout(template=st.session_state.get("plotly_template", "plotly_dark"), margin=dict(l=40, r=20, t=40, b=40))
+        fig.update_layout(
+            template=st.session_state.get("plotly_template", "plotly_dark"),
+            margin=dict(l=40, r=20, t=40, b=80),
+            legend=dict(orientation="h", yanchor="top", y=-0.2, x=0),
+        )
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    fig = capacity_by_operator_bar(projects, risked=(risk_view == "Risked"))
+    fig = capacity_by_operator_bar(projects)
     st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("### Forecast Pipeline by Risk Category")
+fig = capacity_forecast_chart(projects)
+st.plotly_chart(fig, use_container_width=True)
+st.caption(
+    "Cumulative stated capacity by project startup year, colour-coded by certainty tier. "
+    "Proposed projects with no confirmed startup year pinned to 2028. "
+    "Power secured status for Approved projects based on public disclosures."
+)
 
 st.markdown("---")
 
@@ -99,7 +136,7 @@ with b3:
     fig = market_breakdown_pie(projects, "status", mw_col, "By Development Status")
     st.plotly_chart(fig, use_container_width=True)
 
-b4, b5 = st.columns(2)
+b4, b5, _ = st.columns(3)
 with b4:
     fig = market_breakdown_pie(projects, "workload_type", mw_col, "By Workload Type")
     st.plotly_chart(fig, use_container_width=True)
@@ -107,16 +144,3 @@ with b5:
     fig = market_breakdown_pie(projects, "power_strategy", mw_col, "By Power Strategy")
     st.plotly_chart(fig, use_container_width=True)
 
-st.markdown("---")
-
-# --- DC Demand Scenarios ---
-if dc_demand is not None:
-    st.markdown("### DC Energy Consumption Forecast")
-    fig = dc_demand_scenarios_line(dc_demand)
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption("Sources: Oxford Economics/AEMO (Baseline), AEMO IASR (Step Change, Progressive Change), CEFC/Baringa (High)")
-
-    st.markdown("### Supply vs Demand Trajectory")
-    fig = capacity_trajectory_line(projects, dc_demand)
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption("DC capacity is cumulative facility MW by startup year. Demand scenarios converted from TWh to average MW for comparison.")

@@ -52,21 +52,41 @@ def capacity_by_region_bar(df: pd.DataFrame, title: str = "Capacity by Region") 
         labels={"facility_mw": "Capacity (MW)", "nem_region": "NEM Region", "status": "Status"},
         barmode="stack",
     )
-    fig.update_layout(**CHART_LAYOUT)
+    fig.update_layout(
+        legend=dict(orientation="h", yanchor="top", y=-0.2, x=0),
+        **{**CHART_LAYOUT, "margin": dict(l=40, r=20, t=40, b=80)},
+    )
     return fig
 
 
-def capacity_by_operator_bar(df: pd.DataFrame, risked: bool = False, top_n: int = 15) -> go.Figure:
-    mw_col = "risked_mw" if risked else "facility_mw"
-    label = "Risked" if risked else "Unrisked"
-    agg = df.groupby("operator")[mw_col].sum().sort_values(ascending=True).tail(top_n).reset_index()
-    fig = px.bar(
-        agg, x=mw_col, y="operator", orientation="h",
-        title=f"Top Operators by Capacity ({label})",
-        labels={mw_col: f"Capacity (MW) — {label}", "operator": ""},
-        color_discrete_sequence=["#2563eb"],
+def capacity_by_operator_bar(df: pd.DataFrame, top_n: int = 15) -> go.Figure:
+    agg = df.groupby("operator").agg(
+        risked=("risked_mw", "sum"),
+        unrisked=("facility_mw", "sum"),
+    ).reset_index()
+    agg["speculative"] = agg["unrisked"] - agg["risked"]
+    agg = agg.sort_values("unrisked", ascending=True).tail(top_n)
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        y=agg["operator"], x=agg["risked"],
+        name="Risked", orientation="h",
+        marker_color="#2563eb",
+    ))
+    fig.add_trace(go.Bar(
+        y=agg["operator"], x=agg["speculative"],
+        name="Speculative (unrisked − risked)", orientation="h",
+        marker_color="rgba(37,99,235,0.25)",
+        marker_line=dict(color="#2563eb", width=1),
+    ))
+    fig.update_layout(
+        barmode="stack",
+        title="Top Operators by Capacity",
+        xaxis_title="Capacity (MW)",
+        yaxis_title="",
+        legend=dict(orientation="h", yanchor="top", y=-0.12, x=0),
+        **{**CHART_LAYOUT, "margin": dict(l=40, r=20, t=40, b=90)},
     )
-    fig.update_layout(**CHART_LAYOUT)
     return fig
 
 
@@ -114,38 +134,89 @@ def market_breakdown_pie(df: pd.DataFrame, group_col: str, value_col: str = "fac
         agg, values=value_col, names=group_col, title=title, hole=0.4,
         color=group_col, color_discrete_map=COLOUR_PALETTE,
     )
-    fig.update_layout(**CHART_LAYOUT)
-    fig.update_traces(textposition="inside", textinfo="percent+label")
+    fig.update_traces(textinfo="none")
+    fig.update_layout(
+        height=300,
+        legend=dict(orientation="h", yanchor="top", y=-0.05, x=0.5, xanchor="center"),
+        **{**CHART_LAYOUT, "margin": dict(l=20, r=20, t=40, b=70)},
+    )
     return fig
 
 
-def capacity_trajectory_line(projects: pd.DataFrame, dc_demand: pd.DataFrame = None) -> go.Figure:
-    timeline = projects.dropna(subset=["startup_year"]).copy()
+
+
+def capacity_forecast_chart(projects: pd.DataFrame) -> go.Figure:
+    """Cumulative risked capacity by year, stacked by risk tier.
+
+    Risk tiers derived from risk_weight column set by the risk model:
+      Operating / UC → 100%
+      Approved (power secured) → 75%
+      Approved (no power) → 25%
+      Proposed → 0% (not shown)
+    """
+    timeline = projects.copy()
+    # Operating with no startup_year are already built — pin to 2019 (shows from chart start)
+    timeline.loc[(timeline["status"] == "Operating") & (timeline["startup_year"].isna()), "startup_year"] = 2019
+    # Proposed/pipeline with no startup_year — pin to 2028 (conservative far end)
+    timeline.loc[(timeline["status"] != "Operating") & (timeline["startup_year"].isna()), "startup_year"] = 2028
+    timeline = timeline.dropna(subset=["startup_year"])
     timeline["startup_year"] = timeline["startup_year"].astype(int)
-    yearly = timeline.groupby("startup_year")["facility_mw"].sum().sort_index().cumsum().reset_index()
-    yearly.columns = ["year", "cumulative_mw"]
+
+    # Map risk_weight + status → display group
+    def _group(row):
+        s, w = row["status"], row["risk_weight"]
+        if s == "Operating":
+            return "Operating"
+        if s == "Under Construction":
+            return "Under Construction"
+        if s == "Approved" and w >= 0.74:
+            return "Approved — Power Secured"
+        if s == "Approved":
+            return "Approved — Grid Pending"
+        return "Proposed"
+
+    timeline["group"] = timeline.apply(_group, axis=1)
+
+    years = list(range(2020, 2031))
+    groups = [
+        "Operating",
+        "Under Construction",
+        "Approved — Power Secured",
+        "Approved — Grid Pending",
+        "Proposed",
+    ]
+    colors = {
+        "Operating": "#22c55e",
+        "Under Construction": "#3b82f6",
+        "Approved — Power Secured": "#f59e0b",
+        "Approved — Grid Pending": "#fde68a",
+        "Proposed": "#ef4444",
+    }
+
+    rows = []
+    for year in years:
+        for group in groups:
+            subset = timeline[(timeline["group"] == group) & (timeline["startup_year"] <= year)]
+            rows.append({"year": year, "group": group, "mw": subset["facility_mw"].sum()})
+    df = pd.DataFrame(rows)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=yearly["year"], y=yearly["cumulative_mw"],
-        name="DC Capacity (MW)", mode="lines+markers",
-        line=dict(color="#2563eb", width=3), marker=dict(size=6),
-    ))
-
-    if dc_demand is not None:
-        for scenario in dc_demand["scenario"].unique():
-            sdf = dc_demand[dc_demand["scenario"] == scenario].sort_values("year")
-            approx_mw = sdf["dc_consumption_twh"] * 1_000_000 / 8760
-            fig.add_trace(go.Scatter(
-                x=sdf["year"], y=approx_mw,
-                name=f"Demand — {scenario} (avg MW)", mode="lines",
-                line=dict(color=COLOUR_PALETTE.get(scenario, "#6b7280"), width=2, dash="dash"),
-            ))
+    for group in groups:
+        gdf = df[df["group"] == group]
+        if gdf["mw"].sum() == 0:
+            continue
+        fig.add_trace(go.Bar(
+            x=gdf["year"], y=gdf["mw"],
+            name=group,
+            marker_color=colors[group],
+        ))
 
     fig.update_layout(
-        title="DC Capacity Trajectory vs Demand Scenarios",
-        xaxis_title="Year", yaxis_title="MW",
-        **CHART_LAYOUT,
+        barmode="stack",
+        xaxis_title="Year",
+        yaxis_title="Cumulative Capacity (MW, unrisked)",
+        legend=dict(orientation="h", yanchor="top", y=-0.15, x=0),
+        **{**CHART_LAYOUT, "margin": dict(l=40, r=20, t=40, b=90)},
     )
     return fig
 
