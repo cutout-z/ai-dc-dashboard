@@ -26,64 +26,60 @@ else:
     df_val = pd.read_csv(val_path)
     df_val["date"] = pd.to_datetime(df_val["date"])
 
-    col1, col2 = st.columns(2)
+    st.subheader("Valuation Trajectory")
+    df_v = df_val[df_val["metric"] == "valuation"].sort_values("date")
+    if not df_v.empty:
+        fig_v = go.Figure()
+        for company, color in LAB_COLORS.items():
+            df_c = df_v[df_v["company"] == company]
+            if df_c.empty:
+                continue
+            fig_v.add_trace(go.Scatter(
+                x=df_c["date"], y=df_c["value"],
+                mode="lines+markers+text",
+                name=company,
+                line=dict(color=color, width=2),
+                marker=dict(size=8),
+                text=[f"${v:.0f}B" for v in df_c["value"]],
+                textposition="top center",
+                textfont=dict(size=9),
+                hovertemplate="<b>%{fullData.name}</b><br>%{x|%b %Y}: $%{y:.0f}B<br>%{customdata}<extra></extra>",
+                customdata=df_c["source"],
+            ))
+        fig_v.update_layout(
+            height=450,
+            yaxis_title="Valuation ($B)",
+            yaxis_type="log",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02),
+            margin=dict(l=0, r=0, t=30, b=0),
+        )
+        st.plotly_chart(fig_v, use_container_width=True)
 
-    with col1:
-        st.subheader("Valuation Trajectory")
-        df_v = df_val[df_val["metric"] == "valuation"].sort_values("date")
-        if not df_v.empty:
-            fig_v = go.Figure()
-            for company, color in LAB_COLORS.items():
-                df_c = df_v[df_v["company"] == company]
-                if df_c.empty:
-                    continue
-                fig_v.add_trace(go.Scatter(
-                    x=df_c["date"], y=df_c["value"],
-                    mode="lines+markers+text",
-                    name=company,
-                    line=dict(color=color, width=2),
-                    marker=dict(size=8),
-                    text=[f"${v:.0f}B" for v in df_c["value"]],
-                    textposition="top center",
-                    textfont=dict(size=9),
-                    hovertemplate="<b>%{fullData.name}</b><br>%{x|%b %Y}: $%{y:.0f}B<br>%{customdata}<extra></extra>",
-                    customdata=df_c["source"],
-                ))
-            fig_v.update_layout(
-                height=450,
-                yaxis_title="Valuation ($B)",
-                yaxis_type="log",
-                legend=dict(orientation="h", yanchor="bottom", y=1.02),
-                margin=dict(l=0, r=0, t=30, b=0),
-            )
-            st.plotly_chart(fig_v, use_container_width=True)
-
-    with col2:
-        st.subheader("Revenue Run Rate (ARR)")
-        df_r = df_val[df_val["metric"] == "arr"].sort_values("date")
-        if not df_r.empty:
-            fig_r = go.Figure()
-            for company, color in LAB_COLORS.items():
-                df_c = df_r[df_r["company"] == company]
-                if df_c.empty:
-                    continue
-                fig_r.add_trace(go.Scatter(
-                    x=df_c["date"], y=df_c["value"],
-                    mode="lines+markers+text",
-                    name=company,
-                    line=dict(color=color, width=2),
-                    marker=dict(size=8),
-                    text=[f"${v:.1f}B" for v in df_c["value"]],
-                    textposition="top center",
-                    textfont=dict(size=9),
-                ))
-            fig_r.update_layout(
-                height=450,
-                yaxis_title="ARR ($B)",
-                legend=dict(orientation="h", yanchor="bottom", y=1.02),
-                margin=dict(l=0, r=0, t=30, b=0),
-            )
-            st.plotly_chart(fig_r, use_container_width=True)
+    st.subheader("Revenue Run Rate (ARR)")
+    df_r = df_val[df_val["metric"] == "arr"].sort_values("date")
+    if not df_r.empty:
+        fig_r = go.Figure()
+        for company, color in LAB_COLORS.items():
+            df_c = df_r[df_r["company"] == company]
+            if df_c.empty:
+                continue
+            fig_r.add_trace(go.Scatter(
+                x=df_c["date"], y=df_c["value"],
+                mode="lines+markers+text",
+                name=company,
+                line=dict(color=color, width=2),
+                marker=dict(size=8),
+                text=[f"${v:.1f}B" for v in df_c["value"]],
+                textposition="top center",
+                textfont=dict(size=9),
+            ))
+        fig_r.update_layout(
+            height=450,
+            yaxis_title="ARR ($B)",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02),
+            margin=dict(l=0, r=0, t=30, b=0),
+        )
+        st.plotly_chart(fig_r, use_container_width=True)
 
     st.subheader("Implied Revenue Multiple")
     multiples = []
