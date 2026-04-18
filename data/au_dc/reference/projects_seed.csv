@@ -1,135 +1,135 @@
-project_name,campus,operator,parent_company,operator_type,nem_region,state,suburb,status,facility_mw,critical_it_mw,startup_year,full_capacity_year,capex_aud_m,power_strategy,workload_type,pue,wue,pue_source,financial_sponsor,source
-S7,NEXTDC S7,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Eastern Creek,Under Construction,550.0,,2027.0,,7000.0,Grid,AI/HPC,1.35,,Design target — NEXTDC next-gen,,ASX announcement
-S4,NEXTDC S4,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Horsley Park,Proposed,250.0,,2028.0,,,Grid,Traditional,1.35,,Design target — NEXTDC next-gen,,NSW SSD portal
-S3,NEXTDC S3,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Gore Hill,Operating,30.0,20.0,2020.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-S2,NEXTDC S2,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Macquarie Park,Operating,30.0,20.0,2015.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-S1,NEXTDC S1,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Macquarie Park,Operating,12.0,8.0,2012.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-M4,NEXTDC M4,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Melbourne,Proposed,200.0,,2028.0,,2000.0,Grid,AI/HPC,1.35,,Design target — NEXTDC next-gen,,ASX announcement
-M3,NEXTDC M3,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Melbourne,Operating,24.0,16.0,2022.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-M2,NEXTDC M2,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Tullamarine,Operating,40.0,27.0,2018.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-M1,NEXTDC M1,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Port Melbourne,Operating,12.0,8.0,2012.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-B2,NEXTDC B2,NEXTDC,NEXTDC,Colocation,QLD1,QLD,Brisbane,Operating,6.0,4.0,2019.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-B1,NEXTDC B1,NEXTDC,NEXTDC,Colocation,QLD1,QLD,Brisbane,Operating,6.0,4.0,2013.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-P2,NEXTDC P2,NEXTDC,NEXTDC,Colocation,WA,WA,Perth,Operating,10.0,7.0,2018.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-P1,NEXTDC P1,NEXTDC,NEXTDC,Colocation,WA,WA,Perth,Operating,6.0,4.0,2013.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-C1,NEXTDC C1,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Canberra,Operating,6.0,4.0,2013.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-D1,NEXTDC D1,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Darwin,Operating,4.0,3.0,2020.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-A1,NEXTDC A1,NEXTDC,NEXTDC,Colocation,SA1,SA,Adelaide,Operating,4.0,3.0,2016.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website
-B3,NEXTDC B3,NEXTDC,NEXTDC,Colocation,QLD1,QLD,Brisbane,Proposed,150.0,,2028.0,,,Grid,AI/HPC,1.35,,Design target — NEXTDC next-gen,,ASX announcement
-P3,NEXTDC P3,NEXTDC,NEXTDC,Colocation,WA,WA,Perth,Proposed,80.0,,2028.0,,,Grid,AI/HPC,1.35,,Design target — NEXTDC next-gen,,ASX announcement
-Marsden Park,CDC Marsden Park,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Marsden Park,Approved,504.0,,2027.0,2032.0,,Grid,AI/HPC,1.3,0.01,Design target — CDC LiquidCore next-gen,,NSW SSD approval
-Eastern Creek,CDC Eastern Creek,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Eastern Creek,Operating,150.0,100.0,2018.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website
-Fyshwick,CDC Fyshwick,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Canberra,Operating,40.0,27.0,2010.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website
-Hume,CDC Hume,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Canberra,Operating,40.0,27.0,2015.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website
-Macquarie Park,CDC Macquarie Park,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Macquarie Park,Operating,20.0,14.0,2017.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website
-Silverwater,CDC Silverwater,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Silverwater,Operating,15.0,10.0,2012.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website
-Perth (CDC),CDC Perth,CDC Data Centres,Infratil,Colocation,WA,WA,Maddington,Proposed,200.0,,2027.0,,415.0,Grid,Cloud,1.3,0.01,Design target — CDC LiquidCore next-gen,,CDC press release
-CDC Deakin,CDC Deakin,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Canberra,Operating,20.0,14.0,2005.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website
-CDC Brisbane,CDC Brisbane,CDC Data Centres,Infratil,Colocation,QLD1,QLD,Brisbane,Operating,15.0,10.0,2014.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website
-CDC Melbourne,CDC Melbourne,CDC Data Centres,Infratil,Colocation,VIC1,VIC,Melbourne,Operating,30.0,20.0,2016.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website
-CDC Adelaide,CDC Adelaide,CDC Data Centres,Infratil,Colocation,SA1,SA,Adelaide,Operating,10.0,7.0,2018.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website
-SYD1,AirTrunk SYD1,AirTrunk,Blackstone,Colocation,NSW1,NSW,Eastern Creek,Operating,121.0,80.0,2018.0,,,Grid,Traditional,1.32,0.97,AirTrunk FY24 Sustainability Report (portfolio avg),,AirTrunk website
-SYD2,AirTrunk SYD2,AirTrunk,Blackstone,Colocation,NSW1,NSW,Western Sydney,Operating,158.0,105.0,2021.0,,,Grid,Traditional,1.32,0.97,AirTrunk FY24 Sustainability Report (portfolio avg),,AirTrunk website
-SYD3,AirTrunk SYD3,AirTrunk,Blackstone,Colocation,NSW1,NSW,Western Sydney,Under Construction,330.0,,2026.0,,,Grid,AI/HPC,1.25,0.8,Design target — AirTrunk 1.23-1.28 band,,AirTrunk website
-MEL1,AirTrunk MEL1,AirTrunk,Blackstone,Colocation,VIC1,VIC,Melbourne,Operating,276.0,185.0,2020.0,,,Grid,Traditional,1.32,0.97,AirTrunk FY24 Sustainability Report (portfolio avg),,AirTrunk website
-MEL2,AirTrunk MEL2,AirTrunk,Blackstone,Colocation,VIC1,VIC,Melbourne,Proposed,354.0,,2027.0,,7000.0,Grid,AI/HPC,1.25,0.8,Design target — AirTrunk 1.23-1.28 band,,AirTrunk press release
-AirTrunk SYD4,AirTrunk SYD4,AirTrunk,Blackstone,Colocation,NSW1,NSW,Western Sydney,Proposed,250.0,,2028.0,,,Grid,AI/HPC,1.25,0.8,Design target — AirTrunk 1.23-1.28 band,,Press
-IC3 Super West,Macquarie IC3,Macquarie Data Centres,Macquarie Technology Group,Colocation,NSW1,NSW,Macquarie Park,Operating,32.0,21.0,2023.0,,,Grid,Traditional,1.4,1.2,Macquarie Technology ESG disclosures,,ASX:MAQ filings
-IC2 Bungarribee,Macquarie IC2,Macquarie Data Centres,Macquarie Technology Group,Colocation,NSW1,NSW,Bungarribee,Under Construction,110.0,,2026.0,,,Grid,Cloud,1.28,1.0,Design target — MAQ IC2 design PUE,,ASX:MAQ filings
-IC1,Macquarie IC1,Macquarie Data Centres,Macquarie Technology Group,Colocation,NSW1,NSW,Macquarie Park,Operating,16.0,11.0,2010.0,,,Grid,Traditional,1.7,1.5,Macquarie Technology ESG disclosures,,ASX:MAQ filings
-Goodman Ultimo,Goodman Ultimo,Goodman Group,Goodman Group,Developer,NSW1,NSW,Ultimo,Operating,25.0,17.0,2022.0,,,Grid,Traditional,1.4,1.2,Industry benchmark — modern colo developer,,GMG filings
-Goodman Truganina,Goodman Truganina,Goodman Group,Goodman Group,Developer,VIC1,VIC,Truganina,Under Construction,100.0,,2026.0,,,Grid,Cloud,1.3,0.8,Design target — Goodman new build,,GMG filings
-Goodman Macquarie Park,Goodman Macquarie Park,Goodman Group,Goodman Group,Developer,NSW1,NSW,Macquarie Park,Under Construction,60.0,,2026.0,,,Grid,Cloud,1.3,0.8,Design target — Goodman new build,,GMG filings
-Equinix SY6,Equinix SY6,Equinix,Equinix,Colocation,NSW1,NSW,Alexandria,Operating,15.0,10.0,2021.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website
-Equinix SY5,Equinix SY5,Equinix,Equinix,Colocation,NSW1,NSW,Sydney,Operating,12.0,8.0,2019.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website
-Equinix SY4,Equinix SY4,Equinix,Equinix,Colocation,NSW1,NSW,Sydney,Operating,10.0,7.0,2016.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website
-Equinix SY3,Equinix SY3,Equinix,Equinix,Colocation,NSW1,NSW,Sydney,Operating,8.0,5.0,2014.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website
-Equinix SY7,Equinix SY7,Equinix,Equinix,Colocation,NSW1,NSW,Sydney,Proposed,50.0,,2027.0,,,Grid,Traditional,1.3,0.8,Design target — Equinix 2030 goal 1.33,,Press
-Equinix ME2,Equinix ME2,Equinix,Equinix,Colocation,VIC1,VIC,Melbourne,Operating,15.0,10.0,2020.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website
-Equinix ME1,Equinix ME1,Equinix,Equinix,Colocation,VIC1,VIC,Melbourne,Operating,8.0,5.0,2015.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website
-Equinix PE1,Equinix PE1,Equinix,Equinix,Colocation,WA,WA,Perth,Operating,5.0,3.0,2019.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website
-Equinix CA1,Equinix CA1,Equinix,Equinix,Colocation,NSW1,NSW,Canberra,Operating,5.0,3.0,2017.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website
-Digital Realty SYD10,DRe SYD10,Digital Realty,Digital Realty,Colocation,NSW1,NSW,Western Sydney,Under Construction,50.0,,2026.0,,,Grid,Traditional,1.3,0.8,Design target — Digital Realty new build,,Press
-Digital Realty SYD11,DRe SYD11,Digital Realty,Digital Realty,Colocation,NSW1,NSW,Sydney,Operating,15.0,10.0,2019.0,,,Grid,Traditional,1.4,1.0,Digital Realty 2024 Impact Report (estimate),,Digital Realty website
-Digital Realty MEL1,DRe MEL1,Digital Realty,Digital Realty,Colocation,VIC1,VIC,Melbourne,Operating,12.0,8.0,2018.0,,,Grid,Traditional,1.4,1.0,Digital Realty 2024 Impact Report (estimate),,Digital Realty website
-Global Switch SYD,Global Switch SYD,DigiCo Infrastructure REIT,HMC Capital,Colocation,NSW1,NSW,Ultimo,Operating,20.0,14.0,2002.0,,,Grid,Traditional,1.5,1.5,Global Switch ESG — legacy facility,,Global Switch website
-Global Switch MEL,Global Switch MEL,DigiCo Infrastructure REIT,HMC Capital,Colocation,VIC1,VIC,Port Melbourne,Operating,12.0,8.0,2005.0,,,Grid,Traditional,1.5,1.5,Global Switch ESG — legacy facility,,Global Switch website
-DCI Sydney,DCI Sydney,DCI Data Centres,Brookfield,Colocation,NSW1,NSW,Erskine Park,Under Construction,100.0,,2026.0,,,Grid,Cloud,1.3,0.8,Design target — DCI new build,,Press
-DCI Melbourne,DCI Melbourne,DCI Data Centres,Brookfield,Colocation,VIC1,VIC,Melbourne,Operating,15.0,10.0,2020.0,,,Grid,Traditional,1.4,1.2,Industry benchmark — modern colocation,,DCI website
-DCI Perth,DCI Perth,DCI Data Centres,Brookfield,Colocation,WA,WA,Perth,Operating,8.0,5.0,2019.0,,,Grid,Traditional,1.4,1.2,Industry benchmark — modern colocation,,DCI website
-AWS Sydney Region,,Amazon Web Services,Amazon,Hyperscaler,NSW1,NSW,Various,Operating,200.0,,,,,Grid,Cloud,1.15,0.15,AWS 2024 Sustainability Report (global avg),,Press estimate
-AWS Melbourne Region,,Amazon Web Services,Amazon,Hyperscaler,VIC1,VIC,Various,Operating,100.0,,,,,Grid,Cloud,1.15,0.15,AWS 2024 Sustainability Report (global avg),,Press estimate
-AWS Queensland Region,,Amazon Web Services,Amazon,Hyperscaler,QLD1,QLD,Various,Proposed,300.0,,2027.0,,2000.0,Grid,Cloud,1.12,0.12,Design target — AWS next-gen,,AWS announcement 2024
-AWS Perth Region,,Amazon Web Services,Amazon,Hyperscaler,WA,WA,Various,Proposed,100.0,,2028.0,,,Grid,Cloud,1.12,0.12,Design target — AWS next-gen,,Press
-Azure Sydney Region,,Microsoft Azure,Microsoft,Hyperscaler,NSW1,NSW,Various,Operating,150.0,,,,,Grid,Cloud,1.16,0.3,Microsoft 2024 Sustainability (global avg),,Press estimate
-Azure Melbourne Region,,Microsoft Azure,Microsoft,Hyperscaler,VIC1,VIC,Various,Operating,75.0,,,,,Grid,Cloud,1.16,0.3,Microsoft 2024 Sustainability (global avg),,Press estimate
-Azure Canberra,,Microsoft Azure,Microsoft,Hyperscaler,NSW1,NSW,Canberra,Operating,50.0,,,,,Grid,Cloud,1.16,0.3,Microsoft 2024 Sustainability (global avg),,Press estimate
-Azure Sydney Expansion,,Microsoft Azure,Microsoft,Hyperscaler,NSW1,NSW,Western Sydney,Under Construction,200.0,,2026.0,,5000.0,Grid,Cloud/AI,1.12,0.1,Design target — MS zero-water cooling,,Microsoft AU $5B commitment
-Azure Queensland,,Microsoft Azure,Microsoft,Hyperscaler,QLD1,QLD,Various,Proposed,150.0,,2028.0,,,Grid,Cloud,1.12,0.1,Design target — MS zero-water cooling,,Microsoft announcement
-Google Sydney,,Google Cloud,Alphabet,Hyperscaler,NSW1,NSW,Various,Operating,80.0,,,,,Grid,Cloud,1.09,0.5,Google 2024 Environmental Report (global avg),,Press estimate
-Google Melbourne,,Google Cloud,Alphabet,Hyperscaler,VIC1,VIC,Various,Operating,50.0,,,,,Grid,Cloud,1.09,0.5,Google 2024 Environmental Report (global avg),,Press estimate
-Google Sydney Expansion,,Google Cloud,Alphabet,Hyperscaler,NSW1,NSW,Western Sydney,Proposed,150.0,,2028.0,,2000.0,Grid,Cloud/AI,1.08,0.4,Design target — Google next-gen,,Google AU expansion announcement
-Oracle Sydney,,Oracle Cloud,Oracle,Hyperscaler,NSW1,NSW,Various,Operating,40.0,,2024.0,,,Grid,Cloud,1.2,0.5,Industry benchmark — hyperscaler,,Oracle website
-Oracle Melbourne,,Oracle Cloud,Oracle,Hyperscaler,VIC1,VIC,Various,Proposed,50.0,,2027.0,,,Grid,Cloud,1.18,0.4,Design target — Oracle next-gen,,Oracle AU expansion
-Meta Australia,,Meta,Meta Platforms,Hyperscaler,VIC1,VIC,Various,Proposed,100.0,,2028.0,,,Grid,AI/HPC,1.1,0.2,Meta 2024 Sustainability Report (global avg),,Press reports
-NTT Sydney,NTT SYD1,NTT,NTT,Telecom,NSW1,NSW,Sydney,Operating,20.0,14.0,2020.0,,,Grid,Traditional,1.4,1.2,NTT Global Data Centers sustainability,,NTT website
-NTT Melbourne,NTT MEL1,NTT,NTT,Telecom,VIC1,VIC,Melbourne,Operating,12.0,8.0,2019.0,,,Grid,Traditional,1.4,1.2,NTT Global Data Centers sustainability,,NTT website
-Vocus Sydney,Vocus SYD,Vocus,Vocus Group,Telecom,NSW1,NSW,Alexandria,Operating,10.0,7.0,2015.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — mid-size telecom,,Vocus website
-Vocus Melbourne,Vocus MEL,Vocus,Vocus Group,Telecom,VIC1,VIC,Melbourne,Operating,8.0,5.0,2016.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — mid-size telecom,,Vocus website
-Vocus Brisbane,Vocus BNE,Vocus,Vocus Group,Telecom,QLD1,QLD,Brisbane,Operating,5.0,3.0,2017.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — mid-size telecom,,Vocus website
-Vocus Perth,Vocus PER,Vocus,Vocus Group,Telecom,WA,WA,Perth,Operating,5.0,3.0,2018.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — mid-size telecom,,Vocus website
-Fujitsu Castle Hill,Fujitsu Sydney,Fujitsu,Fujitsu,Technology,NSW1,NSW,Castle Hill,Operating,10.0,7.0,2010.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — enterprise/technology,,Fujitsu website
-Fujitsu Homebush,Fujitsu Homebush,Fujitsu,Fujitsu,Technology,NSW1,NSW,Homebush,Operating,8.0,5.0,2008.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — enterprise/technology,,Fujitsu website
-KINX Sydney,KINX SYD,KINX,KINX,Colocation,NSW1,NSW,Sydney,Operating,8.0,5.0,2020.0,,,Grid,Traditional,1.45,1.3,Industry benchmark — small colocation,,KINX website
-Canberra Data Centres,Canberra DC,Canberra Data Centres,Canberra Data Centres,Colocation,NSW1,NSW,Canberra,Operating,15.0,10.0,2008.0,,,Grid,Traditional,1.5,1.5,Industry benchmark — legacy colocation,,Company website
-Harbour ISP,Harbour ISP DC,Harbour ISP,Harbour ISP,Telecom,VIC1,VIC,Melbourne,Operating,4.0,3.0,2010.0,,,Grid,Traditional,1.65,1.5,Industry benchmark — small telecom,,Company website
-SUBco Melbourne,SUBco MEL,SUBco,SUBco,Telecom,VIC1,VIC,Melbourne,Operating,3.0,2.0,2015.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — small telecom,,SUBco website
-Macquarie Telecom IC5,Macquarie IC5,Macquarie Data Centres,Macquarie Technology Group,Colocation,NSW1,NSW,Macquarie Park,Operating,16.0,11.0,2018.0,,,Grid,Traditional,1.5,1.3,Macquarie Technology ESG disclosures,,ASX:MAQ filings
-YondrGroup Western Sydney,Yondr SYD,Yondr Group,Yondr Group,Developer,NSW1,NSW,Western Sydney,Under Construction,120.0,,2026.0,,,Grid,AI/HPC,1.25,0.8,Design target — Yondr purpose-built hyperscale,,Press
-CloudHQ Sydney,CloudHQ SYD,CloudHQ,CloudHQ,Developer,NSW1,NSW,Western Sydney,Proposed,200.0,,2027.0,,,Grid,Cloud,1.3,1.0,Industry benchmark — modern developer,,Press
-Stack Infrastructure Sydney,Stack SYD,Stack Infrastructure,IPI Partners,Developer,NSW1,NSW,Western Sydney,Proposed,150.0,,2028.0,,,Grid,Cloud,1.3,1.0,Industry benchmark — modern developer,,Press
-Endeavour Energy DC Precinct,Endeavour DC,Various,Various,Developer,NSW1,NSW,Western Sydney,Proposed,500.0,,2028.0,2035.0,,Grid,Cloud,1.3,1.0,Industry benchmark — modern developer,,NSW SSD portal
-Keppel SYD1,Keppel Sydney 1,Keppel Data Centres,Keppel Ltd,Colocation,NSW1,NSW,Artarmon,Operating,20.0,,,,,Grid,Traditional,,,,,datacentermap.com
-Keppel Gore Hill,Keppel Gore Hill,Keppel Data Centres,Keppel Ltd,Colocation,NSW1,NSW,St Leonards,Operating,,,,,,Grid,Traditional,,,,,keppeldatacentres.com
-Keppel Morwell,Keppel Morwell Campus,Keppel Data Centres,Keppel Ltd,Developer,VIC1,VIC,Morwell,Proposed,720.0,,,,,Grid,AI/HPC,,,,,Data Center Dynamics — Keppel secures rights to 720MW campus outside Melbourne
-Vantage MEL1,Vantage MEL1,Vantage Data Centers,DigitalBridge / Silver Lake,Colocation,VIC1,VIC,Tullamarine,Operating,48.0,,,,,Grid,Cloud,,,,DigitalBridge,vantage-dc.com
-Vantage SYD1,Vantage SYD1,Vantage Data Centers,DigitalBridge / Silver Lake,Colocation,NSW1,NSW,Sydney,Operating,,,,,,Grid,Cloud,,,,DigitalBridge,vantage-dc.com
-Equinix SY9x,Equinix SY9x,Equinix,Equinix,Colocation,NSW1,NSW,Rosehill,Operating,28.0,,2024.0,,,Grid,Cloud,1.3,,Equinix xScale design target,PGIM Real Estate,Equinix IR / Data Center Dynamics
-Equinix SY10x,Equinix SY10x,Equinix,Equinix,Colocation,NSW1,NSW,Rosehill,Under Construction,28.0,,2026.0,,,Grid,Cloud,1.3,,Equinix xScale design target,PGIM Real Estate,Data Center Dynamics
-EdgeConneX Macquarie Park,EdgeConneX Macquarie Park,EdgeConneX,EQT Infrastructure,Developer,NSW1,NSW,Macquarie Park,Approved,100.0,,2027.0,,,Grid,Cloud,1.3,,Design target — modern hyperscale,EQT Infrastructure,Data Center Dynamics — EdgeConneX + Stockland JV
-GreenSquareDC Norwest,GreenSquareDC Norwest,GreenSquareDC,Partners Group,Colocation,NSW1,NSW,Norwest,Operating,20.0,,2023.0,,,Grid,Cloud,1.3,,Design target — modern facility,Partners Group,Data Center Dynamics — Partners Group acquires GreenSquareDC
-DigiCo BNE1,DigiCo Eagle Farm 1,DigiCo Infrastructure REIT,HMC Capital,Colocation,QLD1,QLD,Eagle Farm,Operating,6.0,,,,,Grid,Traditional,,,,,datacentermap.com / HMC Capital DigiCo REIT
-DigiCo BNE2,DigiCo Eagle Farm 2,DigiCo Infrastructure REIT,HMC Capital,Colocation,QLD1,QLD,Eagle Farm,Operating,,,,,,Grid,Traditional,,,,,baxtel.com / HMC Capital DigiCo REIT
-DigiCo BNE3,DigiCo Woolloongabba,DigiCo Infrastructure REIT,HMC Capital,Colocation,QLD1,QLD,Woolloongabba,Operating,,,,,,Grid,Traditional,,,,,datacentermap.com / HMC Capital DigiCo REIT
-DigiCo ADL1,DigiCo Adelaide,DigiCo Infrastructure REIT,HMC Capital,Colocation,SA1,SA,Adelaide,Operating,,,,,,Grid,Traditional,,,,,itbrief.com.au — iseek acquires YourDC
-DigiCo Townsville,DigiCo Townsville,DigiCo Infrastructure REIT,HMC Capital,Colocation,QLD1,QLD,Townsville,Operating,,,,,,Grid,Traditional,,,,,Townsville City Council announcement / HMC Capital DigiCo REIT
-DigiCo SYD Gore Hill,DigiCo Gore Hill,DigiCo Infrastructure REIT,HMC Capital,Colocation,NSW1,NSW,Gore Hill,Operating,,,,,,Grid,Traditional,,,,,iseek.com.au / HMC Capital DigiCo REIT
-Telstra St Leonards,Telstra St Leonards DC,Telstra InfraCo,Telstra Group,Telecom,NSW1,NSW,St Leonards,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au
-Telstra Clayton,Telstra Clayton DC,Telstra InfraCo,Telstra Group,Telecom,VIC1,VIC,Clayton,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au
-Telstra Exhibition Street,Telstra Exhibition Street DC,Telstra InfraCo,Telstra Group,Telecom,VIC1,VIC,Melbourne CBD,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au
-Telstra Woolloongabba,Telstra Woolloongabba DC,Telstra InfraCo,Telstra Group,Telecom,QLD1,QLD,Woolloongabba,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au
-Telstra Waymouth Street,Telstra Waymouth Street DC,Telstra InfraCo,Telstra Group,Telecom,SA1,SA,Adelaide CBD,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au
-Telstra Deakin,Telstra Deakin DC,Telstra InfraCo,Telstra Group,Telecom,NSW1,NSW,Deakin,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au
-Telstra Wellington Street,Telstra Wellington Street DC,Telstra InfraCo,Telstra Group,Telecom,WA,WA,Perth CBD,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au
-Doma Minchinbury,Doma Minchinbury DC,Doma Infrastructure Group,Starwood Capital Group,Developer,NSW1,NSW,Minchinbury,Under Construction,62.0,,2028.0,,,Grid,AI/HPC,1.25,,Design target — AI-optimised facility,Starwood Capital Group,PR Newswire Nov 2025 — Starwood / Doma / Telstra InfraCo announcement
-Rackspace SYD2,Rackspace Sydney 2,Rackspace Technology,Rackspace Technology,Colocation,NSW1,NSW,Erskine Park,Operating,10.0,,,,,Grid,Traditional,,,,,datacentermap.com / Rackspace website
-Macquarie IC4,Macquarie IC4 Bunker,Macquarie Government,Macquarie Technology Group,Colocation,NSW1,NSW,Canberra,Operating,2.5,,,,,Grid,Traditional,,,,,datacentermap.com / ASX:MAQ filings
-DXN SYD1,DXN Sydney Olympic Park,DXN Limited,DXN Limited,Colocation,NSW1,NSW,Sydney Olympic Park,Operating,12.0,,,,,Grid,Traditional,,,,,dxn.solutions
-DXN TAS1,DXN Hobart,DXN Limited,DXN Limited,Colocation,TAS1,TAS,Hobart,Operating,,,,,,Grid,Traditional,,,,,dxn.solutions
-DXN NT1,DXN Darwin,DXN Limited,DXN Limited,Colocation,NT,NT,Darwin,Operating,,,,,,Grid,Traditional,,,,,dxn.solutions
-LEDC Newcastle,Leading Edge Newcastle,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Newcastle,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com
-LEDC Albury,Leading Edge Albury,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Albury,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com
-LEDC Wagga Wagga,Leading Edge Wagga Wagga,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Wagga Wagga,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com
-LEDC Tamworth,Leading Edge Tamworth,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Tamworth,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com
-LEDC Dubbo,Leading Edge Dubbo,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Dubbo,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com
-LEDC Coffs Harbour,Leading Edge Coffs Harbour,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Coffs Harbour,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com
-TPG Forest Lodge,TPG Forest Lodge,TPG Telecom,TPG Telecom,Telecom,NSW1,NSW,Forest Lodge,Operating,,,,,,Grid,Traditional,,,,,Data Center Dynamics — TPG data centre for sale
-TPG Richmond,TPG Richmond Melbourne,TPG Telecom,TPG Telecom,Telecom,VIC1,VIC,Richmond,Operating,,,,,,Grid,Traditional,,,,,datacentermap.com
-TPG Collins Street,TPG 530 Collins Street,TPG Telecom,TPG Telecom,Telecom,VIC1,VIC,Melbourne CBD,Operating,,,,,,Grid,Traditional,,,,,datacenterhawk.com
-Vault Cloud Canberra,Vault Cloud Canberra,Vault Cloud,Vault Cloud,Colocation,NSW1,NSW,Canberra,Operating,,,,,,Grid,Cloud,,,,,vaultcloud.com.au — ASD Certified Protected cloud
-Vault Cloud Sydney,Vault Cloud Sydney,Vault Cloud,Vault Cloud,Colocation,NSW1,NSW,Sydney,Operating,,,,,,Grid,Cloud,,,,,vaultcloud.com.au — ASD Certified Protected cloud
-AUCloud Canberra,AUCloud Canberra,AUCloud,AUCloud (ASX:AUC),Colocation,NSW1,NSW,Canberra,Operating,,,,,,Grid,Cloud,,,,,AUCloud ASD Certified Strategic submission to Home Affairs
-AUCloud Sydney,AUCloud Sydney,AUCloud,AUCloud (ASX:AUC),Colocation,NSW1,NSW,Sydney,Operating,,,,,,Grid,Cloud,,,,,AUCloud ASD Certified Strategic submission to Home Affairs
-Sliced Tech Fyshwick,Sliced Tech Fyshwick,Sliced Tech,Sliced Tech,Colocation,NSW1,NSW,Fyshwick,Operating,,,,,,Grid,Cloud,,,,,crn.com.au — Sliced Tech ASD Certified Protected
-NCI Gadi,NCI National Computational Infrastructure,NCI,ANU / CSIRO / BoM / Australian Govt,Technology,NSW1,NSW,Canberra,Operating,,,2020.0,,,Grid,AI/HPC,,,,Australian Government,nci.org.au
-Pawsey Setonix,Pawsey Supercomputing Research Centre,Pawsey Supercomputing Research Centre,CSIRO / Curtin / Australian Govt,Technology,WA,WA,Kensington,Operating,,,2022.0,,,Grid,AI/HPC,,,,Australian Government,pawsey.org.au
+project_name,campus,operator,parent_company,operator_type,nem_region,state,suburb,status,facility_mw,critical_it_mw,startup_year,full_capacity_year,capex_aud_m,power_strategy,workload_type,pue,wue,pue_source,financial_sponsor,source,power_secured
+S7,NEXTDC S7,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Eastern Creek,Under Construction,550.0,,2027.0,,7000.0,Grid,AI/HPC,1.35,,Design target — NEXTDC next-gen,,ASX announcement,
+S4,NEXTDC S4,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Horsley Park,Proposed,250.0,,2028.0,,,Grid,Traditional,1.35,,Design target — NEXTDC next-gen,,NSW SSD portal,
+S3,NEXTDC S3,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Gore Hill,Operating,30.0,20.0,2020.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+S2,NEXTDC S2,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Macquarie Park,Operating,30.0,20.0,2015.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+S1,NEXTDC S1,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Macquarie Park,Operating,12.0,8.0,2012.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+M4,NEXTDC M4,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Melbourne,Proposed,200.0,,2028.0,,2000.0,Grid,AI/HPC,1.35,,Design target — NEXTDC next-gen,,ASX announcement,
+M3,NEXTDC M3,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Melbourne,Operating,24.0,16.0,2022.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+M2,NEXTDC M2,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Tullamarine,Operating,40.0,27.0,2018.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+M1,NEXTDC M1,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Port Melbourne,Operating,12.0,8.0,2012.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+B2,NEXTDC B2,NEXTDC,NEXTDC,Colocation,QLD1,QLD,Brisbane,Operating,6.0,4.0,2019.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+B1,NEXTDC B1,NEXTDC,NEXTDC,Colocation,QLD1,QLD,Brisbane,Operating,6.0,4.0,2013.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+P2,NEXTDC P2,NEXTDC,NEXTDC,Colocation,WA,WA,Perth,Operating,10.0,7.0,2018.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+P1,NEXTDC P1,NEXTDC,NEXTDC,Colocation,WA,WA,Perth,Operating,6.0,4.0,2013.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+C1,NEXTDC C1,NEXTDC,NEXTDC,Colocation,NSW1,NSW,Canberra,Operating,6.0,4.0,2013.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+D1,NEXTDC D1,NEXTDC,NEXTDC,Colocation,VIC1,VIC,Darwin,Operating,4.0,3.0,2020.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+A1,NEXTDC A1,NEXTDC,NEXTDC,Colocation,SA1,SA,Adelaide,Operating,4.0,3.0,2016.0,,,Grid,Traditional,1.42,2.16,NEXTDC FY24 ESG Report (portfolio avg),,NEXTDC website,
+B3,NEXTDC B3,NEXTDC,NEXTDC,Colocation,QLD1,QLD,Brisbane,Proposed,150.0,,2028.0,,,Grid,AI/HPC,1.35,,Design target — NEXTDC next-gen,,ASX announcement,
+P3,NEXTDC P3,NEXTDC,NEXTDC,Colocation,WA,WA,Perth,Proposed,80.0,,2028.0,,,Grid,AI/HPC,1.35,,Design target — NEXTDC next-gen,,ASX announcement,
+Marsden Park,CDC Marsden Park,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Marsden Park,Approved,504.0,,2027.0,2032.0,,Grid,AI/HPC,1.3,0.01,Design target — CDC LiquidCore next-gen,,NSW SSD approval,False
+Eastern Creek,CDC Eastern Creek,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Eastern Creek,Operating,150.0,100.0,2018.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website,
+Fyshwick,CDC Fyshwick,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Canberra,Operating,40.0,27.0,2010.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website,
+Hume,CDC Hume,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Canberra,Operating,40.0,27.0,2015.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website,
+Macquarie Park,CDC Macquarie Park,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Macquarie Park,Operating,20.0,14.0,2017.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website,
+Silverwater,CDC Silverwater,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Silverwater,Operating,15.0,10.0,2012.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website,
+Perth (CDC),CDC Perth,CDC Data Centres,Infratil,Colocation,WA,WA,Maddington,Proposed,200.0,,2027.0,,415.0,Grid,Cloud,1.3,0.01,Design target — CDC LiquidCore next-gen,,CDC press release,
+CDC Deakin,CDC Deakin,CDC Data Centres,Infratil,Colocation,NSW1,NSW,Canberra,Operating,20.0,14.0,2005.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website,
+CDC Brisbane,CDC Brisbane,CDC Data Centres,Infratil,Colocation,QLD1,QLD,Brisbane,Operating,15.0,10.0,2014.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website,
+CDC Melbourne,CDC Melbourne,CDC Data Centres,Infratil,Colocation,VIC1,VIC,Melbourne,Operating,30.0,20.0,2016.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website,
+CDC Adelaide,CDC Adelaide,CDC Data Centres,Infratil,Colocation,SA1,SA,Adelaide,Operating,10.0,7.0,2018.0,,,Grid,Traditional,1.38,0.01,CDC 2024 Sustainability Report,,CDC website,
+SYD1,AirTrunk SYD1,AirTrunk,Blackstone,Colocation,NSW1,NSW,Eastern Creek,Operating,121.0,80.0,2018.0,,,Grid,Traditional,1.32,0.97,AirTrunk FY24 Sustainability Report (portfolio avg),,AirTrunk website,
+SYD2,AirTrunk SYD2,AirTrunk,Blackstone,Colocation,NSW1,NSW,Western Sydney,Operating,158.0,105.0,2021.0,,,Grid,Traditional,1.32,0.97,AirTrunk FY24 Sustainability Report (portfolio avg),,AirTrunk website,
+SYD3,AirTrunk SYD3,AirTrunk,Blackstone,Colocation,NSW1,NSW,Western Sydney,Under Construction,330.0,,2026.0,,,Grid,AI/HPC,1.25,0.8,Design target — AirTrunk 1.23-1.28 band,,AirTrunk website,
+MEL1,AirTrunk MEL1,AirTrunk,Blackstone,Colocation,VIC1,VIC,Melbourne,Operating,276.0,185.0,2020.0,,,Grid,Traditional,1.32,0.97,AirTrunk FY24 Sustainability Report (portfolio avg),,AirTrunk website,
+MEL2,AirTrunk MEL2,AirTrunk,Blackstone,Colocation,VIC1,VIC,Melbourne,Proposed,354.0,,2027.0,,7000.0,Grid,AI/HPC,1.25,0.8,Design target — AirTrunk 1.23-1.28 band,,AirTrunk press release,
+AirTrunk SYD4,AirTrunk SYD4,AirTrunk,Blackstone,Colocation,NSW1,NSW,Western Sydney,Proposed,250.0,,2028.0,,,Grid,AI/HPC,1.25,0.8,Design target — AirTrunk 1.23-1.28 band,,Press,
+IC3 Super West,Macquarie IC3,Macquarie Data Centres,Macquarie Technology Group,Colocation,NSW1,NSW,Macquarie Park,Operating,32.0,21.0,2023.0,,,Grid,Traditional,1.4,1.2,Macquarie Technology ESG disclosures,,ASX:MAQ filings,
+IC2 Bungarribee,Macquarie IC2,Macquarie Data Centres,Macquarie Technology Group,Colocation,NSW1,NSW,Bungarribee,Under Construction,110.0,,2026.0,,,Grid,Cloud,1.28,1.0,Design target — MAQ IC2 design PUE,,ASX:MAQ filings,
+IC1,Macquarie IC1,Macquarie Data Centres,Macquarie Technology Group,Colocation,NSW1,NSW,Macquarie Park,Operating,16.0,11.0,2010.0,,,Grid,Traditional,1.7,1.5,Macquarie Technology ESG disclosures,,ASX:MAQ filings,
+Goodman Ultimo,Goodman Ultimo,Goodman Group,Goodman Group,Developer,NSW1,NSW,Ultimo,Operating,25.0,17.0,2022.0,,,Grid,Traditional,1.4,1.2,Industry benchmark — modern colo developer,,GMG filings,
+Goodman Truganina,Goodman Truganina,Goodman Group,Goodman Group,Developer,VIC1,VIC,Truganina,Under Construction,100.0,,2026.0,,,Grid,Cloud,1.3,0.8,Design target — Goodman new build,,GMG filings,
+Goodman Macquarie Park,Goodman Macquarie Park,Goodman Group,Goodman Group,Developer,NSW1,NSW,Macquarie Park,Under Construction,60.0,,2026.0,,,Grid,Cloud,1.3,0.8,Design target — Goodman new build,,GMG filings,
+Equinix SY6,Equinix SY6,Equinix,Equinix,Colocation,NSW1,NSW,Alexandria,Operating,15.0,10.0,2021.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website,
+Equinix SY5,Equinix SY5,Equinix,Equinix,Colocation,NSW1,NSW,Sydney,Operating,12.0,8.0,2019.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website,
+Equinix SY4,Equinix SY4,Equinix,Equinix,Colocation,NSW1,NSW,Sydney,Operating,10.0,7.0,2016.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website,
+Equinix SY3,Equinix SY3,Equinix,Equinix,Colocation,NSW1,NSW,Sydney,Operating,8.0,5.0,2014.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website,
+Equinix SY7,Equinix SY7,Equinix,Equinix,Colocation,NSW1,NSW,Sydney,Proposed,50.0,,2027.0,,,Grid,Traditional,1.3,0.8,Design target — Equinix 2030 goal 1.33,,Press,
+Equinix ME2,Equinix ME2,Equinix,Equinix,Colocation,VIC1,VIC,Melbourne,Operating,15.0,10.0,2020.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website,
+Equinix ME1,Equinix ME1,Equinix,Equinix,Colocation,VIC1,VIC,Melbourne,Operating,8.0,5.0,2015.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website,
+Equinix PE1,Equinix PE1,Equinix,Equinix,Colocation,WA,WA,Perth,Operating,5.0,3.0,2019.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website,
+Equinix CA1,Equinix CA1,Equinix,Equinix,Colocation,NSW1,NSW,Canberra,Operating,5.0,3.0,2017.0,,,Grid,Traditional,1.39,0.95,Equinix 2024 Sustainability Report (global avg),,Equinix website,
+Digital Realty SYD10,DRe SYD10,Digital Realty,Digital Realty,Colocation,NSW1,NSW,Western Sydney,Under Construction,50.0,,2026.0,,,Grid,Traditional,1.3,0.8,Design target — Digital Realty new build,,Press,
+Digital Realty SYD11,DRe SYD11,Digital Realty,Digital Realty,Colocation,NSW1,NSW,Sydney,Operating,15.0,10.0,2019.0,,,Grid,Traditional,1.4,1.0,Digital Realty 2024 Impact Report (estimate),,Digital Realty website,
+Digital Realty MEL1,DRe MEL1,Digital Realty,Digital Realty,Colocation,VIC1,VIC,Melbourne,Operating,12.0,8.0,2018.0,,,Grid,Traditional,1.4,1.0,Digital Realty 2024 Impact Report (estimate),,Digital Realty website,
+Global Switch SYD,Global Switch SYD,DigiCo Infrastructure REIT,HMC Capital,Colocation,NSW1,NSW,Ultimo,Operating,20.0,14.0,2002.0,,,Grid,Traditional,1.5,1.5,Global Switch ESG — legacy facility,,Global Switch website,
+Global Switch MEL,Global Switch MEL,DigiCo Infrastructure REIT,HMC Capital,Colocation,VIC1,VIC,Port Melbourne,Operating,12.0,8.0,2005.0,,,Grid,Traditional,1.5,1.5,Global Switch ESG — legacy facility,,Global Switch website,
+DCI Sydney,DCI Sydney,DCI Data Centres,Brookfield,Colocation,NSW1,NSW,Erskine Park,Under Construction,100.0,,2026.0,,,Grid,Cloud,1.3,0.8,Design target — DCI new build,,Press,
+DCI Melbourne,DCI Melbourne,DCI Data Centres,Brookfield,Colocation,VIC1,VIC,Melbourne,Operating,15.0,10.0,2020.0,,,Grid,Traditional,1.4,1.2,Industry benchmark — modern colocation,,DCI website,
+DCI Perth,DCI Perth,DCI Data Centres,Brookfield,Colocation,WA,WA,Perth,Operating,8.0,5.0,2019.0,,,Grid,Traditional,1.4,1.2,Industry benchmark — modern colocation,,DCI website,
+AWS Sydney Region,,Amazon Web Services,Amazon,Hyperscaler,NSW1,NSW,Various,Operating,200.0,,,,,Grid,Cloud,1.15,0.15,AWS 2024 Sustainability Report (global avg),,Press estimate,
+AWS Melbourne Region,,Amazon Web Services,Amazon,Hyperscaler,VIC1,VIC,Various,Operating,100.0,,,,,Grid,Cloud,1.15,0.15,AWS 2024 Sustainability Report (global avg),,Press estimate,
+AWS Queensland Region,,Amazon Web Services,Amazon,Hyperscaler,QLD1,QLD,Various,Proposed,300.0,,2027.0,,2000.0,Grid,Cloud,1.12,0.12,Design target — AWS next-gen,,AWS announcement 2024,
+AWS Perth Region,,Amazon Web Services,Amazon,Hyperscaler,WA,WA,Various,Proposed,100.0,,2028.0,,,Grid,Cloud,1.12,0.12,Design target — AWS next-gen,,Press,
+Azure Sydney Region,,Microsoft Azure,Microsoft,Hyperscaler,NSW1,NSW,Various,Operating,150.0,,,,,Grid,Cloud,1.16,0.3,Microsoft 2024 Sustainability (global avg),,Press estimate,
+Azure Melbourne Region,,Microsoft Azure,Microsoft,Hyperscaler,VIC1,VIC,Various,Operating,75.0,,,,,Grid,Cloud,1.16,0.3,Microsoft 2024 Sustainability (global avg),,Press estimate,
+Azure Canberra,,Microsoft Azure,Microsoft,Hyperscaler,NSW1,NSW,Canberra,Operating,50.0,,,,,Grid,Cloud,1.16,0.3,Microsoft 2024 Sustainability (global avg),,Press estimate,
+Azure Sydney Expansion,,Microsoft Azure,Microsoft,Hyperscaler,NSW1,NSW,Western Sydney,Under Construction,200.0,,2026.0,,5000.0,Grid,Cloud/AI,1.12,0.1,Design target — MS zero-water cooling,,Microsoft AU $5B commitment,
+Azure Queensland,,Microsoft Azure,Microsoft,Hyperscaler,QLD1,QLD,Various,Proposed,150.0,,2028.0,,,Grid,Cloud,1.12,0.1,Design target — MS zero-water cooling,,Microsoft announcement,
+Google Sydney,,Google Cloud,Alphabet,Hyperscaler,NSW1,NSW,Various,Operating,80.0,,,,,Grid,Cloud,1.09,0.5,Google 2024 Environmental Report (global avg),,Press estimate,
+Google Melbourne,,Google Cloud,Alphabet,Hyperscaler,VIC1,VIC,Various,Operating,50.0,,,,,Grid,Cloud,1.09,0.5,Google 2024 Environmental Report (global avg),,Press estimate,
+Google Sydney Expansion,,Google Cloud,Alphabet,Hyperscaler,NSW1,NSW,Western Sydney,Proposed,150.0,,2028.0,,2000.0,Grid,Cloud/AI,1.08,0.4,Design target — Google next-gen,,Google AU expansion announcement,
+Oracle Sydney,,Oracle Cloud,Oracle,Hyperscaler,NSW1,NSW,Various,Operating,40.0,,2024.0,,,Grid,Cloud,1.2,0.5,Industry benchmark — hyperscaler,,Oracle website,
+Oracle Melbourne,,Oracle Cloud,Oracle,Hyperscaler,VIC1,VIC,Various,Proposed,50.0,,2027.0,,,Grid,Cloud,1.18,0.4,Design target — Oracle next-gen,,Oracle AU expansion,
+Meta Australia,,Meta,Meta Platforms,Hyperscaler,VIC1,VIC,Various,Proposed,100.0,,2028.0,,,Grid,AI/HPC,1.1,0.2,Meta 2024 Sustainability Report (global avg),,Press reports,
+NTT Sydney,NTT SYD1,NTT,NTT,Telecom,NSW1,NSW,Sydney,Operating,20.0,14.0,2020.0,,,Grid,Traditional,1.4,1.2,NTT Global Data Centers sustainability,,NTT website,
+NTT Melbourne,NTT MEL1,NTT,NTT,Telecom,VIC1,VIC,Melbourne,Operating,12.0,8.0,2019.0,,,Grid,Traditional,1.4,1.2,NTT Global Data Centers sustainability,,NTT website,
+Vocus Sydney,Vocus SYD,Vocus,Vocus Group,Telecom,NSW1,NSW,Alexandria,Operating,10.0,7.0,2015.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — mid-size telecom,,Vocus website,
+Vocus Melbourne,Vocus MEL,Vocus,Vocus Group,Telecom,VIC1,VIC,Melbourne,Operating,8.0,5.0,2016.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — mid-size telecom,,Vocus website,
+Vocus Brisbane,Vocus BNE,Vocus,Vocus Group,Telecom,QLD1,QLD,Brisbane,Operating,5.0,3.0,2017.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — mid-size telecom,,Vocus website,
+Vocus Perth,Vocus PER,Vocus,Vocus Group,Telecom,WA,WA,Perth,Operating,5.0,3.0,2018.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — mid-size telecom,,Vocus website,
+Fujitsu Castle Hill,Fujitsu Sydney,Fujitsu,Fujitsu,Technology,NSW1,NSW,Castle Hill,Operating,10.0,7.0,2010.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — enterprise/technology,,Fujitsu website,
+Fujitsu Homebush,Fujitsu Homebush,Fujitsu,Fujitsu,Technology,NSW1,NSW,Homebush,Operating,8.0,5.0,2008.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — enterprise/technology,,Fujitsu website,
+KINX Sydney,KINX SYD,KINX,KINX,Colocation,NSW1,NSW,Sydney,Operating,8.0,5.0,2020.0,,,Grid,Traditional,1.45,1.3,Industry benchmark — small colocation,,KINX website,
+Canberra Data Centres,Canberra DC,Canberra Data Centres,Canberra Data Centres,Colocation,NSW1,NSW,Canberra,Operating,15.0,10.0,2008.0,,,Grid,Traditional,1.5,1.5,Industry benchmark — legacy colocation,,Company website,
+Harbour ISP,Harbour ISP DC,Harbour ISP,Harbour ISP,Telecom,VIC1,VIC,Melbourne,Operating,4.0,3.0,2010.0,,,Grid,Traditional,1.65,1.5,Industry benchmark — small telecom,,Company website,
+SUBco Melbourne,SUBco MEL,SUBco,SUBco,Telecom,VIC1,VIC,Melbourne,Operating,3.0,2.0,2015.0,,,Grid,Traditional,1.6,1.5,Industry benchmark — small telecom,,SUBco website,
+Macquarie Telecom IC5,Macquarie IC5,Macquarie Data Centres,Macquarie Technology Group,Colocation,NSW1,NSW,Macquarie Park,Operating,16.0,11.0,2018.0,,,Grid,Traditional,1.5,1.3,Macquarie Technology ESG disclosures,,ASX:MAQ filings,
+YondrGroup Western Sydney,Yondr SYD,Yondr Group,Yondr Group,Developer,NSW1,NSW,Western Sydney,Under Construction,120.0,,2026.0,,,Grid,AI/HPC,1.25,0.8,Design target — Yondr purpose-built hyperscale,,Press,
+CloudHQ Sydney,CloudHQ SYD,CloudHQ,CloudHQ,Developer,NSW1,NSW,Western Sydney,Proposed,200.0,,2027.0,,,Grid,Cloud,1.3,1.0,Industry benchmark — modern developer,,Press,
+Stack Infrastructure Sydney,Stack SYD,Stack Infrastructure,IPI Partners,Developer,NSW1,NSW,Western Sydney,Proposed,150.0,,2028.0,,,Grid,Cloud,1.3,1.0,Industry benchmark — modern developer,,Press,
+Endeavour Energy DC Precinct,Endeavour DC,Various,Various,Developer,NSW1,NSW,Western Sydney,Proposed,500.0,,2028.0,2035.0,,Grid,Cloud,1.3,1.0,Industry benchmark — modern developer,,NSW SSD portal,
+Keppel SYD1,Keppel Sydney 1,Keppel Data Centres,Keppel Ltd,Colocation,NSW1,NSW,Artarmon,Operating,20.0,,,,,Grid,Traditional,,,,,datacentermap.com,
+Keppel Gore Hill,Keppel Gore Hill,Keppel Data Centres,Keppel Ltd,Colocation,NSW1,NSW,St Leonards,Operating,,,,,,Grid,Traditional,,,,,keppeldatacentres.com,
+Keppel Morwell,Keppel Morwell Campus,Keppel Data Centres,Keppel Ltd,Developer,VIC1,VIC,Morwell,Proposed,720.0,,,,,Grid,AI/HPC,,,,,Data Center Dynamics — Keppel secures rights to 720MW campus outside Melbourne,
+Vantage MEL1,Vantage MEL1,Vantage Data Centers,DigitalBridge / Silver Lake,Colocation,VIC1,VIC,Tullamarine,Operating,48.0,,,,,Grid,Cloud,,,,DigitalBridge,vantage-dc.com,
+Vantage SYD1,Vantage SYD1,Vantage Data Centers,DigitalBridge / Silver Lake,Colocation,NSW1,NSW,Sydney,Operating,,,,,,Grid,Cloud,,,,DigitalBridge,vantage-dc.com,
+Equinix SY9x,Equinix SY9x,Equinix,Equinix,Colocation,NSW1,NSW,Rosehill,Operating,28.0,,2024.0,,,Grid,Cloud,1.3,,Equinix xScale design target,PGIM Real Estate,Equinix IR / Data Center Dynamics,
+Equinix SY10x,Equinix SY10x,Equinix,Equinix,Colocation,NSW1,NSW,Rosehill,Under Construction,28.0,,2026.0,,,Grid,Cloud,1.3,,Equinix xScale design target,PGIM Real Estate,Data Center Dynamics,
+EdgeConneX Macquarie Park,EdgeConneX Macquarie Park,EdgeConneX,EQT Infrastructure,Developer,NSW1,NSW,Macquarie Park,Approved,100.0,,2027.0,,,Grid,Cloud,1.3,,Design target — modern hyperscale,EQT Infrastructure,Data Center Dynamics — EdgeConneX + Stockland JV,False
+GreenSquareDC Norwest,GreenSquareDC Norwest,GreenSquareDC,Partners Group,Colocation,NSW1,NSW,Norwest,Operating,20.0,,2023.0,,,Grid,Cloud,1.3,,Design target — modern facility,Partners Group,Data Center Dynamics — Partners Group acquires GreenSquareDC,
+DigiCo BNE1,DigiCo Eagle Farm 1,DigiCo Infrastructure REIT,HMC Capital,Colocation,QLD1,QLD,Eagle Farm,Operating,6.0,,,,,Grid,Traditional,,,,,datacentermap.com / HMC Capital DigiCo REIT,
+DigiCo BNE2,DigiCo Eagle Farm 2,DigiCo Infrastructure REIT,HMC Capital,Colocation,QLD1,QLD,Eagle Farm,Operating,,,,,,Grid,Traditional,,,,,baxtel.com / HMC Capital DigiCo REIT,
+DigiCo BNE3,DigiCo Woolloongabba,DigiCo Infrastructure REIT,HMC Capital,Colocation,QLD1,QLD,Woolloongabba,Operating,,,,,,Grid,Traditional,,,,,datacentermap.com / HMC Capital DigiCo REIT,
+DigiCo ADL1,DigiCo Adelaide,DigiCo Infrastructure REIT,HMC Capital,Colocation,SA1,SA,Adelaide,Operating,,,,,,Grid,Traditional,,,,,itbrief.com.au — iseek acquires YourDC,
+DigiCo Townsville,DigiCo Townsville,DigiCo Infrastructure REIT,HMC Capital,Colocation,QLD1,QLD,Townsville,Operating,,,,,,Grid,Traditional,,,,,Townsville City Council announcement / HMC Capital DigiCo REIT,
+DigiCo SYD Gore Hill,DigiCo Gore Hill,DigiCo Infrastructure REIT,HMC Capital,Colocation,NSW1,NSW,Gore Hill,Operating,,,,,,Grid,Traditional,,,,,iseek.com.au / HMC Capital DigiCo REIT,
+Telstra St Leonards,Telstra St Leonards DC,Telstra InfraCo,Telstra Group,Telecom,NSW1,NSW,St Leonards,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au,
+Telstra Clayton,Telstra Clayton DC,Telstra InfraCo,Telstra Group,Telecom,VIC1,VIC,Clayton,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au,
+Telstra Exhibition Street,Telstra Exhibition Street DC,Telstra InfraCo,Telstra Group,Telecom,VIC1,VIC,Melbourne CBD,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au,
+Telstra Woolloongabba,Telstra Woolloongabba DC,Telstra InfraCo,Telstra Group,Telecom,QLD1,QLD,Woolloongabba,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au,
+Telstra Waymouth Street,Telstra Waymouth Street DC,Telstra InfraCo,Telstra Group,Telecom,SA1,SA,Adelaide CBD,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au,
+Telstra Deakin,Telstra Deakin DC,Telstra InfraCo,Telstra Group,Telecom,NSW1,NSW,Deakin,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au,
+Telstra Wellington Street,Telstra Wellington Street DC,Telstra InfraCo,Telstra Group,Telecom,WA,WA,Perth CBD,Operating,,,,,,Grid,Traditional,,,,,infraco.telstra.com.au,
+Doma Minchinbury,Doma Minchinbury DC,Doma Infrastructure Group,Starwood Capital Group,Developer,NSW1,NSW,Minchinbury,Under Construction,62.0,,2028.0,,,Grid,AI/HPC,1.25,,Design target — AI-optimised facility,Starwood Capital Group,PR Newswire Nov 2025 — Starwood / Doma / Telstra InfraCo announcement,
+Rackspace SYD2,Rackspace Sydney 2,Rackspace Technology,Rackspace Technology,Colocation,NSW1,NSW,Erskine Park,Operating,10.0,,,,,Grid,Traditional,,,,,datacentermap.com / Rackspace website,
+Macquarie IC4,Macquarie IC4 Bunker,Macquarie Government,Macquarie Technology Group,Colocation,NSW1,NSW,Canberra,Operating,2.5,,,,,Grid,Traditional,,,,,datacentermap.com / ASX:MAQ filings,
+DXN SYD1,DXN Sydney Olympic Park,DXN Limited,DXN Limited,Colocation,NSW1,NSW,Sydney Olympic Park,Operating,12.0,,,,,Grid,Traditional,,,,,dxn.solutions,
+DXN TAS1,DXN Hobart,DXN Limited,DXN Limited,Colocation,TAS1,TAS,Hobart,Operating,,,,,,Grid,Traditional,,,,,dxn.solutions,
+DXN NT1,DXN Darwin,DXN Limited,DXN Limited,Colocation,NT,NT,Darwin,Operating,,,,,,Grid,Traditional,,,,,dxn.solutions,
+LEDC Newcastle,Leading Edge Newcastle,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Newcastle,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com,
+LEDC Albury,Leading Edge Albury,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Albury,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com,
+LEDC Wagga Wagga,Leading Edge Wagga Wagga,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Wagga Wagga,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com,
+LEDC Tamworth,Leading Edge Tamworth,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Tamworth,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com,
+LEDC Dubbo,Leading Edge Dubbo,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Dubbo,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com,
+LEDC Coffs Harbour,Leading Edge Coffs Harbour,Leading Edge Data Centres,Leading Edge Data Centres,Colocation,NSW1,NSW,Coffs Harbour,Operating,,,,,,Grid,Traditional,,,,,leadingedgedc.com,
+TPG Forest Lodge,TPG Forest Lodge,TPG Telecom,TPG Telecom,Telecom,NSW1,NSW,Forest Lodge,Operating,,,,,,Grid,Traditional,,,,,Data Center Dynamics — TPG data centre for sale,
+TPG Richmond,TPG Richmond Melbourne,TPG Telecom,TPG Telecom,Telecom,VIC1,VIC,Richmond,Operating,,,,,,Grid,Traditional,,,,,datacentermap.com,
+TPG Collins Street,TPG 530 Collins Street,TPG Telecom,TPG Telecom,Telecom,VIC1,VIC,Melbourne CBD,Operating,,,,,,Grid,Traditional,,,,,datacenterhawk.com,
+Vault Cloud Canberra,Vault Cloud Canberra,Vault Cloud,Vault Cloud,Colocation,NSW1,NSW,Canberra,Operating,,,,,,Grid,Cloud,,,,,vaultcloud.com.au — ASD Certified Protected cloud,
+Vault Cloud Sydney,Vault Cloud Sydney,Vault Cloud,Vault Cloud,Colocation,NSW1,NSW,Sydney,Operating,,,,,,Grid,Cloud,,,,,vaultcloud.com.au — ASD Certified Protected cloud,
+AUCloud Canberra,AUCloud Canberra,AUCloud,AUCloud (ASX:AUC),Colocation,NSW1,NSW,Canberra,Operating,,,,,,Grid,Cloud,,,,,AUCloud ASD Certified Strategic submission to Home Affairs,
+AUCloud Sydney,AUCloud Sydney,AUCloud,AUCloud (ASX:AUC),Colocation,NSW1,NSW,Sydney,Operating,,,,,,Grid,Cloud,,,,,AUCloud ASD Certified Strategic submission to Home Affairs,
+Sliced Tech Fyshwick,Sliced Tech Fyshwick,Sliced Tech,Sliced Tech,Colocation,NSW1,NSW,Fyshwick,Operating,,,,,,Grid,Cloud,,,,,crn.com.au — Sliced Tech ASD Certified Protected,
+NCI Gadi,NCI National Computational Infrastructure,NCI,ANU / CSIRO / BoM / Australian Govt,Technology,NSW1,NSW,Canberra,Operating,,,2020.0,,,Grid,AI/HPC,,,,Australian Government,nci.org.au,
+Pawsey Setonix,Pawsey Supercomputing Research Centre,Pawsey Supercomputing Research Centre,CSIRO / Curtin / Australian Govt,Technology,WA,WA,Kensington,Operating,,,2022.0,,,Grid,AI/HPC,,,,Australian Government,pawsey.org.au,
