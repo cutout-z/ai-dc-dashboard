@@ -1,0 +1,65 @@
+{
+  "run_at": "2026-04-20T01:40:18.064522+00:00",
+  "project_count": 141,
+  "total_mw_unrisked": 10251.5,
+  "total_mw_risked": 4899.5,
+  "checks": [
+    {
+      "level": "ok",
+      "code": "seed_parquet_row_count",
+      "message": "Seed and parquet row counts match (141 rows).",
+      "count": 0,
+      "projects": []
+    },
+    {
+      "level": "ok",
+      "code": "missing_source",
+      "message": "All projects have source attribution.",
+      "count": 0,
+      "projects": []
+    },
+    {
+      "level": "ok",
+      "code": "vague_source_high_mw",
+      "message": "All high-MW non-hyperscaler projects (\u226550 MW) have specific sources.",
+      "count": 0,
+      "projects": []
+    },
+    {
+      "level": "ok",
+      "code": "pipeline_missing_mw",
+      "message": "All pipeline projects have facility_mw populated.",
+      "count": 0,
+      "projects": []
+    },
+    {
+      "level": "warn",
+      "code": "top_operator_no_operating",
+      "message": "2 top-10 operator(s) by total MW have zero operating capacity \u2014 may be correct (pure pipeline) or a data gap.",
+      "count": 2,
+      "projects": [
+        "Various",
+        "CloudHQ"
+      ]
+    },
+    {
+      "level": "ok",
+      "code": "operating_share",
+      "message": "74% of projects are Operating (sanity range \u226530%).",
+      "count": 0,
+      "projects": []
+    },
+    {
+      "level": "ok",
+      "code": "stale_source_high_mw_operating",
+      "message": "No high-MW operating projects referencing sources older than 2023.",
+      "count": 0,
+      "projects": []
+    }
+  ],
+  "summary": {
+    "errors": 0,
+    "warnings": 1,
+    "ok": 6
+  }
+}

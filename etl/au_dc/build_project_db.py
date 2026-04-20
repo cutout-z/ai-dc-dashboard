@@ -11,6 +11,7 @@ import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
 from models.au_dc.risk_model import apply_risk_weight
 from models.au_dc.capex_model import estimate_capex
 
@@ -77,3 +78,8 @@ def build():
 
 if __name__ == "__main__":
     build()
+    # Run data quality spot check after every build
+    import importlib.util, subprocess
+    spot_check = PROJECT_ROOT / "scripts" / "au_dc_spot_check.py"
+    if spot_check.exists():
+        subprocess.run([sys.executable, str(spot_check)], check=False)

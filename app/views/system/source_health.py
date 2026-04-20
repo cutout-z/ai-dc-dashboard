@@ -21,7 +21,7 @@ import streamlit as st
 from app.lib.news import fetch_news_source_health
 
 DB_PATH = Path(st.session_state["db_path"])
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_DIR = Path(__file__).parent.parent.parent.parent / "data"
 REF_DIR = DATA_DIR / "reference"
 AU_DC_DIR = DATA_DIR / "au_dc"
 
@@ -388,7 +388,68 @@ st.dataframe(pd.DataFrame(live_rows), use_container_width=True, hide_index=True,
 
 
 # ──────────────────────────────────────────────
-# 5. NEWS BUCKETS
+# 5. AU DC DATA QUALITY (spot check results)
+# ──────────────────────────────────────────────
+st.header("AU DC Data Quality")
+
+SPOT_CHECK_JSON = AU_DC_DIR / "processed" / "spot_check.json"
+
+if not SPOT_CHECK_JSON.exists():
+    st.info(
+        "No spot check results found. Run `python scripts/au_dc_spot_check.py` "
+        "or rebuild the project database to generate them."
+    )
+else:
+    try:
+        spot = json.loads(SPOT_CHECK_JSON.read_text())
+        run_age = _fmt_age(_age_seconds(SPOT_CHECK_JSON))
+        summary = spot.get("summary", {})
+
+        col_a, col_b, col_c, col_d = st.columns(4)
+        col_a.metric("Projects", spot.get("project_count", "—"))
+        col_b.metric("Unrisked MW", f"{spot.get('total_mw_unrisked', 0):,.0f}")
+        col_c.metric(
+            "Issues",
+            f"{summary.get('errors', 0)}E  {summary.get('warnings', 0)}W",
+            delta=None,
+        )
+        col_d.metric("Last run", run_age)
+
+        checks = spot.get("checks", [])
+        if checks:
+            LEVEL_ICON = {"error": "🔴", "warn": "🟡", "ok": "🟢"}
+            rows = []
+            for c in checks:
+                rows.append({
+                    "": LEVEL_ICON.get(c["level"], ""),
+                    "Check": c["code"],
+                    "Message": c["message"],
+                    "Count": c.get("count") or "",
+                })
+            df_checks = pd.DataFrame(rows)
+            # Sort: errors first, then warnings, then ok
+            level_order = {"🔴": 0, "🟡": 1, "🟢": 2}
+            df_checks = df_checks.sort_values("", key=lambda s: s.map(level_order))
+            st.dataframe(df_checks, use_container_width=True, hide_index=True,
+                         height=35 * (len(df_checks) + 1) + 3)
+
+        # Show details for warnings/errors in an expander
+        problem_checks = [c for c in checks if c["level"] in ("error", "warn") and c.get("projects")]
+        if problem_checks:
+            with st.expander("View flagged projects"):
+                for c in problem_checks:
+                    st.markdown(f"**{c['code']}** — {c['message']}")
+                    projs = c["projects"]
+                    if projs and isinstance(projs[0], dict):
+                        st.dataframe(pd.DataFrame(projs), use_container_width=True, hide_index=True)
+                    else:
+                        st.write(", ".join(str(p) for p in projs))
+    except Exception as e:
+        st.error(f"Failed to read spot check results: {e}")
+
+
+# ──────────────────────────────────────────────
+# 6. NEWS BUCKETS
 # ──────────────────────────────────────────────
 st.header("News Buckets")
 st.caption("Item counts and latest article per bucket (from cached fetch).")
