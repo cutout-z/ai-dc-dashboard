@@ -25,9 +25,9 @@ Maps where value accumulates — and erodes — across the AI infrastructure sta
 Power constraints, input cost inflation, and commodity cycles all affect which parts of the chain can sustain margins.
 Useful for identifying crowded vs. overlooked segments, tracking structural bottlenecks (interconnection queue depth, cooling materials, power procurement), and monitoring whether the build-out thesis is running into physical limits.
 
-### Australian Market — Alpha/WIP
+### Australian Market
 
-Early-stage analysis of the ANZ data centre market: capacity additions, operator financials, grid constraints, and project pipeline.
+Analysis of the ANZ data centre market: capacity additions, operator financials, grid constraints, and project pipeline.
 Relevant for assessing AU-listed DC operators and infrastructure plays with local exposure, and for stress-testing demand scenarios against NEM grid capacity and ESOO projections.
 
 ### Other
