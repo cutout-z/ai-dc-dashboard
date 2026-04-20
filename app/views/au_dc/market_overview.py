@@ -144,3 +144,17 @@ with b5:
     fig = market_breakdown_pie(projects, "power_strategy", mw_col, "By Power Strategy")
     st.plotly_chart(fig, use_container_width=True)
 
+st.info(
+    "**Source — Manually curated Australian DC project database.**  \n"
+    "Every entry is traced to a named public source: ASX/NZX announcements, company IR pages, "
+    "NSW/VIC/QLD State Significant Development (SSD) portals, "
+    "[Data Center Dynamics](https://www.datacenterdynamics.com/en/market/australasia/), "
+    "[datacentermap.com](https://www.datacentermap.com/australia/), "
+    "[datacenterhawk.com](https://datacenterhawk.com/market/australia), and operator press releases. "
+    "No estimated or synthesised entries. Coverage excludes undisclosed hyperscaler on-premises deployments, "
+    "enterprise facilities <10 MW, and classified government infrastructure. "
+    "Updated periodically as announcements are made — there is no automated refresh.  \n"
+    "See *Data sources & methodology* above for capacity weighting rules.",
+    icon=":material/info:",
+)
+
