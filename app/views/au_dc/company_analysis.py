@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from pathlib import Path
 
 from app.lib.au_dc_charts import COLOUR_PALETTE, CHART_LAYOUT, price_history_chart
+from app.lib.au_dc_financials import fetch_asx_dc_quotes, fetch_asx_dc_history
 
 _AU_DC_DATA = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
 DATA_DIR = _AU_DC_DATA / "processed"
@@ -22,11 +23,11 @@ if not projects_path.exists():
 projects = pd.read_parquet(projects_path)
 operators_ref = pd.read_csv(REF_DIR / "operator_types.csv") if (REF_DIR / "operator_types.csv").exists() else None
 
-# Financial data
-quotes_path = DATA_DIR / "financials_quotes.parquet"
-history_path = DATA_DIR / "financials_history.parquet"
-fin_quotes = pd.read_parquet(quotes_path) if quotes_path.exists() else None
-fin_history = pd.read_parquet(history_path) if history_path.exists() else None
+# Financial data — live, 5-minute cache
+_fin_quotes = fetch_asx_dc_quotes()
+_fin_history = fetch_asx_dc_history()
+fin_quotes = _fin_quotes if not _fin_quotes.empty else None
+fin_history = _fin_history if not _fin_history.empty else None
 
 # --- Controls ---
 st.sidebar.header("Controls")
@@ -50,6 +51,20 @@ market_share = (
 )
 market_share["share_pct"] = (market_share["value"] / market_share["value"].sum() * 100).round(1)
 
+STAGE_COLOURS = {
+    "Operating": "#16a34a",
+    "Under Construction": "#f59e0b",
+    "Announced": "#2563eb",
+}
+stage_map = {
+    "Operating": "Operating",
+    "Under Construction": "Under Construction",
+    "Proposed": "Announced",
+    "Approved": "Announced",
+}
+projects_stage = projects.copy()
+projects_stage["stage"] = projects_stage["status"].map(stage_map).fillna("Announced")
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -58,25 +73,126 @@ with col1:
         title=f"Market Share by {group_by} ({risk_view})", hole=0.4,
         color=group_col, color_discrete_map=COLOUR_PALETTE,
     )
-    fig.update_layout(**CHART_LAYOUT)
-    fig.update_traces(textposition="inside", textinfo="percent+label")
+    fig.update_layout(**CHART_LAYOUT, showlegend=False)
+    fig.update_traces(textposition="inside", textinfo="percent+label", insidetextorientation="radial")
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    fig = px.bar(
-        market_share.sort_values("value", ascending=True).tail(15),
-        x="value", y=group_col, orientation="h",
-        title=f"{share_basis} by {group_by}",
-        labels={"value": share_basis, group_col: ""},
-        color_discrete_sequence=["#2563eb"],
+    top_operators = market_share.sort_values("value", ascending=True).tail(15)[group_col].tolist()
+
+    stage_share = (
+        projects_stage[projects_stage[group_col].isin(top_operators)]
+        .groupby([group_col, "stage"])
+        .agg(value=(val_col, agg_func))
+        .reset_index()
     )
-    fig.update_layout(**CHART_LAYOUT)
+
+    # Add per-operator source attribution for hover tooltip
+    if "source" in projects_stage.columns:
+        src_map = (
+            projects_stage[projects_stage[group_col].isin(top_operators)]
+            .groupby(group_col)["source"]
+            .apply(lambda s: "<br>".join(
+                f"· {v}" for v in sorted(s.dropna().astype(str).unique()) if v.strip()
+            ))
+        )
+        stage_share["Sources"] = stage_share[group_col].map(src_map).fillna("—")
+    else:
+        stage_share["Sources"] = "—"
+
+    fig = px.bar(
+        stage_share,
+        x="value", y=group_col, orientation="h", barmode="stack",
+        color="stage",
+        title=f"{share_basis} by {group_by}",
+        labels={"value": share_basis, group_col: "", "stage": "Stage"},
+        color_discrete_map=STAGE_COLOURS,
+        category_orders={
+            group_col: top_operators,
+            "stage": ["Announced", "Under Construction", "Operating"],
+        },
+        custom_data=["Sources"],
+    )
+    fig.update_traces(
+        hovertemplate=(
+            "<b>%{y}</b> — %{fullData.name}<br>"
+            "%{x:,.0f} MW<br>"
+            "<br><i>Sources:</i><br>%{customdata[0]}"
+            "<extra></extra>"
+        )
+    )
+    fig.update_layout(
+        **{**CHART_LAYOUT, "margin": dict(l=40, r=20, t=40, b=100)},
+        legend=dict(orientation="h", yanchor="top", y=-0.18, x=0),
+    )
     st.plotly_chart(fig, use_container_width=True)
 
-st.dataframe(
-    market_share.rename(columns={group_col: group_by, "value": share_basis, "share_pct": "Share %"}),
-    use_container_width=True, hide_index=True,
+# Stage-breakdown table
+stage_pivot = (
+    projects_stage
+    .groupby([group_col, "stage"])
+    .agg(value=(val_col, agg_func))
+    .reset_index()
+    .pivot(index=group_col, columns="stage", values="value")
+    .fillna(0)
+    .reset_index()
 )
+for stage in ["Operating", "Under Construction", "Announced"]:
+    if stage not in stage_pivot.columns:
+        stage_pivot[stage] = 0
+
+total_op = stage_pivot["Operating"].sum()
+total_uc = stage_pivot["Under Construction"].sum()
+total_ann = stage_pivot["Announced"].sum()
+grand_total = total_op + total_uc + total_ann
+
+stage_pivot["Total"] = stage_pivot["Operating"] + stage_pivot["Under Construction"] + stage_pivot["Announced"]
+stage_pivot["Op %"] = (stage_pivot["Operating"] / max(total_op, 1e-9) * 100).round(1)
+stage_pivot["Op+UC %"] = (
+    (stage_pivot["Operating"] + stage_pivot["Under Construction"]) / max(total_op + total_uc, 1e-9) * 100
+).round(1)
+stage_pivot["Total %"] = (stage_pivot["Total"] / max(grand_total, 1e-9) * 100).round(1)
+stage_pivot = stage_pivot.sort_values("Total", ascending=False).rename(columns={group_col: group_by})
+
+col_label = "MW" if share_basis == "Capacity (MW)" else "Projects"
+st.dataframe(
+    stage_pivot[[group_by, "Operating", "Under Construction", "Announced", "Total", "Op %", "Op+UC %", "Total %"]],
+    use_container_width=True, hide_index=True,
+    column_config={
+        group_by: group_by,
+        "Operating": st.column_config.NumberColumn(f"Operating ({col_label})", format="%d"),
+        "Under Construction": st.column_config.NumberColumn(f"Under Constr. ({col_label})", format="%d"),
+        "Announced": st.column_config.NumberColumn(f"Announced ({col_label})", format="%d"),
+        "Total": st.column_config.NumberColumn(f"Total ({col_label})", format="%d"),
+        "Op %": st.column_config.NumberColumn("Op Share %", format="%.1f"),
+        "Op+UC %": st.column_config.NumberColumn("Op+UC Share %", format="%.1f"),
+        "Total %": st.column_config.NumberColumn("Total Share %", format="%.1f"),
+    },
+)
+
+with st.expander("Data sources & methodology"):
+    st.markdown(
+        """
+**Capacity basis**
+
+- **Unrisked** — total announced `facility_mw` across all project stages (Operating, Under Construction, Proposed/Approved).
+  Represents maximum potential capacity if all projects are delivered as disclosed.
+- **Risked** — probability-weighted capacity. Each project is discounted by stage
+  (e.g. Proposed projects carry a lower weight than Operating or Under Construction).
+
+**What "Capacity (MW)" means**
+
+Figures represent **total facility power draw** (IT load + cooling + ancillaries), as disclosed by operators.
+Where only critical IT load is available, facility MW is estimated using a standard PUE conversion.
+This is *not* contracted or committed capacity — it is the stated design capacity of each facility.
+
+**Data sources**
+
+Project data is manually curated from public disclosures including ASX/NZX announcements,
+company investor relations websites, state planning portals (e.g. NSW SSD), and DCI/Cushman & Wakefield
+market reports. Data is updated periodically and may not reflect the latest announcements.
+        """
+    )
 
 st.markdown("---")
 
@@ -198,7 +314,7 @@ if fin_quotes is not None and len(fin_quotes) > 1:
 
     display_fin = fin_quotes[["ticker", "name", "price", "market_cap", "pe_ratio",
                                "forward_pe", "ev_ebitda", "revenue_growth",
-                               "profit_margin", "debt_to_equity", "beta"]].copy()
+                               "debt_to_equity", "beta"]].copy()
     display_fin["market_cap"] = (display_fin["market_cap"] / 1e9).round(1)
 
     st.dataframe(
@@ -211,7 +327,6 @@ if fin_quotes is not None and len(fin_quotes) > 1:
             "forward_pe": st.column_config.NumberColumn("Fwd P/E", format="%.1f"),
             "ev_ebitda": st.column_config.NumberColumn("EV/EBITDA", format="%.1f"),
             "revenue_growth": st.column_config.NumberColumn("Rev Growth", format="%.1%"),
-            "profit_margin": st.column_config.NumberColumn("Margin", format="%.1%"),
             "debt_to_equity": st.column_config.NumberColumn("D/E %", format="%.0f"),
             "beta": st.column_config.NumberColumn("Beta", format="%.2f"),
         },
@@ -220,5 +335,9 @@ if fin_quotes is not None and len(fin_quotes) > 1:
     if fin_history is not None:
         ticker_names = dict(zip(fin_quotes["ticker"], fin_quotes["name"]))
         fig = price_history_chart(fin_history, ticker_names)
-        fig.update_layout(title="ASX DC Operators — Share Price (12 Months)")
+        fig.update_layout(
+            title="ASX DC Operators — Share Price (12 Months)",
+            **{**CHART_LAYOUT, "margin": dict(l=40, r=20, t=40, b=80)},
+            legend=dict(orientation="h", yanchor="top", y=-0.15, x=0),
+        )
         st.plotly_chart(fig, use_container_width=True)

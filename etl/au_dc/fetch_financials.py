@@ -17,9 +17,9 @@ except ImportError:
     print("yfinance not installed. Run: pip install yfinance")
     sys.exit(1)
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-OPERATOR_CSV = BASE_DIR / "data" / "reference" / "operator_types.csv"
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+OPERATOR_CSV = BASE_DIR / "data" / "au_dc" / "reference" / "operator_types.csv"
+PROCESSED_DIR = BASE_DIR / "data" / "au_dc" / "processed"
 
 # Map our ticker format (ASX:NXT) to yfinance format (NXT.AX)
 EXCHANGE_SUFFIX = {

@@ -67,17 +67,49 @@ def capacity_by_operator_bar(df: pd.DataFrame, top_n: int = 15) -> go.Figure:
     agg["speculative"] = agg["unrisked"] - agg["risked"]
     agg = agg.sort_values("unrisked", ascending=True).tail(top_n)
 
+    # Aggregate sources per operator for hover tooltip
+    if "source" in df.columns:
+        src = (
+            df[df["operator"].isin(agg["operator"])]
+            .groupby("operator")["source"]
+            .apply(lambda s: "<br>".join(
+                f"· {v}" for v in sorted(s.dropna().astype(str).unique()) if v.strip()
+            ))
+            .reset_index()
+            .rename(columns={"source": "sources"})
+        )
+        agg = agg.merge(src, on="operator", how="left")
+        agg["sources"] = agg["sources"].fillna("—")
+    else:
+        agg["sources"] = "—"
+
     fig = go.Figure()
     fig.add_trace(go.Bar(
         y=agg["operator"], x=agg["risked"],
         name="Risked", orientation="h",
         marker_color="#2563eb",
+        customdata=agg[["unrisked", "sources"]].values,
+        hovertemplate=(
+            "<b>%{y}</b><br>"
+            "Risked: <b>%{x:,.0f} MW</b><br>"
+            "Unrisked total: %{customdata[0]:,.0f} MW<br>"
+            "<br><i>Sources:</i><br>%{customdata[1]}"
+            "<extra></extra>"
+        ),
     ))
     fig.add_trace(go.Bar(
         y=agg["operator"], x=agg["speculative"],
         name="Speculative (unrisked − risked)", orientation="h",
         marker_color="rgba(37,99,235,0.25)",
         marker_line=dict(color="#2563eb", width=1),
+        customdata=agg[["unrisked", "sources"]].values,
+        hovertemplate=(
+            "<b>%{y}</b><br>"
+            "Speculative: <b>%{x:,.0f} MW</b><br>"
+            "Unrisked total: %{customdata[0]:,.0f} MW<br>"
+            "<br><i>Sources:</i><br>%{customdata[1]}"
+            "<extra></extra>"
+        ),
     ))
     fig.update_layout(
         barmode="stack",
