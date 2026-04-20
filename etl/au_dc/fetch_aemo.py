@@ -11,9 +11,9 @@ import requests
 import pandas as pd
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-RAW_DIR = BASE_DIR / "data" / "raw" / "aemo"
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+RAW_DIR = BASE_DIR / "data" / "au_dc" / "raw" / "aemo"
+PROCESSED_DIR = BASE_DIR / "data" / "au_dc" / "processed"
 
 # AEMO Generation Information page — latest workbook URL
 # Updated quarterly; check https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/nem-forecasting-and-planning/forecasting-and-planning-data/generation-information

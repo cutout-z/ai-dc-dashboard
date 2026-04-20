@@ -7,9 +7,9 @@ CEFC/Baringa reports) and outputs dc_demand.parquet.
 from pathlib import Path
 import pandas as pd
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-FORECAST_CSV = BASE_DIR / "data" / "reference" / "dc_demand_forecasts.csv"
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+FORECAST_CSV = BASE_DIR / "data" / "au_dc" / "reference" / "dc_demand_forecasts.csv"
+PROCESSED_DIR = BASE_DIR / "data" / "au_dc" / "processed"
 
 
 def build():
