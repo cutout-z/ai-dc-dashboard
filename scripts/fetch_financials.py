@@ -31,6 +31,15 @@ SEMI_BELLWETHERS = {
 
 ALL_TICKERS = {**CAPEX_COMPANIES, **SEMI_BELLWETHERS}
 
+# Reporting currency per ticker (yfinance returns values in the company's native currency)
+REPORTING_CURRENCY = {
+    "MSFT": "USD", "GOOGL": "USD", "AMZN": "USD", "META": "USD",
+    "ORCL": "USD", "CRWV": "USD", "AAPL": "USD",
+    "NVDA": "USD",  # reports in USD
+    "TSM": "TWD",   # TSMC reports in New Taiwan Dollar
+    "ASML": "EUR",  # ASML reports in Euro
+}
+
 
 def _extract_capex(cf_df, date_col) :
     """Extract CAPEX value from a cash flow DataFrame column."""
@@ -58,6 +67,8 @@ def fetch_quarterly_financials(ticker: str, name: str) -> list[dict]:
     records = []
     now = datetime.now().isoformat()
 
+    currency = REPORTING_CURRENCY.get(ticker, "USD")
+
     # Quarterly cash flow for CAPEX
     try:
         cf = stock.quarterly_cashflow
@@ -68,7 +79,7 @@ def fetch_quarterly_financials(ticker: str, name: str) -> list[dict]:
                 records.append({
                     "ticker": ticker, "company": name, "period": period,
                     "metric": "capex", "frequency": "quarterly",
-                    "value": capex, "unit": "USD", "source": "yahoo_finance",
+                    "value": capex, "unit": currency, "source": "yahoo_finance",
                     "fetched_at": now,
                 })
     except Exception as e:
@@ -84,7 +95,7 @@ def fetch_quarterly_financials(ticker: str, name: str) -> list[dict]:
                 records.append({
                     "ticker": ticker, "company": name, "period": period,
                     "metric": "revenue", "frequency": "quarterly",
-                    "value": revenue, "unit": "USD", "source": "yahoo_finance",
+                    "value": revenue, "unit": currency, "source": "yahoo_finance",
                     "fetched_at": now,
                 })
     except Exception as e:
@@ -100,7 +111,7 @@ def fetch_quarterly_financials(ticker: str, name: str) -> list[dict]:
                 records.append({
                     "ticker": ticker, "company": name, "period": period,
                     "metric": "capex", "frequency": "annual",
-                    "value": capex, "unit": "USD", "source": "yahoo_finance",
+                    "value": capex, "unit": currency, "source": "yahoo_finance",
                     "fetched_at": now,
                 })
     except Exception as e:
@@ -116,7 +127,7 @@ def fetch_quarterly_financials(ticker: str, name: str) -> list[dict]:
                 records.append({
                     "ticker": ticker, "company": name, "period": period,
                     "metric": "revenue", "frequency": "annual",
-                    "value": revenue, "unit": "USD", "source": "yahoo_finance",
+                    "value": revenue, "unit": currency, "source": "yahoo_finance",
                     "fetched_at": now,
                 })
     except Exception as e:
