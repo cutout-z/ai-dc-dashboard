@@ -11,11 +11,6 @@ import yfinance as yf
 
 logger = logging.getLogger("ai_research")
 
-# Feature toggles — keeping code for later but hidden per request.
-# Re-enable once the underlying bull:bear skew data is refreshed.
-SHOW_SKEW_SCATTER = False
-SHOW_CROSS_SEGMENT = False
-
 TOP_N_PER_SEGMENT = 10
 TILE_ROW_HEIGHT = 35
 
@@ -146,66 +141,5 @@ for segment in segments:
                 "Market Cap": st.column_config.TextColumn(width=100),
             },
         )
-
-# ──────────────────────────────────────────────
-# 3. BULL:BEAR SKEW SCATTER  (hidden by feature toggle)
-# ──────────────────────────────────────────────
-if SHOW_SKEW_SCATTER:
-    st.header("Bull:Bear Skew")
-    segments = sorted(df_universe["segment"].dropna().unique())
-    selected_segment = st.selectbox("Segment", segments)
-    df_seg = df_universe[df_universe["segment"] == selected_segment].copy()
-    df_plot = df_seg.dropna(subset=["upside_to_pt", "bull_bear_skew"])
-    if not df_plot.empty:
-        fig_skew = px.scatter(
-            df_plot,
-            x="upside_to_pt",
-            y="bull_bear_skew",
-            text="company",
-            color="sub_bucket",
-            title=f"{selected_segment} — Upside vs Bull:Bear Skew",
-            labels={
-                "upside_to_pt": "Upside to Price Target",
-                "bull_bear_skew": "Bull:Bear Skew",
-            },
-        )
-        fig_skew.update_traces(textposition="top center", textfont_size=9)
-        fig_skew.update_layout(height=400)
-        fig_skew.add_hline(y=1, line_dash="dash", line_color="gray", annotation_text="Skew = 1")
-        fig_skew.add_vline(x=0, line_dash="dash", line_color="gray")
-        st.plotly_chart(fig_skew, use_container_width=True)
-
-# ──────────────────────────────────────────────
-# 4. CROSS-SEGMENT POSITIONING  (hidden by feature toggle)
-# ──────────────────────────────────────────────
-if SHOW_CROSS_SEGMENT:
-    st.header("Cross-Segment Positioning")
-
-    df_seg_stats = df_universe.dropna(subset=["segment", "upside_to_pt"]).groupby("segment").agg(
-        stocks=("ticker", "count"),
-        avg_upside=("upside_to_pt", "mean"),
-        avg_skew=("bull_bear_skew", "mean"),
-    ).reset_index()
-
-    if not df_seg_stats.empty:
-        df_seg_stats["avg_upside_pct"] = (df_seg_stats["avg_upside"] * 100).round(1)
-
-        fig_seg = px.scatter(
-            df_seg_stats,
-            x="avg_upside_pct",
-            y="avg_skew",
-            size="stocks",
-            text="segment",
-            title="Segment Positioning — Avg Upside vs Avg Bull:Bear Skew",
-            labels={
-                "avg_upside_pct": "Avg Upside to PT (%)",
-                "avg_skew": "Avg Bull:Bear Skew",
-            },
-        )
-        fig_seg.update_traces(textposition="top center")
-        fig_seg.update_layout(height=450)
-        fig_seg.add_hline(y=1, line_dash="dash", line_color="gray")
-        fig_seg.add_vline(x=0, line_dash="dash", line_color="gray")
-        st.plotly_chart(fig_seg, use_container_width=True)
 
 conn.close()
