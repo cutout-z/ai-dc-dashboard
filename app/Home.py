@@ -130,13 +130,9 @@ value_chain = st.Page(
 dc_inputs = st.Page(
     "views/supply_chain/dc_inputs.py", title="DC & AI Inputs"
 )
-power = st.Page(
-    "views/fundamentals/power.py", title="Power"
+prospecting = st.Page(
+    "views/supply_chain/prospecting.py", title="Prospecting"
 )
-# prospecting = st.Page(
-#     "views/supply_chain/prospecting.py", title="Prospecting"
-# )
-# HIDDEN: uses private AI_Mapping_5.0.xlsx data — rebuild with own logic before re-enabling
 
 # Other
 guidance_revisions = st.Page(
@@ -195,8 +191,8 @@ pg = st.navigation(
             llm_lab_revenue,
             llm_gpu_hardware,
         ],
-        "Supply Chain": [value_chain, dc_inputs, power],
-        "Australian Market - Alpha/WIP": [
+        "Supply Chain": [value_chain, dc_inputs, prospecting],
+        "Australian Market": [
             au_landing,
             au_market_overview,
             au_regional,

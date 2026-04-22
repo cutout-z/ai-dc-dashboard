@@ -1,0 +1,494 @@
+{
+  "updated": "2026-04-22T00:52:57Z",
+  "etfs": [
+    "AIQ",
+    "BOTZ",
+    "ROBT",
+    "CHAT"
+  ],
+  "ticker_count": 34,
+  "universe": [
+    {
+      "ticker": "005930.KS",
+      "company": "Samsung Electronics Co., Ltd.",
+      "country": "South Korea",
+      "region": "Asia-Pacific",
+      "gics_sector": "Technology",
+      "gics_industry": "Consumer Electronics",
+      "market_cap_usd_m": 1454932788.0,
+      "etf_count": 2,
+      "etfs_in": [
+        "AIQ",
+        "CHAT"
+      ],
+      "ai_tier": "High"
+    },
+    {
+      "ticker": "000660.KS",
+      "company": "SK hynix Inc.",
+      "country": "South Korea",
+      "region": "Asia-Pacific",
+      "gics_sector": "Technology",
+      "gics_industry": "Semiconductors",
+      "market_cap_usd_m": 861997453.3,
+      "etf_count": 2,
+      "etfs_in": [
+        "AIQ",
+        "CHAT"
+      ],
+      "ai_tier": "High"
+    },
+    {
+      "ticker": "6861.T",
+      "company": "Keyence Corporation",
+      "country": "Japan",
+      "region": "Asia-Pacific",
+      "gics_sector": "Technology",
+      "gics_industry": "Scientific & Technical Instruments",
+      "market_cap_usd_m": 15266961.4,
+      "etf_count": 1,
+      "etfs_in": [
+        "BOTZ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "6954.T",
+      "company": "Fanuc Corporation",
+      "country": "Japan",
+      "region": "Asia-Pacific",
+      "gics_sector": "Industrials",
+      "gics_industry": "Specialty Industrial Machinery",
+      "market_cap_usd_m": 6064600.8,
+      "etf_count": 1,
+      "etfs_in": [
+        "BOTZ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "NVDA",
+      "company": "NVIDIA Corporation",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Semiconductors",
+      "market_cap_usd_m": 4858083.5,
+      "etf_count": 3,
+      "etfs_in": [
+        "AIQ",
+        "BOTZ",
+        "CHAT"
+      ],
+      "ai_tier": "Core"
+    },
+    {
+      "ticker": "6273.T",
+      "company": "SMC Corporation",
+      "country": "Japan",
+      "region": "Asia-Pacific",
+      "gics_sector": "Industrials",
+      "gics_industry": "Specialty Industrial Machinery",
+      "market_cap_usd_m": 4494869.9,
+      "etf_count": 1,
+      "etfs_in": [
+        "BOTZ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "GOOGL",
+      "company": "Alphabet Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Communication Services",
+      "gics_industry": "Internet Content & Information",
+      "market_cap_usd_m": 4019712.4,
+      "etf_count": 1,
+      "etfs_in": [
+        "CHAT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "AAPL",
+      "company": "Apple Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Consumer Electronics",
+      "market_cap_usd_m": 3912147.1,
+      "etf_count": 1,
+      "etfs_in": [
+        "AIQ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "MSFT",
+      "company": "Microsoft Corporation",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Infrastructure",
+      "market_cap_usd_m": 3152517.5,
+      "etf_count": 1,
+      "etfs_in": [
+        "CHAT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "AMZN",
+      "company": "Amazon.com, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Consumer Cyclical",
+      "gics_industry": "Internet Retail",
+      "market_cap_usd_m": 2687595.2,
+      "etf_count": 2,
+      "etfs_in": [
+        "AIQ",
+        "CHAT"
+      ],
+      "ai_tier": "High"
+    },
+    {
+      "ticker": "6383.T",
+      "company": "Daifuku Co., Ltd.",
+      "country": "Japan",
+      "region": "Asia-Pacific",
+      "gics_sector": "Industrials",
+      "gics_industry": "Specialty Industrial Machinery",
+      "market_cap_usd_m": 2327236.3,
+      "etf_count": 1,
+      "etfs_in": [
+        "BOTZ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "TSM",
+      "company": "Taiwan Semiconductor Manufacturing Company Limited",
+      "country": "Taiwan",
+      "region": "Asia-Pacific",
+      "gics_sector": "Technology",
+      "gics_industry": "Semiconductors",
+      "market_cap_usd_m": 1909010.1,
+      "etf_count": 1,
+      "etfs_in": [
+        "AIQ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "AVGO",
+      "company": "Broadcom Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Semiconductors",
+      "market_cap_usd_m": 1906798.1,
+      "etf_count": 2,
+      "etfs_in": [
+        "AIQ",
+        "CHAT"
+      ],
+      "ai_tier": "High"
+    },
+    {
+      "ticker": "META",
+      "company": "Meta Platforms, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Communication Services",
+      "gics_industry": "Internet Content & Information",
+      "market_cap_usd_m": 1697799.1,
+      "etf_count": 1,
+      "etfs_in": [
+        "AIQ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "AMD",
+      "company": "Advanced Micro Devices, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Semiconductors",
+      "market_cap_usd_m": 463835.6,
+      "etf_count": 1,
+      "etfs_in": [
+        "CHAT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "2513.HK",
+      "company": "Knowledge Atlas Tech Joint",
+      "country": "China",
+      "region": "Asia-Pacific",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Infrastructure",
+      "market_cap_usd_m": 423550.9,
+      "etf_count": 1,
+      "etfs_in": [
+        "CHAT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "NFLX",
+      "company": "Netflix, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Communication Services",
+      "gics_industry": "Entertainment",
+      "market_cap_usd_m": 390887.8,
+      "etf_count": 1,
+      "etfs_in": [
+        "AIQ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "CSCO",
+      "company": "Cisco Systems, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Communication Equipment",
+      "market_cap_usd_m": 354413.2,
+      "etf_count": 1,
+      "etfs_in": [
+        "AIQ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "PLTR",
+      "company": "Palantir Technologies Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Infrastructure",
+      "market_cap_usd_m": 349112.9,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "0100.HK",
+      "company": "MiniMax Group Inc",
+      "country": "Cayman Islands",
+      "region": "Other",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Infrastructure",
+      "market_cap_usd_m": 281801.3,
+      "etf_count": 1,
+      "etfs_in": [
+        "CHAT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "IBM",
+      "company": "International Business Machines Corporation",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Information Technology Services",
+      "market_cap_usd_m": 239932.4,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "300124.SZ",
+      "company": "Shenzhen Inovance Technology Co.,Ltd",
+      "country": "China",
+      "region": "Asia-Pacific",
+      "gics_sector": "Industrials",
+      "gics_industry": "Electrical Equipment & Parts",
+      "market_cap_usd_m": 178785.4,
+      "etf_count": 1,
+      "etfs_in": [
+        "BOTZ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "ISRG",
+      "company": "Intuitive Surgical, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Healthcare",
+      "gics_industry": "Medical Instruments & Supplies",
+      "market_cap_usd_m": 160284.5,
+      "etf_count": 1,
+      "etfs_in": [
+        "BOTZ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "PANW",
+      "company": "Palo Alto Networks, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Infrastructure",
+      "market_cap_usd_m": 142767.4,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "ABBN.SW",
+      "company": "ABB Ltd",
+      "country": "Switzerland",
+      "region": "Europe",
+      "gics_sector": "Industrials",
+      "gics_industry": "Electrical Equipment & Parts",
+      "market_cap_usd_m": 134645.2,
+      "etf_count": 1,
+      "etfs_in": [
+        "BOTZ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "9660.HK",
+      "company": "Horizon Robotics",
+      "country": "China",
+      "region": "Asia-Pacific",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Application",
+      "market_cap_usd_m": 115202.7,
+      "etf_count": 1,
+      "etfs_in": [
+        "BOTZ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "NET",
+      "company": "Cloudflare, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Infrastructure",
+      "market_cap_usd_m": 73095.7,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "DT",
+      "company": "Dynatrace, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Application",
+      "market_cap_usd_m": 10769.2,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "AVAV",
+      "company": "AeroVironment, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Industrials",
+      "gics_industry": "Aerospace & Defense",
+      "market_cap_usd_m": 10630.6,
+      "etf_count": 1,
+      "etfs_in": [
+        "BOTZ"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "PATH",
+      "company": "UiPath, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Infrastructure",
+      "market_cap_usd_m": 5764.6,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "S",
+      "company": "SentinelOne, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Infrastructure",
+      "market_cap_usd_m": 4920.4,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "OII",
+      "company": "Oceaneering International, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Energy",
+      "gics_industry": "Oil & Gas Equipment & Services",
+      "market_cap_usd_m": 3772.3,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "CCC",
+      "company": "CCC Intelligent Solutions Holdings Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Application",
+      "market_cap_usd_m": 3260.3,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    },
+    {
+      "ticker": "AI",
+      "company": "C3.ai, Inc.",
+      "country": "United States",
+      "region": "North America",
+      "gics_sector": "Technology",
+      "gics_industry": "Software - Infrastructure",
+      "market_cap_usd_m": 1336.7,
+      "etf_count": 1,
+      "etfs_in": [
+        "ROBT"
+      ],
+      "ai_tier": "Moderate"
+    }
+  ]
+}

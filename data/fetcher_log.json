@@ -1,0 +1,14 @@
+{
+  "refresh_earnings_dates.py": {
+    "last_run": "2026-04-22T00:52:19Z",
+    "status": "ok",
+    "count": 18,
+    "notes": "5 dates changed"
+  },
+  "fetch_etf_holdings.py": {
+    "last_run": "2026-04-22T00:52:57Z",
+    "status": "ok",
+    "count": 34,
+    "notes": "Holdings from 4 ETFs: AIQ, BOTZ, ROBT, CHAT"
+  }
+}

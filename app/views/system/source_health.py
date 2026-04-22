@@ -374,7 +374,7 @@ live_rows = [
         "Source": "fetch_earnings_dates() — calendar",
         "TTL": "1h",
         "API": "yfinance (Ticker.calendar)",
-        "Fallback": "None — shows blank if blocked",
+        "Fallback": "data/reference/earnings_dates.csv (refresh via etl/refresh_earnings_dates.py)",
     },
     {
         "Source": "fetch_news_buckets() — news feeds",
@@ -453,6 +453,62 @@ else:
 # ──────────────────────────────────────────────
 st.header("News Buckets")
 st.caption("Item counts and latest article per bucket (from cached fetch).")
+
+# ──────────────────────────────────────────────
+# 7. ETL LAST RUNS (fetcher_log.json)
+# ──────────────────────────────────────────────
+st.header("ETL Script Last Runs")
+st.caption(
+    "Populated by ETL scripts that write to `data/fetcher_log.json` on completion. "
+    "Shows when each script last ran and whether it succeeded."
+)
+
+FETCHER_LOG_PATH = DATA_DIR / "fetcher_log.json"
+
+if not FETCHER_LOG_PATH.exists() or FETCHER_LOG_PATH.stat().st_size <= 2:
+    st.info(
+        "No ETL run log yet. Run any of:\n"
+        "- `python etl/refresh_earnings_dates.py`\n"
+        "- `python etl/fetch_etf_holdings.py`\n"
+        "- `python etl/refresh_consensus.py`"
+    )
+else:
+    try:
+        etl_log = json.loads(FETCHER_LOG_PATH.read_text())
+        etl_rows = []
+        for script, entry in sorted(etl_log.items()):
+            last_run = entry.get("last_run", "")
+            status = entry.get("status", "")
+            count = entry.get("count", "")
+            notes = entry.get("notes", "")
+
+            # Calculate age
+            age_s = None
+            if last_run:
+                try:
+                    run_dt = datetime.fromisoformat(last_run.replace("Z", "+00:00"))
+                    age_s = (datetime.now(timezone.utc) - run_dt).total_seconds()
+                except Exception:
+                    pass
+
+            etl_rows.append({
+                "Script": script,
+                "Last Run": last_run[:16].replace("T", " ") if last_run else "—",
+                "Age": _fmt_age(age_s),
+                "Status": "OK" if status == "ok" else status.upper(),
+                "Count": count,
+                "Notes": notes,
+            })
+
+        st.dataframe(
+            pd.DataFrame(etl_rows),
+            use_container_width=True,
+            hide_index=True,
+            height=35 * (len(etl_rows) + 1) + 3,
+        )
+    except Exception as e:
+        st.error(f"Failed to read fetcher log: {e}")
+
 
 try:
     news_rows = fetch_news_source_health()
