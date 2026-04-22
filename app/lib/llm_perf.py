@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sqlite3
+import subprocess
 from pathlib import Path
 
 import pandas as pd
@@ -113,13 +114,38 @@ CAPABILITY_MILESTONES: list[dict] = [
 ]
 
 
+def _zeroeval_api_key() -> str | None:
+    """Return the ZeroEval API key from Streamlit secrets or macOS Keychain."""
+    # Streamlit Cloud: add ZEROEVAL_API_KEY to app secrets
+    try:
+        key = st.secrets.get("ZEROEVAL_API_KEY") or st.secrets.get("zeroeval_api_key")
+        if key:
+            return key
+    except Exception:
+        pass
+    # Local: macOS Keychain
+    try:
+        result = subprocess.run(
+            ["security", "find-generic-password", "-s", "llm-stats-api", "-w"],
+            capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return None
+
+
 @st.cache_data(ttl=3600)
 def fetch_zeroeval_models() -> pd.DataFrame:
     """Fetch live model data from api.zeroeval.com. Cached for 1 hour."""
+    api_key = _zeroeval_api_key()
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
     try:
         resp = requests.get(
             "https://api.zeroeval.com/leaderboard/models/full",
             params={"justCanonicals": "true"},
+            headers=headers,
             timeout=15,
         )
         resp.raise_for_status()
