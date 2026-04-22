@@ -8,8 +8,9 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import requests
 import streamlit as st
+
+from app.lib.llm_perf import fetch_zeroeval_models as _fetch_zeroeval_models_shared
 
 
 def _chart_layout():
@@ -52,29 +53,13 @@ _ORG_TO_PROVIDER = {
 }
 
 
-@st.cache_data(ttl=3600)
-def _fetch_zeroeval_models() -> pd.DataFrame:
-    """Fetch live model data from api.zeroeval.com. Cached for 1 hour."""
-    try:
-        resp = requests.get(
-            "https://api.zeroeval.com/leaderboard/models/full",
-            params={"justCanonicals": "true"},
-            timeout=15,
-        )
-        resp.raise_for_status()
-        return pd.DataFrame(resp.json())
-    except Exception as e:
-        st.warning(f"ZeroEval API unavailable: {e}")
-        return pd.DataFrame()
-
-
-_ze_df = _fetch_zeroeval_models()
+_ze_df = _fetch_zeroeval_models_shared()
 
 if not _ze_df.empty:
     st.header("LLM Leaderboard")
     st.caption(
         "Frontier models ranked by composite benchmark score (mean of GPQA, SWE-Bench Verified, HLE, AIME-2025). "
-        "Live data from [llm-stats.com](https://llm-stats.com) · updated hourly."
+        "Live data from [LLM Stats](https://llm-stats.com) · updated hourly."
     )
 
     _lb = _ze_df.copy()
@@ -305,7 +290,7 @@ if not _ze_df.empty:
         "scicode_score":            "SciCode",
     }
 
-    _ATTR = "Data: [llm-stats.com/ai-trends](https://llm-stats.com/ai-trends) · [api.zeroeval.com](https://api.zeroeval.com)"
+    _ATTR = "Data: [LLM Stats](https://llm-stats.com) · [api.zeroeval.com](https://api.zeroeval.com)"
 
     def _sota_prog(df, score_col, group_col=None):
         if group_col:
@@ -347,9 +332,7 @@ else:
     df_specs = pd.DataFrame()
 
 st.caption(
-    "Charts below replicate the analysis from "
-    "[llm-stats.com/ai-trends](https://llm-stats.com/ai-trends) "
-    "using live data from api.zeroeval.com."
+    "Charts below use live data from [LLM Stats](https://llm-stats.com) via api.zeroeval.com."
 )
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -1058,6 +1041,6 @@ with st.expander("How models rank when humans judge them head-to-head, vs. how t
 # ═════════════════════════════════════════════════════════════════════════
 st.markdown("---")
 st.caption(
-    "Data sources: LLM Stats (llm-stats.com) · Epoch AI (ML Hardware dataset, CC-BY) · Silicon Data (H100 Rental Index blog) · "
+    "Data sources: [LLM Stats](https://llm-stats.com) · Epoch AI (ML Hardware dataset, CC-BY) · Silicon Data (H100 Rental Index blog) · "
     "provider model cards & release announcements. Benchmark scores are vendor-reported unless otherwise noted."
 )

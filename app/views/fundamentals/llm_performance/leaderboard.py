@@ -11,7 +11,7 @@ CHART_LAYOUT = chart_layout()
 st.title("LLM Leaderboard")
 st.caption(
     "Frontier models ranked by composite benchmark score (mean of GPQA, SWE-Bench Verified, HLE, AIME-2025). "
-    "Live data from [llm-stats.com](https://llm-stats.com) · updated hourly."
+    "Live data from [LLM Stats](https://llm-stats.com) · updated hourly."
 )
 
 if ze_df.empty:
@@ -63,12 +63,11 @@ else:
         },
     )
     st.caption(
-        f"api.zeroeval.com · {len(lb)} models · Score = mean(GPQA, SWE-Bench, HLE, AIME-2025) as %. "
-        "Blanks = no published score. Speed in tokens/sec."
+        f"[LLM Stats](https://llm-stats.com) / api.zeroeval.com · {len(lb)} models · "
+        "Score = mean(GPQA, SWE-Bench, HLE, AIME-2025) as %. Blanks = no published score. Speed in tokens/sec."
     )
     st.markdown("")
     st.caption(
-        "Charts on the other LLM Performance pages replicate the analysis from "
-        "[llm-stats.com/ai-trends](https://llm-stats.com/ai-trends) "
-        "using live data from api.zeroeval.com."
+        "Charts on the other LLM Performance pages use live data from "
+        "[LLM Stats](https://llm-stats.com) via api.zeroeval.com."
     )
