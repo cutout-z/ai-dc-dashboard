@@ -57,10 +57,7 @@ BENCH_MAP: dict[str, str] = {
     "scicode_score":            "SciCode",
 }
 
-ATTR = (
-    "Data: [llm-stats.com/ai-trends](https://llm-stats.com/ai-trends) · "
-    "[api.zeroeval.com](https://api.zeroeval.com)"
-)
+ATTR = "Data: [LLM Stats](https://llm-stats.com) · [api.zeroeval.com](https://api.zeroeval.com)"
 
 CONTEXT_WINDOWS: list[dict] = [
     {"model": "GPT-3",            "date": "2020-06", "tokens": 4096,     "provider": "OpenAI"},
