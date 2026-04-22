@@ -45,7 +45,8 @@ updated = data.get("updated", "unknown")
 st.caption(
     f"Last refreshed: **{updated[:10]}** · "
     f"{data.get('ticker_count', len(df))} tickers · "
-    f"ETFs: {', '.join(data.get('etfs', []))}"
+    f"ETFs: {', '.join(data.get('etfs', []))} · "
+    "⚠ Market cap for foreign-listed tickers (KS, T suffix) may be in local currency — use for tier/sector filtering, not cap comparison"
 )
 
 # ──────────────────────────────────────────────
