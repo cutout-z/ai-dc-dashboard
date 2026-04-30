@@ -114,12 +114,19 @@ CAPABILITY_MILESTONES: list[dict] = [
 def _zeroeval_api_key() -> str | None:
     """Return the ZeroEval API key from Streamlit secrets or macOS Keychain."""
     # Streamlit Cloud: add ZEROEVAL_API_KEY to app secrets
-    try:
-        key = st.secrets.get("ZEROEVAL_API_KEY") or st.secrets.get("zeroeval_api_key")
-        if key:
-            return key
-    except Exception:
-        pass
+    # Only access st.secrets if a secrets.toml file exists on disk,
+    # otherwise Streamlit shows a persistent warning banner.
+    _secrets_candidates = [
+        Path.home() / ".streamlit" / "secrets.toml",
+        Path(__file__).resolve().parents[2] / ".streamlit" / "secrets.toml",
+    ]
+    if any(p.is_file() for p in _secrets_candidates):
+        try:
+            key = st.secrets.get("ZEROEVAL_API_KEY") or st.secrets.get("zeroeval_api_key")
+            if key:
+                return key
+        except Exception:
+            pass
     # Local: macOS Keychain
     try:
         result = subprocess.run(
@@ -150,6 +157,44 @@ def fetch_zeroeval_models() -> pd.DataFrame:
     except Exception as e:
         st.warning(f"ZeroEval API unavailable: {e}")
         return pd.DataFrame()
+
+
+@st.cache_data(ttl=3600)
+def fetch_zeroeval_indexes() -> dict[str, pd.DataFrame]:
+    """Fetch TrueSkill index scores from api.zeroeval.com/leaderboard/indexes/all.
+
+    Returns a dict mapping category name (e.g. 'reasoning', 'code', 'math')
+    to a DataFrame with columns: model_id, conservative, mu, sigma, rank.
+    """
+    api_key = _zeroeval_api_key()
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    try:
+        resp = requests.get(
+            "https://api.zeroeval.com/leaderboard/indexes/all",
+            headers=headers,
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        result = {}
+        for cat, info in data.items():
+            if not isinstance(info, dict) or "models" not in info:
+                continue
+            rows = [
+                {
+                    "model_id": m["model_id"],
+                    "conservative": m.get("conservative"),
+                    "mu": m.get("mu"),
+                    "sigma": m.get("sigma"),
+                    "rank": m.get("rank"),
+                }
+                for m in info["models"]
+            ]
+            if rows:
+                result[cat] = pd.DataFrame(rows)
+        return result
+    except Exception:
+        return {}
 
 
 @st.cache_data(ttl=86400)
