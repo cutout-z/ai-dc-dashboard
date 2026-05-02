@@ -18,6 +18,8 @@ from datetime import datetime, timezone
 import feedparser
 import streamlit as st
 
+from app.lib.news_scoring import score_news_item
+
 logger = logging.getLogger("ai_research.news")
 
 # ──────────────────────────────────────────────
@@ -204,6 +206,12 @@ def fetch_news_buckets(max_per_bucket: int = 20) -> dict[str, list[dict]]:
                 "published_str": it.published_str,
                 "age_str": it.age_str,
                 "summary": it.summary,
+                "materiality_score": score_news_item(
+                    title=it.title,
+                    summary=it.summary,
+                    source=it.source,
+                    published=it.published,
+                ),
             }
             for it in items
         ]

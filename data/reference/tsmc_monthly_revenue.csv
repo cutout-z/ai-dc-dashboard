@@ -1,52 +1,52 @@
-year,month,revenue_twd_b,yoy_pct
-2022,1,172.2,
-2022,2,146.9,
-2022,3,172.0,
-2022,4,172.6,
-2022,5,185.7,
-2022,6,175.9,
-2022,7,186.8,
-2022,8,218.1,
-2022,9,208.3,
-2022,10,210.3,
-2022,11,222.7,
-2022,12,192.6,
-2023,1,200.0,16.2
-2023,2,163.2,11.1
-2023,3,145.4,-15.4
-2023,4,147.9,-14.3
-2023,5,176.5,-5.0
-2023,6,156.4,-11.1
-2023,7,177.7,-4.9
-2023,8,188.7,-13.5
-2023,9,180.4,-13.4
-2023,10,243.2,15.7
-2023,11,206.0,-7.5
-2023,12,176.3,-8.4
-2024,1,215.8,7.9
-2024,2,181.6,-2.4
-2024,3,195.2,34.3
-2024,4,236.0,59.6
-2024,5,229.6,30.1
-2024,6,207.9,32.9
-2024,7,256.9,44.7
-2024,8,250.9,33.0
-2024,9,251.9,39.6
-2024,10,314.2,29.2
-2024,11,276.1,34.0
-2024,12,278.2,38.8
-2025,1,293.3,35.9
-2025,2,260.0,43.1
-2025,3,286.0,46.5
-2025,4,349.6,48.1
-2025,5,320.5,39.6
-2025,6,263.7,26.8
-2025,7,323.2,25.8
-2025,8,335.8,33.8
-2025,9,331.0,31.4
-2025,10,367.5,17.0
-2025,11,343.6,24.5
-2025,12,335.0,20.4
-2026,1,401.3,36.8
-2026,2,317.7,22.2
-2026,3,415.2,45.2
+year,month,revenue_twd_b,yoy_pct,source
+2022,1,172.2,,TSMC Investor Relations monthly revenue report
+2022,2,146.9,,TSMC Investor Relations monthly revenue report
+2022,3,172.0,,TSMC Investor Relations monthly revenue report
+2022,4,172.6,,TSMC Investor Relations monthly revenue report
+2022,5,185.7,,TSMC Investor Relations monthly revenue report
+2022,6,175.9,,TSMC Investor Relations monthly revenue report
+2022,7,186.8,,TSMC Investor Relations monthly revenue report
+2022,8,218.1,,TSMC Investor Relations monthly revenue report
+2022,9,208.3,,TSMC Investor Relations monthly revenue report
+2022,10,210.3,,TSMC Investor Relations monthly revenue report
+2022,11,222.7,,TSMC Investor Relations monthly revenue report
+2022,12,192.6,,TSMC Investor Relations monthly revenue report
+2023,1,200.0,16.2,TSMC Investor Relations monthly revenue report
+2023,2,163.2,11.1,TSMC Investor Relations monthly revenue report
+2023,3,145.4,-15.4,TSMC Investor Relations monthly revenue report
+2023,4,147.9,-14.3,TSMC Investor Relations monthly revenue report
+2023,5,176.5,-5.0,TSMC Investor Relations monthly revenue report
+2023,6,156.4,-11.1,TSMC Investor Relations monthly revenue report
+2023,7,177.7,-4.9,TSMC Investor Relations monthly revenue report
+2023,8,188.7,-13.5,TSMC Investor Relations monthly revenue report
+2023,9,180.4,-13.4,TSMC Investor Relations monthly revenue report
+2023,10,243.2,15.7,TSMC Investor Relations monthly revenue report
+2023,11,206.0,-7.5,TSMC Investor Relations monthly revenue report
+2023,12,176.3,-8.4,TSMC Investor Relations monthly revenue report
+2024,1,215.8,7.9,TSMC Investor Relations monthly revenue report
+2024,2,181.6,-2.4,TSMC Investor Relations monthly revenue report
+2024,3,195.2,34.3,TSMC Investor Relations monthly revenue report
+2024,4,236.0,59.6,TSMC Investor Relations monthly revenue report
+2024,5,229.6,30.1,TSMC Investor Relations monthly revenue report
+2024,6,207.9,32.9,TSMC Investor Relations monthly revenue report
+2024,7,256.9,44.7,TSMC Investor Relations monthly revenue report
+2024,8,250.9,33.0,TSMC Investor Relations monthly revenue report
+2024,9,251.9,39.6,TSMC Investor Relations monthly revenue report
+2024,10,314.2,29.2,TSMC Investor Relations monthly revenue report
+2024,11,276.1,34.0,TSMC Investor Relations monthly revenue report
+2024,12,278.2,38.8,TSMC Investor Relations monthly revenue report
+2025,1,293.3,35.9,TSMC Investor Relations monthly revenue report
+2025,2,260.0,43.1,TSMC Investor Relations monthly revenue report
+2025,3,286.0,46.5,TSMC Investor Relations monthly revenue report
+2025,4,349.6,48.1,TSMC Investor Relations monthly revenue report
+2025,5,320.5,39.6,TSMC Investor Relations monthly revenue report
+2025,6,263.7,26.8,TSMC Investor Relations monthly revenue report
+2025,7,323.2,25.8,TSMC Investor Relations monthly revenue report
+2025,8,335.8,33.8,TSMC Investor Relations monthly revenue report
+2025,9,331.0,31.4,TSMC Investor Relations monthly revenue report
+2025,10,367.5,17.0,TSMC Investor Relations monthly revenue report
+2025,11,343.6,24.5,TSMC Investor Relations monthly revenue report
+2025,12,335.0,20.4,TSMC Investor Relations monthly revenue report
+2026,1,401.3,36.8,TSMC Investor Relations monthly revenue report
+2026,2,317.7,22.2,TSMC Investor Relations monthly revenue report
+2026,3,415.2,45.2,TSMC Investor Relations monthly revenue report

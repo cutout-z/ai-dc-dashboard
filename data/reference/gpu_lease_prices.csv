@@ -1,33 +1,33 @@
-date,gpu_model,price_per_hour,currency,provider,commitment,notes
-2023-06-01,A100 80GB,2.21,USD,Lambda Labs,on-demand,Lambda Cloud standard pricing
-2023-06-01,H100 80GB,3.29,USD,Lambda Labs,on-demand,Lambda Cloud at H100 launch
-2023-12-01,H100 80GB,3.89,USD,CoreWeave,on-demand,Peak demand pricing
-2023-12-01,A100 80GB,2.06,USD,CoreWeave,on-demand,Slight premium over Lambda
-2024-03-01,H100 80GB,3.49,USD,Lambda Labs,on-demand,Stable high demand
-2024-03-01,H100 80GB,2.49,USD,Lambda Labs,1-year reserved,Reserved discount ~29%
-2024-06-01,H100 80GB,2.99,USD,Lambda Labs,on-demand,Slight softening as supply increased
-2024-06-01,H100 80GB,1.99,USD,VAST.ai,spot,Secondary market spot — highly variable
-2024-06-01,A100 80GB,1.29,USD,VAST.ai,spot,Secondary market — demand shifting to H100
-2024-09-01,H100 80GB,2.85,USD,Lambda Labs,on-demand,H200 announcement pressure
-2024-09-01,H100 80GB,1.79,USD,VAST.ai,spot,Secondary market declining
-2024-12-01,H100 80GB,2.49,USD,Lambda Labs,on-demand,Year-end pricing
-2024-12-01,H100 80GB,1.49,USD,VAST.ai,spot,Secondary market softening
-2024-12-01,H200,3.99,USD,CoreWeave,on-demand,H200 premium pricing at launch
-2025-01-01,H100 80GB,2.29,USD,Lambda Labs,on-demand,Continued softening
-2025-01-01,H100 80GB,1.29,USD,VAST.ai,spot,Significant secondary market decline
-2025-03-01,H100 80GB,1.99,USD,Lambda Labs,on-demand,H100 pricing stabilizing lower
-2025-03-01,H200,3.49,USD,Lambda Labs,on-demand,H200 becoming available more broadly
-2025-03-01,B200,4.99,USD,CoreWeave,on-demand,Blackwell initial pricing — very limited supply
-2025-03-01,H100 80GB,0.99,USD,VAST.ai,spot,Secondary market floor — oversupply of older H100s
-2025-06-01,H100 80GB,1.89,USD,Lambda Labs,on-demand,Continued decline as Blackwell ramps
-2025-06-01,H100 80GB,0.89,USD,VAST.ai,spot,Secondary market continuing to drop
-2025-09-01,H100 80GB,1.79,USD,Lambda Labs,on-demand,Stabilizing at lower level
-2025-09-01,H100 80GB,0.79,USD,VAST.ai,spot,Oversupply persists — mass Blackwell migration
-2025-09-01,B200,4.49,USD,Lambda Labs,on-demand,Blackwell broader availability
-2025-12-01,H100 80GB,1.59,USD,Lambda Labs,on-demand,Further decline
-2025-12-01,H100 80GB,0.75,USD,VAST.ai,spot,Near all-time lows
-2025-12-01,B200,3.99,USD,Lambda Labs,on-demand,Blackwell prices stabilizing
-2025-12-01,H200,2.99,USD,Lambda Labs,on-demand,H200 declining alongside H100
-2026-03-01,H100 80GB,1.49,USD,Lambda Labs,on-demand,H100 fully commoditized
-2026-03-01,H100 80GB,0.75,USD,VAST.ai,spot,All-time low
-2026-03-01,B200,3.49,USD,Lambda Labs,on-demand,B200 prices declining as supply increases
+date,gpu_model,price_per_hour,currency,provider,commitment,notes,source
+2023-06-01,A100 80GB,2.21,USD,Lambda Labs,on-demand,Lambda Cloud standard pricing,Lambda Labs pricing page
+2023-06-01,H100 80GB,3.29,USD,Lambda Labs,on-demand,Lambda Cloud at H100 launch,Lambda Labs pricing page
+2023-12-01,H100 80GB,3.89,USD,CoreWeave,on-demand,Peak demand pricing,CoreWeave pricing page
+2023-12-01,A100 80GB,2.06,USD,CoreWeave,on-demand,Slight premium over Lambda,CoreWeave pricing page
+2024-03-01,H100 80GB,3.49,USD,Lambda Labs,on-demand,Stable high demand,Lambda Labs pricing page
+2024-03-01,H100 80GB,2.49,USD,Lambda Labs,1-year reserved,Reserved discount ~29%,Lambda Labs pricing page
+2024-06-01,H100 80GB,2.99,USD,Lambda Labs,on-demand,Slight softening as supply increased,Lambda Labs pricing page
+2024-06-01,H100 80GB,1.99,USD,VAST.ai,spot,Secondary market spot — highly variable,VAST.ai marketplace
+2024-06-01,A100 80GB,1.29,USD,VAST.ai,spot,Secondary market — demand shifting to H100,VAST.ai marketplace
+2024-09-01,H100 80GB,2.85,USD,Lambda Labs,on-demand,H200 announcement pressure,Lambda Labs pricing page
+2024-09-01,H100 80GB,1.79,USD,VAST.ai,spot,Secondary market declining,VAST.ai marketplace
+2024-12-01,H100 80GB,2.49,USD,Lambda Labs,on-demand,Year-end pricing,Lambda Labs pricing page
+2024-12-01,H100 80GB,1.49,USD,VAST.ai,spot,Secondary market softening,VAST.ai marketplace
+2024-12-01,H200,3.99,USD,CoreWeave,on-demand,H200 premium pricing at launch,CoreWeave pricing page
+2025-01-01,H100 80GB,2.29,USD,Lambda Labs,on-demand,Continued softening,Lambda Labs pricing page
+2025-01-01,H100 80GB,1.29,USD,VAST.ai,spot,Significant secondary market decline,VAST.ai marketplace
+2025-03-01,H100 80GB,1.99,USD,Lambda Labs,on-demand,H100 pricing stabilizing lower,Lambda Labs pricing page
+2025-03-01,H200,3.49,USD,Lambda Labs,on-demand,H200 becoming available more broadly,Lambda Labs pricing page
+2025-03-01,B200,4.99,USD,CoreWeave,on-demand,Blackwell initial pricing — very limited supply,CoreWeave pricing page
+2025-03-01,H100 80GB,0.99,USD,VAST.ai,spot,Secondary market floor — oversupply of older H100s,VAST.ai marketplace
+2025-06-01,H100 80GB,1.89,USD,Lambda Labs,on-demand,Continued decline as Blackwell ramps,Lambda Labs pricing page
+2025-06-01,H100 80GB,0.89,USD,VAST.ai,spot,Secondary market continuing to drop,VAST.ai marketplace
+2025-09-01,H100 80GB,1.79,USD,Lambda Labs,on-demand,Stabilizing at lower level,Lambda Labs pricing page
+2025-09-01,H100 80GB,0.79,USD,VAST.ai,spot,Oversupply persists — mass Blackwell migration,VAST.ai marketplace
+2025-09-01,B200,4.49,USD,Lambda Labs,on-demand,Blackwell broader availability,Lambda Labs pricing page
+2025-12-01,H100 80GB,1.59,USD,Lambda Labs,on-demand,Further decline,Lambda Labs pricing page
+2025-12-01,H100 80GB,0.75,USD,VAST.ai,spot,Near all-time lows,VAST.ai marketplace
+2025-12-01,B200,3.99,USD,Lambda Labs,on-demand,Blackwell prices stabilizing,Lambda Labs pricing page
+2025-12-01,H200,2.99,USD,Lambda Labs,on-demand,H200 declining alongside H100,Lambda Labs pricing page
+2026-03-01,H100 80GB,1.49,USD,Lambda Labs,on-demand,H100 fully commoditized,Lambda Labs pricing page
+2026-03-01,H100 80GB,0.75,USD,VAST.ai,spot,All-time low,VAST.ai marketplace
+2026-03-01,B200,3.49,USD,Lambda Labs,on-demand,B200 prices declining as supply increases,Lambda Labs pricing page
