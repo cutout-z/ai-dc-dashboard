@@ -1,0 +1,63 @@
+{
+  "checked_at": "2026-05-02T00:19:28Z",
+  "lookback_days": 14,
+  "cutoff": "2026-04-18",
+  "stale_tickers": [
+    {
+      "ticker": "AAPL",
+      "company": "Apple",
+      "last_earnings_date": "2026-04-30",
+      "last_guidance_date": "2026-01-30",
+      "fiscal_year": "FY2026",
+      "fy_end_month": "9",
+      "prior_guidance_usd_b": "14.3",
+      "prior_low": "",
+      "prior_high": "",
+      "q_capex_usd_b": 2.37,
+      "search_query": "Apple FY2026 earnings capex capital expenditure guidance 2026-04-30"
+    }
+  ],
+  "fresh_tickers": [
+    "AMZN",
+    "GOOGL",
+    "META",
+    "MSFT"
+  ],
+  "quarterly_actuals": [
+    {
+      "ticker": "AAPL",
+      "quarter_end": "2025-12-31",
+      "capex_usd_b": 2.37
+    },
+    {
+      "ticker": "AMZN",
+      "quarter_end": "2026-03-31",
+      "capex_usd_b": 44.2
+    },
+    {
+      "ticker": "CRWV",
+      "quarter_end": "2025-12-31",
+      "capex_usd_b": 4.06
+    },
+    {
+      "ticker": "GOOGL",
+      "quarter_end": "2026-03-31",
+      "capex_usd_b": 35.67
+    },
+    {
+      "ticker": "META",
+      "quarter_end": "2025-12-31",
+      "capex_usd_b": 21.38
+    },
+    {
+      "ticker": "MSFT",
+      "quarter_end": "2026-03-31",
+      "capex_usd_b": 30.88
+    },
+    {
+      "ticker": "ORCL",
+      "quarter_end": "2026-02-28",
+      "capex_usd_b": 18.64
+    }
+  ]
+}

@@ -386,11 +386,16 @@ if not df_capex.empty:
     df_capex["quarter"] = df_capex["period"].dt.to_period("Q").astype(str)
     df_capex = df_capex.sort_values("period")
 
-    # Drop trailing quarter if incomplete (e.g. Oracle reports one quarter ahead)
+    # Drop trailing quarter only if very few companies reported (< 3)
     co_per_q = df_capex.groupby("quarter")["company"].nunique()
     last_q = sorted(co_per_q.index)[-1]
-    if co_per_q[last_q] < co_per_q.median():
+    partial_q = None
+    if co_per_q[last_q] < 3:
         df_capex = df_capex[df_capex["quarter"] != last_q]
+    elif co_per_q[last_q] < co_per_q.iloc[:-1].median():
+        partial_q = last_q
+        n_have = co_per_q[last_q]
+        n_usual = int(co_per_q.iloc[:-1].median())
 
     quarter_order = sorted(df_capex["quarter"].unique())
 
@@ -407,6 +412,11 @@ if not df_capex.empty:
                         legend=dict(orientation="h", yanchor="bottom", y=1.02,
                                     title_text=""))
     st.plotly_chart(fig_q, use_container_width=True)
+    if partial_q:
+        st.caption(
+            f"**Note:** {partial_q} is partial — {n_have}/{n_usual} "
+            f"companies have reported so far."
+        )
 
     fig_ind = px.line(
         df_capex, x="quarter", y="capex_bn", color="company",
