@@ -1,19 +1,19 @@
-symbol,earnings_date
-AAPL,2026-07-31
-MSFT,2026-07-30
-GOOGL,2026-07-24
-AMZN,2026-07-31
-NVDA,2026-05-21
-META,2026-07-30
-TSLA,2026-07-23
-ORCL,2026-06-11
-AMD,2026-05-06
-TSM,2026-07-16
-PLTR,2026-05-05
-EQIX,2026-07-30
-DLR,2026-07-24
-AMT,2026-07-28
-NXT.AX,2026-02-26
-IFT.NZ,2026-05-26
-MQG.AX,2026-05-08
-GMG.AX,2026-02-19
+symbol,earnings_date,source
+AAPL,2026-07-31,yfinance calendar (fallback cache)
+MSFT,2026-07-30,yfinance calendar (fallback cache)
+GOOGL,2026-07-24,yfinance calendar (fallback cache)
+AMZN,2026-07-31,yfinance calendar (fallback cache)
+NVDA,2026-05-21,yfinance calendar (fallback cache)
+META,2026-07-30,yfinance calendar (fallback cache)
+TSLA,2026-07-23,yfinance calendar (fallback cache)
+ORCL,2026-06-11,yfinance calendar (fallback cache)
+AMD,2026-05-06,yfinance calendar (fallback cache)
+TSM,2026-07-16,yfinance calendar (fallback cache)
+PLTR,2026-05-05,yfinance calendar (fallback cache)
+EQIX,2026-07-30,yfinance calendar (fallback cache)
+DLR,2026-07-24,yfinance calendar (fallback cache)
+AMT,2026-07-28,yfinance calendar (fallback cache)
+NXT.AX,2026-02-26,ASX company calendar
+IFT.NZ,2026-05-26,NZX company calendar
+MQG.AX,2026-05-08,ASX company calendar
+GMG.AX,2026-02-19,ASX company calendar

@@ -1,67 +1,67 @@
-month,tier,price_usd_per_gpu_hr
-2023-08,Hyperscaler,7.76
-2023-09,Hyperscaler,7.76
-2023-10,Hyperscaler,7.76
-2023-11,Hyperscaler,7.76
-2023-12,Hyperscaler,7.76
-2024-01,Hyperscaler,7.92
-2024-02,Hyperscaler,7.92
-2024-03,Hyperscaler,7.92
-2024-04,Hyperscaler,7.92
-2024-05,Hyperscaler,7.92
-2024-06,Hyperscaler,9.34
-2024-06,Marketplace,2.58
-2024-07,Hyperscaler,9.34
-2024-07,Marketplace,2.58
-2024-07,Neocloud,2.99
-2024-08,Hyperscaler,9.34
-2024-08,Marketplace,2.58
-2024-08,Neocloud,2.99
-2024-09,Hyperscaler,9.34
-2024-09,Marketplace,2.58
-2024-09,Neocloud,2.99
-2024-10,Hyperscaler,9.34
-2024-10,Marketplace,2.58
-2024-10,Neocloud,2.99
-2024-11,Hyperscaler,9.34
-2024-11,Marketplace,2.58
-2024-11,Neocloud,2.99
-2024-12,Hyperscaler,9.34
-2024-12,Marketplace,2.58
-2024-12,Neocloud,2.99
-2025-01,Hyperscaler,8.96
-2025-01,Marketplace,2.29
-2025-01,Neocloud,3.50
-2025-02,Hyperscaler,8.96
-2025-02,Marketplace,2.29
-2025-02,Neocloud,3.50
-2025-03,Hyperscaler,8.96
-2025-03,Marketplace,2.29
-2025-03,Neocloud,3.50
-2025-04,Hyperscaler,8.96
-2025-04,Marketplace,2.29
-2025-04,Neocloud,3.50
-2025-05,Hyperscaler,8.96
-2025-05,Marketplace,2.29
-2025-05,Neocloud,3.50
-2025-06,Hyperscaler,6.94
-2025-06,Marketplace,2.00
-2025-06,Neocloud,3.29
-2025-07,Hyperscaler,6.26
-2025-07,Marketplace,1.95
-2025-07,Neocloud,3.33
-2025-08,Hyperscaler,6.26
-2025-08,Marketplace,1.95
-2025-08,Neocloud,3.33
-2025-09,Hyperscaler,6.26
-2025-09,Marketplace,1.95
-2025-09,Neocloud,3.33
-2025-10,Hyperscaler,6.26
-2025-10,Marketplace,1.95
-2025-10,Neocloud,3.33
-2025-11,Hyperscaler,6.26
-2025-11,Marketplace,1.95
-2025-11,Neocloud,3.33
-2025-12,Hyperscaler,6.26
-2025-12,Marketplace,1.95
-2025-12,Neocloud,3.33
+month,tier,price_usd_per_gpu_hr,source
+2023-08,Hyperscaler,7.76,AWS/Azure/GCP published instance pricing
+2023-09,Hyperscaler,7.76,AWS/Azure/GCP published instance pricing
+2023-10,Hyperscaler,7.76,AWS/Azure/GCP published instance pricing
+2023-11,Hyperscaler,7.76,AWS/Azure/GCP published instance pricing
+2023-12,Hyperscaler,7.76,AWS/Azure/GCP published instance pricing
+2024-01,Hyperscaler,7.92,AWS/Azure/GCP published instance pricing
+2024-02,Hyperscaler,7.92,AWS/Azure/GCP published instance pricing
+2024-03,Hyperscaler,7.92,AWS/Azure/GCP published instance pricing
+2024-04,Hyperscaler,7.92,AWS/Azure/GCP published instance pricing
+2024-05,Hyperscaler,7.92,AWS/Azure/GCP published instance pricing
+2024-06,Hyperscaler,9.34,AWS/Azure/GCP published instance pricing
+2024-06,Marketplace,2.58,VAST.ai/RunPod spot market
+2024-07,Hyperscaler,9.34,AWS/Azure/GCP published instance pricing
+2024-07,Marketplace,2.58,VAST.ai/RunPod spot market
+2024-07,Neocloud,2.99,CoreWeave/Lambda Labs published pricing
+2024-08,Hyperscaler,9.34,AWS/Azure/GCP published instance pricing
+2024-08,Marketplace,2.58,VAST.ai/RunPod spot market
+2024-08,Neocloud,2.99,CoreWeave/Lambda Labs published pricing
+2024-09,Hyperscaler,9.34,AWS/Azure/GCP published instance pricing
+2024-09,Marketplace,2.58,VAST.ai/RunPod spot market
+2024-09,Neocloud,2.99,CoreWeave/Lambda Labs published pricing
+2024-10,Hyperscaler,9.34,AWS/Azure/GCP published instance pricing
+2024-10,Marketplace,2.58,VAST.ai/RunPod spot market
+2024-10,Neocloud,2.99,CoreWeave/Lambda Labs published pricing
+2024-11,Hyperscaler,9.34,AWS/Azure/GCP published instance pricing
+2024-11,Marketplace,2.58,VAST.ai/RunPod spot market
+2024-11,Neocloud,2.99,CoreWeave/Lambda Labs published pricing
+2024-12,Hyperscaler,9.34,AWS/Azure/GCP published instance pricing
+2024-12,Marketplace,2.58,VAST.ai/RunPod spot market
+2024-12,Neocloud,2.99,CoreWeave/Lambda Labs published pricing
+2025-01,Hyperscaler,8.96,AWS/Azure/GCP published instance pricing
+2025-01,Marketplace,2.29,VAST.ai/RunPod spot market
+2025-01,Neocloud,3.50,CoreWeave/Lambda Labs published pricing
+2025-02,Hyperscaler,8.96,AWS/Azure/GCP published instance pricing
+2025-02,Marketplace,2.29,VAST.ai/RunPod spot market
+2025-02,Neocloud,3.50,CoreWeave/Lambda Labs published pricing
+2025-03,Hyperscaler,8.96,AWS/Azure/GCP published instance pricing
+2025-03,Marketplace,2.29,VAST.ai/RunPod spot market
+2025-03,Neocloud,3.50,CoreWeave/Lambda Labs published pricing
+2025-04,Hyperscaler,8.96,AWS/Azure/GCP published instance pricing
+2025-04,Marketplace,2.29,VAST.ai/RunPod spot market
+2025-04,Neocloud,3.50,CoreWeave/Lambda Labs published pricing
+2025-05,Hyperscaler,8.96,AWS/Azure/GCP published instance pricing
+2025-05,Marketplace,2.29,VAST.ai/RunPod spot market
+2025-05,Neocloud,3.50,CoreWeave/Lambda Labs published pricing
+2025-06,Hyperscaler,6.94,AWS/Azure/GCP published instance pricing
+2025-06,Marketplace,2.00,VAST.ai/RunPod spot market
+2025-06,Neocloud,3.29,CoreWeave/Lambda Labs published pricing
+2025-07,Hyperscaler,6.26,AWS/Azure/GCP published instance pricing
+2025-07,Marketplace,1.95,VAST.ai/RunPod spot market
+2025-07,Neocloud,3.33,CoreWeave/Lambda Labs published pricing
+2025-08,Hyperscaler,6.26,AWS/Azure/GCP published instance pricing
+2025-08,Marketplace,1.95,VAST.ai/RunPod spot market
+2025-08,Neocloud,3.33,CoreWeave/Lambda Labs published pricing
+2025-09,Hyperscaler,6.26,AWS/Azure/GCP published instance pricing
+2025-09,Marketplace,1.95,VAST.ai/RunPod spot market
+2025-09,Neocloud,3.33,CoreWeave/Lambda Labs published pricing
+2025-10,Hyperscaler,6.26,AWS/Azure/GCP published instance pricing
+2025-10,Marketplace,1.95,VAST.ai/RunPod spot market
+2025-10,Neocloud,3.33,CoreWeave/Lambda Labs published pricing
+2025-11,Hyperscaler,6.26,AWS/Azure/GCP published instance pricing
+2025-11,Marketplace,1.95,VAST.ai/RunPod spot market
+2025-11,Neocloud,3.33,CoreWeave/Lambda Labs published pricing
+2025-12,Hyperscaler,6.26,AWS/Azure/GCP published instance pricing
+2025-12,Marketplace,1.95,VAST.ai/RunPod spot market
+2025-12,Neocloud,3.33,CoreWeave/Lambda Labs published pricing
