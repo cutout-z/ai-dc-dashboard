@@ -1,14 +1,20 @@
 {
   "refresh_earnings_dates.py": {
-    "last_run": "2026-04-22T00:52:19Z",
+    "last_run": "2026-05-02T00:02:13Z",
     "status": "ok",
     "count": 18,
-    "notes": "5 dates changed"
+    "notes": "9 dates changed"
   },
   "fetch_etf_holdings.py": {
     "last_run": "2026-04-22T00:52:57Z",
     "status": "ok",
     "count": 34,
     "notes": "Holdings from 4 ETFs: AIQ, BOTZ, ROBT, CHAT"
+  },
+  "refresh_capex_guidance.py": {
+    "last_run": "2026-05-02T00:19:28Z",
+    "status": "ok",
+    "count": 5,
+    "notes": "1 stale, 4 current"
   }
 }

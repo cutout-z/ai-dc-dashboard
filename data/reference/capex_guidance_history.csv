@@ -30,3 +30,7 @@ CRWV,CoreWeave,CY2025,12,14.9,,,2026-02-26,Q4 CY2025 earnings,Actual full-year r
 CRWV,CoreWeave,CY2026,12,32.5,30.0,35.0,2026-02-26,Q4 CY2025 earnings,Initial CY2026 guidance $30-35B — >2x CY2025; substantially tied to $66.8B contracted revenue backlog
 AAPL,Apple,FY2025,9,12.715,,,2025-10-30,Q4 FY2025 earnings,Actual full-year result — $12.715B; Apple does not give formal capex guidance (CFO describes capex as volatile)
 AAPL,Apple,FY2026,9,14.3,,,2026-01-30,Q1 FY2026 earnings,Analyst consensus ~$14.3B (FactSet) — Apple gave no explicit annual figure; directional only: expects increases in AI-related capex spending
+MSFT,Microsoft,FY2026,6,190.0,,,2026-04-30,Q3 FY2026 earnings,~$190B CY2026 capex including ~$25B from higher component pricing; Q4 FY2026 to exceed $40B; massive increase from prior ~$120B estimate
+GOOGL,Alphabet,CY2026,12,185.0,180.0,190.0,2026-04-30,Q1 CY2026 earnings,Raised to $180-190B from $175-185B (+$5B each end); Q1 actual $35.7B; Cloud backlog ~$460B; 2027 to significantly increase
+AMZN,Amazon,CY2026,12,200.0,,,2026-04-30,Q1 CY2026 earnings,Reaffirmed ~$200B; Q1 actual $43.2B (+107% YoY); AWS $150B ARR; FCF compressed -95% YoY
+META,Meta,CY2026,12,135.0,125.0,145.0,2026-04-30,Q1 CY2026 earnings,Raised to $125-145B from $115-135B (+$10B each end); component pricing + future-year capacity; stock -10%
