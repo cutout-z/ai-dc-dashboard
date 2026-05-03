@@ -115,12 +115,12 @@ else:
     }
 
     _INDEX_HELP = {
-        "reasoning": "Reasoning Index — TrueSkill conservative rating across reasoning benchmarks (logic, planning, multi-step problem solving)",
-        "math": "Math Index — TrueSkill conservative rating across math benchmarks (competition math, formal proofs, quantitative reasoning)",
-        "coding": "Coding Index — TrueSkill conservative rating across coding benchmarks (generation, debugging, software engineering)",
-        "agents": "Agent Index — TrueSkill conservative rating across agent benchmarks (long-horizon planning, tool orchestration)",
-        "search": "Search Index — TrueSkill conservative rating across search & retrieval benchmarks",
-        "knowledge": "Knowledge Index — TrueSkill conservative rating across knowledge benchmarks (factual recall, world knowledge)",
+        "reasoning": "TrueSkill rating across reasoning benchmarks: GPQA, MMLU-Pro, AIME, HLE, ARC-C, BIG-Bench Hard, SuperGPQA. Higher = stronger at logic, planning & multi-step problem solving.",
+        "math": "TrueSkill rating across math benchmarks: AIME 2025/2026, MATH, GSM8k, FrontierMath, HiddenMath, IMO-AnswerBench. Higher = stronger at competition & quantitative math.",
+        "coding": "TrueSkill rating across coding benchmarks: SWE-Bench Verified, LiveCodeBench, HumanEval, Terminal-Bench, SciCode. Higher = stronger at code generation & debugging.",
+        "agents": "TrueSkill rating across agent benchmarks: BrowseComp, Terminal-Bench, OSWorld, Toolathlon, MCP Atlas, BFCL. Higher = stronger at autonomous task completion.",
+        "search": "TrueSkill rating across search benchmarks: BrowseComp, WideSearch, DeepSearchQA, Natural Questions, CRAG. Higher = stronger at web search & information retrieval.",
+        "knowledge": "TrueSkill rating across knowledge benchmarks: factual recall, world knowledge, SimpleQA.",
     }
 
     # Add index columns
@@ -160,6 +160,71 @@ else:
         ("Search", "search"), ("Multimodal", "multimodal"),
         ("Frontend", "frontend_development"), ("Factuality", "factuality"),
     ]
+
+    # Category descriptions: what each index tests and key benchmarks
+    _CAT_INFO = {
+        "reasoning": {
+            "tip": "Logic, planning & multi-step problem solving",
+            "detail": "Tests logical deduction, planning, and multi-step reasoning across diverse domains.",
+            "benchmarks": "GPQA, MMLU-Pro, AIME, HLE, ARC-C, BIG-Bench Hard, ZebraLogic, SuperGPQA",
+        },
+        "code": {
+            "tip": "Code generation, debugging & software engineering",
+            "detail": "Tests ability to write, debug, and fix real-world code across languages and frameworks.",
+            "benchmarks": "SWE-Bench Verified, LiveCodeBench, HumanEval, Terminal-Bench, SWE-Bench Pro, Aider, MCP Atlas, SciCode",
+        },
+        "math": {
+            "tip": "Competition math, proofs & quantitative reasoning",
+            "detail": "Tests mathematical problem-solving from arithmetic through competition and research-level math.",
+            "benchmarks": "AIME 2025/2026, MATH, GSM8k, FrontierMath, HiddenMath, IMO-AnswerBench, HMMT, PolyMATH",
+        },
+        "vision": {
+            "tip": "Image & video understanding, charts, OCR, spatial reasoning",
+            "detail": "Tests visual understanding including document parsing, chart reading, video comprehension, and spatial reasoning.",
+            "benchmarks": "MMMU, MathVista, ChartQA, AI2D, DocVQA, OCRBench, VideoMMMU, RealWorldQA",
+        },
+        "writing": {
+            "tip": "Creative writing, instruction following & style",
+            "detail": "Tests quality of generated text including creative writing, instruction adherence, and conversational ability.",
+            "benchmarks": "Arena Hard, WritingBench, Creative Writing v3, COLLIE, AlpacaEval 2.0",
+        },
+        "agents": {
+            "tip": "Autonomous task completion, tool use & planning",
+            "detail": "Tests models acting as autonomous agents — browsing, terminal use, multi-step planning, and real-world task completion.",
+            "benchmarks": "BrowseComp, Terminal-Bench, OSWorld, Toolathlon, MCP Atlas, BFCL, DeepPlanning, AndroidWorld",
+        },
+        "tool_calling": {
+            "tip": "Function calling accuracy, API use & multi-tool orchestration",
+            "detail": "Tests structured function/API calling — correct parameter selection, multi-turn tool chains, and complex orchestration.",
+            "benchmarks": "BFCL v3/v4, TAU-bench (Retail/Airline), Toolathlon, MCP Atlas, Terminal-Bench, ComplexFuncBench",
+        },
+        "long_context": {
+            "tip": "Needle-in-a-haystack, long document QA & retrieval",
+            "detail": "Tests ability to process and reason over very long inputs — document QA, multi-hop retrieval, and recall accuracy.",
+            "benchmarks": "LongBench v2, MRCR v2, AA-LCR, Graphwalks, RULER, MMLongBench-Doc, LVBench",
+        },
+        "search": {
+            "tip": "Web search, information retrieval & deep research",
+            "detail": "Tests ability to find and synthesise information from the web or large corpora.",
+            "benchmarks": "BrowseComp, BrowseComp-zh, WideSearch, DeepSearchQA, Natural Questions, CRAG, Seal-0",
+        },
+        "multimodal": {
+            "tip": "Cross-modal understanding — text, image, video, documents",
+            "detail": "Tests combined understanding across modalities — visual QA, video reasoning, document analysis, and GUI interaction.",
+            "benchmarks": "MMMU, MathVista, ChartQA, VideoMMMU, OSWorld, DocVQA, ScreenSpot Pro, CC-OCR",
+        },
+        "frontend_development": {
+            "tip": "UI code generation & web interaction",
+            "detail": "Tests ability to build and interact with web UIs — generating HTML/CSS/JS and navigating web pages.",
+            "benchmarks": "SWE-Bench Verified, MM-Mind2Web",
+        },
+        "factuality": {
+            "tip": "Factual accuracy & hallucination resistance",
+            "detail": "Tests whether models give correct, verifiable answers and resist making things up.",
+            "benchmarks": "SimpleQA, FACTS Grounding",
+        },
+    }
+
     tab_labels = [label for label, _ in _CHART_CATS]
     tabs = st.tabs(tab_labels)
 
@@ -176,6 +241,12 @@ else:
 
     for tab, (label, cat_key) in zip(tabs, _CHART_CATS):
         with tab:
+            if cat_key in _CAT_INFO:
+                info = _CAT_INFO[cat_key]
+                st.caption(f"**{info['detail']}** Benchmarks: {info['benchmarks']}. "
+                           "Score is the TrueSkill conservative rating (mu \u2212 3\u03c3) \u2014 "
+                           "a Bayesian skill estimate that requires benchmark evidence to rise.")
+
             if cat_key not in indexes or indexes[cat_key].empty:
                 st.info(f"No index data for {label}.")
                 continue

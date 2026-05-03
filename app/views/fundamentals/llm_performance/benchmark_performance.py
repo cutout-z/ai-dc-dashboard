@@ -11,6 +11,20 @@ from app.lib.llm_perf import (
     fetch_zeroeval_models, preprocess_ze, chart_layout, sota_prog,
 )
 
+# Benchmark descriptions — what each eval tests and why it matters
+_BENCH_DESC: dict[str, str] = {
+    "GPQA": "Graduate-level science questions (physics, chemistry, biology) designed to resist web search. Tests deep scientific reasoning.",
+    "SWE-Bench": "Real GitHub issues from popular Python repos — models must write patches that pass the test suite. Tests practical software engineering.",
+    "HLE": "Humanity\u2019s Last Exam — ~3,000 extremely hard questions across disciplines, crowdsourced from domain experts. Tests the outer limits of knowledge.",
+    "AIME 2025": "American Invitational Mathematics Exam — 15 competition math problems requiring creative problem-solving. Answers are integers 000\u2013999.",
+    "MMMLU": "Multilingual MMLU — knowledge & reasoning questions translated across 14 languages. Tests non-English understanding.",
+    "SimpleQA": "Short factual questions with unambiguous answers. Tests factual accuracy and hallucination resistance.",
+    "BrowseComp": "Questions requiring comprehensive web browsing to answer. Tests ability to find and synthesise information from the internet.",
+    "Terminal Bench": "Tasks requiring terminal/shell use to accomplish goals. Tests command-line proficiency and system administration.",
+    "MRCR v2": "Multi-Round Coreference Resolution — tracking entities across long, multi-turn conversations. Tests long-context recall accuracy.",
+    "SciCode": "Scientific computing tasks — implementing algorithms from research papers in code. Tests translation of scientific methods into working programs.",
+}
+
 ze_df = fetch_zeroeval_models()
 df, _ = preprocess_ze(ze_df)
 CHART_LAYOUT = chart_layout()
@@ -24,7 +38,11 @@ else:
     _BENCH_COLOURS = px.colors.qualitative.Dark24
 
     st.subheader("Benchmark Saturation")
-    st.caption("SOTA score progression over time — each step is a new best model.")
+    st.caption(
+        "**SOTA** (State of the Art) = the highest score any model has achieved on a benchmark to date. "
+        "Each step in the chart is a new best model pushing the frontier."
+    )
+    _legend_items: list[tuple[str, str]] = []  # (label, colour)
     fig_sat = go.Figure()
     for i, (col, label) in enumerate(BENCH_MAP.items()):
         prog = sota_prog(df, col)
@@ -41,8 +59,40 @@ else:
             line=dict(color=colour, width=1.5, shape="hv"),
             hovertemplate=f"{label}: %{{y:.1f}}%<br>%{{x|%b %Y}}<extra></extra>",
         ))
-    fig_sat.update_layout(yaxis_title="SOTA Score (%)", yaxis_range=[0, 105], **CHART_LAYOUT)
-    st.plotly_chart(fig_sat, use_container_width=True)
+        _legend_items.append((label, colour))
+    sat_layout = {**CHART_LAYOUT}
+    sat_layout["legend"] = dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5)
+    sat_layout["showlegend"] = False  # replaced by custom HTML legend below
+    fig_sat.update_layout(yaxis_title="SOTA Score (%)", yaxis_range=[0, 105], **sat_layout)
+    st.plotly_chart(fig_sat, use_container_width=True, key="benchmark_saturation")
+
+    # Custom HTML legend with CSS hover tooltips
+    _tooltip_css = (
+        "<style>"
+        ".bench-legend{display:flex;flex-wrap:wrap;gap:6px 18px;padding:4px 0;}"
+        ".bench-item{position:relative;display:inline-flex;align-items:center;gap:5px;"
+        "font-size:13px;color:#e5e7eb;cursor:help;}"
+        ".bench-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}"
+        ".bench-item .bench-tip{visibility:hidden;opacity:0;position:absolute;"
+        "bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);"
+        "background:#1e293b;color:#e5e7eb;padding:8px 12px;border-radius:6px;"
+        "font-size:12px;line-height:1.4;width:280px;z-index:999;"
+        "box-shadow:0 4px 12px rgba(0,0,0,.4);pointer-events:none;"
+        "transition:opacity .15s;white-space:normal;}"
+        ".bench-item:hover .bench-tip{visibility:visible;opacity:1;}"
+        "</style>"
+    )
+    _legend_html = '<div class="bench-legend">'
+    for label, colour in _legend_items:
+        desc = _BENCH_DESC.get(label, "")
+        _legend_html += (
+            f'<span class="bench-item">'
+            f'<span class="bench-dot" style="background:{colour}"></span>{label}'
+            f'<span class="bench-tip">{desc}</span>'
+            f'</span>'
+        )
+    _legend_html += "</div>"
+    st.markdown(_tooltip_css + _legend_html, unsafe_allow_html=True)
     st.caption(ATTR)
 
     st.subheader("The Convergence")

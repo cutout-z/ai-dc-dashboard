@@ -1,167 +1,299 @@
-"""Prices and Value — API cost trends, price frontiers, and intelligence per dollar."""
+"""Prices and Value — falling cost of intelligence, capability vs price, performance per dollar."""
 from __future__ import annotations
 
-import plotly.express as px
+import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
 from app.lib.llm_perf import (
     ATTR, PROVIDER_COLOURS,
-    fetch_zeroeval_models, preprocess_ze, load_token_prices,
-    chart_layout, explainer, pareto_front, provider_sidebar,
+    fetch_zeroeval_models, preprocess_ze,
+    chart_layout,
 )
 
 ze_df = fetch_zeroeval_models()
-df, df_specs = preprocess_ze(ze_df)
-token_df = load_token_prices()
+df, _ = preprocess_ze(ze_df)
 CHART_LAYOUT = chart_layout()
-sel_providers = provider_sidebar()
 
 st.title("Prices and Value")
-st.caption("How fast intelligence is getting cheaper, which models deliver the most value, and where prices differ.")
+st.caption(
+    "How fast intelligence is getting cheaper, which models deliver the most value, and where prices differ."
+)
+st.caption(
+    "**GPQA** = Graduate-level science questions (physics, chemistry, biology) testing deep reasoning. "
+    "**SWE-Bench** = Real GitHub issues — models must write code patches that pass the test suite. "
+    "**SOTA** = State of the Art — the highest score any model has achieved on a benchmark."
+)
 
-if not token_df.empty:
-    st.subheader("Blended API Cost Over Time")
-    explainer(
-        what="API list price per million tokens for flagship frontier models at release, blended as (3×input + output)/4 to approximate a typical chat workload. Log scale.",
-        why="Costs have fallen ~1000× since GPT-3 (2020). Epoch AI estimates 'price to match GPT-4 quality' has declined ~40× per year. This is the single most important variable in AI unit economics — it determines which applications are deployable and at what margin.",
-        source="List prices from provider announcements & release blog posts. Open-weight models (Llama, Qwen) priced via major hosted providers (Together AI, DashScope). Snapshot at release — later price cuts not shown.",
-    )
-    fig_price = go.Figure()
-    for provider in PROVIDER_COLOURS:
-        if provider not in sel_providers:
-            continue
-        sub = token_df[token_df["provider"] == provider]
-        if sub.empty:
-            continue
-        fig_price.add_trace(go.Scatter(
-            x=sub["date"], y=sub["blended_usd_per_mtok"], text=sub["model"],
-            customdata=sub[["input_usd_per_mtok", "output_usd_per_mtok"]].values,
-            name=provider, mode="markers+lines",
-            line=dict(color=PROVIDER_COLOURS[provider], width=1.2),
-            marker=dict(size=8, color=PROVIDER_COLOURS[provider]),
-            hovertemplate=(
-                "%{text}<br>Blended: $%{y:.2f} / M tokens<br>"
-                "Input: $%{customdata[0]:.2f}<br>"
-                "Output: $%{customdata[1]:.2f}"
-                f"<extra>{provider}</extra>"
-            ),
+if ze_df.empty or df.empty:
+    st.info("Live data unavailable — ZeroEval API offline.")
+else:
+    # --- Shared filtered data ---
+    priced = df.dropna(subset=["gpqa_score", "blended_price"])
+    priced = priced[priced["blended_price"] > 0].copy()
+    priced["gpqa_pct"] = priced["gpqa_score"] * 100
+    priced["cost_per_gpqa"] = priced["blended_price"] / priced["gpqa_pct"]
+
+    # ═══════════════════════════════════════════════════════════════
+    # Charts 1 & 2 — side by side
+    # ═══════════════════════════════════════════════════════════════
+    col1, col2 = st.columns(2)
+
+    # --- Chart 1: The Price of Intelligence ---
+    with col1:
+        st.subheader("The Price of Intelligence")
+        st.caption(
+            "Cost per GPQA point over time across quality tiers "
+            "— each line tracks the cheapest model"
+        )
+
+        _TIERS = [
+            (50, "#8b5cf6", "50%+ GPQA"),
+            (75, "#3b82f6", "75%+ GPQA"),
+            (85, "#ef4444", "85%+ GPQA"),
+        ]
+
+        fig1 = go.Figure()
+        # Background: all models as faded dots
+        fig1.add_trace(go.Scatter(
+            x=priced["release_date"], y=priced["cost_per_gpqa"],
+            mode="markers",
+            marker=dict(size=4, color="#6b7280", opacity=0.25),
+            text=priced["name"],
+            hovertemplate="%{text}<br>$%{y:.4f}/GPQA pt<extra></extra>",
+            showlegend=False,
         ))
-    fig_price.update_layout(
-        yaxis_title="$ per million tokens (blended 3×input + 1×output)",
-        yaxis_type="log",
-        xaxis_range=["2023-01-01", None],
-        **CHART_LAYOUT,
-    )
-    st.plotly_chart(fig_price, use_container_width=True)
 
-if not ze_df.empty and not df.empty:
-    st.subheader("Price by Country")
-    pd_ = df.dropna(subset=["input_price", "country"])
-    pd_ = pd_[pd_["input_price"] > 0]
-    if not pd_.empty:
-        top4c = pd_["country"].value_counts().head(4).index.tolist()
-        pd_top = pd_[pd_["country"].isin(top4c)]
-        fig_pbc = go.Figure()
-        for ctry in top4c:
-            sub = pd_top[pd_top["country"] == ctry]
-            fig_pbc.add_trace(go.Box(
-                y=sub["input_price"], name=ctry, boxpoints="all", jitter=0.5,
-                pointpos=0, marker_size=5,
-                text=sub["name"].tolist(),
-                hovertemplate="%{text}: $%{y:.3f}/M tokens<extra></extra>",
+        _tier_stats: dict[int, tuple[float, float]] = {}
+        for threshold, colour, label in _TIERS:
+            tier_df = priced[priced["gpqa_pct"] >= threshold].sort_values("release_date")
+            if tier_df.empty:
+                continue
+            dates, mins, names = [], [], []
+            running_min = float("inf")
+            for _, row in tier_df.iterrows():
+                if row["cost_per_gpqa"] < running_min:
+                    running_min = row["cost_per_gpqa"]
+                    dates.append(row["release_date"])
+                    mins.append(running_min)
+                    names.append(row["name"])
+            if dates:
+                _tier_stats[threshold] = (mins[0], mins[-1])
+                dates.append(priced["release_date"].max())
+                mins.append(mins[-1])
+                names.append("")
+            fig1.add_trace(go.Scatter(
+                x=dates, y=mins, name=label,
+                mode="lines",
+                line=dict(color=colour, width=2, shape="hv"),
+                text=names,
+                hovertemplate=(
+                    f"{label}<br>%{{text}}<br>${{y:.4f}}/GPQA pt<extra></extra>"
+                ),
             ))
-        fig_pbc.update_layout(
-            yaxis_title="Input Price ($/1M tokens)",
+
+        fig1.update_layout(
+            yaxis_title="$ per GPQA point",
             yaxis_type="log",
-            showlegend=False,
+            height=420,
             **CHART_LAYOUT,
         )
-        st.plotly_chart(fig_pbc, use_container_width=True)
-        st.caption(ATTR)
+        st.plotly_chart(fig1, use_container_width=True)
 
-    st.subheader("Price Frontiers")
-    st.caption("Capability vs API cost — Pareto frontier shows the best value per dollar.")
-    for sc, lb in [("gpqa_score", "GPQA"), ("swe_bench_verified_score", "SWE-Bench")]:
-        pp = df.dropna(subset=[sc, "input_price"])
-        pp = pp[pp["input_price"] > 0].copy()
-        if pp.empty:
-            continue
-        pf = pareto_front(pp, "input_price", sc)
-        fig_pp = go.Figure()
-        for prov in sorted(pp["provider"].unique()):
-            sub = pp[pp["provider"] == prov]
-            fig_pp.add_trace(go.Scatter(
-                x=sub["input_price"], y=sub[sc] * 100, text=sub["name"],
-                name=prov, mode="markers",
-                marker=dict(color=PROVIDER_COLOURS.get(prov, "#6b7280"), size=7, opacity=0.8),
-                hovertemplate="%{text}<br>$%{x:.3f}/M · %{y:.1f}%<extra></extra>",
-            ))
-        if not pf.empty:
-            fig_pp.add_trace(go.Scatter(
-                x=pf["input_price"], y=pf[sc] * 100,
-                mode="lines", name="Pareto front",
-                line=dict(color="#ffffff", width=1.5, dash="dot", shape="hv"), showlegend=False,
-            ))
-        fig_pp.update_layout(
-            title=f"{lb} vs Price",
-            xaxis_title="Input Price ($/1M tokens)",
-            yaxis_title=f"{lb} Score (%)",
-            height=380,
-            showlegend=False,
-            **CHART_LAYOUT,
+        if 75 in _tier_stats:
+            first, last = _tier_stats[75]
+            pct = (1 - last / first) * 100
+            st.caption(
+                f"75%+ tier: {pct:.0f}% cheaper — "
+                f"${first:.3f} → ${last:.4f} per GPQA point"
+            )
+
+    # --- Chart 2: Cheapest 75%+ GPQA Model ---
+    with col2:
+        st.subheader("Cheapest 75%+ GPQA Model")
+        st.caption(
+            "The falling cost of frontier-level intelligence "
+            "— every dot is a qualifying model"
         )
-        st.plotly_chart(fig_pp, use_container_width=True)
+
+        cheap = priced[priced["gpqa_pct"] >= 75].copy().sort_values("release_date")
+        if not cheap.empty:
+            fig2 = go.Figure()
+            # All qualifying models as faded dots
+            fig2.add_trace(go.Scatter(
+                x=cheap["release_date"], y=cheap["blended_price"],
+                mode="markers",
+                marker=dict(size=5, color="#6b7280", opacity=0.3),
+                text=cheap["name"],
+                hovertemplate="%{text}<br>$%{y:.2f}/M tokens<extra></extra>",
+                showlegend=False,
+            ))
+
+            # Running minimum step-line with model labels
+            dates, prices, names = [], [], []
+            running_min = float("inf")
+            for _, row in cheap.iterrows():
+                if row["blended_price"] < running_min:
+                    running_min = row["blended_price"]
+                    dates.append(row["release_date"])
+                    prices.append(running_min)
+                    names.append(row["name"])
+
+            first_p = prices[0] if prices else 0
+            last_p = prices[-1] if prices else 0
+
+            if dates:
+                dates.append(cheap["release_date"].max())
+                prices.append(prices[-1])
+                names.append("")
+
+                fig2.add_trace(go.Scatter(
+                    x=dates, y=prices,
+                    mode="lines+markers+text",
+                    line=dict(color="#10b981", width=2, shape="hv"),
+                    marker=dict(size=7, color="#10b981"),
+                    text=names,
+                    textposition="top left",
+                    textfont=dict(size=10, color="#e5e7eb"),
+                    hovertemplate="%{text}<br>$%{y:.2f}/M tokens<extra></extra>",
+                    showlegend=False,
+                ))
+
+            fig2.update_layout(
+                yaxis_title="$ per 1M tokens (blended)",
+                yaxis_type="log",
+                height=420,
+                **CHART_LAYOUT,
+            )
+            st.plotly_chart(fig2, use_container_width=True)
+
+            if first_p > 0 and last_p > 0 and first_p != last_p:
+                pct_drop = (1 - last_p / first_p) * 100
+                st.caption(
+                    f"{pct_drop:.0f}% cheaper: ${first_p:.2f} → "
+                    f"${last_p:.2f} per 1M tokens · Models with 75%+ GPQA"
+                )
+        else:
+            st.info("No models with 75%+ GPQA and pricing data.")
+
     st.caption(ATTR)
 
-    st.subheader("Intelligence vs Cost Frontier")
-    explainer(
-        what="Each model plotted at its list input price (x-axis) vs composite intelligence index (y-axis). The Pareto frontier moves left and up over time — models that were SOTA 12 months ago are now dominated on both axes.",
-        why="As intelligence commoditises, can any provider maintain pricing power? This chart shows how fast the frontier is shifting — and whether there is still a capability moat at the top end that justifies premium pricing.",
-        source="api.zeroeval.com — benchmark scores (GPQA, SWE-Bench, HLE, AIME-2025, MMMLU) averaged for composite intelligence index. Pricing from provider API list rates.",
-    )
-    if not df_specs.empty:
-        df_plot = df_specs.dropna(subset=["intelligence_score", "input_price_per_m_tokens"])
-        if not df_plot.empty:
-            vis2 = [p for p in df_plot["provider"].unique() if p in sel_providers] if sel_providers else df_plot["provider"].unique().tolist()
-            df_plot = df_plot[df_plot["provider"].isin(vis2)] if vis2 else df_plot
-            fig_frontier = px.scatter(
-                df_plot, x="input_price_per_m_tokens", y="intelligence_score",
-                color="provider",
-                title="Intelligence Index vs $/1M Input Tokens",
-                labels={"input_price_per_m_tokens": "$/1M Input Tokens", "intelligence_score": "Intelligence Index"},
-                color_discrete_map=PROVIDER_COLOURS,
-                hover_data={"model": True, "provider": False},
-            )
-            fig_frontier.update_layout(height=450, showlegend=False, **CHART_LAYOUT)
-            st.plotly_chart(fig_frontier, use_container_width=True)
+    # ═══════════════════════════════════════════════════════════════
+    # Chart 3: Capability vs Price
+    # ═══════════════════════════════════════════════════════════════
+    st.subheader("Capability vs Price")
+    st.caption("SWE-Bench SOTA (line) vs average model price (bars) over time")
 
-    st.subheader("Value Evolution")
-    st.caption("GPQA score per dollar by release quarter — the rising value of intelligence.")
-    ve = df.dropna(subset=["gpqa_score", "input_price"])
-    ve = ve[ve["input_price"] > 0].copy()
-    ve["gpqa_per_dollar"] = (ve["gpqa_score"] * 100) / ve["input_price"]
-    if not ve.empty:
-        ve_q = ve.groupby(["quarter", "provider"])["gpqa_per_dollar"].median().reset_index()
-        fig_ve = go.Figure()
-        for prov in sorted(ve_q["provider"].unique()):
-            sub = ve_q[ve_q["provider"] == prov]
-            fig_ve.add_trace(go.Scatter(
-                x=sub["quarter"], y=sub["gpqa_per_dollar"], name=prov,
-                mode="lines+markers",
-                line=dict(color=PROVIDER_COLOURS.get(prov, "#6b7280"), width=1.5),
-                hovertemplate=f"{prov}: %{{y:.1f}} GPQA pts/$1M<extra></extra>",
+    cap = df[df["blended_price"] > 0].dropna(subset=["blended_price"]).copy()
+    swe = df.dropna(subset=["swe_bench_verified_score"]).copy()
+
+    if not cap.empty:
+        avg_price = cap.groupby("quarter")["blended_price"].mean().reset_index()
+        avg_price.columns = ["quarter", "avg_price"]
+        avg_price["q_label"] = avg_price["quarter"].apply(
+            lambda d: f"Q{(d.month - 1) // 3 + 1} {d.year}"
+        )
+
+        # SWE-Bench SOTA progression by quarter
+        sota_rows = []
+        running_sota = 0.0
+        for q in sorted(df["quarter"].dropna().unique()):
+            q_scores = swe[swe["quarter"] <= q]["swe_bench_verified_score"]
+            if not q_scores.empty:
+                best = q_scores.max() * 100
+                running_sota = max(running_sota, best)
+            if running_sota > 0:
+                sota_rows.append({"quarter": q, "sota": running_sota})
+        sota_df = pd.DataFrame(sota_rows) if sota_rows else pd.DataFrame()
+
+        if not sota_df.empty:
+            sota_df["q_label"] = sota_df["quarter"].apply(
+                lambda d: f"Q{(d.month - 1) // 3 + 1} {d.year}"
+            )
+            merged = avg_price.merge(sota_df[["q_label", "sota"]], on="q_label", how="left")
+        else:
+            merged = avg_price.copy()
+            merged["sota"] = None
+
+        fig3 = go.Figure()
+        fig3.add_trace(go.Bar(
+            x=merged["q_label"], y=merged["avg_price"],
+            marker_color="#9ca3af", opacity=0.6,
+            name="Avg Price ($/M tokens)",
+            hovertemplate="%{x}<br>Avg: $%{y:.2f}/M tokens<extra></extra>",
+        ))
+        if merged["sota"].notna().any():
+            fig3.add_trace(go.Scatter(
+                x=merged["q_label"], y=merged["sota"],
+                mode="lines+markers", name="SWE-Bench SOTA (%)",
+                line=dict(color="#10b981", width=2.5),
+                marker=dict(size=7, color="#10b981"),
+                hovertemplate="SWE-Bench SOTA: %{y:.1f}%<extra></extra>",
+                yaxis="y2",
             ))
-        fig_ve.update_layout(yaxis_title="GPQA pts per $1M tokens", yaxis_type="log", **CHART_LAYOUT)
-        st.plotly_chart(fig_ve, use_container_width=True)
+
+        layout3 = {**CHART_LAYOUT}
+        layout3["margin"] = dict(l=40, r=60, t=40, b=80)
+        fig3.update_layout(
+            yaxis=dict(title="Avg Price ($/M tokens)", tickprefix="$"),
+            yaxis2=dict(
+                title="SWE-Bench SOTA (%)",
+                overlaying="y", side="right",
+                range=[0, 105], ticksuffix="%",
+            ),
+            height=450,
+            **layout3,
+        )
+        st.plotly_chart(fig3, use_container_width=True)
         st.caption(ATTR)
 
+    # ═══════════════════════════════════════════════════════════════
+    # Chart 4: Performance vs Price
+    # ═══════════════════════════════════════════════════════════════
+    st.subheader("Performance vs Price")
+    st.caption("GPQA score vs cost per million tokens")
+
+    if not priced.empty:
+        _MAJOR = set(PROVIDER_COLOURS.keys())
+        perf = priced.copy()
+        perf["chart_provider"] = perf["provider"].apply(
+            lambda p: p if p in _MAJOR else "Others"
+        )
+        _ALL_COLOURS = {**PROVIDER_COLOURS, "Others": "#6b7280"}
+
+        fig4 = go.Figure()
+        for prov in list(PROVIDER_COLOURS.keys()) + ["Others"]:
+            sub = perf[perf["chart_provider"] == prov]
+            if sub.empty:
+                continue
+            fig4.add_trace(go.Scatter(
+                x=sub["blended_price"], y=sub["gpqa_pct"],
+                mode="markers", name=prov,
+                marker=dict(size=8, color=_ALL_COLOURS[prov], opacity=0.8),
+                text=sub["name"],
+                hovertemplate=(
+                    "%{text}<br>$%{x:.2f}/M tokens<br>"
+                    "GPQA: %{y:.1f}%<extra></extra>"
+                ),
+            ))
+
+        fig4.update_layout(
+            xaxis_title="Price ($/M tokens)", xaxis_type="log",
+            yaxis_title="GPQA Score (%)", yaxis_range=[0, 105],
+            height=500,
+            **CHART_LAYOUT,
+        )
+        st.plotly_chart(fig4, use_container_width=True)
+        st.caption(ATTR)
+
+    # ═══════════════════════════════════════════════════════════════
+    # Cost Efficiency by Tier (existing)
+    # ═══════════════════════════════════════════════════════════════
     st.subheader("Cost Efficiency by Tier")
     st.caption("Cost per GPQA point across model size tiers.")
     ct = df.dropna(subset=["gpqa_score", "input_price", "params"])
     ct = ct[(ct["input_price"] > 0) & (ct["params"] > 0)].copy()
     if not ct.empty:
-        import pandas as pd
         ct["tier"] = pd.cut(
             ct["params"],
             bins=[0, 10e9, 70e9, 200e9, float("inf")],
