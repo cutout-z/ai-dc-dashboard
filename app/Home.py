@@ -98,9 +98,6 @@ llm_labs = st.Page(
 llm_open = st.Page(
     "views/fundamentals/llm_performance/open_models.py", title="Open Models"
 )
-llm_capabilities = st.Page(
-    "views/fundamentals/llm_performance/model_capabilities.py", title="Model Capabilities"
-)
 llm_prices = st.Page(
     "views/fundamentals/llm_performance/prices_and_value.py", title="Prices and Value"
 )
@@ -109,12 +106,6 @@ llm_efficiency = st.Page(
 )
 llm_speed = st.Page(
     "views/fundamentals/llm_performance/speed_and_context.py", title="Speed and Context"
-)
-llm_preference = st.Page(
-    "views/fundamentals/llm_performance/human_preference.py", title="Human Preference"
-)
-llm_ai_demand = st.Page(
-    "views/fundamentals/llm_performance/ai_demand_indicators.py", title="AI Demand Indicators"
 )
 llm_lab_revenue = st.Page(
     "views/fundamentals/llm_performance/frontier_lab_revenue.py", title="Frontier Lab Revenue & Valuations"
@@ -182,12 +173,9 @@ pg = st.navigation(
             llm_benchmark,
             llm_labs,
             llm_open,
-            llm_capabilities,
             llm_prices,
             llm_efficiency,
             llm_speed,
-            llm_preference,
-            llm_ai_demand,
             llm_lab_revenue,
             llm_gpu_hardware,
         ],
