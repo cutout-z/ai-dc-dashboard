@@ -196,3 +196,32 @@ def score_news_item(
         recency_weight * recency + trust_weight * trust + ticker_weight * ticker,
         3,
     )
+
+
+# ──────────────────────────────────────────────
+# Materiality tiers
+# ──────────────────────────────────────────────
+
+TIER_HIGH_THRESHOLD = 0.65
+TIER_MEDIUM_THRESHOLD = 0.40
+
+TIER_COLORS = {
+    "HIGH":   "#ef4444",  # red
+    "MEDIUM": "#f59e0b",  # amber
+    "LOW":    "#6b7280",  # grey
+}
+
+TIER_LABELS = {
+    "HIGH":   "🔴 HIGH",
+    "MEDIUM": "🟡 MEDIUM",
+    "LOW":    "⚪ LOW",
+}
+
+
+def get_materiality_tier(score: float) -> str:
+    """Classify a materiality score into HIGH / MEDIUM / LOW."""
+    if score >= TIER_HIGH_THRESHOLD:
+        return "HIGH"
+    if score >= TIER_MEDIUM_THRESHOLD:
+        return "MEDIUM"
+    return "LOW"

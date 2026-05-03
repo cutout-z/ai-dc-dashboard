@@ -77,7 +77,7 @@ CONTEXT_WINDOWS: list[dict] = [
     {"model": "Gemini 2.0",       "date": "2024-12", "tokens": 1000000,  "provider": "Google"},
     {"model": "Grok 3",           "date": "2025-02", "tokens": 131000,   "provider": "xAI"},
     {"model": "Gemini 2.5 Pro",   "date": "2025-03", "tokens": 1000000,  "provider": "Google"},
-    {"model": "Llama 4 Maverick", "date": "2025-04", "tokens": 10000000, "provider": "Meta"},
+    {"model": "Llama 4 Scout",    "date": "2025-04", "tokens": 10000000, "provider": "Meta"},
     {"model": "Claude Opus 4",    "date": "2025-05", "tokens": 1000000,  "provider": "Anthropic"},
     {"model": "GPT-5",            "date": "2025-08", "tokens": 400000,   "provider": "OpenAI"},
     {"model": "Claude Sonnet 4.5","date": "2025-09", "tokens": 200000,   "provider": "Anthropic"},
