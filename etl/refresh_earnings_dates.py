@@ -1,4 +1,4 @@
-"""Refresh earnings_dates.csv from yfinance calendar data.
+"""Refresh earnings_dates.csv from FMP API.
 
 Run locally before pushing to update next earnings dates for all tracked tickers.
 Writes a log entry to data/fetcher_log.json on completion.
@@ -15,8 +15,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-import pandas as pd
-import yfinance as yf
+from app.lib.fmp import get_earnings_dates, get_fmp_key
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -39,42 +38,43 @@ def _write_log(status: str, count: int, notes: str = "") -> None:
     LOG_PATH.write_text(json.dumps(log, indent=2))
 
 
+def _next_earnings_date(symbol: str) -> str | None:
+    """Return the next upcoming earnings date for a symbol via FMP."""
+    today = datetime.now().date()
+    try:
+        events = get_earnings_dates(symbol)
+        # FMP returns most recent first — find the next upcoming date
+        future = [
+            e["date"] for e in events
+            if e.get("date") and e["date"] >= today.isoformat()
+        ]
+        if future:
+            return min(future)  # earliest upcoming
+    except Exception as e:
+        logger.warning("  %s: FMP error — %s", symbol, e)
+    return None
+
+
 def main() -> None:
+    if not get_fmp_key():
+        logger.error("No FMP API key found — set FMP_API_KEY or add to ~/.openbb_platform/user_settings.json")
+        raise SystemExit(1)
+
     with open(CSV_PATH) as f:
         rows = list(csv.DictReader(f))
 
     tickers = [r["symbol"] for r in rows]
     old_dates = {r["symbol"]: r["earnings_date"] for r in rows}
 
-    logger.info("Refreshing earnings dates for %d tickers...", len(tickers))
+    logger.info("Refreshing earnings dates for %d tickers via FMP...", len(tickers))
 
     updated = []
     changes = 0
 
     for ticker in tickers:
-        date_str: str | None = None
-        try:
-            cal = yf.Ticker(ticker).calendar
-            if isinstance(cal, dict):
-                # Newer yfinance: calendar is a dict
-                eds = cal.get("Earnings Date")
-                if eds is not None:
-                    if hasattr(eds, "__iter__") and not isinstance(eds, str):
-                        eds_list = [e for e in eds if e is not None]
-                        if eds_list:
-                            date_str = pd.Timestamp(eds_list[0]).strftime("%Y-%m-%d")
-                    else:
-                        date_str = pd.Timestamp(eds).strftime("%Y-%m-%d")
-            elif hasattr(cal, "columns"):
-                # Older yfinance: calendar is a DataFrame
-                if "Earnings Date" in cal.columns:
-                    vals = cal.loc["Earnings Date"].dropna()
-                    if len(vals):
-                        date_str = pd.Timestamp(vals.iloc[0]).strftime("%Y-%m-%d")
-        except Exception as e:
-            logger.warning("  %s: error — %s", ticker, e)
-
+        date_str = _next_earnings_date(ticker)
         new_date = date_str or old_dates.get(ticker, "")
+
         if date_str and date_str != old_dates.get(ticker):
             logger.info("  %s: %s → %s", ticker, old_dates.get(ticker), date_str)
             changes += 1
