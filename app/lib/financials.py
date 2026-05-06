@@ -145,68 +145,14 @@ def _load_consensus_file() -> dict:
         return {}
 
 
-def _fetch_consensus(t: yf.Ticker, scale: float, ticker: str) -> dict:
-    """Fetch broker consensus estimates (revenue, EPS, price targets).
+def _fetch_consensus(ticker: str) -> dict:
+    """Return broker consensus estimates from pre-computed FMP JSON.
 
-    Prefers pre-computed JSON file (reliable, works on Streamlit Cloud).
-    Falls back to yfinance live if JSON is missing or has no data for ticker.
-    Refresh JSON via: python etl/refresh_consensus.py
+    Refresh via: python etl/refresh_consensus.py
+    Returns {} if the JSON file is missing or has no entry for this ticker.
     """
-    # Prefer pre-computed JSON (fast, reliable on Cloud)
     cached = _load_consensus_file()
-    if ticker in cached and cached[ticker]:
-        return cached[ticker]
-
-    # Fallback: yfinance live (works locally, unreliable on Streamlit Cloud)
-    try:
-        rev_est = t.revenue_estimate
-        eps_est = t.earnings_estimate
-        ptgt = t.analyst_price_targets or {}
-
-        def _get(df, period, col):
-            try:
-                if df is None or df.empty:
-                    return None
-                v = df.loc[period, col]
-                return float(v) if pd.notna(v) else None
-            except (KeyError, TypeError):
-                return None
-
-        def _s(v):
-            return round(v * scale, 1) if v is not None else None
-
-        def _p(key):
-            v = ptgt.get(key)
-            try:
-                return round(float(v), 2) if v is not None and pd.notna(v) else None
-            except (TypeError, ValueError):
-                return None
-
-        result = {
-            "rev_0y_avg":  _s(_get(rev_est, "0y", "avg")),
-            "rev_0y_low":  _s(_get(rev_est, "0y", "low")),
-            "rev_0y_high": _s(_get(rev_est, "0y", "high")),
-            "rev_1y_avg":  _s(_get(rev_est, "+1y", "avg")),
-            "rev_1y_low":  _s(_get(rev_est, "+1y", "low")),
-            "rev_1y_high": _s(_get(rev_est, "+1y", "high")),
-            "rev_n":       int(_get(rev_est, "0y", "numberOfAnalysts") or 0) or None,
-            "rev_growth":  _get(rev_est, "+1y", "growth"),
-            "eps_0y_avg":  _get(eps_est, "0y", "avg"),
-            "eps_1y_avg":  _get(eps_est, "+1y", "avg"),
-            "eps_n":       int(_get(eps_est, "0y", "numberOfAnalysts") or 0) or None,
-            "pt_current": _p("current"),
-            "pt_mean":    _p("mean"),
-            "pt_low":     _p("low"),
-            "pt_high":    _p("high"),
-        }
-
-        has_data = any(v is not None for k, v in result.items() if k not in ("rev_n", "eps_n"))
-        if has_data:
-            return result
-    except Exception as e:
-        logger.debug("yfinance consensus %s: %s", ticker, e)
-
-    return {}
+    return cached.get(ticker) or {}
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -311,57 +257,31 @@ def _fetch_one_company(ticker: str, meta: dict) -> tuple[str, dict | None]:
             "Free CF":      fcf,
         }
 
-        try:
-            rev_est = t.revenue_estimate
-            eps_est = t.earnings_estimate
-            if rev_est is not None and not rev_est.empty and yrs:
+        # ── Forward estimates from FMP consensus JSON ─────────────────────────
+        # Fetch once; reuse for both the income statement extension and the
+        # consensus panel. Avoids a second JSON parse in _fetch_consensus.
+        consensus = _fetch_consensus(ticker)
+        if consensus and yrs:
+            try:
                 last_fy = int(yrs[-1].replace("FY", ""))
+                rev_0y = consensus.get("rev_0y_avg")
+                rev_1y = consensus.get("rev_1y_avg")
+                ni_0y  = consensus.get("ni_0y_avg")
+                ni_1y  = consensus.get("ni_1y_avg")
 
-                def _est(df, period):
-                    try:
-                        v = df.loc[period, "avg"]
-                        return round(float(v) * scale, 1) if pd.notna(v) else None
-                    except (KeyError, TypeError):
-                        return None
-
-                rev_0y = _est(rev_est, "0y")
-                rev_1y = _est(rev_est, "+1y")
-                # EPS × shares ≈ net income estimate
-                ni_0y, ni_1y = None, None
-                if eps_est is not None and not eps_est.empty:
-                    try:
-                        shares = getattr(t.fast_info, "shares", None)
-                        if shares is None:
-                            shares = (t.info or {}).get("sharesOutstanding")
-                        if shares:
-                            def _eps_raw(period):
-                                try:
-                                    v = eps_est.loc[period, "avg"]
-                                    return float(v) if pd.notna(v) else None
-                                except (KeyError, TypeError):
-                                    return None
-                            e0 = _eps_raw("0y")
-                            e1 = _eps_raw("+1y")
-                            if e0 is not None:
-                                ni_0y = round(e0 * shares * scale, 1)
-                            if e1 is not None:
-                                ni_1y = round(e1 * shares * scale, 1)
-                    except Exception:
-                        pass
-
-                est_years = [f"FY{last_fy + 1}E", f"FY{last_fy + 2}E"]
-                yrs = yrs + est_years
-
-                income["Revenue"]    = revenue + [rev_0y, rev_1y]
-                income["Net Income"] = net_inc + [ni_0y, ni_1y]
-                for key in income:
-                    if len(income[key]) < len(yrs):
-                        income[key] = income[key] + [None] * (len(yrs) - len(income[key]))
-                for d in (balance, cashflow):
-                    for key in d:
-                        d[key] = d[key] + [None, None]
-        except Exception as e:
-            logger.debug("Estimates %s: %s", ticker, e)
+                if any(v is not None for v in [rev_0y, rev_1y]):
+                    est_years = [f"FY{last_fy + 1}E", f"FY{last_fy + 2}E"]
+                    yrs = yrs + est_years
+                    income["Revenue"]    = revenue + [rev_0y, rev_1y]
+                    income["Net Income"] = net_inc  + [ni_0y,  ni_1y]
+                    for key in income:
+                        if len(income[key]) < len(yrs):
+                            income[key] = income[key] + [None] * (len(yrs) - len(income[key]))
+                    for d in (balance, cashflow):
+                        for key in d:
+                            d[key] = d[key] + [None, None]
+            except Exception as e:
+                logger.debug("Forward estimates %s: %s", ticker, e)
 
         return ticker, {
             "name":  meta["name"],
@@ -370,7 +290,7 @@ def _fetch_one_company(ticker: str, meta: dict) -> tuple[str, dict | None]:
             "income":   income,
             "balance":  balance,
             "cashflow": cashflow,
-            "consensus": _fetch_consensus(t, scale, ticker),
+            "consensus": consensus,
         }
     except Exception as e:
         logger.warning("yfinance financials %s: %s", ticker, e)
@@ -406,6 +326,7 @@ def get_all_financials() -> dict:
         ni     = d["income"]["Net Income"]
         ebitda = d["income"]["EBITDA"]
         nd     = d["balance"]["Net Debt"]
+        ocf    = d["cashflow"]["Operating CF"]
         fcf    = d["cashflow"]["Free CF"]
         capex  = d["cashflow"]["CapEx"]
 
@@ -427,6 +348,7 @@ def get_all_financials() -> dict:
             "Net Margin %":      _pct(ni, rev),
             "FCF Margin %":      _pct(fcf, rev),
             "CapEx / Revenue %": _pct(capex, rev),
+            "CapEx / OpCF %":    _pct(capex, ocf),
             "Net Debt / EBITDA": _mult(nd, ebitda),
         }
 
