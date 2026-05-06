@@ -15,7 +15,8 @@ from pathlib import Path
 
 import httpx
 
-FMP_BASE = "https://financialmodelingprep.com/api"
+FMP_BASE   = "https://financialmodelingprep.com/api"    # legacy v3/v4 (deprecated Aug 2025)
+FMP_STABLE = "https://financialmodelingprep.com/stable"  # new stable endpoints
 
 _OPENBB_SETTINGS = Path.home() / ".openbb_platform" / "user_settings.json"
 _FMP_API_KEY: str | None = None
@@ -57,13 +58,31 @@ def get_fmp_key() -> str | None:
 
 
 def _get_sync(path: str, **params) -> dict | list | None:
-    """Synchronous GET — used in ETL scripts and Streamlit (non-async context)."""
+    """Synchronous GET against the legacy FMP_BASE (v3/v4)."""
     key = get_fmp_key()
     if not key:
         return None
     try:
         resp = httpx.get(
             f"{FMP_BASE}{path}",
+            params={"apikey": key, **params},
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            return resp.json()
+    except Exception:
+        pass
+    return None
+
+
+def _get_stable(endpoint: str, **params) -> dict | list | None:
+    """Synchronous GET against the FMP stable API (post-Aug 2025)."""
+    key = get_fmp_key()
+    if not key:
+        return None
+    try:
+        resp = httpx.get(
+            f"{FMP_STABLE}/{endpoint}",
             params={"apikey": key, **params},
             timeout=15,
         )
@@ -87,4 +106,52 @@ def get_earnings_dates(symbol: str) -> list[dict]:
 def get_earnings_calendar_range(from_date: str, to_date: str) -> list[dict]:
     """Earnings calendar for a date range (YYYY-MM-DD)."""
     data = _get_sync("/v3/earning_calendar", **{"from": from_date, "to": to_date})
+    return data if isinstance(data, list) else []
+
+
+def get_analyst_estimates(symbol: str, period: str = "annual", limit: int = 6) -> list[dict]:
+    """Annual or quarterly analyst consensus estimates (revenue, EBITDA, EPS).
+
+    Returns list sorted newest-first. Each dict has keys:
+      symbol, date (fiscal year end), revenueLow/High/Avg,
+      ebitdaLow/High/Avg, epsLow/High/Avg,
+      netIncomeLow/High/Avg, numAnalystsRevenue, numAnalystsEps.
+    """
+    data = _get_stable("analyst-estimates", symbol=symbol, period=period, limit=limit)
+    return data if isinstance(data, list) else []
+
+
+def get_price_target_consensus(symbol: str) -> dict:
+    """Aggregated price target consensus (high, low, consensus/mean, median).
+
+    Returns dict with keys: symbol, targetHigh, targetLow,
+    targetConsensus, targetMedian.
+    """
+    data = _get_stable("price-target-consensus", symbol=symbol)
+    if isinstance(data, list) and data:
+        return data[0]
+    if isinstance(data, dict):
+        return data
+    return {}
+
+
+def get_price_targets(symbol: str, limit: int = 15) -> list[dict]:
+    """Individual analyst price targets with firm/analyst name and date.
+
+    Returns list sorted newest-first. Each dict has keys:
+      symbol, publishedDate, analystName, analystCompany,
+      priceTarget, priceWhenPosted, newsPublisher.
+    """
+    data = _get_stable("price-target-news", symbol=symbol, limit=limit)
+    return data if isinstance(data, list) else []
+
+
+def get_upgrades_downgrades(symbol: str, limit: int = 10) -> list[dict]:
+    """Recent analyst grade changes (upgrades, downgrades, initiations, maintains).
+
+    Returns list sorted newest-first. Each dict has keys:
+      symbol, date, gradingCompany, previousGrade, newGrade,
+      action (upgrade/downgrade/initiated/maintain/reiterated).
+    """
+    data = _get_stable("grades", symbol=symbol, limit=limit)
     return data if isinstance(data, list) else []
