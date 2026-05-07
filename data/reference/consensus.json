@@ -1,7 +1,289 @@
 {
-  "updated": "2026-05-06T06:33:32Z",
+  "updated": "2026-05-07T02:31:22Z",
   "source": "fmp",
   "data": {
+    "GOOGL": {
+      "rev_0y_avg": 480925.4,
+      "rev_0y_low": 465397.6,
+      "rev_0y_high": 498090.2,
+      "rev_1y_avg": 564673.4,
+      "rev_1y_low": 529500.7,
+      "rev_1y_high": 635917.1,
+      "rev_n": 32,
+      "rev_growth": 0.1741,
+      "eps_0y_avg": 13.4915,
+      "eps_1y_avg": 14.2596,
+      "eps_n": 43,
+      "ebitda_0y_avg": 178426.6,
+      "ebitda_0y_low": 172665.7,
+      "ebitda_0y_high": 184794.9,
+      "ebitda_1y_avg": 209497.7,
+      "ebitda_1y_low": 196448.4,
+      "ebitda_1y_high": 235929.6,
+      "ni_0y_avg": 167567.6,
+      "ni_1y_avg": 172645.0,
+      "pt_current": 384.54,
+      "pt_mean": 406.28,
+      "pt_low": 355.0,
+      "pt_high": 460.0,
+      "pt_analysts": [
+        {
+          "firm": "Morgan Stanley",
+          "analyst": "",
+          "price": 375,
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "UBS",
+          "analyst": "",
+          "price": 435,
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Needham",
+          "analyst": "Laura Martin",
+          "price": 450,
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "RBC Capital",
+          "analyst": "",
+          "price": 425,
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Goldman Sachs",
+          "analyst": "",
+          "price": 450,
+          "date": "2026-04-30"
+        }
+      ],
+      "upgrades_downgrades": [
+        {
+          "firm": "Freedom Broker",
+          "action": "downgrade",
+          "new_grade": "Hold",
+          "prev_grade": "Buy",
+          "date": "2026-05-04"
+        },
+        {
+          "firm": "Citizens",
+          "action": "maintain",
+          "new_grade": "Market Outperform",
+          "prev_grade": "Market Outperform",
+          "date": "2026-05-04"
+        },
+        {
+          "firm": "Stifel",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-05-01"
+        },
+        {
+          "firm": "Wells Fargo",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-05-01"
+        },
+        {
+          "firm": "Keybanc",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-04-30"
+        }
+      ]
+    },
+    "AMZN": {
+      "rev_0y_avg": 818087.2,
+      "rev_0y_low": 803569.3,
+      "rev_0y_high": 837331.1,
+      "rev_1y_avg": 921934.4,
+      "rev_1y_low": 891847.1,
+      "rev_1y_high": 988483.8,
+      "rev_n": 40,
+      "rev_growth": 0.1269,
+      "eps_0y_avg": 8.5282,
+      "eps_1y_avg": 9.9384,
+      "eps_n": 39,
+      "ebitda_0y_avg": 133054.6,
+      "ebitda_0y_low": 130693.4,
+      "ebitda_0y_high": 136184.5,
+      "ebitda_1y_avg": 149944.4,
+      "ebitda_1y_low": 145051.0,
+      "ebitda_1y_high": 160768.1,
+      "ni_0y_avg": 94451.8,
+      "ni_1y_avg": 107031.0,
+      "pt_current": 268.57,
+      "pt_mean": 306.77,
+      "pt_low": 175.0,
+      "pt_high": 333.0,
+      "pt_analysts": [
+        {
+          "firm": "Robert W. Baird",
+          "analyst": "",
+          "price": 300,
+          "date": "2026-05-01"
+        },
+        {
+          "firm": "Raymond James",
+          "analyst": "",
+          "price": 280,
+          "date": "2026-05-01"
+        },
+        {
+          "firm": "Morgan Stanley",
+          "analyst": "",
+          "price": 330,
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Scotiabank",
+          "analyst": "",
+          "price": 325,
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Telsey Advisory",
+          "analyst": "",
+          "price": 315,
+          "date": "2026-04-30"
+        }
+      ],
+      "upgrades_downgrades": [
+        {
+          "firm": "Stifel",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-05-01"
+        },
+        {
+          "firm": "RBC Capital",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Susquehanna",
+          "action": "maintain",
+          "new_grade": "Positive",
+          "prev_grade": "Positive",
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Morgan Stanley",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Telsey Advisory Group",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-04-30"
+        }
+      ]
+    },
+    "MSFT": {
+      "rev_0y_avg": 328664.9,
+      "rev_0y_low": 325801.2,
+      "rev_0y_high": 329946.5,
+      "rev_1y_avg": 382260.0,
+      "rev_1y_low": 370276.5,
+      "rev_1y_high": 392242.9,
+      "rev_n": 33,
+      "rev_growth": 0.1631,
+      "eps_0y_avg": 16.6919,
+      "eps_1y_avg": 19.2687,
+      "eps_n": 26,
+      "ebitda_0y_avg": 172176.8,
+      "ebitda_0y_low": 170676.6,
+      "ebitda_0y_high": 172848.2,
+      "ebitda_1y_avg": 200253.5,
+      "ebitda_1y_low": 193975.7,
+      "ebitda_1y_high": 205483.2,
+      "ni_0y_avg": 123990.8,
+      "ni_1y_avg": 144891.9,
+      "pt_current": 413.96,
+      "pt_mean": 556.88,
+      "pt_low": 415.0,
+      "pt_high": 680.0,
+      "pt_analysts": [
+        {
+          "firm": "Tigress Financial",
+          "analyst": "Ivan Feinseth",
+          "price": 680,
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Scotiabank",
+          "analyst": "Patrick Colville",
+          "price": 550,
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Deutsche Bank",
+          "analyst": "",
+          "price": 550,
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Stifel Nicolaus",
+          "analyst": "Brad Reback",
+          "price": 415,
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Evercore ISI",
+          "analyst": "Kirk Materne",
+          "price": 510,
+          "date": "2026-04-30"
+        }
+      ],
+      "upgrades_downgrades": [
+        {
+          "firm": "Stifel",
+          "action": "maintain",
+          "new_grade": "Hold",
+          "prev_grade": "Hold",
+          "date": "2026-05-01"
+        },
+        {
+          "firm": "Citigroup",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Piper Sandler",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Wedbush",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Evercore ISI Group",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-04-30"
+        }
+      ]
+    },
     "AAPL": {
       "rev_0y_avg": 471693.4,
       "rev_0y_low": 463137.1,
@@ -96,285 +378,97 @@
         }
       ]
     },
-    "AMZN": {
-      "rev_0y_avg": 818087.2,
-      "rev_0y_low": 803569.3,
-      "rev_0y_high": 837331.1,
-      "rev_1y_avg": 921934.4,
-      "rev_1y_low": 891847.1,
-      "rev_1y_high": 988483.8,
-      "rev_n": 40,
-      "rev_growth": 0.1269,
-      "eps_0y_avg": 8.5282,
-      "eps_1y_avg": 9.9384,
-      "eps_n": 39,
-      "ebitda_0y_avg": 133054.6,
-      "ebitda_0y_low": 130693.4,
-      "ebitda_0y_high": 136184.5,
-      "ebitda_1y_avg": 149944.4,
-      "ebitda_1y_low": 145051.0,
-      "ebitda_1y_high": 160768.1,
-      "ni_0y_avg": 94451.8,
-      "ni_1y_avg": 107031.0,
-      "pt_current": 268.57,
-      "pt_mean": 306.77,
-      "pt_low": 175.0,
-      "pt_high": 333.0,
+    "TSLA": {
+      "rev_0y_avg": 102820.5,
+      "rev_0y_low": 91685.7,
+      "rev_0y_high": 114088.3,
+      "rev_1y_avg": 118321.7,
+      "rev_1y_low": 106998.4,
+      "rev_1y_high": 131133.2,
+      "rev_n": 34,
+      "rev_growth": 0.1508,
+      "eps_0y_avg": 1.9337,
+      "eps_1y_avg": 2.4547,
+      "eps_n": 25,
+      "ebitda_0y_avg": 16926.1,
+      "ebitda_0y_low": 15093.1,
+      "ebitda_0y_high": 18780.9,
+      "ebitda_1y_avg": 19477.8,
+      "ebitda_1y_low": 17613.8,
+      "ebitda_1y_high": 21586.8,
+      "ni_0y_avg": 4667.1,
+      "ni_1y_avg": 7248.1,
+      "pt_current": 374.73,
+      "pt_mean": 450.45,
+      "pt_low": 360.0,
+      "pt_high": 548.0,
       "pt_analysts": [
         {
-          "firm": "Robert W. Baird",
-          "analyst": "",
-          "price": 300,
-          "date": "2026-05-01"
+          "firm": "UBS",
+          "analyst": "Joseph Spak",
+          "price": 364,
+          "date": "2026-04-23"
         },
         {
-          "firm": "Raymond James",
+          "firm": "UBS",
           "analyst": "",
-          "price": 280,
-          "date": "2026-05-01"
+          "price": 475,
+          "date": "2026-04-23"
         },
         {
-          "firm": "Morgan Stanley",
+          "firm": "Canaccord Genuity",
           "analyst": "",
-          "price": 330,
-          "date": "2026-04-30"
+          "price": 450,
+          "date": "2026-04-23"
         },
         {
-          "firm": "Scotiabank",
+          "firm": "Deutsche Bank",
           "analyst": "",
-          "price": 325,
-          "date": "2026-04-30"
+          "price": 465,
+          "date": "2026-04-09"
         },
         {
-          "firm": "Telsey Advisory",
+          "firm": "Truist Financial",
           "analyst": "",
-          "price": 315,
-          "date": "2026-04-30"
+          "price": 400,
+          "date": "2026-04-02"
         }
       ],
       "upgrades_downgrades": [
-        {
-          "firm": "Stifel",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-05-01"
-        },
-        {
-          "firm": "Needham",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Truist Securities",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-04-30"
-        },
         {
           "firm": "Cantor Fitzgerald",
           "action": "maintain",
           "new_grade": "Overweight",
           "prev_grade": "Overweight",
-          "date": "2026-04-30"
+          "date": "2026-04-23"
         },
         {
-          "firm": "Benchmark",
+          "firm": "Canaccord Genuity",
           "action": "maintain",
           "new_grade": "Buy",
           "prev_grade": "Buy",
-          "date": "2026-04-30"
-        }
-      ]
-    },
-    "MSFT": {
-      "rev_0y_avg": 328664.9,
-      "rev_0y_low": 325801.2,
-      "rev_0y_high": 329946.5,
-      "rev_1y_avg": 382260.0,
-      "rev_1y_low": 370276.5,
-      "rev_1y_high": 392242.9,
-      "rev_n": 33,
-      "rev_growth": 0.1631,
-      "eps_0y_avg": 16.6919,
-      "eps_1y_avg": 19.2687,
-      "eps_n": 26,
-      "ebitda_0y_avg": 172176.8,
-      "ebitda_0y_low": 170676.6,
-      "ebitda_0y_high": 172848.2,
-      "ebitda_1y_avg": 200253.5,
-      "ebitda_1y_low": 193975.7,
-      "ebitda_1y_high": 205483.2,
-      "ni_0y_avg": 123990.8,
-      "ni_1y_avg": 144891.9,
-      "pt_current": 403.31,
-      "pt_mean": 551.75,
-      "pt_low": 415.0,
-      "pt_high": 675.0,
-      "pt_analysts": [
-        {
-          "firm": "Scotiabank",
-          "analyst": "Patrick Colville",
-          "price": 550,
-          "date": "2026-04-30"
+          "date": "2026-04-23"
         },
         {
-          "firm": "Deutsche Bank",
-          "analyst": "",
-          "price": 550,
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Stifel Nicolaus",
-          "analyst": "Brad Reback",
-          "price": 415,
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Evercore ISI",
-          "analyst": "Kirk Materne",
-          "price": 510,
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Bernstein",
-          "analyst": "Mark Moerdler",
-          "price": 646,
-          "date": "2026-04-30"
-        }
-      ],
-      "upgrades_downgrades": [
-        {
-          "firm": "Stifel",
+          "firm": "Mizuho",
           "action": "maintain",
-          "new_grade": "Hold",
-          "prev_grade": "Hold",
-          "date": "2026-05-01"
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-04-23"
         },
         {
-          "firm": "Scotiabank",
+          "firm": "TD Cowen",
           "action": "maintain",
-          "new_grade": "Sector Outperform",
-          "prev_grade": "Sector Outperform",
-          "date": "2026-04-30"
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-04-23"
         },
         {
           "firm": "Wedbush",
           "action": "maintain",
           "new_grade": "Outperform",
           "prev_grade": "Outperform",
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Piper Sandler",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Evercore ISI Group",
-          "action": "maintain",
-          "new_grade": "Outperform",
-          "prev_grade": "Outperform",
-          "date": "2026-04-30"
-        }
-      ]
-    },
-    "GOOGL": {
-      "rev_0y_avg": 480925.4,
-      "rev_0y_low": 465397.6,
-      "rev_0y_high": 498090.2,
-      "rev_1y_avg": 564673.4,
-      "rev_1y_low": 529500.7,
-      "rev_1y_high": 635917.1,
-      "rev_n": 32,
-      "rev_growth": 0.1741,
-      "eps_0y_avg": 13.4915,
-      "eps_1y_avg": 14.2596,
-      "eps_n": 43,
-      "ebitda_0y_avg": 178426.6,
-      "ebitda_0y_low": 172665.7,
-      "ebitda_0y_high": 184794.9,
-      "ebitda_1y_avg": 209497.7,
-      "ebitda_1y_low": 196448.4,
-      "ebitda_1y_high": 235929.6,
-      "ni_0y_avg": 167567.6,
-      "ni_1y_avg": 172645.0,
-      "pt_current": 384.54,
-      "pt_mean": 406.28,
-      "pt_low": 355.0,
-      "pt_high": 460.0,
-      "pt_analysts": [
-        {
-          "firm": "Morgan Stanley",
-          "analyst": "",
-          "price": 375,
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "UBS",
-          "analyst": "",
-          "price": 435,
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Needham",
-          "analyst": "Laura Martin",
-          "price": 450,
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "RBC Capital",
-          "analyst": "",
-          "price": 425,
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Goldman Sachs",
-          "analyst": "",
-          "price": 450,
-          "date": "2026-04-30"
-        }
-      ],
-      "upgrades_downgrades": [
-        {
-          "firm": "Wells Fargo",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-05-01"
-        },
-        {
-          "firm": "Stifel",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-05-01"
-        },
-        {
-          "firm": "Citigroup",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Truist Securities",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Susquehanna",
-          "action": "maintain",
-          "new_grade": "Positive",
-          "prev_grade": "Positive",
-          "date": "2026-04-30"
+          "date": "2026-04-23"
         }
       ]
     },
@@ -537,17 +631,17 @@
           "date": "2026-03-31"
         },
         {
-          "firm": "Rosenblatt",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-03-23"
-        },
-        {
           "firm": "Cantor Fitzgerald",
           "action": "maintain",
           "new_grade": "Overweight",
           "prev_grade": "Overweight",
+          "date": "2026-03-23"
+        },
+        {
+          "firm": "Rosenblatt",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
           "date": "2026-03-23"
         },
         {
@@ -558,105 +652,11 @@
           "date": "2026-03-19"
         },
         {
-          "firm": "Truist Securities",
+          "firm": "Needham",
           "action": "maintain",
           "new_grade": "Buy",
           "prev_grade": "Buy",
           "date": "2026-03-18"
-        }
-      ]
-    },
-    "TSLA": {
-      "rev_0y_avg": 102820.5,
-      "rev_0y_low": 91685.7,
-      "rev_0y_high": 114088.3,
-      "rev_1y_avg": 118321.7,
-      "rev_1y_low": 106998.4,
-      "rev_1y_high": 131133.2,
-      "rev_n": 34,
-      "rev_growth": 0.1508,
-      "eps_0y_avg": 1.9337,
-      "eps_1y_avg": 2.4547,
-      "eps_n": 25,
-      "ebitda_0y_avg": 16926.1,
-      "ebitda_0y_low": 15093.1,
-      "ebitda_0y_high": 18780.9,
-      "ebitda_1y_avg": 19477.8,
-      "ebitda_1y_low": 17613.8,
-      "ebitda_1y_high": 21586.8,
-      "ni_0y_avg": 4667.1,
-      "ni_1y_avg": 7248.1,
-      "pt_current": 374.73,
-      "pt_mean": 450.45,
-      "pt_low": 360.0,
-      "pt_high": 548.0,
-      "pt_analysts": [
-        {
-          "firm": "UBS",
-          "analyst": "Joseph Spak",
-          "price": 364,
-          "date": "2026-04-23"
-        },
-        {
-          "firm": "UBS",
-          "analyst": "",
-          "price": 475,
-          "date": "2026-04-23"
-        },
-        {
-          "firm": "Canaccord Genuity",
-          "analyst": "",
-          "price": 450,
-          "date": "2026-04-23"
-        },
-        {
-          "firm": "Deutsche Bank",
-          "analyst": "",
-          "price": 465,
-          "date": "2026-04-09"
-        },
-        {
-          "firm": "Truist Financial",
-          "analyst": "",
-          "price": 400,
-          "date": "2026-04-02"
-        }
-      ],
-      "upgrades_downgrades": [
-        {
-          "firm": "Cantor Fitzgerald",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-04-23"
-        },
-        {
-          "firm": "Canaccord Genuity",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-04-23"
-        },
-        {
-          "firm": "Mizuho",
-          "action": "maintain",
-          "new_grade": "Outperform",
-          "prev_grade": "Outperform",
-          "date": "2026-04-23"
-        },
-        {
-          "firm": "TD Cowen",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-04-23"
-        },
-        {
-          "firm": "Wedbush",
-          "action": "maintain",
-          "new_grade": "Outperform",
-          "prev_grade": "Outperform",
-          "date": "2026-04-23"
         }
       ]
     },
@@ -718,97 +718,97 @@
       ],
       "upgrades_downgrades": []
     },
-    "AMD": {
-      "rev_0y_avg": 47385.8,
-      "rev_0y_low": 42801.1,
-      "rev_0y_high": 51086.9,
-      "rev_1y_avg": 69220.5,
-      "rev_1y_low": 56693.7,
-      "rev_1y_high": 81917.4,
-      "rev_n": 34,
-      "rev_growth": 0.4608,
-      "eps_0y_avg": 6.884,
-      "eps_1y_avg": 11.3569,
-      "eps_n": 28,
-      "ebitda_0y_avg": 10281.4,
-      "ebitda_0y_low": 9286.6,
-      "ebitda_0y_high": 11084.4,
-      "ebitda_1y_avg": 15018.9,
-      "ebitda_1y_low": 12300.9,
-      "ebitda_1y_high": 17773.7,
-      "ni_0y_avg": 11750.8,
-      "ni_1y_avg": 13904.5,
-      "pt_current": 355.26,
-      "pt_mean": 331.9,
-      "pt_low": 230.0,
-      "pt_high": 500.0,
+    "PLTR": {
+      "rev_0y_avg": 7357.7,
+      "rev_0y_low": 7296.8,
+      "rev_0y_high": 7520.1,
+      "rev_1y_avg": 10538.0,
+      "rev_1y_low": 10029.3,
+      "rev_1y_high": 10963.7,
+      "rev_n": 16,
+      "rev_growth": 0.4322,
+      "eps_0y_avg": 1.3245,
+      "eps_1y_avg": 1.885,
+      "eps_n": 13,
+      "ebitda_0y_avg": 1755.5,
+      "ebitda_0y_low": 1741.0,
+      "ebitda_0y_high": 1794.3,
+      "ebitda_1y_avg": 2514.4,
+      "ebitda_1y_low": 2393.0,
+      "ebitda_1y_high": 2615.9,
+      "ni_0y_avg": 3537.0,
+      "ni_1y_avg": 4224.3,
+      "pt_current": 135.91,
+      "pt_mean": 191.83,
+      "pt_low": 151.0,
+      "pt_high": 230.0,
       "pt_analysts": [
         {
-          "firm": "Goldman Sachs",
+          "firm": "Argus Research",
           "analyst": "",
-          "price": 450,
+          "price": 190,
           "date": "2026-05-06"
         },
         {
-          "firm": "Roth Capital",
+          "firm": "D.A. Davidson",
           "analyst": "",
-          "price": 500,
-          "date": "2026-05-06"
+          "price": 165,
+          "date": "2026-05-05"
         },
         {
           "firm": "HSBC",
           "analyst": "",
-          "price": 340,
-          "date": "2026-05-04"
+          "price": 151,
+          "date": "2026-05-01"
         },
         {
-          "firm": "Susquehanna",
-          "analyst": "Christopher Rolland",
-          "price": 375,
-          "date": "2026-04-29"
+          "firm": "Oppenheimer",
+          "analyst": "Param Singh",
+          "price": 200,
+          "date": "2026-04-30"
         },
         {
-          "firm": "Northland Securities",
-          "analyst": "Market Perform",
-          "price": 260,
-          "date": "2026-04-27"
+          "firm": "Mizuho Securities",
+          "analyst": "Gregg Moskowitz",
+          "price": 185,
+          "date": "2026-04-14"
         }
       ],
       "upgrades_downgrades": [
         {
-          "firm": "HSBC",
-          "action": "downgrade",
-          "new_grade": "Hold",
+          "firm": "Argus Research",
+          "action": "upgrade",
+          "new_grade": "Buy",
+          "prev_grade": "Hold",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Citigroup",
+          "action": "maintain",
+          "new_grade": "Buy",
           "prev_grade": "Buy",
-          "date": "2026-05-04"
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Rosenblatt",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-05-05"
         },
         {
           "firm": "Wedbush",
           "action": "maintain",
           "new_grade": "Outperform",
           "prev_grade": "Outperform",
-          "date": "2026-05-04"
+          "date": "2026-05-05"
         },
         {
           "firm": "RBC Capital",
           "action": "maintain",
-          "new_grade": "Sector Perform",
-          "prev_grade": "Sector Perform",
-          "date": "2026-05-01"
-        },
-        {
-          "firm": "Susquehanna",
-          "action": "maintain",
-          "new_grade": "Positive",
-          "prev_grade": "Positive",
-          "date": "2026-04-29"
-        },
-        {
-          "firm": "Northland Capital Markets",
-          "action": "downgrade",
-          "new_grade": "Market Perform",
-          "prev_grade": "Outperform",
-          "date": "2026-04-27"
+          "new_grade": "Underperform",
+          "prev_grade": "Underperform",
+          "date": "2026-05-05"
         }
       ]
     },
@@ -906,100 +906,6 @@
         }
       ]
     },
-    "PLTR": {
-      "rev_0y_avg": 7357.7,
-      "rev_0y_low": 7296.8,
-      "rev_0y_high": 7520.1,
-      "rev_1y_avg": 10538.0,
-      "rev_1y_low": 10029.3,
-      "rev_1y_high": 10963.7,
-      "rev_n": 16,
-      "rev_growth": 0.4322,
-      "eps_0y_avg": 1.3245,
-      "eps_1y_avg": 1.885,
-      "eps_n": 13,
-      "ebitda_0y_avg": 1755.5,
-      "ebitda_0y_low": 1741.0,
-      "ebitda_0y_high": 1794.3,
-      "ebitda_1y_avg": 2514.4,
-      "ebitda_1y_low": 2393.0,
-      "ebitda_1y_high": 2615.9,
-      "ni_0y_avg": 3537.0,
-      "ni_1y_avg": 4224.3,
-      "pt_current": 137.31,
-      "pt_mean": 192.0,
-      "pt_low": 151.0,
-      "pt_high": 230.0,
-      "pt_analysts": [
-        {
-          "firm": "D.A. Davidson",
-          "analyst": "",
-          "price": 165,
-          "date": "2026-05-05"
-        },
-        {
-          "firm": "HSBC",
-          "analyst": "",
-          "price": 151,
-          "date": "2026-05-01"
-        },
-        {
-          "firm": "Oppenheimer",
-          "analyst": "Param Singh",
-          "price": 200,
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Mizuho Securities",
-          "analyst": "Gregg Moskowitz",
-          "price": 185,
-          "date": "2026-04-14"
-        },
-        {
-          "firm": "Daiwa",
-          "analyst": "",
-          "price": 180,
-          "date": "2026-02-10"
-        }
-      ],
-      "upgrades_downgrades": [
-        {
-          "firm": "Rosenblatt",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-05-05"
-        },
-        {
-          "firm": "Wedbush",
-          "action": "maintain",
-          "new_grade": "Outperform",
-          "prev_grade": "Outperform",
-          "date": "2026-05-05"
-        },
-        {
-          "firm": "RBC Capital",
-          "action": "maintain",
-          "new_grade": "Underperform",
-          "prev_grade": "Underperform",
-          "date": "2026-05-05"
-        },
-        {
-          "firm": "DA Davidson",
-          "action": "maintain",
-          "new_grade": "Neutral",
-          "prev_grade": "Neutral",
-          "date": "2026-05-05"
-        },
-        {
-          "firm": "HSBC",
-          "action": "downgrade",
-          "new_grade": "Hold",
-          "prev_grade": "Buy",
-          "date": "2026-05-01"
-        }
-      ]
-    },
     "EQIX": {
       "rev_0y_avg": null,
       "rev_0y_low": null,
@@ -1057,6 +963,100 @@
         }
       ],
       "upgrades_downgrades": []
+    },
+    "AMD": {
+      "rev_0y_avg": 47385.8,
+      "rev_0y_low": 42801.1,
+      "rev_0y_high": 51086.9,
+      "rev_1y_avg": 69220.5,
+      "rev_1y_low": 56693.7,
+      "rev_1y_high": 81917.4,
+      "rev_n": 34,
+      "rev_growth": 0.4608,
+      "eps_0y_avg": 6.884,
+      "eps_1y_avg": 11.3569,
+      "eps_n": 28,
+      "ebitda_0y_avg": 10281.4,
+      "ebitda_0y_low": 9286.6,
+      "ebitda_0y_high": 11084.4,
+      "ebitda_1y_avg": 15018.9,
+      "ebitda_1y_low": 12300.9,
+      "ebitda_1y_high": 17773.7,
+      "ni_0y_avg": 11750.8,
+      "ni_1y_avg": 13904.5,
+      "pt_current": 408.3,
+      "pt_mean": 401.65,
+      "pt_low": 260.0,
+      "pt_high": 530.0,
+      "pt_analysts": [
+        {
+          "firm": "Susquehanna",
+          "analyst": "Christopher Rolland",
+          "price": 450,
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Truist Financial",
+          "analyst": "",
+          "price": 478,
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "RBC Capital",
+          "analyst": "",
+          "price": 400,
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Seaport Global",
+          "analyst": "Jay Goldberg",
+          "price": 430,
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "KeyBanc",
+          "analyst": "",
+          "price": 530,
+          "date": "2026-05-06"
+        }
+      ],
+      "upgrades_downgrades": [
+        {
+          "firm": "Susquehanna",
+          "action": "maintain",
+          "new_grade": "Positive",
+          "prev_grade": "Positive",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Cantor Fitzgerald",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Wells Fargo",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Keybanc",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Mizuho",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-05-06"
+        }
+      ]
     },
     "AMT": {
       "rev_0y_avg": null,

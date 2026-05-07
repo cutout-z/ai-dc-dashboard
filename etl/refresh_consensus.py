@@ -34,6 +34,7 @@ from app.lib.fmp import (  # noqa: E402
 )
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 OUT_PATH = Path(__file__).parent.parent / "data" / "reference" / "consensus.json"

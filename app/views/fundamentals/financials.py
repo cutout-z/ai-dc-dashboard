@@ -55,6 +55,7 @@ _RATIO_FORMATTERS = {
     "Net Margin %":      _fmt_pct,
     "FCF Margin %":      _fmt_pct,
     "CapEx / Revenue %": _fmt_pct,
+    "CapEx / OpCF %":    _fmt_pct,
     "Net Debt / EBITDA": _fmt_x,
 }
 
@@ -229,7 +230,8 @@ _render_table("Cash Flow Statement", d["cashflow"], years)
 _render_table("Key Ratios", d.get("ratios", {}), years, formatters=_RATIO_FORMATTERS)
 st.caption(
     "Lease Oblig. = GAAP-reported capital/operating lease liabilities (ASC 842 / IFRS 16). "
-    "Net Debt / EBITDA: negative = net cash. CapEx / Revenue flags capital intensity."
+    "Net Debt / EBITDA: negative = net cash. CapEx / Revenue flags capital intensity. "
+    "CapEx / OpCF shows what share of operating cash flow is consumed by capex."
 )
 
 

@@ -194,35 +194,35 @@ with col1:
 # --- Market Cap Treemap ---
 with col2:
     st.subheader("Market Cap Treemap")
-    tree_data = [s for s in stocks if s.get("market_cap") and s.get("returns", {}).get("1Y") is not None]
+    tree_data = [s for s in stocks if s.get("market_cap")]
     if tree_data:
-        df_tree = pd.DataFrame([{
-            "symbol": s["symbol"],
-            "name": s["name"],
-            "group": s["group"],
-            "market_cap": s["market_cap"],
-            "ytd_pct": s["returns"].get("1Y", 0) or 0,
-        } for s in tree_data])
-
-        df_tree["label"] = df_tree.apply(
-            lambda r: f"{r['symbol']}<br>${r['market_cap'] / 1e12:.2f}T<br>{r['ytd_pct']:+.1f}%"
-            if r["market_cap"] >= 1e12
-            else f"{r['symbol']}<br>${r['market_cap'] / 1e9:.0f}B<br>{r['ytd_pct']:+.1f}%",
-            axis=1,
-        )
+        has_returns = any(s.get("returns", {}).get("1Y") is not None for s in tree_data)
+        rows = []
+        for s in tree_data:
+            ret_1y = s.get("returns", {}).get("1Y")
+            mc = s["market_cap"]
+            mc_label = f"${mc / 1e12:.2f}T" if mc >= 1e12 else f"${mc / 1e9:.0f}B"
+            label = f"{s['symbol']}<br>{mc_label}" + (f"<br>{ret_1y:+.1f}%" if ret_1y is not None else "")
+            rows.append({
+                "symbol": s["symbol"],
+                "group": s["group"],
+                "market_cap": mc,
+                "ytd_pct": ret_1y if ret_1y is not None else 0,
+                "label": label,
+            })
+        df_tree = pd.DataFrame(rows)
 
         fig_tree = px.treemap(
             df_tree,
             path=["group", "label"],
             values="market_cap",
-            color="ytd_pct",
-            color_continuous_scale="RdYlGn",
-            color_continuous_midpoint=0,
+            **({"color": "ytd_pct", "color_continuous_scale": "RdYlGn", "color_continuous_midpoint": 0}
+               if has_returns else {}),
         )
         fig_tree.update_layout(
             height=500,
             margin=dict(l=0, r=0, t=30, b=0),
-            coloraxis_colorbar=dict(title="1Y %"),
+            **({"coloraxis_colorbar": dict(title="1Y %")} if has_returns else {}),
         )
         st.plotly_chart(fig_tree, use_container_width=True)
     else:
@@ -291,6 +291,24 @@ with col_vh2:
         mag7_total = sum(s["market_cap"] for s in mag7_stocks) / 1e12
         mag7_data = sorted(mag7_stocks, key=lambda s: s["market_cap"], reverse=True)
 
+        # Live S&P 500 total float market cap estimate.
+        # S&P 500 float market cap = index level × S&P 500 divisor.
+        # Divisor ≈ 8.9B as of 2024 (S&P Dow Jones; adjusts slowly via corporate actions).
+        _SP500_DIVISOR = 8.9e9
+        _mag7_pct = None
+        _sp500_mc_T = None
+        try:
+            import yfinance as yf
+            _gspc_hist = yf.Ticker("^GSPC").history(period="1d")
+            if not _gspc_hist.empty:
+                _gspc_level = float(_gspc_hist["Close"].iloc[-1])
+                _sp500_mc_T = _gspc_level * _SP500_DIVISOR / 1e12
+                _mag7_pct = mag7_total / _sp500_mc_T * 100
+        except Exception:
+            pass
+
+        _pct_label = f"{_mag7_pct:.0f}%" if _mag7_pct else "~33% (est.)"
+
         fig_conc = go.Figure()
         fig_conc.add_trace(go.Bar(
             x=[s["symbol"] for s in mag7_data],
@@ -304,14 +322,30 @@ with col_vh2:
         fig_conc.update_layout(
             height=250, yaxis_title="Market Cap ($T)",
             showlegend=False,
-            margin=dict(l=0, r=0, t=10, b=0),
+            margin=dict(l=0, r=0, t=30, b=0),
+            title=dict(
+                text=f"Combined: ${mag7_total:.1f}T  ·  S&P 500 share: {_pct_label}",
+                font=dict(size=12, color="#9ca3af"),
+                x=0,
+            ),
         )
         st.plotly_chart(fig_conc, use_container_width=True)
-        st.caption(
-            f"Mag 7 combined: **${mag7_total:.1f}T**. "
-            f"At dot-com peak, top 5 were ~18% of S&P 500 (S&P Dow Jones). "
-            f"Today's Mag 7 share is estimated at ~33% — nearly 2x the dot-com concentration."
-        )
+
+        if _mag7_pct and _sp500_mc_T:
+            _vs_dotcom = _mag7_pct / 18  # dot-com top-5 were ~18% of S&P 500
+            st.caption(
+                f"Mag 7 combined: **${mag7_total:.1f}T** — **{_mag7_pct:.0f}%** of estimated S&P 500 "
+                f"float market cap (${_sp500_mc_T:.0f}T, live via index level). "
+                f"At dot-com peak, top 5 were ~18% of S&P 500 — current Mag 7 concentration is "
+                f"**{_vs_dotcom:.1f}×** the dot-com level. "
+                f"(S&P 500 total estimated using index level × divisor method; approximate.)"
+            )
+        else:
+            st.caption(
+                f"Mag 7 combined: **${mag7_total:.1f}T**. "
+                f"At dot-com peak, top 5 were ~18% of S&P 500 (S&P Dow Jones). "
+                f"Today's Mag 7 share is estimated at ~33% — nearly 2x the dot-com concentration."
+            )
     else:
         st.info("Mag 7 market cap data not available.")
 
@@ -324,109 +358,145 @@ st.caption(
     "**Platforms** (LLM development), **Infrastructure** (GPUs, semis), "
     "**Enterprise Software** (business AI apps), and **Consumer Software** (consumer AI apps). "
     "Includes non-US exposure (Chinese AI, Korean semiconductors). "
+    "Expense ratio: 0.75% · Inception: May 2023. "
     "[Fund details →](https://www.roundhillinvestments.com/etf/chat/)"
+)
+st.markdown(
+    "**Why track CHAT?** "
+    "CHAT is the closest pure-play ETF to the AI infrastructure thesis this dashboard monitors. "
+    "Its price action reflects market consensus on the generative AI value chain — "
+    "a useful cross-check against the individual signals tracked above."
 )
 
 try:
     import yfinance as yf
+    import requests as _req
+    import concurrent.futures as _cf
 
+    # ── Fetch summary info ──
     _chat_etf = yf.Ticker("CHAT")
     _chat_info = _chat_etf.info
     _chat_price = _chat_info.get("regularMarketPrice") or _chat_info.get("previousClose")
     _chat_aum = _chat_info.get("totalAssets")
-    _chat_pe = _chat_info.get("trailingPE")
     _chat_ytd = _chat_info.get("ytdReturn")
     _chat_52lo = _chat_info.get("fiftyTwoWeekLow")
     _chat_52hi = _chat_info.get("fiftyTwoWeekHigh")
 
+    # ── Fetch holdings ──
+    df_hold = None
+    try:
+        _qs = _req.get(
+            "https://query2.finance.yahoo.com/v10/finance/quoteSummary/CHAT",
+            params={"modules": "topHoldings"},
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=10,
+        )
+        if _qs.status_code == 200:
+            _raw = (_qs.json().get("quoteSummary", {})
+                              .get("result", [{}])[0]
+                              .get("topHoldings", {})
+                              .get("holdings", []))
+            if _raw:
+                df_hold = pd.DataFrame([{
+                    "Ticker": h.get("symbol", ""),
+                    "Name":   h.get("holdingName", ""),
+                    "_weight_raw": h.get("holdingPercent", {}).get("raw", 0),
+                } for h in _raw])
+    except Exception:
+        pass
+
+    # Fallback to yfinance funds_data
+    if df_hold is None or df_hold.empty:
+        _chat_hd = _chat_etf.get_funds_data()
+        if hasattr(_chat_hd, "top_holdings") and _chat_hd.top_holdings is not None:
+            df_hold = _chat_hd.top_holdings.copy().reset_index()
+            df_hold.columns = ["Ticker", "Name", "_weight_raw"]
+
+    # ── Parallel PE fetch + weighted avg forward PE ──
+    wtd_fwd_pe = None
+    _pe_map = {}
+    _pe_pairs = []
+    if df_hold is not None and not df_hold.empty:
+        def _fetch_pe(sym):
+            try:
+                info = yf.Ticker(sym).info
+                fpe = info.get("forwardPE")
+                tpe = info.get("trailingPE")
+                fpe_raw = fpe if fpe and 0 < fpe < 5000 else None
+                tpe_raw = tpe if tpe and 0 < tpe < 5000 else None
+                return sym, (
+                    f"{fpe_raw:.1f}x" if fpe_raw else "—",
+                    f"{tpe_raw:.1f}x" if tpe_raw else "—",
+                    fpe_raw,
+                )
+            except Exception:
+                return sym, ("—", "—", None)
+
+        with _cf.ThreadPoolExecutor(max_workers=8) as _pool:
+            _pe_map = dict(_pool.map(_fetch_pe, df_hold["Ticker"].tolist()))
+
+        # Weighted average forward PE (US listings only — non-US return None)
+        _pe_pairs = [
+            (row["_weight_raw"], _pe_map.get(row["Ticker"], ("—", "—", None))[2])
+            for _, row in df_hold.iterrows()
+        ]
+        _covered = [(w, pe) for w, pe in _pe_pairs if pe is not None]
+        if _covered:
+            _cov_w = sum(w for w, _ in _covered)
+            wtd_fwd_pe = sum(w * pe for w, pe in _covered) / _cov_w if _cov_w else None
+
+        # Format display columns (after weighted PE calc, so _weight_raw still available above)
+        df_hold["Weight"] = df_hold["_weight_raw"].apply(lambda x: f"{x * 100:.1f}%")
+        df_hold = df_hold.drop(columns=["_weight_raw"])
+        df_hold["Fwd P/E"]   = df_hold["Ticker"].map(lambda s: _pe_map.get(s, ("—", "—", None))[0])
+        df_hold["Trail P/E"] = df_hold["Ticker"].map(lambda s: _pe_map.get(s, ("—", "—", None))[1])
+
+    # ── Metric tiles ──
     col_chat1, col_chat2, col_chat3, col_chat4 = st.columns(4)
     if _chat_price:
         col_chat1.metric("Price", f"${_chat_price:.2f}")
     if _chat_aum:
         col_chat2.metric("AUM", f"${_chat_aum / 1e9:.2f}B")
-    if _chat_pe:
-        col_chat3.metric("Trailing PE", f"{_chat_pe:.1f}x")
+    if wtd_fwd_pe is not None:
+        col_chat3.metric("Wtd Avg Fwd PE", f"{wtd_fwd_pe:.1f}x")
     if _chat_ytd is not None:
         col_chat4.metric("YTD Return", f"{_chat_ytd * 100:+.1f}%")
 
-    col_ch1, col_ch2 = st.columns([2, 1])
-    with col_ch1:
-        import requests as _req
-        import concurrent.futures as _cf
-
-        # Yahoo Finance quoteSummary returns full holdings list (beyond top 10)
-        df_hold = None
-        try:
-            _qs = _req.get(
-                "https://query2.finance.yahoo.com/v10/finance/quoteSummary/CHAT",
-                params={"modules": "topHoldings"},
-                headers={"User-Agent": "Mozilla/5.0"},
-                timeout=10,
-            )
-            if _qs.status_code == 200:
-                _raw = (_qs.json().get("quoteSummary", {})
-                                  .get("result", [{}])[0]
-                                  .get("topHoldings", {})
-                                  .get("holdings", []))
-                if _raw:
-                    df_hold = pd.DataFrame([{
-                        "Ticker": h.get("symbol", ""),
-                        "Name":   h.get("holdingName", ""),
-                        "_weight_raw": h.get("holdingPercent", {}).get("raw", 0),
-                    } for h in _raw])
-        except Exception:
-            pass
-
-        # Fallback to yfinance funds_data if direct API failed
-        if df_hold is None or df_hold.empty:
-            _chat_hd = _chat_etf.get_funds_data()
-            if hasattr(_chat_hd, "top_holdings") and _chat_hd.top_holdings is not None:
-                df_hold = _chat_hd.top_holdings.copy().reset_index()
-                df_hold.columns = ["Ticker", "Name", "_weight_raw"]
-
-        if df_hold is not None and not df_hold.empty:
-            df_hold["Weight"] = df_hold["_weight_raw"].apply(lambda x: f"{x * 100:.1f}%")
-            df_hold = df_hold.drop(columns=["_weight_raw"])
-
-            # Parallel forward + trailing P/E fetch
-            def _fetch_pe(sym):
-                try:
-                    info = yf.Ticker(sym).info
-                    fpe = info.get("forwardPE")
-                    tpe = info.get("trailingPE")
-                    return sym, (
-                        f"{fpe:.1f}x" if fpe and 0 < fpe < 5000 else "—",
-                        f"{tpe:.1f}x" if tpe and 0 < tpe < 5000 else "—",
-                    )
-                except Exception:
-                    return sym, ("—", "—")
-
-            with _cf.ThreadPoolExecutor(max_workers=8) as _pool:
-                _pe_map = dict(_pool.map(_fetch_pe, df_hold["Ticker"].tolist()))
-
-            df_hold["Fwd P/E"]   = df_hold["Ticker"].map(lambda s: _pe_map.get(s, ("—", "—"))[0])
-            df_hold["Trail P/E"] = df_hold["Ticker"].map(lambda s: _pe_map.get(s, ("—", "—"))[1])
-
-            st.caption(f"Top {len(df_hold)} holdings · P/E unavailable for non-US listings (HK, KS)")
-            st.dataframe(df_hold, use_container_width=True, hide_index=True)
-        else:
-            st.info("Holdings data not available.")
-
-    with col_ch2:
+    # ── 52-week range (above the table) ──
+    col_rng, _ = st.columns([2, 1])
+    with col_rng:
         if _chat_52lo and _chat_52hi and _chat_price:
-            pct_of_range = (_chat_price - _chat_52lo) / (_chat_52hi - _chat_52lo) * 100 if _chat_52hi > _chat_52lo else 50
-            st.markdown(
-                f"**52-Week Range**  \n"
-                f"${_chat_52lo:.2f} — ${_chat_52hi:.2f}  \n"
-                f"Currently at {pct_of_range:.0f}% of range"
+            pct_of_range = (
+                (_chat_price - _chat_52lo) / (_chat_52hi - _chat_52lo) * 100
+                if _chat_52hi > _chat_52lo else 50
             )
-        st.markdown(
-            "**Why track CHAT?**  \n"
-            "CHAT is the closest pure-play ETF to the AI infrastructure thesis this dashboard monitors. "
-            "Its price action reflects market consensus on the generative AI value chain — "
-            "a useful cross-check against the individual signals tracked above."
-        )
-        st.caption("Expense ratio: 0.75% · Inception: May 2023 · Actively managed")
+            _dot_pct = min(max(pct_of_range, 2), 98)
+            st.markdown("**52-Week Range**")
+            st.markdown(
+                f"""<div style="padding:2px 0 14px 0;">
+  <div style="display:flex;justify-content:space-between;font-size:0.78em;color:#9ca3af;margin-bottom:8px;">
+    <div><div style="font-size:1.1em;color:#e5e7eb;font-weight:600;">${_chat_52lo:.2f}</div>52W Low</div>
+    <div style="text-align:right"><div style="font-size:1.1em;color:#e5e7eb;font-weight:600;">${_chat_52hi:.2f}</div>52W High</div>
+  </div>
+  <div style="background:#374151;border-radius:6px;height:8px;position:relative;margin:0 2px;">
+    <div style="position:absolute;left:{_dot_pct:.1f}%;transform:translateX(-50%);
+                width:14px;height:14px;background:#3b82f6;border-radius:50%;top:-3px;
+                box-shadow:0 0 8px rgba(59,130,246,0.6);"></div>
+  </div>
+  <div style="font-size:0.82em;color:#d1d5db;margin-top:10px;">
+    Current: <strong>${_chat_price:.2f}</strong> &nbsp;·&nbsp; {pct_of_range:.0f}% of range
+  </div>
+</div>""",
+                unsafe_allow_html=True,
+            )
+    # ── Holdings table ──
+    if df_hold is not None and not df_hold.empty:
+        _n_covered = sum(1 for _, pe in _pe_pairs if pe is not None)
+        _pe_note = f"P/E unavailable for non-US listings (HK, KS) · Wtd avg fwd PE covers {_n_covered}/{len(_pe_pairs)} holdings"
+        st.caption(f"Top {len(df_hold)} holdings · {_pe_note}")
+        st.dataframe(df_hold, use_container_width=True, hide_index=True)
+    else:
+        st.info("Holdings data not available.")
 
 except Exception as e:
     st.warning(f"Could not fetch CHAT ETF data: {e}")
