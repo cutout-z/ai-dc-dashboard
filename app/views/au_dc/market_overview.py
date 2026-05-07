@@ -43,13 +43,13 @@ if spot_check:
             "as mixed-quality public-source data."
         )
 
-# --- Controls ---
-st.sidebar.header("Controls")
-risk_view = st.sidebar.radio(
+st.markdown("### Controls")
+risk_view = st.radio(
     "Capacity View",
     ["Unrisked", "Risked"],
     index=0,
     key="au_mkt_risk",
+    horizontal=True,
     help=RISKED_MW_HELP,
 )
 mw_col = "risked_mw" if risk_view == "Risked" else "facility_mw"

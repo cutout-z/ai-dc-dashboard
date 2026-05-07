@@ -60,6 +60,16 @@ The current AU project table is not audit-grade and should not be treated as a s
 - Quarantined CDC legacy split rows that do not map to a current disclosed CDC campus/capacity.
 - Final included project capacity now consists only of rows with row-level source URLs, evidence text, and capacity basis. All other rows are grade Q and excluded from project capacity totals pending source remediation.
 
+## Quarantine Remediation Sweep - 2026-05-07
+
+- Removed 51 stale, duplicate, regional-estimate, placeholder, or unsupported rows from the seed file. The removal audit trail is stored at `data/au_dc/processed/project_rows_removed_2026-05-07.csv`.
+- Converted quick-win official-source rows back into included project totals where MW could be verified: Macquarie IC1, Telstra St Leonards/Clayton, six Leading Edge Data Centres sites, Fujitsu Greystanes/Homebush, NCI Gadi, and DigiCo SYD1/BNE1/BNE2/BNE3/ADL1/TSV1.
+- Replaced directory or legacy figures for DigiCo rows with DigiCo official location-page installed/planned IT capacity. BNE3 is treated as a proposed greenfield project; SYD1 records 26MW installed IT capacity, with 88MW planned capacity retained in evidence rather than counted as current operating MW.
+- Located official no-MW sources for Equinix, Digital Realty, Keppel, Telstra, Macquarie Government, DXN, Vault Cloud, AUCloud, Pawsey, DCI, and Rackspace rows. These remain quarantined because the public source confirms the facility but does not disclose MW, or in Rackspace's case discloses 10MVA rather than MW.
+- Removed current-source mismatches including Vantage SYD1, Global Switch MEL, DigiCo SYD Gore Hill, and Sliced Tech Fyshwick where a row-level current facility/MW source could not be established.
+- After the sweep, all quarantined rows have source URLs. Remaining quarantined rows are not legacy estimates awaiting blind trust; they are source-located rows where MW/current-stage evidence is still insufficient for capacity totals.
+- Moved Australian-section controls/filters out of the Streamlit sidebar and into the top of the relevant AU page, so the controls sit beside the page they adjust.
+
 ## Useful External Alternatives
 
 - Baxtel sells site-level global data centre datasets with power capacity and lifecycle status.

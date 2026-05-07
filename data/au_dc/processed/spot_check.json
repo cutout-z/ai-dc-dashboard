@@ -1,13 +1,13 @@
 {
-  "run_at": "2026-05-07T05:58:09.282958+00:00",
-  "project_count": 138,
-  "total_mw_unrisked": 5940.65,
-  "total_mw_risked": 3078.65,
+  "run_at": "2026-05-07T06:13:29.302185+00:00",
+  "project_count": 87,
+  "total_mw_unrisked": 6114.424999999999,
+  "total_mw_risked": 3232.825,
   "checks": [
     {
       "level": "ok",
       "code": "seed_parquet_row_count",
-      "message": "Seed and parquet row counts match (138 rows).",
+      "message": "Seed and parquet row counts match (87 rows).",
       "count": 0,
       "projects": []
     },
@@ -21,7 +21,7 @@
     {
       "level": "ok",
       "code": "missing_source_urls",
-      "message": "All included project rows have source URLs. 84 quarantined row(s) still lack URLs.",
+      "message": "All included project rows have source URLs. 0 quarantined row(s) still lack URLs.",
       "count": 0,
       "projects": []
     },
@@ -42,8 +42,8 @@
     {
       "level": "warn",
       "code": "capex_mostly_estimated",
-      "message": "133/138 projects (96%) have estimated CAPEX; estimated rows represent 91% of capacity. Do not present blended CAPEX as disclosed market spend.",
-      "count": 133,
+      "message": "85/87 projects (98%) have estimated CAPEX; estimated rows represent 91% of capacity. Do not present blended CAPEX as disclosed market spend.",
+      "count": 85,
       "projects": [
         {
           "project_name": "Keppel Morwell",
@@ -110,8 +110,8 @@
     {
       "level": "warn",
       "code": "uc_power_not_explicit",
-      "message": "12/14 under-construction project(s) have no explicit power_secured flag; the risk model currently weights them at 100%.",
-      "count": 12,
+      "message": "7/9 under-construction project(s) have no explicit power_secured flag; the risk model currently weights them at 100%.",
+      "count": 7,
       "projects": [
         {
           "project_name": "CDC Maddington",
@@ -132,34 +132,10 @@
           "source": "AirTrunk official Dec 2025 portfolio media release"
         },
         {
-          "project_name": "Goodman Truganina",
-          "operator": "Goodman Group",
-          "facility_mw": NaN,
-          "source": "No row-level MW source found in remediation pass"
-        },
-        {
-          "project_name": "Goodman Macquarie Park",
-          "operator": "Goodman Group",
-          "facility_mw": NaN,
-          "source": "No row-level MW source found in remediation pass"
-        },
-        {
           "project_name": "DCI Sydney",
           "operator": "DCI Data Centres",
           "facility_mw": NaN,
           "source": "DCI official locations page; MW not disclosed"
-        },
-        {
-          "project_name": "Azure Sydney Expansion",
-          "operator": "Microsoft Azure",
-          "facility_mw": NaN,
-          "source": "Australian Government / Microsoft investment announcement; MW not disclosed"
-        },
-        {
-          "project_name": "YondrGroup Western Sydney",
-          "operator": "Yondr Group",
-          "facility_mw": NaN,
-          "source": "No row-level source found in remediation pass"
         },
         {
           "project_name": "Equinix SY10x",
@@ -178,39 +154,18 @@
           "operator": "CDC Data Centres",
           "facility_mw": 39.0,
           "source": "CDC official Canberra location page"
-        },
-        {
-          "project_name": "CDC Perth UC",
-          "operator": "CDC Data Centres",
-          "facility_mw": NaN,
-          "source": "Duplicate of CDC Maddington campus after remediation"
         }
       ]
     },
     {
       "level": "warn",
       "code": "pipeline_missing_mw",
-      "message": "18 pipeline project(s) (UC/Proposed/Approved) have no facility_mw \u2014 they won't appear in capacity charts.",
-      "count": 18,
+      "message": "3 pipeline project(s) (UC/Proposed/Approved) have no facility_mw \u2014 they won't appear in capacity charts.",
+      "count": 3,
       "projects": [
-        "B3",
-        "P3",
-        "AirTrunk SYD4",
-        "Goodman Truganina",
-        "Goodman Macquarie Park",
         "DCI Sydney",
-        "AWS Queensland Region",
-        "AWS Perth Region",
-        "Azure Sydney Expansion",
-        "Azure Queensland",
-        "Google Sydney Expansion",
-        "Oracle Melbourne",
-        "Meta Australia",
-        "YondrGroup Western Sydney",
-        "CloudHQ Sydney",
-        "Endeavour Energy DC Precinct",
         "EdgeConneX Macquarie Park",
-        "CDC Perth UC"
+        "GreenSquareDC Norwest"
       ]
     },
     {
@@ -254,19 +209,18 @@
     {
       "level": "warn",
       "code": "top_operator_no_operating",
-      "message": "4 top-10 operator(s) by total MW have zero operating capacity \u2014 may be correct (pure pipeline) or a data gap.",
-      "count": 4,
+      "message": "3 top-10 operator(s) by total MW have zero operating capacity \u2014 may be correct (pure pipeline) or a data gap.",
+      "count": 3,
       "projects": [
         "Keppel Data Centres",
         "Stack Infrastructure",
-        "Doma Infrastructure Group",
-        "AUCloud"
+        "Doma Infrastructure Group"
       ]
     },
     {
       "level": "ok",
       "code": "operating_share",
-      "message": "76% of projects are Operating (sanity range \u226530%).",
+      "message": "78% of projects are Operating (sanity range \u226530%).",
       "count": 0,
       "projects": []
     },
