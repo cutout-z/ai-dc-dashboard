@@ -30,17 +30,26 @@ _fin_history = fetch_asx_dc_history()
 fin_quotes = _fin_quotes if not _fin_quotes.empty else None
 fin_history = _fin_history if not _fin_history.empty else None
 
-# --- Controls ---
-st.sidebar.header("Controls")
-risk_view = st.sidebar.radio(
-    "Capacity View",
-    ["Unrisked", "Risked"],
-    index=0,
-    key="au_co_risk",
-    help=RISKED_MW_HELP,
-)
+st.markdown("### Controls")
+control_col1, control_col2 = st.columns([1, 1])
+with control_col1:
+    risk_view = st.radio(
+        "Capacity View",
+        ["Unrisked", "Risked"],
+        index=0,
+        key="au_co_risk",
+        horizontal=True,
+        help=RISKED_MW_HELP,
+    )
 mw_col = "risked_mw" if risk_view == "Risked" else "facility_mw"
-group_by = st.sidebar.radio("Group By", ["Operator", "Parent Company", "Operator Type"], index=0, key="au_co_group")
+with control_col2:
+    group_by = st.radio(
+        "Group By",
+        ["Operator", "Parent Company", "Operator Type"],
+        index=0,
+        key="au_co_group",
+        horizontal=True,
+    )
 group_col = {"Operator": "operator", "Parent Company": "parent_company", "Operator Type": "operator_type"}[group_by]
 
 # ========================================

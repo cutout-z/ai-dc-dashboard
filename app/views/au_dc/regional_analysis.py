@@ -39,13 +39,13 @@ nem_demand = pd.read_parquet(nem_demand_path) if nem_demand_path.exists() else N
 esoo_path = DATA_DIR / "esoo_forecasts.parquet"
 esoo = pd.read_parquet(esoo_path) if esoo_path.exists() else None
 
-# --- Controls ---
-st.sidebar.header("Controls")
-risk_view = st.sidebar.radio(
+st.markdown("### Controls")
+risk_view = st.radio(
     "Capacity View",
     ["Unrisked", "Risked"],
     index=0,
     key="au_reg_risk",
+    horizontal=True,
     help=RISKED_MW_HELP,
 )
 mw_col = "risked_mw" if risk_view == "Risked" else "facility_mw"
