@@ -80,7 +80,7 @@ if "unverified_capacity_mw" in projects.columns:
     display_mw = display_mw.fillna(projects["unverified_capacity_mw"])
 projects["_display_mw"] = display_mw.fillna(0)
 
-f4, f5, f6 = st.columns([1.4, 1, 1.2])
+f4, f5 = st.columns([2, 1])
 with f4:
     sel_evidence = st.multiselect(
         "Evidence Grade",
@@ -90,14 +90,14 @@ with f4:
         help="A requires row-level source URL, evidence text, capacity basis, and source date where available.",
     )
 with f5:
-    show_quarantined = st.toggle(
-        "Show Quarantined Rows",
-        value=False,
-        key="au_proj_show_quarantined",
-        help="Quarantined rows retain unverified MW for audit trail but are excluded from default project totals.",
-    )
-with f6:
     min_mw = st.slider("Min MW", 0, int(projects["_display_mw"].max()), 0, key="au_proj_mw")
+
+show_quarantined = st.toggle(
+    "Show Quarantined Rows",
+    value=False,
+    key="au_proj_show_quarantined",
+    help="Quarantined rows retain unverified MW for audit trail but are excluded from default project totals.",
+)
 
 # Apply filters
 filtered = projects.copy()
