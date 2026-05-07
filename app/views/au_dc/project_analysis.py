@@ -234,76 +234,6 @@ for col, (label, value, help_text) in zip([s1, s2, s3, s4, s5], status_metrics):
 st.markdown("---")
 
 # ========================================
-# Hyperscaler Announcements
-# ========================================
-hyperscaler_path = REFERENCE_DIR / "hyperscaler_announcements.csv"
-if hyperscaler_path.exists():
-    hyperscaler_announcements = pd.read_csv(hyperscaler_path)
-
-    st.markdown("### Hyperscaler & AI Demand Announcements")
-    st.caption(
-        "These are capex, footprint, cloud-region, or tenant/partner announcements. "
-        "They are deliberately excluded from project MW totals unless a named physical "
-        "project with row-level MW evidence exists in the project database."
-    )
-
-    h1, h2, h3 = st.columns(3)
-    with h1:
-        st.metric("Announcements", f"{len(hyperscaler_announcements):,.0f}")
-    with h2:
-        announcement_capex = hyperscaler_announcements["capex_aud_m"].dropna().sum()
-        st.metric(
-            "Announced CAPEX",
-            f"A${announcement_capex:,.0f}M",
-            help="Capex disclosed in hyperscaler/AI demand announcements. This is not added to project CAPEX totals.",
-        )
-    with h3:
-        linked_mw = hyperscaler_announcements["linked_project_mw"].dropna().sum()
-        st.metric(
-            "Linked Project MW",
-            f"{linked_mw:,.0f} MW",
-            help="MW already represented in the project database through a linked operator/project row.",
-        )
-
-    hyperscaler_cols = [
-        "announcement_name", "provider", "announcement_type", "announced_cities",
-        "announcement_date", "capex_aud_m", "site_count_before", "site_count_after",
-        "linked_project", "linked_operator", "linked_project_mw", "capacity_basis",
-        "source_url", "secondary_source_url", "evidence_summary", "notes",
-    ]
-    available_hyperscaler_cols = [
-        c for c in hyperscaler_cols if c in hyperscaler_announcements.columns
-    ]
-    st.dataframe(
-        hyperscaler_announcements[available_hyperscaler_cols].sort_values(
-            "announcement_date", ascending=False
-        ),
-        use_container_width=True,
-        hide_index=True,
-        height=260,
-        column_config={
-            "announcement_name": st.column_config.TextColumn("Announcement", width="medium"),
-            "provider": "Provider",
-            "announcement_type": st.column_config.TextColumn("Type", width="medium"),
-            "announced_cities": "Cities / Regions",
-            "announcement_date": "Date",
-            "capex_aud_m": st.column_config.NumberColumn("CAPEX (A$M)", format="%d"),
-            "site_count_before": st.column_config.NumberColumn("Sites Before", format="%d"),
-            "site_count_after": st.column_config.NumberColumn("Sites After", format="%d"),
-            "linked_project": "Linked Project",
-            "linked_operator": "Linked Operator",
-            "linked_project_mw": st.column_config.NumberColumn("Linked MW", format="%d"),
-            "capacity_basis": "Basis",
-            "source_url": st.column_config.LinkColumn("Source", display_text="open"),
-            "secondary_source_url": st.column_config.LinkColumn("Capacity Source", display_text="open"),
-            "evidence_summary": st.column_config.TextColumn("Evidence Summary", width="large"),
-            "notes": st.column_config.TextColumn("Treatment", width="large"),
-        },
-    )
-
-    st.markdown("---")
-
-# ========================================
 # Project Table
 # ========================================
 st.markdown("### Project Database")
@@ -387,6 +317,76 @@ st.dataframe(
 )
 
 st.markdown("---")
+
+# ========================================
+# Hyperscaler Announcements
+# ========================================
+hyperscaler_path = REFERENCE_DIR / "hyperscaler_announcements.csv"
+if hyperscaler_path.exists():
+    hyperscaler_announcements = pd.read_csv(hyperscaler_path)
+
+    st.markdown("### Hyperscaler & AI Demand Announcements")
+    st.caption(
+        "These are capex, footprint, cloud-region, or tenant/partner announcements. "
+        "They are deliberately excluded from project MW totals unless a named physical "
+        "project with row-level MW evidence exists in the project database."
+    )
+
+    h1, h2, h3 = st.columns(3)
+    with h1:
+        st.metric("Announcements", f"{len(hyperscaler_announcements):,.0f}")
+    with h2:
+        announcement_capex = hyperscaler_announcements["capex_aud_m"].dropna().sum()
+        st.metric(
+            "Announced CAPEX",
+            f"A${announcement_capex:,.0f}M",
+            help="Capex disclosed in hyperscaler/AI demand announcements. This is not added to project CAPEX totals.",
+        )
+    with h3:
+        linked_mw = hyperscaler_announcements["linked_project_mw"].dropna().sum()
+        st.metric(
+            "Linked Project MW",
+            f"{linked_mw:,.0f} MW",
+            help="MW already represented in the project database through a linked operator/project row.",
+        )
+
+    hyperscaler_cols = [
+        "announcement_name", "provider", "announcement_type", "announced_cities",
+        "announcement_date", "capex_aud_m", "site_count_before", "site_count_after",
+        "linked_project", "linked_operator", "linked_project_mw", "capacity_basis",
+        "source_url", "secondary_source_url", "evidence_summary", "notes",
+    ]
+    available_hyperscaler_cols = [
+        c for c in hyperscaler_cols if c in hyperscaler_announcements.columns
+    ]
+    st.dataframe(
+        hyperscaler_announcements[available_hyperscaler_cols].sort_values(
+            "announcement_date", ascending=False
+        ),
+        use_container_width=True,
+        hide_index=True,
+        height=260,
+        column_config={
+            "announcement_name": st.column_config.TextColumn("Announcement", width="medium"),
+            "provider": "Provider",
+            "announcement_type": st.column_config.TextColumn("Type", width="medium"),
+            "announced_cities": "Cities / Regions",
+            "announcement_date": "Date",
+            "capex_aud_m": st.column_config.NumberColumn("CAPEX (A$M)", format="%d"),
+            "site_count_before": st.column_config.NumberColumn("Sites Before", format="%d"),
+            "site_count_after": st.column_config.NumberColumn("Sites After", format="%d"),
+            "linked_project": "Linked Project",
+            "linked_operator": "Linked Operator",
+            "linked_project_mw": st.column_config.NumberColumn("Linked MW", format="%d"),
+            "capacity_basis": "Basis",
+            "source_url": st.column_config.LinkColumn("Source", display_text="open"),
+            "secondary_source_url": st.column_config.LinkColumn("Capacity Source", display_text="open"),
+            "evidence_summary": st.column_config.TextColumn("Evidence Summary", width="large"),
+            "notes": st.column_config.TextColumn("Treatment", width="large"),
+        },
+    )
+
+    st.markdown("---")
 
 # ========================================
 # Charts
