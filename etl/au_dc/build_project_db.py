@@ -20,6 +20,67 @@ SEED_CSV = BASE_DIR / "data" / "au_dc" / "reference" / "projects_seed.csv"
 OPERATOR_CSV = BASE_DIR / "data" / "au_dc" / "reference" / "operator_types.csv"
 PROCESSED_DIR = BASE_DIR / "data" / "au_dc" / "processed"
 
+STAGED_CAMPUS_NOTES = {
+    "CDC Marsden Park": (
+        "Staged campus envelope: NSW approval covers six buildings and 504MW power "
+        "consumption; Infratil's 26 Mar 2026 CDC presentation shows MP1/the first "
+        "of six buildings complete. No stage-level MW was disclosed."
+    ),
+    "CDC Eastern Creek": (
+        "Staged campus: CDC states EC1-EC4 are operational and EC5-EC6 are under "
+        "construction. The >200MW figure is campus-level; no building-level MW split "
+        "is stored."
+    ),
+    "CDC Brooklyn Campus": (
+        "Staged campus: CDC states BK1 is operational while remaining Brooklyn "
+        "facilities are under construction. The >350MW figure is upon-completion "
+        "campus capacity; no stage-level MW split is stored."
+    ),
+}
+
+
+def _derive_capacity_scope(row: pd.Series) -> str:
+    """Classify whether a MW figure is row-level current capacity or a campus envelope."""
+    basis = str(row.get("capacity_basis") or "").strip()
+    status = str(row.get("status") or "").strip()
+    evidence = str(row.get("evidence_quote") or "").lower()
+
+    if basis in {"unsupported_legacy_split", "pending_row_level_source", "unverified_pipeline_estimate"}:
+        return "Quarantined/unverified"
+    if basis == "power_consumption_mw":
+        return "Campus power-consumption envelope"
+    if basis == "campus_full_build_mw":
+        if "current capacity (operating)" in evidence:
+            return "Campus current operating capacity"
+        if status == "Operating" and "upon completion" not in evidence and "under construction" not in evidence:
+            return "Campus capacity; stage split not stored"
+        return "Campus full-build envelope"
+    if basis in {"it_load_mw", "gross_power_mw"}:
+        return "Row-level sourced capacity"
+    if basis == "facility_exists_no_mw_disclosed":
+        return "Facility exists; no MW disclosed"
+    return "Unclassified"
+
+
+def _derive_stage_status_caveat(row: pd.Series) -> str:
+    campus = str(row.get("campus") or "").strip()
+    project = str(row.get("project_name") or "").strip()
+    key = campus if campus in STAGED_CAMPUS_NOTES else project
+    if key in STAGED_CAMPUS_NOTES:
+        return STAGED_CAMPUS_NOTES[key]
+
+    scope = str(row.get("capacity_scope") or "")
+    if scope in {
+        "Campus full-build envelope",
+        "Campus power-consumption envelope",
+        "Campus capacity; stage split not stored",
+    }:
+        return (
+            "Campus-level MW: row status is the best available project/campus status, "
+            "but public data may not disclose each building or stage separately."
+        )
+    return ""
+
 
 def build():
     print("=" * 60)
@@ -55,6 +116,9 @@ def build():
 
     # Apply risk model
     df = apply_risk_weight(df, status_col="status", mw_col="facility_mw")
+
+    df["capacity_scope"] = df.apply(_derive_capacity_scope, axis=1)
+    df["stage_status_caveat"] = df.apply(_derive_stage_status_caveat, axis=1)
 
     # Estimate CAPEX where not disclosed
     df = estimate_capex(df)
