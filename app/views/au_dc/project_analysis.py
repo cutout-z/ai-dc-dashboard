@@ -144,28 +144,29 @@ with k2:
 with k3:
     st.metric("Risked MW (Provisional)", f"{filtered['risked_mw'].sum():,.0f}", help=RISKED_MW_HELP)
 with k4:
+    pipeline_filtered = filtered[filtered["status"] != "Operating"]
     if "capex_estimated" in filtered.columns:
-        estimated_mask = filtered["capex_estimated"].fillna(False)
-        disclosed_capex = filtered.loc[~estimated_mask, "capex_aud_m"].dropna().sum()
+        estimated_mask = pipeline_filtered["capex_estimated"].fillna(False)
+        disclosed_capex = pipeline_filtered.loc[~estimated_mask, "capex_aud_m"].dropna().sum()
         st.metric(
-            "Disclosed CAPEX",
+            "Pipeline Disclosed CAPEX",
             f"A${disclosed_capex:,.0f}M",
-            help=DISCLOSED_CAPEX_HELP,
+            help=f"{DISCLOSED_CAPEX_HELP} Operating rows are excluded from this top-line KPI.",
         )
     else:
-        known_capex = filtered["capex_aud_m"].dropna().sum()
-        st.metric("Known CAPEX", f"A${known_capex:,.0f}M" if known_capex > 0 else "N/A")
+        known_capex = pipeline_filtered["capex_aud_m"].dropna().sum()
+        st.metric("Pipeline Known CAPEX", f"A${known_capex:,.0f}M" if known_capex > 0 else "N/A")
 with k5:
     if "capex_estimated" in filtered.columns:
-        estimated_mask = filtered["capex_estimated"].fillna(False)
-        estimated_capex = filtered.loc[estimated_mask, "capex_aud_m"].dropna().sum()
+        estimated_mask = pipeline_filtered["capex_estimated"].fillna(False)
+        estimated_capex = pipeline_filtered.loc[estimated_mask, "capex_aud_m"].dropna().sum()
         st.metric(
-            "Modelled CAPEX",
+            "Pipeline Modelled CAPEX",
             f"A${estimated_capex:,.0f}M",
-            help=CAPEX_ESTIMATION_HELP,
+            help=f"{CAPEX_ESTIMATION_HELP} Operating rows are excluded from this top-line KPI.",
         )
     else:
-        st.metric("Modelled CAPEX", "N/A", help=CAPEX_ESTIMATION_HELP)
+        st.metric("Pipeline Modelled CAPEX", "N/A", help=CAPEX_ESTIMATION_HELP)
 
 if "capacity_scope" in filtered.columns and campus_scope_mask.any():
     campus_scope_mw = metric_mw.loc[campus_scope_mask].sum()
