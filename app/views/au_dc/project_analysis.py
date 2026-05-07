@@ -41,11 +41,12 @@ if audit_path.exists():
     no_url = int((projects.get("has_source_url") == False).sum()) if "has_source_url" in projects.columns else len(projects)
     weak_rows = projects[projects.get("evidence_grade", "").isin(["C", "D", "E"])] if "evidence_grade" in projects.columns else projects
     weak_mw = weak_rows["facility_mw"].fillna(0).sum()
-    st.warning(
-        f"Project database is provisional: {no_url}/{len(projects)} rows have no stored source URL, "
-        f"and {weak_mw:,.0f} MW is C/D/E evidence grade. Use this page as an audit queue, not a source of truth.",
-        icon=":material/warning:",
-    )
+    if no_url > 0 or weak_mw > 0:
+        st.warning(
+            f"Project database is provisional: {no_url}/{len(projects)} rows have no stored source URL, "
+            f"and {weak_mw:,.0f} MW is C/D/E evidence grade. Use this page as an audit queue, not a source of truth.",
+            icon=":material/warning:",
+        )
 else:
     st.warning(
         "Project evidence audit has not been generated. Run scripts/au_dc_project_evidence_audit.py before relying on this page.",
