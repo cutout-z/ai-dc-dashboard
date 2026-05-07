@@ -7,6 +7,13 @@ RISKED_MW_HELP = (
     "This is a delivery-confidence lens, not contracted demand or expected load."
 )
 
+RECORDED_MW_HELP = (
+    "Recorded MW is the project capacity currently counted in dashboard totals. "
+    "It is called unverified because public sources use different bases: IT load, "
+    "gross facility power, power consumption, or full-campus build-out. Rows without "
+    "row-level source evidence are quarantined and excluded from this total by default."
+)
+
 CAPEX_ESTIMATION_HELP = (
     "CAPEX is disclosed where filings or project announcements provide a figure. "
     "If missing, capex_aud_m is modelled from facility MW using operator-type benchmarks: "

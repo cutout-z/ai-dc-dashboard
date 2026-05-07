@@ -6,7 +6,12 @@ import plotly.express as px
 from pathlib import Path
 
 from app.lib.au_dc_charts import COLOUR_PALETTE, CHART_LAYOUT
-from app.lib.au_dc_methodology import CAPEX_ESTIMATION_HELP, DISCLOSED_CAPEX_HELP, RISKED_MW_HELP
+from app.lib.au_dc_methodology import (
+    CAPEX_ESTIMATION_HELP,
+    DISCLOSED_CAPEX_HELP,
+    RECORDED_MW_HELP,
+    RISKED_MW_HELP,
+)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc" / "processed"
 
@@ -98,28 +103,40 @@ filtered = filtered[filtered["facility_mw"] >= min_mw]
 # ========================================
 # KPIs
 # ========================================
-k1, k2, k3, k4 = st.columns(4)
+k1, k2, k3, k4, k5 = st.columns(5)
 with k1:
     st.metric("Projects Shown", len(filtered))
 with k2:
-    st.metric("Recorded MW (Unverified)", f"{filtered['facility_mw'].sum():,.0f}")
+    st.metric(
+        "Recorded MW (Unverified)",
+        f"{filtered['facility_mw'].sum():,.0f}",
+        help=RECORDED_MW_HELP,
+    )
 with k3:
     st.metric("Risked MW (Provisional)", f"{filtered['risked_mw'].sum():,.0f}", help=RISKED_MW_HELP)
 with k4:
     if "capex_estimated" in filtered.columns:
         estimated_mask = filtered["capex_estimated"].fillna(False)
         disclosed_capex = filtered.loc[~estimated_mask, "capex_aud_m"].dropna().sum()
-        estimated_capex = filtered.loc[estimated_mask, "capex_aud_m"].dropna().sum()
-        est_count = filtered["capex_estimated"].sum()
         st.metric(
             "Disclosed CAPEX",
             f"A${disclosed_capex:,.0f}M",
-            delta=f"+ A${estimated_capex:,.0f}M modelled" if est_count > 0 else None,
             help=DISCLOSED_CAPEX_HELP,
         )
     else:
         known_capex = filtered["capex_aud_m"].dropna().sum()
         st.metric("Known CAPEX", f"A${known_capex:,.0f}M" if known_capex > 0 else "N/A")
+with k5:
+    if "capex_estimated" in filtered.columns:
+        estimated_mask = filtered["capex_estimated"].fillna(False)
+        estimated_capex = filtered.loc[estimated_mask, "capex_aud_m"].dropna().sum()
+        st.metric(
+            "Modelled CAPEX",
+            f"A${estimated_capex:,.0f}M",
+            help=CAPEX_ESTIMATION_HELP,
+        )
+    else:
+        st.metric("Modelled CAPEX", "N/A", help=CAPEX_ESTIMATION_HELP)
 
 st.markdown("---")
 
