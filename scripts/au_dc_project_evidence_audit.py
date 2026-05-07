@@ -56,6 +56,7 @@ SPECIFIC_PRIMARY_TERMS = (
     "announcement",
     "expansion",
     "press release",
+    "media release",
     "website",
     "nci.org.au",
     "pawsey.org.au",
@@ -174,7 +175,7 @@ def audit_projects(df: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict] = []
     for _, row in df.iterrows():
         source = classify_source(row.get("source"))
-        issues = [source.base_issue]
+        issues: list[str] = []
         grade = source.evidence_grade
         source_class = source.source_class
 
@@ -184,6 +185,7 @@ def audit_projects(df: pd.DataFrame) -> pd.DataFrame:
             source_class = url_class
 
         if not has_url:
+            issues.append(source.base_issue)
             issues.append("No source_url/evidence_url column with a retrievable URL.")
             if grade == "B":
                 grade = "C"
