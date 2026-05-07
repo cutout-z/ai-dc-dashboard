@@ -236,7 +236,25 @@ st.markdown("---")
 # ========================================
 st.markdown("### Project Database")
 
+table_df = filtered.copy()
+if "include_in_project_totals" in table_df.columns:
+    table_df["_row_status"] = table_df["include_in_project_totals"].fillna(True).map(
+        {True: "Included", False: "Quarantined"}
+    )
+else:
+    table_df["_row_status"] = "Included"
+table_df["_quarantine_sort"] = table_df["_row_status"].eq("Quarantined").astype(int)
+
+if show_quarantined and "include_in_project_totals" in table_df.columns:
+    quarantined_count = int(table_df["_row_status"].eq("Quarantined").sum())
+    included_count = int(table_df["_row_status"].eq("Included").sum())
+    st.caption(
+        f"Sorted by row status: {included_count} included rows first, "
+        f"then {quarantined_count} quarantined rows."
+    )
+
 display_cols = [
+    "_row_status",
     "project_name", "operator", "parent_company", "operator_type",
     "nem_region", "state", "suburb", "status", "size_class",
     "facility_mw", "critical_it_mw", "risked_mw", "unverified_capacity_mw",
@@ -248,12 +266,18 @@ display_cols = [
     "it_load_mw", "gross_power_mw", "power_consumption_mw", "campus_full_build_mw",
     "source_date", "source", "source_url", "issues", "remediation_notes",
 ]
-available = [c for c in display_cols if c in filtered.columns]
+available = [c for c in display_cols if c in table_df.columns]
+sort_cols = ["_quarantine_sort", "_display_mw", "project_name"]
+sort_ascending = [True, False, True]
 
 st.dataframe(
-    filtered[available].sort_values("facility_mw", ascending=False),
+    table_df.sort_values(sort_cols, ascending=sort_ascending)[available],
     use_container_width=True, hide_index=True, height=600,
     column_config={
+        "_row_status": st.column_config.TextColumn(
+            "Row Status",
+            help="Included rows count in default totals. Quarantined rows are audit-trail rows excluded from default totals.",
+        ),
         "project_name": "Project", "operator": "Operator", "parent_company": "Parent",
         "operator_type": "Type", "nem_region": "Region", "state": "State",
         "suburb": "Suburb", "status": "Status", "size_class": "Size",
