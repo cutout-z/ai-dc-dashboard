@@ -45,6 +45,17 @@ def _is_vague(source: str) -> bool:
     return any(p in s for p in VAGUE_SOURCE_PATTERNS)
 
 
+def _has_audit_grade_evidence(df: pd.DataFrame) -> pd.Series:
+    source_url_col = next((c for c in ("source_url", "evidence_url", "url") if c in df.columns), None)
+    if source_url_col is None:
+        return pd.Series(False, index=df.index)
+    return (
+        df[source_url_col].fillna("").astype(str).str.startswith(("http://", "https://"))
+        & df.get("evidence_quote", pd.Series("", index=df.index)).fillna("").astype(str).str.strip().ne("")
+        & df.get("capacity_basis", pd.Series("", index=df.index)).fillna("").astype(str).str.strip().ne("")
+    )
+
+
 def run_checks(df: pd.DataFrame, seed_row_count: int) -> list[dict]:
     checks = []
 
@@ -137,7 +148,8 @@ def run_checks(df: pd.DataFrame, seed_row_count: int) -> list[dict]:
     non_hyper = df[df["operator_type"] != "Hyperscaler"] if "operator_type" in df.columns else df
     high_mw = non_hyper[
         (non_hyper["facility_mw"] >= VAGUE_SOURCE_MW_THRESHOLD) &
-        (non_hyper["source"].apply(_is_vague))
+        (non_hyper["source"].apply(_is_vague)) &
+        (~_has_audit_grade_evidence(non_hyper))
     ]
     if not high_mw.empty:
         checks.append({
