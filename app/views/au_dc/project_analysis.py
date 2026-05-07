@@ -7,6 +7,7 @@ from pathlib import Path
 
 from app.lib.au_dc_charts import COLOUR_PALETTE, CHART_LAYOUT
 from app.lib.au_dc_methodology import (
+    CAMPUS_SCOPE_HELP,
     CAPEX_ESTIMATION_HELP,
     DISCLOSED_CAPEX_HELP,
     RECORDED_MW_HELP,
@@ -115,6 +116,16 @@ metric_mw = (
 # KPIs
 # ========================================
 k1, k2, k3, k4, k5 = st.columns(5)
+campus_scope_mask = (
+    filtered.get("capacity_scope", pd.Series("", index=filtered.index))
+    .fillna("")
+    .astype(str)
+    .str.contains("Campus", case=False, na=False)
+    & ~filtered.get("capacity_scope", pd.Series("", index=filtered.index))
+    .fillna("")
+    .astype(str)
+    .eq("Campus current operating capacity")
+)
 with k1:
     st.metric("Projects Shown", len(filtered))
 with k2:
@@ -149,10 +160,20 @@ with k5:
     else:
         st.metric("Modelled CAPEX", "N/A", help=CAPEX_ESTIMATION_HELP)
 
+if "capacity_scope" in filtered.columns and campus_scope_mask.any():
+    campus_scope_mw = metric_mw.loc[campus_scope_mask].sum()
+    st.info(
+        f"{campus_scope_mw:,.0f} MW across {int(campus_scope_mask.sum())} shown rows is campus-envelope MW. "
+        "For staged campuses, the status is a best available campus/project label and may not apply to every building. "
+        "Use the Capacity Scope and Stage Caveat columns before treating these MW as current operating capacity.",
+        icon=":material/info:",
+    )
+
 st.markdown("### Capacity by Development Status — Projects Shown Only")
 st.caption(
     "These MW totals use the current filters and exclude quarantined/unverified rows unless "
-    "`Show Quarantined Rows` is enabled. They are not an estimate of the full Australian data centre universe."
+    "`Show Quarantined Rows` is enabled. They are not an estimate of the full Australian data centre universe. "
+    "For campus-envelope rows, status is applied at row level because public stage-level MW is not always disclosed."
 )
 
 status_df = filtered.copy()
@@ -214,6 +235,7 @@ display_cols = [
     "startup_year", "full_capacity_year", "capex_aud_m", "capex_estimated",
     "power_strategy", "workload_type", "financial_sponsor",
     "evidence_grade", "source_class", "has_source_url", "capacity_basis",
+    "capacity_scope", "stage_status_caveat",
     "it_load_mw", "gross_power_mw", "power_consumption_mw", "campus_full_build_mw",
     "source_date", "source", "source_url", "issues", "remediation_notes",
 ]
@@ -245,6 +267,8 @@ st.dataframe(
         "source_class": "Source Class",
         "has_source_url": st.column_config.CheckboxColumn("URL?", default=False),
         "capacity_basis": "Capacity Basis",
+        "capacity_scope": st.column_config.TextColumn("Capacity Scope", help=CAMPUS_SCOPE_HELP),
+        "stage_status_caveat": st.column_config.TextColumn("Stage Caveat", width="large"),
         "it_load_mw": st.column_config.NumberColumn("Sourced IT MW", format="%d"),
         "gross_power_mw": st.column_config.NumberColumn("Sourced Gross MW", format="%d"),
         "power_consumption_mw": st.column_config.NumberColumn("Sourced Consumption MW", format="%d"),

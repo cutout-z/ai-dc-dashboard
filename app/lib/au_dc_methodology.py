@@ -11,7 +11,16 @@ RECORDED_MW_HELP = (
     "Recorded MW is the project capacity currently counted in dashboard totals. "
     "It is called unverified because public sources use different bases: IT load, "
     "gross facility power, power consumption, or full-campus build-out. Rows without "
-    "row-level source evidence are quarantined and excluded from this total by default."
+    "row-level source evidence are quarantined and excluded from this total by default. "
+    "Campus/full-build rows may include multiple stages; check Capacity Scope and "
+    "Stage Caveat before treating the MW as currently operating."
+)
+
+CAMPUS_SCOPE_HELP = (
+    "Campus envelope MW is capacity where the public source reports a campus, full-build, "
+    "upon-completion, or power-consumption figure rather than a stage/building-level "
+    "current IT-load figure. It is counted in Recorded MW if the row is included, but "
+    "the row status may not apply to every building on a staged campus."
 )
 
 CAPEX_ESTIMATION_HELP = (
