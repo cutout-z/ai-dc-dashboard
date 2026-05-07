@@ -71,6 +71,13 @@ The current AU project table is not audit-grade and should not be treated as a s
 - Moved Australian-section controls/filters out of the Streamlit sidebar and into the top of the relevant AU page, so the controls sit beside the page they adjust.
 - Added a separate `hyperscaler_announcements.csv` reference table for hyperscaler and AI demand announcements such as AWS, Microsoft, Oracle/Google, and OpenAI/NEXTDC. These rows are shown separately in Project Analysis and are excluded from physical project MW totals unless a named project row exists.
 
+## Hyperscaler Physical Site Lead Pass - 2026-05-07
+
+- Added `hyperscaler_site_leads.csv` as a separate evidence table for named hyperscaler-owned or hyperscaler-operated Australian physical facility leads. These rows are displayed in Project Analysis but excluded from project MW totals pending normal row-level project evidence promotion.
+- Identified five Microsoft site leads with direct Microsoft Local evidence: Kemps Creek, Station Road Seven Hills, Cawley Road, Garden Drive, and Woods Road. Kemps Creek also has NSW planning evidence for a 144MW three-building design envelope.
+- Identified four AWS physical-site leads from DCD reporting: Turner Road Smeaton Grange, existing Smeaton Grange Park/SYD52, Eastern Creek area campus, and Cobblebank/Ferris Road. Turner Road carries a reported 40MW IT-capacity figure but remains secondary-source only until the underlying planning document is captured.
+- No Google Cloud or Oracle Australia physical facility rows were added in this pass because the located public evidence remains cloud-region/service-availability evidence rather than named physical facility evidence.
+
 ## Useful External Alternatives
 
 - Baxtel sells site-level global data centre datasets with power capacity and lifecycle status.

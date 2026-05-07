@@ -389,6 +389,86 @@ if hyperscaler_path.exists():
     st.markdown("---")
 
 # ========================================
+# Hyperscaler Physical Site Leads
+# ========================================
+site_leads_path = REFERENCE_DIR / "hyperscaler_site_leads.csv"
+if site_leads_path.exists():
+    hyperscaler_site_leads = pd.read_csv(site_leads_path)
+
+    st.markdown("### Hyperscaler Physical Site Leads")
+    st.caption(
+        "Named Australian facilities or facility leads with operator, planning, or trade-press evidence. "
+        "These rows identify likely hyperscaler-owned or hyperscaler-operated sites, but remain excluded "
+        "from project MW totals until promoted through the row-level project evidence audit."
+    )
+
+    facility_mw = hyperscaler_site_leads.get(
+        "facility_mw", pd.Series(dtype="float64")
+    ).fillna(0)
+    it_mw = hyperscaler_site_leads.get(
+        "critical_it_mw", pd.Series(dtype="float64")
+    ).fillna(0)
+    sourced_mw = facility_mw + it_mw
+    direct_operator_rows = hyperscaler_site_leads[
+        hyperscaler_site_leads.get("evidence_tier", pd.Series("", index=hyperscaler_site_leads.index)).eq("A")
+    ]
+
+    l1, l2, l3, l4 = st.columns(4)
+    with l1:
+        st.metric("Physical Leads", f"{len(hyperscaler_site_leads):,.0f}")
+    with l2:
+        st.metric("Direct Operator Evidence", f"{len(direct_operator_rows):,.0f}")
+    with l3:
+        st.metric("Leads With MW", f"{int((sourced_mw > 0).sum()):,.0f}")
+    with l4:
+        st.metric(
+            "Sourced Lead MW",
+            f"{sourced_mw.sum():,.0f} MW",
+            help="Mixed-basis MW captured from the lead table only. Check capacity_basis before comparing rows. This is not added to project totals.",
+        )
+
+    site_lead_cols = [
+        "site_name", "provider", "evidence_tier", "evidence_class",
+        "state", "suburb", "address", "status", "facility_mw", "critical_it_mw",
+        "capacity_basis", "source_url", "secondary_source_url", "evidence_summary",
+        "confidence_notes",
+    ]
+    available_site_lead_cols = [
+        c for c in site_lead_cols if c in hyperscaler_site_leads.columns
+    ]
+    st.dataframe(
+        hyperscaler_site_leads[available_site_lead_cols].sort_values(
+            ["provider", "evidence_tier", "state", "site_name"],
+            ascending=[True, True, True, True],
+        ),
+        use_container_width=True,
+        hide_index=True,
+        height=360,
+        column_config={
+            "site_name": st.column_config.TextColumn("Site Lead", width="medium"),
+            "provider": "Provider",
+            "evidence_tier": st.column_config.TextColumn(
+                "Tier",
+                help="A = direct operator/planning evidence; B = credible secondary report citing planning/source documents; C = area-level or weaker physical-site lead.",
+            ),
+            "evidence_class": "Evidence Class",
+            "state": "State",
+            "suburb": "Suburb",
+            "address": st.column_config.TextColumn("Address / Area", width="medium"),
+            "status": "Status",
+            "facility_mw": st.column_config.NumberColumn("Facility MW", format="%d"),
+            "critical_it_mw": st.column_config.NumberColumn("IT MW", format="%d"),
+            "capacity_basis": "Capacity Basis",
+            "source_url": st.column_config.LinkColumn("Source", display_text="open"),
+            "secondary_source_url": st.column_config.LinkColumn("Secondary", display_text="open"),
+            "evidence_summary": st.column_config.TextColumn("Evidence Summary", width="large"),
+            "confidence_notes": st.column_config.TextColumn("Confidence Notes", width="large"),
+        },
+    )
+
+    st.markdown("---")
+
+# ========================================
 # Charts
 # ========================================
 st.markdown("### Visualisations")
