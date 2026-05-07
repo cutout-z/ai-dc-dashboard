@@ -69,6 +69,7 @@ The current AU project table is not audit-grade and should not be treated as a s
 - Removed current-source mismatches including Vantage SYD1, Global Switch MEL, DigiCo SYD Gore Hill, and Sliced Tech Fyshwick where a row-level current facility/MW source could not be established.
 - After the sweep, all quarantined rows have source URLs. Remaining quarantined rows are not legacy estimates awaiting blind trust; they are source-located rows where MW/current-stage evidence is still insufficient for capacity totals.
 - Moved Australian-section controls/filters out of the Streamlit sidebar and into the top of the relevant AU page, so the controls sit beside the page they adjust.
+- Added a separate `hyperscaler_announcements.csv` reference table for hyperscaler and AI demand announcements such as AWS, Microsoft, Oracle/Google, and OpenAI/NEXTDC. These rows are shown separately in Project Analysis and are excluded from physical project MW totals unless a named project row exists.
 
 ## Useful External Alternatives
 
