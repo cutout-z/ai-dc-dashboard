@@ -138,7 +138,11 @@ with k5:
     else:
         st.metric("Modelled CAPEX", "N/A", help=CAPEX_ESTIMATION_HELP)
 
-st.markdown("### Capacity by Development Status")
+st.markdown("### Capacity by Development Status — Projects Shown Only")
+st.caption(
+    "These MW totals use the current filters and exclude quarantined/unverified rows unless "
+    "`Show Quarantined Rows` is enabled. They are not an estimate of the full Australian data centre universe."
+)
 
 status_df = filtered.copy()
 mw_series = status_df["facility_mw"].fillna(0)
@@ -155,27 +159,27 @@ status_metrics = [
     (
         "Operating",
         mw_series[status_df["status"].eq("Operating")].sum(),
-        "Built and operating capacity included in the current filtered project set.",
+        "Built and operating capacity in the projects currently shown, not the full market.",
     ),
     (
         "Under Construction",
         mw_series[status_df["status"].eq("Under Construction")].sum(),
-        "Projects marked under construction. Some rows still need explicit public power-secured evidence.",
+        "Under-construction capacity in the projects currently shown. Quarantined/unverified rows are excluded by default.",
     ),
     (
         "Approved + Power",
         mw_series[status_df["status"].eq("Approved") & power_secured].sum(),
-        "Approved projects where public evidence or the seed flag indicates grid/power is secured.",
+        "Approved projects currently shown where public evidence or the seed flag indicates grid/power is secured.",
     ),
     (
         "Approved, Power Pending",
         mw_series[status_df["status"].eq("Approved") & ~power_secured].sum(),
-        "Approved projects without explicit public evidence that grid/power is secured.",
+        "Approved projects currently shown without explicit public evidence that grid/power is secured.",
     ),
     (
         "Announced / Proposed",
         mw_series[status_df["status"].isin(["Announced", "Proposed"])].sum(),
-        "Announced or proposed capacity. These rows carry 0% risk weight until a power pathway is confirmed.",
+        "Announced or proposed capacity in the projects currently shown. These rows carry 0% risk weight until a power pathway is confirmed.",
     ),
 ]
 
