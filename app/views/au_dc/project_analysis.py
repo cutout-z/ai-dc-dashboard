@@ -138,6 +138,52 @@ with k5:
     else:
         st.metric("Modelled CAPEX", "N/A", help=CAPEX_ESTIMATION_HELP)
 
+st.markdown("### Capacity by Development Status")
+
+status_df = filtered.copy()
+mw_series = status_df["facility_mw"].fillna(0)
+power_secured = (
+    status_df.get("power_secured", pd.Series(False, index=status_df.index))
+    .fillna(False)
+    .astype(str)
+    .str.strip()
+    .str.lower()
+    .isin(["true", "1", "yes"])
+)
+
+status_metrics = [
+    (
+        "Operating",
+        mw_series[status_df["status"].eq("Operating")].sum(),
+        "Built and operating capacity included in the current filtered project set.",
+    ),
+    (
+        "Under Construction",
+        mw_series[status_df["status"].eq("Under Construction")].sum(),
+        "Projects marked under construction. Some rows still need explicit public power-secured evidence.",
+    ),
+    (
+        "Approved + Power",
+        mw_series[status_df["status"].eq("Approved") & power_secured].sum(),
+        "Approved projects where public evidence or the seed flag indicates grid/power is secured.",
+    ),
+    (
+        "Approved, Power Pending",
+        mw_series[status_df["status"].eq("Approved") & ~power_secured].sum(),
+        "Approved projects without explicit public evidence that grid/power is secured.",
+    ),
+    (
+        "Announced / Proposed",
+        mw_series[status_df["status"].isin(["Announced", "Proposed"])].sum(),
+        "Announced or proposed capacity. These rows carry 0% risk weight until a power pathway is confirmed.",
+    ),
+]
+
+s1, s2, s3, s4, s5 = st.columns(5)
+for col, (label, value, help_text) in zip([s1, s2, s3, s4, s5], status_metrics):
+    with col:
+        st.metric(label, f"{value:,.0f} MW", help=help_text)
+
 st.markdown("---")
 
 # ========================================
