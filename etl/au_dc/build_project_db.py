@@ -31,9 +31,27 @@ def build():
     print(f"  Loaded {len(df)} projects from seed CSV")
 
     # Clean numeric columns
-    for col in ["facility_mw", "critical_it_mw", "capex_aud_m", "startup_year", "full_capacity_year", "pue", "wue"]:
+    numeric_cols = [
+        "facility_mw", "critical_it_mw", "capex_aud_m", "startup_year",
+        "full_capacity_year", "pue", "wue", "it_load_mw", "gross_power_mw",
+        "power_consumption_mw", "grid_connection_mva", "campus_full_build_mw",
+        "unverified_capacity_mw",
+    ]
+    for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    if "include_in_project_totals" in df.columns:
+        df["include_in_project_totals"] = (
+            df["include_in_project_totals"]
+            .fillna(True)
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .isin(["true", "1", "yes"])
+        )
+    else:
+        df["include_in_project_totals"] = True
 
     # Apply risk model
     df = apply_risk_weight(df, status_col="status", mw_col="facility_mw")

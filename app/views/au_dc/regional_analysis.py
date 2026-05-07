@@ -14,6 +14,7 @@ from app.lib.au_dc_charts import (
     COLOUR_PALETTE,
     CHART_LAYOUT,
 )
+from app.lib.au_dc_methodology import DISCLOSED_CAPEX_HELP, RISKED_MW_HELP
 
 _AU_DC_DATA = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
 DATA_DIR = _AU_DC_DATA / "processed"
@@ -40,7 +41,13 @@ esoo = pd.read_parquet(esoo_path) if esoo_path.exists() else None
 
 # --- Controls ---
 st.sidebar.header("Controls")
-risk_view = st.sidebar.radio("Capacity View", ["Unrisked", "Risked"], index=0, key="au_reg_risk")
+risk_view = st.sidebar.radio(
+    "Capacity View",
+    ["Unrisked", "Risked"],
+    index=0,
+    key="au_reg_risk",
+    help=RISKED_MW_HELP,
+)
 mw_col = "risked_mw" if risk_view == "Risked" else "facility_mw"
 
 # ========================================
@@ -124,6 +131,7 @@ st.markdown("---")
 st.markdown("## Grid Generation Capacity")
 
 if grid_capacity is not None:
+    st.caption("AEMO/NEM view only. WA/SWIS projects are included in the project database but not in NEM grid capacity charts.")
     fig = grid_capacity_stacked_bar(grid_capacity)
     st.plotly_chart(fig, use_container_width=True)
 
@@ -138,6 +146,10 @@ if grid_capacity is not None:
     st.markdown("### Generation Pipeline (Committed + Proposed)")
     pipeline = grid_capacity[grid_capacity["status"].isin(["Committed", "Proposed"])]
     if not pipeline.empty:
+        st.caption(
+            "AEMO Proposed generation is an unfiltered candidate pipeline, not expected build-out. "
+            "Use Committed capacity for near-term supply confidence."
+        )
         fig = px.bar(
             pipeline.groupby(["nem_region", "fuel_category", "status"])["capacity_mw"].sum().reset_index(),
             x="nem_region", y="capacity_mw", color="fuel_category",
@@ -161,15 +173,23 @@ st.markdown("---")
 st.markdown("## Regional Screener")
 
 if projects is not None and regions is not None:
+    projects_region = projects.copy()
+    if "capex_estimated" in projects_region.columns:
+        projects_region["capex_disclosed_for_sum"] = projects_region["capex_aud_m"].where(
+            ~projects_region["capex_estimated"].fillna(False), 0
+        )
+    else:
+        projects_region["capex_disclosed_for_sum"] = projects_region["capex_aud_m"]
+
     dc_by_region = (
-        projects.groupby("nem_region")
+        projects_region.groupby("nem_region")
         .agg(
             num_projects=("project_name", "count"),
             total_mw_unrisked=("facility_mw", "sum"),
             total_mw_risked=("risked_mw", "sum"),
-            operating_mw=("facility_mw", lambda x: x[projects.loc[x.index, "status"] == "Operating"].sum()),
-            pipeline_mw=("facility_mw", lambda x: x[projects.loc[x.index, "status"] != "Operating"].sum()),
-            capex_known=("capex_aud_m", lambda x: x.dropna().sum()),
+            operating_mw=("facility_mw", lambda x: x[projects_region.loc[x.index, "status"] == "Operating"].sum()),
+            pipeline_mw=("facility_mw", lambda x: x[projects_region.loc[x.index, "status"] != "Operating"].sum()),
+            capex_disclosed=("capex_disclosed_for_sum", "sum"),
         )
         .reset_index()
     )
@@ -192,8 +212,8 @@ if projects is not None and regions is not None:
                     "total_mw_unrisked", "total_mw_risked", "compute_per_capita_kw_per_m"]
     if "grid_capacity_mw" in screener.columns:
         display_cols += ["grid_capacity_mw", "dc_as_pct_of_grid"]
-    if screener["capex_known"].sum() > 0:
-        display_cols.append("capex_known")
+    if screener["capex_disclosed"].sum() > 0:
+        display_cols.append("capex_disclosed")
 
     st.dataframe(
         screener[display_cols].sort_values("total_mw_unrisked", ascending=False),
@@ -204,11 +224,11 @@ if projects is not None and regions is not None:
             "operating_mw": st.column_config.NumberColumn("Operating MW", format="%d"),
             "pipeline_mw": st.column_config.NumberColumn("Pipeline MW", format="%d"),
             "total_mw_unrisked": st.column_config.NumberColumn("Total MW (Unrisked)", format="%d"),
-            "total_mw_risked": st.column_config.NumberColumn("Total MW (Risked)", format="%d"),
+            "total_mw_risked": st.column_config.NumberColumn("Total MW (Risked)", format="%d", help=RISKED_MW_HELP),
             "compute_per_capita_kw_per_m": st.column_config.NumberColumn("kW per M Pop", format="%.1f"),
             "grid_capacity_mw": st.column_config.NumberColumn("Grid Capacity MW", format="%d"),
             "dc_as_pct_of_grid": st.column_config.NumberColumn("DC as % of Grid", format="%.2f%%"),
-            "capex_known": st.column_config.NumberColumn("Known CAPEX (A$M)", format="%d"),
+            "capex_disclosed": st.column_config.NumberColumn("Disclosed CAPEX (A$M)", format="%d", help=DISCLOSED_CAPEX_HELP),
         },
     )
 

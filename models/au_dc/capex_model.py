@@ -26,6 +26,7 @@ def estimate_capex(df, operator_type_col="operator_type", mw_col="facility_mw",
     - capex_aud_m: filled in with estimate where previously null
     """
     df = df.copy()
+    df["capex_disclosed_aud_m"] = df[capex_col]
     df["capex_estimated"] = df[capex_col].isna()
 
     for idx in df[df["capex_estimated"]].index:

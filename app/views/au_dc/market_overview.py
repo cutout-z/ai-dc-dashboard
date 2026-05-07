@@ -1,5 +1,6 @@
 """Market Overview — Headline KPIs, capacity trends, market breakdown."""
 
+import json
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -12,6 +13,7 @@ from app.lib.au_dc_charts import (
     capacity_forecast_chart,
     COLOUR_PALETTE,
 )
+from app.lib.au_dc_methodology import RISKED_MW_HELP
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc" / "processed"
 
@@ -25,10 +27,31 @@ if not projects_path.exists():
     st.stop()
 
 projects = pd.read_parquet(projects_path)
+if "include_in_project_totals" in projects.columns:
+    projects_for_totals = projects[projects["include_in_project_totals"].fillna(True)]
+else:
+    projects_for_totals = projects
+spot_check_path = DATA_DIR / "spot_check.json"
+spot_check = json.loads(spot_check_path.read_text()) if spot_check_path.exists() else None
+
+if spot_check:
+    summary = spot_check.get("summary", {})
+    if summary.get("warnings", 0) or summary.get("errors", 0):
+        st.warning(
+            f"AU DC data quality check: {summary.get('errors', 0)} error(s), "
+            f"{summary.get('warnings', 0)} warning(s). Treat project CAPEX and some capacity fields "
+            "as mixed-quality public-source data."
+        )
 
 # --- Controls ---
 st.sidebar.header("Controls")
-risk_view = st.sidebar.radio("Capacity View", ["Unrisked", "Risked"], index=0, key="au_mkt_risk")
+risk_view = st.sidebar.radio(
+    "Capacity View",
+    ["Unrisked", "Risked"],
+    index=0,
+    key="au_mkt_risk",
+    help=RISKED_MW_HELP,
+)
 mw_col = "risked_mw" if risk_view == "Risked" else "facility_mw"
 
 # --- KPI Row ---
@@ -36,22 +59,28 @@ st.markdown("### Key Metrics")
 k1, k2, k3, k4 = st.columns(4)
 
 total_projects = len(projects)
-operating = projects[projects["status"] == "Operating"]
+operating = projects_for_totals[projects_for_totals["status"] == "Operating"]
+quarantined = total_projects - len(projects_for_totals)
 
 with k1:
-    st.metric("Total Projects", total_projects)
+    st.metric("Total Projects", total_projects, delta=f"{quarantined} quarantined" if quarantined else None)
 with k2:
     st.metric("Operating DCs", len(operating))
 with k3:
     st.metric("Operating Capacity", f"{operating['facility_mw'].sum():,.0f} MW")
 with k4:
-    total_cap = projects[mw_col].sum()
-    st.metric(f"Total Capacity ({risk_view})", f"{total_cap:,.0f} MW")
+    total_cap = projects_for_totals[mw_col].sum()
+    st.metric(
+        f"Recorded Capacity ({risk_view})",
+        f"{total_cap:,.0f} MW",
+        help=RISKED_MW_HELP if risk_view == "Risked" else None,
+    )
 
 with st.expander("Data sources & methodology", icon=":material/info:"):
     st.markdown(
         """
-**Coverage note:** This dataset tracks publicly announced and verifiable projects. It will not capture
+**Coverage note:** This dataset tracks publicly announced projects and facilities, but the current project
+table is provisional rather than audit-grade. It will not capture
 every data centre — undisclosed hyperscaler on-premises deployments, small enterprise facilities (<10 MW),
 and government classified infrastructure are not included. Figures reflect publicly available information
 at the time of last update.
@@ -59,11 +88,14 @@ at the time of last update.
 **Project database**
 Manually curated from named public sources: ASX/NZX announcements, company IR pages, NSW/VIC/QLD State
 Significant Development (SSD) portals, Data Center Dynamics, datacentermap.com, datacenterhawk.com, and
-press releases. Each project is traced to a specific source — no estimated or synthesised entries.
+press releases. The current seed stores short source labels, not audit-grade URLs, page references,
+evidence text, source dates, or capacity basis. Rows should be treated as an audit queue until remediated.
 Updated periodically as announcements are made; there is no automated refresh.
 
 **Capacity methodology**
-- *Unrisked*: total stated facility MW at full build-out (as disclosed by operator)
+- *Unrisked*: recorded facility MW at full build-out where stated. Current rows may mix IT load, gross
+  facility power, campus power, regional estimates, and grid/substation capacity until capacity-basis
+  remediation is complete.
 - *Risked*: probability-weighted MW based on development status and power/grid connection certainty —
 
   | Status | Weight | Rationale |
@@ -76,6 +108,11 @@ Updated periodically as announcements are made; there is no automated refresh.
 
 - Where only a partial phase is funded, the figure reflects what has been disclosed (not full campus aspiration)
 - *Power secured* status is manually assessed from public disclosures; defaults to unconfirmed if not explicitly announced
+
+**CAPEX methodology**
+CAPEX is disclosed only where public filings or announcements provide a figure. Where missing, the model
+fills `capex_aud_m` using operator-type benchmarks; those rows are flagged as estimated in the Project
+Analysis page and should not be read as disclosed market spend.
 
 **Other providers that track Australian DC builds**
 [Data Center Dynamics](https://www.datacenterdynamics.com/en/market/australasia/) ·
@@ -93,9 +130,9 @@ st.markdown("### Installed Capacity")
 col1, col2 = st.columns(2)
 
 with col1:
-    fig = capacity_by_region_bar(projects, title=f"Capacity by Region ({risk_view})")
+    fig = capacity_by_region_bar(projects_for_totals, title=f"Capacity by Region ({risk_view})")
     if risk_view == "Risked":
-        agg = projects.groupby(["nem_region", "status"])["risked_mw"].sum().reset_index()
+        agg = projects_for_totals.groupby(["nem_region", "status"])["risked_mw"].sum().reset_index()
         fig = px.bar(agg, x="nem_region", y="risked_mw", color="status",
                      color_discrete_map=COLOUR_PALETTE, title="Capacity by Region (Risked)",
                      labels={"risked_mw": "Capacity (MW)", "nem_region": "NEM Region"},
@@ -108,11 +145,11 @@ with col1:
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    fig = capacity_by_operator_bar(projects)
+    fig = capacity_by_operator_bar(projects_for_totals)
     st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("### Forecast Pipeline by Risk Category")
-fig = capacity_forecast_chart(projects)
+fig = capacity_forecast_chart(projects_for_totals)
 st.plotly_chart(fig, use_container_width=True)
 st.caption(
     "Cumulative stated capacity by project startup year, colour-coded by certainty tier. "
@@ -127,34 +164,37 @@ st.markdown("### Market Breakdown")
 b1, b2, b3 = st.columns(3)
 
 with b1:
-    fig = market_breakdown_pie(projects, "operator_type", mw_col, "By Operator Type")
+    fig = market_breakdown_pie(projects_for_totals, "operator_type", mw_col, "By Operator Type")
     st.plotly_chart(fig, use_container_width=True)
 with b2:
-    fig = market_breakdown_pie(projects, "size_class", mw_col, "By Project Size")
+    fig = market_breakdown_pie(projects_for_totals, "size_class", mw_col, "By Project Size")
     st.plotly_chart(fig, use_container_width=True)
 with b3:
-    fig = market_breakdown_pie(projects, "status", mw_col, "By Development Status")
+    fig = market_breakdown_pie(projects_for_totals, "status", mw_col, "By Development Status")
     st.plotly_chart(fig, use_container_width=True)
 
 b4, b5, _ = st.columns(3)
 with b4:
-    fig = market_breakdown_pie(projects, "workload_type", mw_col, "By Workload Type")
+    fig = market_breakdown_pie(projects_for_totals, "workload_type", mw_col, "By Workload Type")
     st.plotly_chart(fig, use_container_width=True)
 with b5:
-    fig = market_breakdown_pie(projects, "power_strategy", mw_col, "By Power Strategy")
+    fig = market_breakdown_pie(projects_for_totals, "power_strategy", mw_col, "By Power Strategy")
     st.plotly_chart(fig, use_container_width=True)
 
 st.info(
     "**Source — Manually curated Australian DC project database.**  \n"
-    "Every entry is traced to a named public source: ASX/NZX announcements, company IR pages, "
-    "NSW/VIC/QLD State Significant Development (SSD) portals, "
+    "This is currently a provisional lead list, not an audit-grade source of truth. Rows carry short "
+    "source labels referring to ASX/NZX announcements, company IR pages, NSW/VIC/QLD State Significant "
+    "Development (SSD) portals, "
     "[Data Center Dynamics](https://www.datacenterdynamics.com/en/market/australasia/), "
     "[datacentermap.com](https://www.datacentermap.com/australia/), "
-    "[datacenterhawk.com](https://datacenterhawk.com/market/australia), and operator press releases. "
-    "No estimated or synthesised entries. Coverage excludes undisclosed hyperscaler on-premises deployments, "
+    "[datacenterhawk.com](https://datacenterhawk.com/market/australia), and operator press releases, "
+    "but the current schema does not store row-level URLs, page references, extracted evidence text, "
+    "or capacity basis. Capacity is public-source curated but may mix IT load, gross facility power, "
+    "campus full-build power, regional estimates, and grid/substation capacity until remediation is complete. "
+    "CAPEX may be estimated where not disclosed. Coverage excludes undisclosed hyperscaler on-premises deployments, "
     "enterprise facilities <10 MW, and classified government infrastructure. "
     "Updated periodically as announcements are made — there is no automated refresh.  \n"
     "See *Data sources & methodology* above for capacity weighting rules.",
     icon=":material/info:",
 )
-

@@ -6,6 +6,7 @@ import plotly.express as px
 from pathlib import Path
 
 from app.lib.au_dc_charts import COLOUR_PALETTE, CHART_LAYOUT
+from app.lib.au_dc_methodology import CAPEX_ESTIMATION_HELP, DISCLOSED_CAPEX_HELP, RISKED_MW_HELP
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc" / "processed"
 
@@ -17,6 +18,33 @@ if not projects_path.exists():
     st.stop()
 
 projects = pd.read_parquet(projects_path)
+audit_path = DATA_DIR / "project_evidence_audit.csv"
+if audit_path.exists():
+    audit_cols = [
+        "project_name", "campus", "operator", "evidence_grade",
+        "source_class", "has_source_url", "issues",
+    ]
+    audit = pd.read_csv(audit_path, usecols=lambda c: c in audit_cols)
+    projects = projects.merge(
+        audit,
+        on=["project_name", "campus", "operator"],
+        how="left",
+        suffixes=("", "_audit"),
+    )
+
+    no_url = int((projects.get("has_source_url") == False).sum()) if "has_source_url" in projects.columns else len(projects)
+    weak_rows = projects[projects.get("evidence_grade", "").isin(["C", "D", "E"])] if "evidence_grade" in projects.columns else projects
+    weak_mw = weak_rows["facility_mw"].fillna(0).sum()
+    st.warning(
+        f"Project database is provisional: {no_url}/{len(projects)} rows have no stored source URL, "
+        f"and {weak_mw:,.0f} MW is C/D/E evidence grade. Use this page as an audit queue, not a source of truth.",
+        icon=":material/warning:",
+    )
+else:
+    st.warning(
+        "Project evidence audit has not been generated. Run scripts/au_dc_project_evidence_audit.py before relying on this page.",
+        icon=":material/warning:",
+    )
 
 # ========================================
 # Filters
@@ -32,6 +60,25 @@ sel_region = st.sidebar.multiselect("Region", regions_list, default=["All"], key
 op_types = ["All"] + sorted(projects["operator_type"].dropna().unique().tolist())
 sel_op_type = st.sidebar.multiselect("Operator Type", op_types, default=["All"], key="au_proj_optype")
 
+if "evidence_grade" in projects.columns:
+    evidence_grades = ["All"] + sorted(projects["evidence_grade"].dropna().unique().tolist())
+    sel_evidence = st.sidebar.multiselect(
+        "Evidence Grade",
+        evidence_grades,
+        default=["All"],
+        key="au_proj_evidence",
+        help="Current rows are C/D because source URLs and evidence extracts are not yet stored.",
+    )
+else:
+    sel_evidence = ["All"]
+
+show_quarantined = st.sidebar.toggle(
+    "Show Quarantined Rows",
+    value=False,
+    key="au_proj_show_quarantined",
+    help="Quarantined rows retain unverified MW for audit trail but are excluded from default project totals.",
+)
+
 min_mw = st.sidebar.slider("Min Facility MW", 0, int(projects["facility_mw"].max()), 0, key="au_proj_mw")
 
 # Apply filters
@@ -42,6 +89,10 @@ if "All" not in sel_region:
     filtered = filtered[filtered["nem_region"].isin(sel_region)]
 if "All" not in sel_op_type:
     filtered = filtered[filtered["operator_type"].isin(sel_op_type)]
+if "All" not in sel_evidence and "evidence_grade" in filtered.columns:
+    filtered = filtered[filtered["evidence_grade"].isin(sel_evidence)]
+if not show_quarantined and "include_in_project_totals" in filtered.columns:
+    filtered = filtered[filtered["include_in_project_totals"].fillna(True)]
 filtered = filtered[filtered["facility_mw"] >= min_mw]
 
 # ========================================
@@ -51,15 +102,21 @@ k1, k2, k3, k4 = st.columns(4)
 with k1:
     st.metric("Projects Shown", len(filtered))
 with k2:
-    st.metric("Total MW (Unrisked)", f"{filtered['facility_mw'].sum():,.0f}")
+    st.metric("Recorded MW (Unverified)", f"{filtered['facility_mw'].sum():,.0f}")
 with k3:
-    st.metric("Total MW (Risked)", f"{filtered['risked_mw'].sum():,.0f}")
+    st.metric("Risked MW (Provisional)", f"{filtered['risked_mw'].sum():,.0f}", help=RISKED_MW_HELP)
 with k4:
     if "capex_estimated" in filtered.columns:
-        total_capex = filtered["capex_aud_m"].dropna().sum()
+        estimated_mask = filtered["capex_estimated"].fillna(False)
+        disclosed_capex = filtered.loc[~estimated_mask, "capex_aud_m"].dropna().sum()
+        estimated_capex = filtered.loc[estimated_mask, "capex_aud_m"].dropna().sum()
         est_count = filtered["capex_estimated"].sum()
-        st.metric("Total CAPEX", f"A${total_capex:,.0f}M",
-                  delta=f"{int(est_count)} estimated" if est_count > 0 else None)
+        st.metric(
+            "Disclosed CAPEX",
+            f"A${disclosed_capex:,.0f}M",
+            delta=f"+ A${estimated_capex:,.0f}M modelled" if est_count > 0 else None,
+            help=DISCLOSED_CAPEX_HELP,
+        )
     else:
         known_capex = filtered["capex_aud_m"].dropna().sum()
         st.metric("Known CAPEX", f"A${known_capex:,.0f}M" if known_capex > 0 else "N/A")
@@ -74,9 +131,13 @@ st.markdown("### Project Database")
 display_cols = [
     "project_name", "operator", "parent_company", "operator_type",
     "nem_region", "state", "suburb", "status", "size_class",
-    "facility_mw", "critical_it_mw", "risked_mw",
+    "facility_mw", "critical_it_mw", "risked_mw", "unverified_capacity_mw",
+    "include_in_project_totals", "remediation_status",
     "startup_year", "full_capacity_year", "capex_aud_m", "capex_estimated",
-    "power_strategy", "workload_type", "financial_sponsor", "source",
+    "power_strategy", "workload_type", "financial_sponsor",
+    "evidence_grade", "source_class", "has_source_url", "capacity_basis",
+    "it_load_mw", "gross_power_mw", "power_consumption_mw", "campus_full_build_mw",
+    "source_date", "source", "source_url", "issues", "remediation_notes",
 ]
 available = [c for c in display_cols if c in filtered.columns]
 
@@ -89,13 +150,32 @@ st.dataframe(
         "suburb": "Suburb", "status": "Status", "size_class": "Size",
         "facility_mw": st.column_config.NumberColumn("Facility MW", format="%d"),
         "critical_it_mw": st.column_config.NumberColumn("IT MW", format="%d"),
-        "risked_mw": st.column_config.NumberColumn("Risked MW", format="%d"),
+        "risked_mw": st.column_config.NumberColumn("Risked MW", format="%d", help=RISKED_MW_HELP),
+        "unverified_capacity_mw": st.column_config.NumberColumn("Quarantined MW", format="%d"),
+        "include_in_project_totals": st.column_config.CheckboxColumn("In Totals?", default=True),
+        "remediation_status": "Remediation",
         "startup_year": st.column_config.NumberColumn("Startup", format="%d"),
         "full_capacity_year": st.column_config.NumberColumn("Full Capacity", format="%d"),
-        "capex_aud_m": st.column_config.NumberColumn("CAPEX (A$M)", format="%d"),
-        "capex_estimated": st.column_config.CheckboxColumn("Est?", default=False),
+        "capex_aud_m": st.column_config.NumberColumn("CAPEX (A$M)", format="%d", help=CAPEX_ESTIMATION_HELP),
+        "capex_estimated": st.column_config.CheckboxColumn("CAPEX Est?", default=False, help=CAPEX_ESTIMATION_HELP),
         "power_strategy": "Power Strategy", "workload_type": "Workload",
-        "financial_sponsor": "Sponsor", "source": "Source",
+        "financial_sponsor": "Sponsor",
+        "evidence_grade": st.column_config.TextColumn(
+            "Evidence",
+            help="A requires source URL and row-level evidence text. Current rows are C/D until remediated.",
+        ),
+        "source_class": "Source Class",
+        "has_source_url": st.column_config.CheckboxColumn("URL?", default=False),
+        "capacity_basis": "Capacity Basis",
+        "it_load_mw": st.column_config.NumberColumn("Sourced IT MW", format="%d"),
+        "gross_power_mw": st.column_config.NumberColumn("Sourced Gross MW", format="%d"),
+        "power_consumption_mw": st.column_config.NumberColumn("Sourced Consumption MW", format="%d"),
+        "campus_full_build_mw": st.column_config.NumberColumn("Sourced Campus MW", format="%d"),
+        "source_date": "Source Date",
+        "source": "Source",
+        "source_url": st.column_config.LinkColumn("Source URL", display_text="open"),
+        "issues": st.column_config.TextColumn("Audit Issues", width="large"),
+        "remediation_notes": st.column_config.TextColumn("Remediation Notes", width="large"),
     },
 )
 
@@ -107,6 +187,9 @@ st.markdown("---")
 st.markdown("### Project Deep Dive")
 
 project_names = sorted(filtered["project_name"].unique().tolist())
+if not project_names:
+    st.info("No projects match the current filters.")
+    st.stop()
 selected_project = st.selectbox("Select Project", project_names, key="au_proj_select")
 
 proj = filtered[filtered["project_name"] == selected_project]
@@ -123,6 +206,11 @@ if not proj.empty:
         st.markdown(f"**Status:** {p.get('status', 'N/A')}")
         st.markdown(f"**Workload:** {p.get('workload_type', 'N/A')}")
         st.markdown(f"**Power Strategy:** {p.get('power_strategy', 'N/A')}")
+        if "evidence_grade" in p:
+            st.markdown(f"**Evidence Grade:** {p.get('evidence_grade', 'N/A')}")
+            st.markdown(f"**Source Class:** {p.get('source_class', 'N/A')}")
+        if pd.notna(p.get("capacity_basis")) and str(p.get("capacity_basis")).strip():
+            st.markdown(f"**Capacity Basis:** {p.get('capacity_basis')}")
 
     with col2:
         st.markdown("#### Location & Timing")
@@ -136,15 +224,32 @@ if not proj.empty:
         st.markdown("#### Technical & Economics")
         st.markdown(f"**Facility Power:** {p.get('facility_mw', 'N/A'):,.0f} MW" if pd.notna(p.get('facility_mw')) else "**Facility Power:** N/A")
         st.markdown(f"**Critical IT Power:** {p.get('critical_it_mw', 'N/A'):,.0f} MW" if pd.notna(p.get('critical_it_mw')) else "**Critical IT Power:** N/A")
-        st.markdown(f"**Risk Weight:** {p.get('risk_weight', 'N/A'):.0%}" if pd.notna(p.get('risk_weight')) else "**Risk Weight:** N/A")
-        st.markdown(f"**Risked MW:** {p.get('risked_mw', 'N/A'):,.0f} MW" if pd.notna(p.get('risked_mw')) else "**Risked MW:** N/A")
+        split_capacity = [
+            ("Sourced IT Load", p.get("it_load_mw")),
+            ("Sourced Gross Power", p.get("gross_power_mw")),
+            ("Sourced Power Consumption", p.get("power_consumption_mw")),
+            ("Sourced Campus Full Build", p.get("campus_full_build_mw")),
+        ]
+        for label, value in split_capacity:
+            if pd.notna(value):
+                st.markdown(f"**{label}:** {value:,.0f} MW")
+        st.metric(
+            "Risk Weight",
+            f"{p.get('risk_weight', 'N/A'):.0%}" if pd.notna(p.get('risk_weight')) else "N/A",
+            help=RISKED_MW_HELP,
+        )
+        st.metric(
+            "Risked MW",
+            f"{p.get('risked_mw', 'N/A'):,.0f} MW" if pd.notna(p.get('risked_mw')) else "N/A",
+            help=RISKED_MW_HELP,
+        )
         capex = p.get('capex_aud_m')
         capex_est = p.get('capex_estimated', False)
         if pd.notna(capex):
-            est_label = " *(estimated)*" if capex_est else ""
-            st.markdown(f"**CAPEX:** A${capex:,.0f}M{est_label}")
+            est_label = " (estimated)" if capex_est else ""
+            st.metric("CAPEX", f"A${capex:,.0f}M{est_label}", help=CAPEX_ESTIMATION_HELP)
         else:
-            st.markdown("**CAPEX:** Not disclosed")
+            st.metric("CAPEX", "Not disclosed", help=CAPEX_ESTIMATION_HELP)
         st.markdown(f"**Size Class:** {p.get('size_class', 'N/A')}")
 
     # Efficiency metrics
@@ -182,6 +287,11 @@ if not proj.empty:
             st.metric("Estimated IT MW", f"{it_mw:,.0f} MW")
 
     st.markdown(f"**Source:** {p.get('source', 'N/A')}")
+    if pd.notna(p.get("source_url")) and str(p.get("source_url")).strip():
+        st.link_button("Open Source", str(p.get("source_url")))
+    audit_issues = p.get("issues")
+    if pd.notna(audit_issues) and str(audit_issues).strip():
+        st.warning(str(audit_issues), icon=":material/warning:")
 
 st.markdown("---")
 
