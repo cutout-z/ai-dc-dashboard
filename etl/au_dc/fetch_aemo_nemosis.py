@@ -16,10 +16,11 @@ from pathlib import Path
 import pandas as pd
 from nemosis import dynamic_data_compiler
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-CACHE_DIR = BASE_DIR / "data" / "raw" / "aemo" / "nemosis_cache"
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
-RAW_DIR = BASE_DIR / "data" / "raw" / "aemo"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+AU_DC_DIR = PROJECT_ROOT / "data" / "au_dc"
+CACHE_DIR = AU_DC_DIR / "raw" / "aemo" / "nemosis_cache"
+PROCESSED_DIR = AU_DC_DIR / "processed"
+RAW_DIR = AU_DC_DIR / "raw" / "aemo"
 
 # Path to NEM Registration List (authoritative fuel source data)
 # Downloaded from: https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/participant-information/nem-registration-and-exemption-list
@@ -225,10 +226,10 @@ def load_aemo_pipeline() -> pd.DataFrame:
         return pd.DataFrame()
 
     try:
-        from etl.fetch_aemo import parse_generation_info
+        from etl.au_dc.fetch_aemo import parse_generation_info
     except ImportError:
-        sys.path.insert(0, str(BASE_DIR))
-        from etl.fetch_aemo import parse_generation_info
+        sys.path.insert(0, str(PROJECT_ROOT))
+        from etl.au_dc.fetch_aemo import parse_generation_info
 
     try:
         gen_df = parse_generation_info(gen_info_path)

@@ -7,8 +7,8 @@ Sources:
 
 import os
 import sys
-import requests
 import pandas as pd
+import requests
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -17,7 +17,7 @@ PROCESSED_DIR = BASE_DIR / "data" / "au_dc" / "processed"
 
 # AEMO Generation Information page — latest workbook URL
 # Updated quarterly; check https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/nem-forecasting-and-planning/forecasting-and-planning-data/generation-information
-GEN_INFO_URL = "https://aemo.com.au/-/media/files/electricity/nem/planning_and_forecasting/generation_information/2026/nem-generation-information-jan-2026.xlsx"
+GEN_INFO_URL = "https://www.aemo.com.au/-/media/files/electricity/nem/planning_and_forecasting/generation_information/2026/nem-generation-information-apr-2026.xlsx"
 
 # Fuel type classification
 FUEL_CATEGORIES = {
@@ -57,9 +57,46 @@ def download_file(url: str, dest: Path, force: bool = False) -> Path:
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
     }
     resp = requests.get(url, timeout=120, headers=headers)
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except requests.HTTPError as e:
+        if resp.status_code in (403, 503):
+            print(f"  Direct download blocked ({resp.status_code}); trying Playwright browser download...")
+            return download_file_with_playwright(url, dest)
+        raise e
     dest.write_bytes(resp.content)
     print(f"  Saved: {dest.name} ({len(resp.content) / 1024 / 1024:.1f} MB)")
+    return dest
+
+
+def download_file_with_playwright(url: str, dest: Path) -> Path:
+    """Download AEMO workbook via headless Chromium when Cloudflare blocks requests."""
+    try:
+        from playwright.sync_api import Error as PlaywrightError
+        from playwright.sync_api import sync_playwright
+    except ImportError as e:
+        raise RuntimeError(
+            "AEMO blocked direct download and Playwright is not installed. "
+            "Install Playwright or download the workbook manually."
+        ) from e
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(accept_downloads=True)
+        page = context.new_page()
+        try:
+            with page.expect_download(timeout=45_000) as download_info:
+                try:
+                    page.goto(url, wait_until="commit", timeout=45_000)
+                except PlaywrightError as e:
+                    if "Download is starting" not in str(e):
+                        raise
+            download = download_info.value
+            download.save_as(str(dest))
+        finally:
+            browser.close()
+
+    print(f"  Saved via Playwright: {dest.name} ({dest.stat().st_size / 1024 / 1024:.1f} MB)")
     return dest
 
 

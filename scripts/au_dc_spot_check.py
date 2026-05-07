@@ -19,16 +19,19 @@ PARQUET = PROJECT_ROOT / "data" / "au_dc" / "processed" / "projects.parquet"
 SEED_CSV = PROJECT_ROOT / "data" / "au_dc" / "reference" / "projects_seed.csv"
 OUT_JSON = PROJECT_ROOT / "data" / "au_dc" / "processed" / "spot_check.json"
 
-# Sources that are inherently estimates — don't flag these for vague attribution
-ESTIMATE_EXEMPT_TYPES = {"Hyperscaler"}
-
 # Sources that are too vague for high-MW colocation/developer projects
 VAGUE_SOURCE_PATTERNS = [
+    "press",
     "press estimate",
     "industry benchmark",
     "press reports",
-    "press,",
-    ", press",
+    "company website",
+    " website",
+    "filings",
+    "announcement",
+    "portal",
+    "datacentermap.com",
+    "datacenterhawk.com",
 ]
 
 # MW threshold above which a vague source is flagged
@@ -85,6 +88,51 @@ def run_checks(df: pd.DataFrame, seed_row_count: int) -> list[dict]:
             "projects": [],
         })
 
+    # ── 2a. Audit-grade provenance fields ───────────────────────────────
+    source_url_col = next((c for c in ("source_url", "evidence_url", "url") if c in df.columns), None)
+    if source_url_col is None:
+        checks.append({
+            "level": "warn",
+            "code": "missing_source_urls",
+            "message": (
+                "Project rows have source labels but no source_url/evidence_url field. "
+                "The project database is not audit-grade until rows store retrievable URLs, "
+                "source dates, evidence text, and capacity basis."
+            ),
+            "count": len(df),
+            "projects": [],
+        })
+    else:
+        include_mask = (
+            df["include_in_project_totals"].fillna(True).astype(str).str.strip().str.lower().isin(["true", "1", "yes"])
+            if "include_in_project_totals" in df.columns
+            else pd.Series(True, index=df.index)
+        )
+        missing_url = df[
+            include_mask &
+            (df[source_url_col].isna() | (df[source_url_col].astype(str).str.strip() == ""))
+        ]
+        quarantined_missing_url = int((~include_mask & (df[source_url_col].isna() | (df[source_url_col].astype(str).str.strip() == ""))).sum())
+        if not missing_url.empty:
+            checks.append({
+                "level": "warn",
+                "code": "missing_source_urls",
+                "message": (
+                    f"{len(missing_url)} included project row(s) have no retrievable source URL. "
+                    f"{quarantined_missing_url} excluded/quarantined row(s) also lack source URLs."
+                ),
+                "count": len(missing_url),
+                "projects": missing_url[["project_name", "operator", "facility_mw", "source"]].head(20).to_dict("records"),
+            })
+        else:
+            checks.append({
+                "level": "ok",
+                "code": "missing_source_urls",
+                "message": f"All included project rows have source URLs. {quarantined_missing_url} quarantined row(s) still lack URLs.",
+                "count": 0,
+                "projects": [],
+            })
+
     # ── 3. Vague sources for non-hyperscaler projects > threshold ───────
     non_hyper = df[df["operator_type"] != "Hyperscaler"] if "operator_type" in df.columns else df
     high_mw = non_hyper[
@@ -111,6 +159,94 @@ def run_checks(df: pd.DataFrame, seed_row_count: int) -> list[dict]:
             "projects": [],
         })
 
+    # ── 3a. Placeholder/residual capacity rows ─────────────────────────
+    campus = df.get("campus", pd.Series("", index=df.index))
+    placeholder_mask = (
+        df["project_name"].astype(str).str.contains(r"\bFuture Build\b|\bresidual\b|placeholder", case=False, regex=True) |
+        campus.astype(str).str.contains(r"\bFuture Build\b|\bresidual\b|placeholder", case=False, regex=True)
+    )
+    placeholders = df[placeholder_mask]
+    if not placeholders.empty:
+        checks.append({
+            "level": "error",
+            "code": "placeholder_project_capacity",
+            "message": (
+                f"{len(placeholders)} project row(s) look like aggregate or residual placeholders. "
+                "Do not allocate aggregate company capacity guidance into project-level rows without "
+                "a named project/campus source."
+            ),
+            "count": len(placeholders),
+            "projects": placeholders[["project_name", "operator", "facility_mw", "source"]].to_dict("records"),
+        })
+    else:
+        checks.append({
+            "level": "ok",
+            "code": "placeholder_project_capacity",
+            "message": "No aggregate/residual future-build placeholder project rows detected.",
+            "count": 0,
+            "projects": [],
+        })
+
+    # ── 3b. CAPEX estimate concentration ────────────────────────────────
+    if "capex_estimated" in df.columns:
+        est_count = int(df["capex_estimated"].fillna(False).sum())
+        est_share = est_count / max(len(df), 1)
+        est_mw = float(df.loc[df["capex_estimated"].fillna(False), "facility_mw"].sum())
+        total_mw = float(df["facility_mw"].sum())
+        if est_share > 0.50:
+            checks.append({
+                "level": "warn",
+                "code": "capex_mostly_estimated",
+                "message": (
+                    f"{est_count}/{len(df)} projects ({est_share:.0%}) have estimated CAPEX; "
+                    f"estimated rows represent {est_mw / max(total_mw, 1):.0%} of capacity. "
+                    "Do not present blended CAPEX as disclosed market spend."
+                ),
+                "count": est_count,
+                "projects": (
+                    df[df["capex_estimated"].fillna(False)]
+                    .sort_values("facility_mw", ascending=False)
+                    [["project_name", "operator", "facility_mw", "capex_aud_m"]]
+                    .head(10)
+                    .to_dict("records")
+                ),
+            })
+        else:
+            checks.append({
+                "level": "ok",
+                "code": "capex_estimate_share",
+                "message": f"Estimated CAPEX rows are {est_share:.0%} of project count.",
+                "count": est_count,
+                "projects": [],
+            })
+
+    # ── 3c. Under construction should have explicit power evidence ───────
+    if "power_secured" in df.columns:
+        uc = df[df["status"] == "Under Construction"]
+        uc_unverified = uc[
+            uc["power_secured"].isna() |
+            (uc["power_secured"].astype(str).str.strip() == "")
+        ]
+        if not uc_unverified.empty:
+            checks.append({
+                "level": "warn",
+                "code": "uc_power_not_explicit",
+                "message": (
+                    f"{len(uc_unverified)}/{len(uc)} under-construction project(s) have no explicit "
+                    "power_secured flag; the risk model currently weights them at 100%."
+                ),
+                "count": len(uc_unverified),
+                "projects": uc_unverified[["project_name", "operator", "facility_mw", "source"]].to_dict("records"),
+            })
+        else:
+            checks.append({
+                "level": "ok",
+                "code": "uc_power_not_explicit",
+                "message": "All under-construction projects have explicit power_secured flags.",
+                "count": 0,
+                "projects": [],
+            })
+
     # ── 4. Missing facility_mw for pipeline projects ─────────────────────
     pipeline_no_mw = df[
         (df["status"].isin(["Under Construction", "Proposed", "Approved"])) &
@@ -135,6 +271,33 @@ def run_checks(df: pd.DataFrame, seed_row_count: int) -> list[dict]:
             "count": 0,
             "projects": [],
         })
+
+    # ── 4b. Large operating facilities without critical IT load ──────────
+    if "critical_it_mw" in df.columns:
+        large_operating_no_it = df[
+            (df["status"] == "Operating") &
+            (df["facility_mw"] >= 50) &
+            (df["critical_it_mw"].isna())
+        ]
+        if not large_operating_no_it.empty:
+            checks.append({
+                "level": "warn",
+                "code": "large_operating_missing_it_mw",
+                "message": (
+                    f"{len(large_operating_no_it)} operating project(s) ≥50 MW have no critical_it_mw; "
+                    "energy calculations may overstate or misclassify load basis."
+                ),
+                "count": len(large_operating_no_it),
+                "projects": large_operating_no_it[["project_name", "operator", "facility_mw", "source"]].to_dict("records"),
+            })
+        else:
+            checks.append({
+                "level": "ok",
+                "code": "large_operating_missing_it_mw",
+                "message": "All operating projects ≥50 MW have critical_it_mw populated.",
+                "count": 0,
+                "projects": [],
+            })
 
     # ── 5. Top operators with zero operating capacity ────────────────────
     top10_unrisked = (

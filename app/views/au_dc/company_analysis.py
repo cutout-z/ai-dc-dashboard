@@ -8,6 +8,7 @@ from pathlib import Path
 
 from app.lib.au_dc_charts import COLOUR_PALETTE, CHART_LAYOUT, price_history_chart
 from app.lib.au_dc_financials import fetch_asx_dc_quotes, fetch_asx_dc_history
+from app.lib.au_dc_methodology import CAPEX_ESTIMATION_HELP, RISKED_MW_HELP
 
 _AU_DC_DATA = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
 DATA_DIR = _AU_DC_DATA / "processed"
@@ -31,7 +32,13 @@ fin_history = _fin_history if not _fin_history.empty else None
 
 # --- Controls ---
 st.sidebar.header("Controls")
-risk_view = st.sidebar.radio("Capacity View", ["Unrisked", "Risked"], index=0, key="au_co_risk")
+risk_view = st.sidebar.radio(
+    "Capacity View",
+    ["Unrisked", "Risked"],
+    index=0,
+    key="au_co_risk",
+    help=RISKED_MW_HELP,
+)
 mw_col = "risked_mw" if risk_view == "Risked" else "facility_mw"
 group_by = st.sidebar.radio("Group By", ["Operator", "Parent Company", "Operator Type"], index=0, key="au_co_group")
 group_col = {"Operator": "operator", "Parent Company": "parent_company", "Operator Type": "operator_type"}[group_by]
@@ -182,15 +189,17 @@ with st.expander("Data sources & methodology"):
 
 **What "Capacity (MW)" means**
 
-Figures represent **total facility power draw** (IT load + cooling + ancillaries), as disclosed by operators.
-Where only critical IT load is available, facility MW is estimated using a standard PUE conversion.
-This is *not* contracted or committed capacity — it is the stated design capacity of each facility.
+Figures generally represent **total facility power draw** (IT load + cooling + ancillaries), as disclosed
+or inferred from public operator/project material. Where only critical IT load is available, facility MW
+is estimated using PUE; where only facility MW is available, IT load may be blank. This is *not*
+contracted or committed capacity — it is stated or inferred design capacity.
 
 **Data sources**
 
-Project data is manually curated from public disclosures including ASX/NZX announcements,
-company investor relations websites, state planning portals (e.g. NSW SSD), and DCI/Cushman & Wakefield
-market reports. Data is updated periodically and may not reflect the latest announcements.
+Project data is manually curated from public disclosures including ASX/NZX announcements, company investor
+relations websites, state planning portals (e.g. NSW SSD), and industry reports. Some rows still have broad
+source labels rather than document-level URLs, so use the source field as provenance triage rather than a
+complete audit trail. Data is updated periodically and may not reflect the latest announcements.
         """
     )
 
@@ -247,7 +256,7 @@ st.dataframe(
         "facility_mw": st.column_config.NumberColumn("Facility MW", format="%d"),
         "critical_it_mw": st.column_config.NumberColumn("IT MW", format="%d"),
         "startup_year": st.column_config.NumberColumn("Startup", format="%d"),
-        "capex_aud_m": st.column_config.NumberColumn("CAPEX (A$M)", format="%d"),
+        "capex_aud_m": st.column_config.NumberColumn("CAPEX (A$M)", format="%d", help=CAPEX_ESTIMATION_HELP),
         "workload_type": "Workload", "power_strategy": "Power Strategy",
     },
 )

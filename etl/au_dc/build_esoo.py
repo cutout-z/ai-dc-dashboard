@@ -13,9 +13,10 @@ reliability gaps (QLD 2025-26, SA 2026-27) and major retirements
 from pathlib import Path
 import pandas as pd
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-ESOO_CSV = BASE_DIR / "data" / "reference" / "esoo_forecasts.csv"
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+AU_DC_DIR = BASE_DIR / "data" / "au_dc"
+ESOO_CSV = AU_DC_DIR / "reference" / "esoo_forecasts.csv"
+PROCESSED_DIR = AU_DC_DIR / "processed"
 
 
 def build():
