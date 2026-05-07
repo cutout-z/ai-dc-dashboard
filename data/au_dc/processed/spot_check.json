@@ -1,8 +1,8 @@
 {
-  "run_at": "2026-05-07T05:40:50.930486+00:00",
+  "run_at": "2026-05-07T05:50:54.416048+00:00",
   "project_count": 138,
   "total_mw_unrisked": 5940.65,
-  "total_mw_risked": 3456.65,
+  "total_mw_risked": 3078.65,
   "checks": [
     {
       "level": "ok",
@@ -26,24 +26,11 @@
       "projects": []
     },
     {
-      "level": "warn",
+      "level": "ok",
       "code": "vague_source_high_mw",
-      "message": "2 non-hyperscaler project(s) with \u226550 MW have vague or missing source attribution.",
-      "count": 2,
-      "projects": [
-        {
-          "project_name": "Marsden Park",
-          "operator": "CDC Data Centres",
-          "facility_mw": 504.0,
-          "source": "NSW Planning Portal SSD-70889211"
-        },
-        {
-          "project_name": "Doma Minchinbury",
-          "operator": "Doma Infrastructure Group",
-          "facility_mw": 62.0,
-          "source": "PR Newswire / Starwood-Doma-Telstra announcement"
-        }
-      ]
+      "message": "All high-MW non-hyperscaler projects (\u226550 MW) have specific sources.",
+      "count": 0,
+      "projects": []
     },
     {
       "level": "ok",
@@ -123,7 +110,7 @@
     {
       "level": "warn",
       "code": "uc_power_not_explicit",
-      "message": "12/15 under-construction project(s) have no explicit power_secured flag; the risk model currently weights them at 100%.",
+      "message": "12/14 under-construction project(s) have no explicit power_secured flag; the risk model currently weights them at 100%.",
       "count": 12,
       "projects": [
         {
@@ -293,7 +280,7 @@
   ],
   "summary": {
     "errors": 0,
-    "warnings": 6,
-    "ok": 6
+    "warnings": 5,
+    "ok": 7
   }
 }
