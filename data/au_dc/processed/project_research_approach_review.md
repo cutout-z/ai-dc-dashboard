@@ -20,8 +20,8 @@ The current AU project table is not audit-grade and should not be treated as a s
 - NEXTDC M4: official NEXTDC page states M4 targets 150MW IT capacity. Current seed row records 200MW, so this row appears overstated or using an undocumented basis. Source: https://www.nextdc.com/data-centres/melbourne-data-centres/m4-melbourne
 - CDC Marsden Park: NSW Planning Portal states 504MW power consumption and a 720MW substation. Current seed row records 308MW, so its capacity basis is unclear and not comparable. Source: https://www.planningportal.nsw.gov.au/major-projects/projects/marsden-park-data-centre
 - Keppel Morwell: official Keppel release supports up to 720MW gross power capacity, but describes a leased site/powerbank with pre-development work, planning approvals, and power/water contracting still to follow. It should be classified as pre-development gross power capacity, not a normal proposed project MW. Source: https://www.keppel.com/media/keppel-secures-720mw-powerbank-for-ai-data-centre-campus-near-melbourne-expanding-powerbank-to-over-1gw/
-- AirTrunk MEL2: Data Center Dynamics reports, according to AirTrunk, more than 354MW capacity and more than A$5bn investment. Current row is directionally supported but needs primary AirTrunk URL if available. Source: https://www.datacenterdynamics.com/en/news/airtrunk-acquires-site-in-melbourne-australia-for-354mw-data-center/
-- AirTrunk SYD3: Data Centre Magazine reports 320+MW IT load and an onsite 132kV substation. Current seed records 330MW; use 320+MW IT load unless a primary source supports 330MW. Source: https://datacentremagazine.com/data-centres/airtrunk-open-new-320mw-western-sydney-data-centre
+- AirTrunk MEL2 and Australian portfolio capacities: AirTrunk's official Dec 2025 media release supports MEL2 at 354MW+, A$5bn+ investment, and the five-campus portfolio capacities SYD1 121MW+, SYD2 158MW+, SYD3 330MW+, MEL1 276MW+, and MEL2 354MW+. Source: https://airtrunk.com/airtrunk-expands-australian-platform-with-a-second-hyperscale-data-centre-campus-in-melbourne/
+- AirTrunk SYD3: AirTrunk's official Dec 2025 portfolio release supports 330MW+ campus capacity. The separate Data Centre Magazine article reporting 320MW+ remains useful for IT-load context, but the seed row's `facility_mw` is now documented as `campus_full_build_mw`.
 - Macquarie IC3/IC2: official Macquarie pages support a 65MW Macquarie Park campus and IC3 Super West at 47MW IT load. The current `IC2 Bungarribee` 110MW row does not align with these official pages and needs full remediation. Sources: https://www.macquariedatacentres.com/data-centres/sydney/macquarie-park-campus/ic3-super-west/ and https://www.macquarietechnologygroup.com/our-data-centres/
 
 ## Remediation Rules
@@ -36,7 +36,7 @@ The current AU project table is not audit-grade and should not be treated as a s
 
 - Added source URL, evidence quote, capacity basis, last verified date, and split-capacity fields to the seed schema.
 - Remediated these rows to grade A using primary/company/regulator sources: NEXTDC S7, NEXTDC M4, CDC Marsden Park, Keppel Morwell, STACK Sydney SYD01, Macquarie IC3 East, and Macquarie IC3 Super West.
-- Remediated these rows to grade B using named secondary/press-release mirror sources pending primary-source replacement: AirTrunk SYD3 and AirTrunk MEL2.
+- Remediated AirTrunk SYD3 and AirTrunk MEL2 to grade A using AirTrunk's official Dec 2025 media release.
 - Corrected NEXTDC M4 from 200MW to 150MW IT capacity.
 - Corrected NEXTDC S7 from under construction to proposed because the cited official release is explicitly subject to development approval.
 - Corrected CDC Marsden Park from 308MW to 504MW power consumption, with `capacity_basis=power_consumption_mw`.
@@ -49,7 +49,7 @@ The current AU project table is not audit-grade and should not be treated as a s
 - Added `include_in_project_totals`, `remediation_status`, and `remediation_notes` so the dashboard can separate verified capacity from audit-trail rows.
 - Updated Market Overview to use included rows only; Project Analysis now defaults to hiding quarantined rows with a toggle to inspect them.
 - Remediated NEXTDC operating/proposed rows from the official NEXTDC location list where row-level MW is disclosed.
-- Remediated AirTrunk SYD1/SYD2/SYD3/MEL1/MEL2 using the AirTrunk media-release mirror; these remain grade B pending a primary AirTrunk page.
+- Remediated AirTrunk SYD1/SYD2/SYD3/MEL1/MEL2 to grade A using AirTrunk's official Dec 2025 media release; the prior press-release mirror was replaced.
 - Remediated Vantage MEL1 to 64MW IT capacity from Vantage's official MEL1 page.
 - Remediated Doma Minchinbury to 62MW IT load / 90MVA envelope from the PRNewswire Starwood-Doma-Telstra announcement.
 - Remediated Equinix SY9x/SY10x using Equinix's official xScale press release.

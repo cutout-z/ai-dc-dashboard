@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-05-07T05:11:43.767469+00:00",
+  "run_at": "2026-05-07T05:40:50.930486+00:00",
   "project_count": 138,
   "total_mw_unrisked": 5940.65,
   "total_mw_risked": 3456.65,
@@ -28,44 +28,14 @@
     {
       "level": "warn",
       "code": "vague_source_high_mw",
-      "message": "7 non-hyperscaler project(s) with \u226550 MW have vague or missing source attribution.",
-      "count": 7,
+      "message": "2 non-hyperscaler project(s) with \u226550 MW have vague or missing source attribution.",
+      "count": 2,
       "projects": [
         {
           "project_name": "Marsden Park",
           "operator": "CDC Data Centres",
           "facility_mw": 504.0,
           "source": "NSW Planning Portal SSD-70889211"
-        },
-        {
-          "project_name": "SYD1",
-          "operator": "AirTrunk",
-          "facility_mw": 121.0,
-          "source": "AirTrunk press release mirror"
-        },
-        {
-          "project_name": "SYD2",
-          "operator": "AirTrunk",
-          "facility_mw": 158.0,
-          "source": "AirTrunk press release mirror"
-        },
-        {
-          "project_name": "SYD3",
-          "operator": "AirTrunk",
-          "facility_mw": 330.0,
-          "source": "AirTrunk press release mirror"
-        },
-        {
-          "project_name": "MEL1",
-          "operator": "AirTrunk",
-          "facility_mw": 276.0,
-          "source": "AirTrunk press release mirror"
-        },
-        {
-          "project_name": "MEL2",
-          "operator": "AirTrunk",
-          "facility_mw": 354.0,
-          "source": "AirTrunk press release mirror"
         },
         {
           "project_name": "Doma Minchinbury",
@@ -172,7 +142,7 @@
           "project_name": "SYD3",
           "operator": "AirTrunk",
           "facility_mw": 330.0,
-          "source": "AirTrunk press release mirror"
+          "source": "AirTrunk official Dec 2025 portfolio media release"
         },
         {
           "project_name": "Goodman Truganina",
@@ -278,19 +248,19 @@
           "project_name": "SYD1",
           "operator": "AirTrunk",
           "facility_mw": 121.0,
-          "source": "AirTrunk press release mirror"
+          "source": "AirTrunk official Dec 2025 portfolio media release"
         },
         {
           "project_name": "SYD2",
           "operator": "AirTrunk",
           "facility_mw": 158.0,
-          "source": "AirTrunk press release mirror"
+          "source": "AirTrunk official Dec 2025 portfolio media release"
         },
         {
           "project_name": "MEL1",
           "operator": "AirTrunk",
           "facility_mw": 276.0,
-          "source": "AirTrunk press release mirror"
+          "source": "AirTrunk official Dec 2025 portfolio media release"
         }
       ]
     },
