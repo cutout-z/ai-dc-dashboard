@@ -84,7 +84,12 @@ show_quarantined = st.sidebar.toggle(
     help="Quarantined rows retain unverified MW for audit trail but are excluded from default project totals.",
 )
 
-min_mw = st.sidebar.slider("Min Facility MW", 0, int(projects["facility_mw"].max()), 0, key="au_proj_mw")
+display_mw = projects["facility_mw"].copy()
+if "unverified_capacity_mw" in projects.columns:
+    display_mw = display_mw.fillna(projects["unverified_capacity_mw"])
+projects["_display_mw"] = display_mw.fillna(0)
+
+min_mw = st.sidebar.slider("Min MW", 0, int(projects["_display_mw"].max()), 0, key="au_proj_mw")
 
 # Apply filters
 filtered = projects.copy()
@@ -98,7 +103,13 @@ if "All" not in sel_evidence and "evidence_grade" in filtered.columns:
     filtered = filtered[filtered["evidence_grade"].isin(sel_evidence)]
 if not show_quarantined and "include_in_project_totals" in filtered.columns:
     filtered = filtered[filtered["include_in_project_totals"].fillna(True)]
-filtered = filtered[filtered["facility_mw"] >= min_mw]
+filtered = filtered[filtered["_display_mw"] >= min_mw]
+
+metric_mw = (
+    filtered["_display_mw"]
+    if show_quarantined
+    else filtered["facility_mw"].fillna(0)
+)
 
 # ========================================
 # KPIs
@@ -109,7 +120,7 @@ with k1:
 with k2:
     st.metric(
         "Recorded MW (Unverified)",
-        f"{filtered['facility_mw'].sum():,.0f}",
+        f"{metric_mw.sum():,.0f}",
         help=RECORDED_MW_HELP,
     )
 with k3:
@@ -145,7 +156,7 @@ st.caption(
 )
 
 status_df = filtered.copy()
-mw_series = status_df["facility_mw"].fillna(0)
+mw_series = status_df["_display_mw"] if show_quarantined else status_df["facility_mw"].fillna(0)
 power_secured = (
     status_df.get("power_secured", pd.Series(False, index=status_df.index))
     .fillna(False)
