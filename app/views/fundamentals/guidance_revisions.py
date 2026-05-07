@@ -65,6 +65,9 @@ annotation_color = st.session_state.get("annotation_color", "white")
 
 fig = go.Figure()
 
+# One legend entry per company; FY labelled inline at line end
+_legend_shown = set()
+
 for company in selected_companies:
     color = COMPANY_COLORS.get(company, "#888")
     for fy in selected_fy:
@@ -86,11 +89,23 @@ for company in selected_companies:
                 err_plus.append(0)
                 err_minus.append(0)
 
+        # FY label at rightmost point only
+        text_labels = [""] * len(df_line)
+        text_labels[-1] = fy
+
+        first_for_company = company not in _legend_shown
+        _legend_shown.add(company)
+
         fig.add_trace(go.Scatter(
             x=df_line["announced_date"],
             y=df_line["guidance_usd_b"],
-            mode="lines+markers",
-            name=f"{company} {fy}",
+            mode="lines+markers+text",
+            name=company,
+            legendgroup=company,
+            showlegend=first_for_company,
+            text=text_labels,
+            textposition="middle right",
+            textfont=dict(color=color, size=10),
             line=dict(
                 color=color,
                 width=2,
@@ -114,7 +129,7 @@ for company in selected_companies:
             ),
             customdata=df_line[["fiscal_year", "source", "notes"]].values,
             hovertemplate=(
-                "<b>%{fullData.name}</b><br>"
+                f"<b>{company} {fy}</b><br>"
                 "Date: %{x|%b %d, %Y}<br>"
                 "Guidance: $%{y:.1f}B<br>"
                 "Source: %{customdata[1]}<br>"
@@ -123,18 +138,138 @@ for company in selected_companies:
             ),
         ))
 
+# Marker key entries — star = actual, dashed = completed
+fig.add_trace(go.Scatter(
+    x=[None], y=[None], mode="markers",
+    name="★  Reported actual",
+    marker=dict(symbol="star", size=12, color="white", line=dict(color="gray", width=1)),
+    showlegend=True,
+))
+fig.add_trace(go.Scatter(
+    x=[None], y=[None], mode="lines",
+    name="╌  Completed year",
+    line=dict(color="gray", width=2, dash="dash"),
+    showlegend=True,
+))
+
 fig.update_layout(
     template=template,
     xaxis_title="Announcement Date",
     yaxis_title="CAPEX Guidance ($B)",
     legend=dict(orientation="v", x=1.01, y=1, font=dict(size=11)),
     height=520,
-    margin=dict(r=220, t=30),
+    margin=dict(r=160, t=30),
     hovermode="closest",
 )
 fig.update_yaxes(rangemode="tozero")
 
 st.plotly_chart(fig, use_container_width=True)
+
+# ── Revision summary bar chart ────────────────────────────────────────────────
+st.subheader("Revision Summary")
+st.caption(
+    "First guidance issued vs final reported actual, with net revision shown. "
+    "Bars grouped by company × fiscal year."
+)
+
+summary_rows = []
+for company in selected_companies:
+    for fy in sorted(selected_fy):
+        mask = (df["company"] == company) & (df["fiscal_year"] == fy)
+        df_fy = df[mask].sort_values("announced_date").reset_index(drop=True)
+        if df_fy.empty:
+            continue
+
+        is_actual_mask = df_fy["notes"].str.contains("Actual full-year", na=False)
+        df_guidance = df_fy[~is_actual_mask]
+        df_actual   = df_fy[is_actual_mask]
+
+        if df_guidance.empty:
+            continue
+
+        first_val  = float(df_guidance.iloc[0]["guidance_usd_b"])
+        latest_val = float(df_guidance.iloc[-1]["guidance_usd_b"])
+        actual_val = float(df_actual.iloc[-1]["guidance_usd_b"]) if not df_actual.empty else None
+        n_revisions = len(df_guidance) - 1
+
+        summary_rows.append({
+            "label":       f"{company}<br>{fy}",
+            "company":     company,
+            "fy":          fy,
+            "first":       first_val,
+            "latest":      latest_val,
+            "actual":      actual_val,
+            "n_revisions": n_revisions,
+            "net_change":  (actual_val or latest_val) - first_val,
+        })
+
+if summary_rows:
+    x_labels = [r["label"] for r in summary_rows]
+
+    fig_sum = go.Figure()
+
+    # First guidance
+    fig_sum.add_trace(go.Bar(
+        name="First guidance",
+        x=x_labels,
+        y=[r["first"] for r in summary_rows],
+        marker_color="rgba(107, 114, 128, 0.7)",
+        hovertemplate="<b>%{x}</b><br>First guidance: $%{y:.1f}B<extra></extra>",
+    ))
+
+    # Latest non-actual guidance (only where it differs from first)
+    latest_y = [
+        r["latest"] if r["latest"] != r["first"] else None
+        for r in summary_rows
+    ]
+    if any(v is not None for v in latest_y):
+        fig_sum.add_trace(go.Bar(
+            name="Latest guidance",
+            x=x_labels,
+            y=latest_y,
+            marker_color="rgba(59, 130, 246, 0.8)",
+            hovertemplate="<b>%{x}</b><br>Latest guidance: $%{y:.1f}B<extra></extra>",
+        ))
+
+    # Reported actual
+    actual_y = [r["actual"] for r in summary_rows]
+    if any(v is not None for v in actual_y):
+        fig_sum.add_trace(go.Bar(
+            name="★ Reported actual",
+            x=x_labels,
+            y=actual_y,
+            marker_color="rgba(34, 197, 94, 0.85)",
+            hovertemplate="<b>%{x}</b><br>Reported actual: $%{y:.1f}B<extra></extra>",
+        ))
+
+    # Net revision annotations above each group
+    for i, r in enumerate(summary_rows):
+        end_val = r["actual"] if r["actual"] is not None else r["latest"]
+        delta   = end_val - r["first"]
+        if delta == 0:
+            continue
+        sign  = "+" if delta > 0 else "−"
+        color = "#22c55e" if delta > 0 else "#ef4444"
+        fig_sum.add_annotation(
+            x=r["label"],
+            y=end_val,
+            text=f"<b>{sign}${abs(delta):.0f}B</b>",
+            showarrow=False,
+            yshift=10,
+            font=dict(size=11, color=color),
+        )
+
+    fig_sum.update_layout(
+        template=template,
+        barmode="group",
+        yaxis_title="CAPEX ($B)",
+        yaxis=dict(rangemode="tozero"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        height=400,
+        margin=dict(t=50, r=20, b=20),
+        hovermode="x unified",
+    )
+    st.plotly_chart(fig_sum, use_container_width=True)
 
 # ── Apple / Microsoft caveat ──────────────────────────────────────────────────
 caveats = []

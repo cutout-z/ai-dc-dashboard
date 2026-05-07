@@ -104,7 +104,7 @@ if tsmc_path.exists():
         yaxis_title="$B USD",
         height=350,
         margin=dict(l=0, r=0, t=30, b=0),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="left", x=0),
     )
     st.plotly_chart(fig_rev, use_container_width=True)
 

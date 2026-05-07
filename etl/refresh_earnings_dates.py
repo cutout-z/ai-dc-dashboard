@@ -12,12 +12,17 @@ from __future__ import annotations
 import csv
 import json
 import logging
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Ensure project root is on sys.path when run as a script
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.lib.fmp import get_earnings_dates, get_fmp_key
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 CSV_PATH = Path(__file__).parent.parent / "data" / "reference" / "earnings_dates.csv"

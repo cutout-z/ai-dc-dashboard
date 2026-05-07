@@ -7,17 +7,9 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/opt/anaconda3/bin/streamlit</string>
-        <string>run</string>
-        <string>app/Home.py</string>
-        <string>--server.port</string>
-        <string>8520</string>
-        <string>--server.headless</string>
-        <string>true</string>
+        <string>/bin/bash</string>
+        <string>/Users/zalen/.codex/bin/ai-research-dashboard-runner.sh</string>
     </array>
-
-    <key>WorkingDirectory</key>
-    <string>/Users/zalen/Documents/Zalen/Claude Code Projects/ai-research</string>
 
     <key>RunAtLoad</key>
     <true/>
@@ -25,8 +17,8 @@
     <true/>
 
     <key>StandardOutPath</key>
-    <string>/Users/zalen/Documents/Zalen/Claude Code Projects/ai-research/logs/launchagent.log</string>
+    <string>/Users/zalen/Documents/Zalen/AI Wif Brain Projects/ai-research/logs/launchagent.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/zalen/Documents/Zalen/Claude Code Projects/ai-research/logs/launchagent.log</string>
+    <string>/Users/zalen/Documents/Zalen/AI Wif Brain Projects/ai-research/logs/launchagent.log</string>
 </dict>
 </plist>
