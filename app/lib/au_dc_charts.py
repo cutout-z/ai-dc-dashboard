@@ -130,6 +130,9 @@ def capacity_by_operator_bar(
         hovertemplate=(
             "<b>%{y}</b><br>"
             "Risked: <b>%{x:,.0f} MW</b><br>"
+            "Included named project/campus MW after delivery-confidence weighting: "
+            "Operating/Under Construction 100%, Approved power secured 75%, "
+            "Approved grid pending 25%, Proposed/Announced 0%.<br>"
             "Announced total: %{customdata[0]:,.0f} MW<br>"
             "<br><i>Sources:</i><br>%{customdata[1]}"
             "<extra></extra>"
@@ -144,6 +147,8 @@ def capacity_by_operator_bar(
         hovertemplate=(
             "<b>%{y}</b><br>"
             "Announced / site-tied: <b>%{x:,.0f} MW</b><br>"
+            "Remaining included MW tied to named project/campus rows but not counted "
+            "in Risked MW under the delivery-confidence weights.<br>"
             "Announced total: %{customdata[0]:,.0f} MW<br>"
             "<br><i>Sources:</i><br>%{customdata[1]}"
             "<extra></extra>"
@@ -158,6 +163,8 @@ def capacity_by_operator_bar(
         hovertemplate=(
             "<b>%{y}</b><br>"
             "Unassigned aggregate: <b>%{x:,.0f} MW</b><br>"
+            "Operator-level capacity, contract, order-book, or platform guidance not "
+            "yet mapped to named project rows.<br>"
             "Announced total: %{customdata[0]:,.0f} MW<br>"
             "<br><i>Sources:</i><br>%{customdata[1]}"
             "<extra></extra>"
