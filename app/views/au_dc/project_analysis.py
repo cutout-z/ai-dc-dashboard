@@ -389,6 +389,104 @@ if hyperscaler_path.exists():
     st.markdown("---")
 
 # ========================================
+# Operator Aggregate Guidance
+# ========================================
+aggregate_guidance_path = REFERENCE_DIR / "operator_aggregate_guidance.csv"
+if aggregate_guidance_path.exists():
+    aggregate_guidance = pd.read_csv(aggregate_guidance_path)
+    numeric_cols = [
+        "total_capacity_mw", "operating_capacity_mw", "under_construction_mw",
+        "future_build_mw", "contracted_capacity_mw", "forward_order_book_mw",
+        "new_contract_mw", "capex_aud_m", "named_project_mw_in_db",
+        "unmatched_capacity_mw",
+    ]
+    for col in numeric_cols:
+        if col in aggregate_guidance.columns:
+            aggregate_guidance[col] = pd.to_numeric(aggregate_guidance[col], errors="coerce")
+
+    st.markdown("### Operator Aggregate Guidance & Contracts")
+    st.caption(
+        "Operator-level capacity, contract, and pipeline disclosures that do not cleanly map to named "
+        "physical project rows. These records are cross-checks and demand signals, not additions to "
+        "default project MW totals."
+    )
+
+    a1, a2, a3, a4 = st.columns(4)
+    with a1:
+        st.metric("Aggregate Records", f"{len(aggregate_guidance):,.0f}")
+    with a2:
+        unmatched_mw = aggregate_guidance.get(
+            "unmatched_capacity_mw", pd.Series(dtype="float64")
+        ).dropna().sum()
+        st.metric(
+            "Unmatched Capacity",
+            f"{unmatched_mw:,.0f} MW",
+            help="Disclosed aggregate MW not yet represented by named included project rows.",
+        )
+    with a3:
+        contracted_mw = aggregate_guidance.get(
+            "contracted_capacity_mw", pd.Series(dtype="float64")
+        ).dropna().sum()
+        st.metric(
+            "Contracted MW Signals",
+            f"{contracted_mw:,.0f} MW",
+            help="Operator-level contracted capacity disclosures. These may overlap with project rows and can be lower-bound figures where sources say capacity exceeds a threshold.",
+        )
+    with a4:
+        new_contract_mw = aggregate_guidance.get(
+            "new_contract_mw", pd.Series(dtype="float64")
+        ).dropna().sum()
+        st.metric(
+            "New Contract MW",
+            f"{new_contract_mw:,.0f} MW",
+            help="New contract wins tracked as demand signals, not incremental physical capacity.",
+        )
+
+    aggregate_cols = [
+        "operator", "announcement_name", "announcement_date", "geography",
+        "metric_type", "total_capacity_mw", "operating_capacity_mw",
+        "under_construction_mw", "future_build_mw", "contracted_capacity_mw",
+        "forward_order_book_mw", "new_contract_mw", "capex_aud_m",
+        "forecast_horizon", "named_project_mw_in_db", "unmatched_capacity_mw",
+        "source_url", "evidence_summary", "treatment_notes", "last_verified_at",
+    ]
+    available_aggregate_cols = [
+        c for c in aggregate_cols if c in aggregate_guidance.columns
+    ]
+    st.dataframe(
+        aggregate_guidance[available_aggregate_cols].sort_values(
+            ["operator", "announcement_date"], ascending=[True, False]
+        ),
+        use_container_width=True,
+        hide_index=True,
+        height=330,
+        column_config={
+            "operator": "Operator",
+            "announcement_name": st.column_config.TextColumn("Disclosure", width="medium"),
+            "announcement_date": "Date",
+            "geography": "Geography",
+            "metric_type": "Metric Type",
+            "total_capacity_mw": st.column_config.NumberColumn("Total MW", format="%d"),
+            "operating_capacity_mw": st.column_config.NumberColumn("Operating MW", format="%d"),
+            "under_construction_mw": st.column_config.NumberColumn("UC MW", format="%d"),
+            "future_build_mw": st.column_config.NumberColumn("Future MW", format="%d"),
+            "contracted_capacity_mw": st.column_config.NumberColumn("Contracted MW", format="%d"),
+            "forward_order_book_mw": st.column_config.NumberColumn("FOB MW", format="%d"),
+            "new_contract_mw": st.column_config.NumberColumn("New Contract MW", format="%d"),
+            "capex_aud_m": st.column_config.NumberColumn("CAPEX / Funding (A$M)", format="%d"),
+            "forecast_horizon": "Horizon",
+            "named_project_mw_in_db": st.column_config.NumberColumn("Named MW in DB", format="%d"),
+            "unmatched_capacity_mw": st.column_config.NumberColumn("Unmatched MW", format="%d"),
+            "source_url": st.column_config.LinkColumn("Source", display_text="open"),
+            "evidence_summary": st.column_config.TextColumn("Evidence Summary", width="large"),
+            "treatment_notes": st.column_config.TextColumn("Treatment", width="large"),
+            "last_verified_at": "Verified",
+        },
+    )
+
+    st.markdown("---")
+
+# ========================================
 # Hyperscaler Physical Site Leads
 # ========================================
 site_leads_path = REFERENCE_DIR / "hyperscaler_site_leads.csv"

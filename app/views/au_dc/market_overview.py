@@ -88,14 +88,17 @@ at the time of last update.
 **Project database**
 Manually curated from named public sources: ASX/NZX announcements, company IR pages, NSW/VIC/QLD State
 Significant Development (SSD) portals, Data Center Dynamics, datacentermap.com, datacenterhawk.com, and
-press releases. The current seed stores short source labels, not audit-grade URLs, page references,
-evidence text, source dates, or capacity basis. Rows should be treated as an audit queue until remediated.
+press releases. The project seed now stores source URLs, source dates, page or section references,
+evidence extracts, capacity basis, and remediation notes where available. Rows still vary in evidence
+quality because public disclosures mix precise site-level MW, campus envelopes, power-consumption figures,
+and announced pipeline capacity. Rows flagged as quarantined are retained for audit trail but excluded
+from default project totals.
 Updated periodically as announcements are made; there is no automated refresh.
 
 **Capacity methodology**
-- *Unrisked*: recorded facility MW at full build-out where stated. Current rows may mix IT load, gross
-  facility power, campus power, regional estimates, and grid/substation capacity until capacity-basis
-  remediation is complete.
+- *Unrisked*: included project MW at the disclosed capacity basis. The database distinguishes IT load,
+  gross facility power, campus full-build MW, and power-consumption envelopes where the source allows.
+  Quarantined legacy estimates and no-MW facility leads are excluded from default totals.
 - *Risked*: probability-weighted MW based on development status and power/grid connection certainty —
 
   | Status | Weight | Rationale |
@@ -183,16 +186,18 @@ with b5:
 
 st.info(
     "**Source — Manually curated Australian DC project database.**  \n"
-    "This is currently a provisional lead list, not an audit-grade source of truth. Rows carry short "
-    "source labels referring to ASX/NZX announcements, company IR pages, NSW/VIC/QLD State Significant "
+    "This is a public-source project database with row-level evidence fields where available, but it is "
+    "still provisional and should not be treated as an exhaustive market census. Rows refer to ASX/NZX "
+    "announcements, company IR pages, NSW/VIC/QLD State Significant "
     "Development (SSD) portals, "
     "[Data Center Dynamics](https://www.datacenterdynamics.com/en/market/australasia/), "
     "[datacentermap.com](https://www.datacentermap.com/australia/), "
     "[datacenterhawk.com](https://datacenterhawk.com/market/australia), and operator press releases, "
-    "but the current schema does not store row-level URLs, page references, extracted evidence text, "
-    "or capacity basis. Capacity is public-source curated but may mix IT load, gross facility power, "
-    "campus full-build power, regional estimates, and grid/substation capacity until remediation is complete. "
-    "CAPEX may be estimated where not disclosed. Coverage excludes undisclosed hyperscaler on-premises deployments, "
+    "with source URLs, dates, evidence extracts, capacity basis, and remediation notes stored where available. "
+    "Capacity is public-source curated and may still mix IT load, gross facility power, campus full-build power, "
+    "and campus power-consumption envelopes. Quarantined rows and separate hyperscaler announcement/site-lead "
+    "tables are excluded from default project MW totals unless promoted into the project database. CAPEX may be "
+    "estimated where not disclosed. Coverage excludes undisclosed hyperscaler on-premises deployments, "
     "enterprise facilities <10 MW, and classified government infrastructure. "
     "Updated periodically as announcements are made — there is no automated refresh.  \n"
     "See *Data sources & methodology* above for capacity weighting rules.",
