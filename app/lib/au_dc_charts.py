@@ -59,13 +59,51 @@ def capacity_by_region_bar(df: pd.DataFrame, title: str = "Capacity by Region") 
     return fig
 
 
-def capacity_by_operator_bar(df: pd.DataFrame, top_n: int = 15) -> go.Figure:
+def capacity_by_operator_bar(
+    df: pd.DataFrame,
+    aggregate_guidance: pd.DataFrame | None = None,
+    top_n: int = 15,
+) -> go.Figure:
     agg = df.groupby("operator").agg(
         risked=("risked_mw", "sum"),
         unrisked=("facility_mw", "sum"),
     ).reset_index()
-    agg["speculative"] = agg["unrisked"] - agg["risked"]
-    agg = agg.sort_values("unrisked", ascending=True).tail(top_n)
+    agg["announced_site_tied"] = (agg["unrisked"] - agg["risked"]).clip(lower=0)
+    agg["unassigned_aggregate"] = 0.0
+
+    if aggregate_guidance is not None and not aggregate_guidance.empty:
+        guidance = aggregate_guidance.copy()
+        if "include_in_project_totals" in guidance.columns:
+            guidance = guidance[
+                ~guidance["include_in_project_totals"]
+                .fillna(False)
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .isin(["true", "1", "yes"])
+            ]
+        if "unmatched_capacity_mw" in guidance.columns:
+            guidance["unmatched_capacity_mw"] = pd.to_numeric(
+                guidance["unmatched_capacity_mw"], errors="coerce"
+            ).fillna(0)
+            unassigned = (
+                guidance.groupby("operator", as_index=False)["unmatched_capacity_mw"]
+                .sum()
+                .rename(columns={"unmatched_capacity_mw": "unassigned_aggregate"})
+            )
+            agg = agg.merge(unassigned, on="operator", how="outer", suffixes=("", "_guidance"))
+            agg["unassigned_aggregate"] = (
+                agg["unassigned_aggregate_guidance"]
+                .fillna(agg["unassigned_aggregate"])
+                .fillna(0)
+            )
+            agg = agg.drop(columns=[c for c in ["unassigned_aggregate_guidance"] if c in agg.columns])
+
+    for col in ["risked", "unrisked", "announced_site_tied", "unassigned_aggregate"]:
+        agg[col] = agg[col].fillna(0)
+    agg["operator"] = agg["operator"].fillna("Unknown")
+    agg["announced_total"] = agg["unrisked"] + agg["unassigned_aggregate"]
+    agg = agg.sort_values("announced_total", ascending=True).tail(top_n)
 
     # Aggregate sources per operator for hover tooltip
     if "source" in df.columns:
@@ -88,32 +126,46 @@ def capacity_by_operator_bar(df: pd.DataFrame, top_n: int = 15) -> go.Figure:
         y=agg["operator"], x=agg["risked"],
         name="Risked", orientation="h",
         marker_color="#2563eb",
-        customdata=agg[["unrisked", "sources"]].values,
+        customdata=agg[["announced_total", "sources"]].values,
         hovertemplate=(
             "<b>%{y}</b><br>"
             "Risked: <b>%{x:,.0f} MW</b><br>"
-            "Unrisked total: %{customdata[0]:,.0f} MW<br>"
+            "Announced total: %{customdata[0]:,.0f} MW<br>"
             "<br><i>Sources:</i><br>%{customdata[1]}"
             "<extra></extra>"
         ),
     ))
     fig.add_trace(go.Bar(
-        y=agg["operator"], x=agg["speculative"],
-        name="Speculative (unrisked − risked)", orientation="h",
+        y=agg["operator"], x=agg["announced_site_tied"],
+        name="Announced / site-tied", orientation="h",
         marker_color="rgba(37,99,235,0.25)",
         marker_line=dict(color="#2563eb", width=1),
-        customdata=agg[["unrisked", "sources"]].values,
+        customdata=agg[["announced_total", "sources"]].values,
         hovertemplate=(
             "<b>%{y}</b><br>"
-            "Speculative: <b>%{x:,.0f} MW</b><br>"
-            "Unrisked total: %{customdata[0]:,.0f} MW<br>"
+            "Announced / site-tied: <b>%{x:,.0f} MW</b><br>"
+            "Announced total: %{customdata[0]:,.0f} MW<br>"
+            "<br><i>Sources:</i><br>%{customdata[1]}"
+            "<extra></extra>"
+        ),
+    ))
+    fig.add_trace(go.Bar(
+        y=agg["operator"], x=agg["unassigned_aggregate"],
+        name="Unassigned aggregate", orientation="h",
+        marker_color="rgba(245,158,11,0.30)",
+        marker_line=dict(color="#f59e0b", width=1),
+        customdata=agg[["announced_total", "sources"]].values,
+        hovertemplate=(
+            "<b>%{y}</b><br>"
+            "Unassigned aggregate: <b>%{x:,.0f} MW</b><br>"
+            "Announced total: %{customdata[0]:,.0f} MW<br>"
             "<br><i>Sources:</i><br>%{customdata[1]}"
             "<extra></extra>"
         ),
     ))
     fig.update_layout(
         barmode="stack",
-        title="Top Operators by Capacity",
+        title="Top Operators by Announced Capacity",
         xaxis_title="Capacity (MW)",
         yaxis_title="",
         legend=dict(orientation="h", yanchor="top", y=-0.12, x=0),
