@@ -9,6 +9,7 @@ from pathlib import Path
 from app.lib.au_dc_charts import (
     capacity_by_region_bar,
     capacity_by_operator_bar,
+    operator_capacity_segments,
     market_breakdown_pie,
     capacity_forecast_chart,
     COLOUR_PALETTE,
@@ -64,11 +65,15 @@ mw_col = "risked_mw" if risk_view == "Risked" else "facility_mw"
 
 # --- KPI Row ---
 st.markdown("### Key Metrics")
-k1, k2, k3, k4 = st.columns(4)
+k1, k2, k3, k4, k5 = st.columns(5)
 
 total_projects = len(projects)
 operating = projects_for_totals[projects_for_totals["status"] == "Operating"]
 quarantined = total_projects - len(projects_for_totals)
+operator_segments = operator_capacity_segments(projects_for_totals, aggregate_guidance)
+capacity_segments = operator_segments[
+    ["risked", "announced_site_tied", "unassigned_aggregate", "announced_total"]
+].sum()
 
 with k1:
     st.metric("Total Projects", total_projects, delta=f"{quarantined} quarantined" if quarantined else None)
@@ -77,11 +82,19 @@ with k2:
 with k3:
     st.metric("Operating Capacity", f"{operating['facility_mw'].sum():,.0f} MW")
 with k4:
-    total_cap = projects_for_totals[mw_col].sum()
     st.metric(
-        f"Recorded Capacity ({risk_view})",
-        f"{total_cap:,.0f} MW",
-        help=RISKED_MW_HELP if risk_view == "Risked" else None,
+        "Risked Capacity",
+        f"{capacity_segments['risked']:,.0f} MW",
+        help=RISKED_MW_HELP,
+    )
+with k5:
+    st.metric(
+        "Aggregate Announced",
+        f"{capacity_segments['announced_total']:,.0f} MW",
+        help=(
+            "Total announced capacity used by the Top Operators chart: included named project/campus MW "
+            "plus unassigned aggregate operator guidance that is not yet mapped to named project rows."
+        ),
     )
 
 with st.expander("Data sources & methodology", icon=":material/info:"):
@@ -104,6 +117,9 @@ from default project totals.
 Updated periodically as announcements are made; there is no automated refresh.
 
 **Capacity methodology**
+- *Announced capacity*: included named project/campus MW plus separately tracked unassigned aggregate
+  operator guidance. The Top Operators chart and Key Metrics split this into Risked, Announced / site-tied,
+  and Unassigned aggregate segments to avoid mixing named project rows with operator-level pipeline guidance.
 - *Unrisked*: included project MW at the disclosed capacity basis. The database distinguishes IT load,
   gross facility power, campus full-build MW, and power-consumption envelopes where the source allows.
   Quarantined legacy estimates and no-MW facility leads are excluded from default totals.
