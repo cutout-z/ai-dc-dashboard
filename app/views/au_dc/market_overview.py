@@ -13,7 +13,7 @@ from app.lib.au_dc_charts import (
     capacity_forecast_chart,
     COLOUR_PALETTE,
 )
-from app.lib.au_dc_methodology import RISKED_MW_HELP
+from app.lib.au_dc_methodology import OPERATOR_CAPACITY_SEGMENTS_HELP, RISKED_MW_HELP
 
 AU_DC_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
 DATA_DIR = AU_DC_DIR / "processed"
@@ -156,6 +156,10 @@ with col1:
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
+    st.caption(
+        "Risked, announced site-tied, and unassigned aggregate operator capacity.",
+        help=OPERATOR_CAPACITY_SEGMENTS_HELP,
+    )
     fig = capacity_by_operator_bar(projects_for_totals, aggregate_guidance=aggregate_guidance)
     st.plotly_chart(fig, use_container_width=True)
 

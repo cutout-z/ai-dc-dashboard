@@ -7,6 +7,16 @@ RISKED_MW_HELP = (
     "This is a delivery-confidence lens, not contracted demand or expected load."
 )
 
+OPERATOR_CAPACITY_SEGMENTS_HELP = (
+    "Top Operators segments: Risked = included named project/campus MW multiplied by "
+    "the dashboard delivery-confidence weights (Operating and Under Construction 100%, "
+    "Approved with power secured 75%, Approved with grid/power pending 25%, "
+    "Proposed/Announced 0%). Announced / site-tied = the remaining included MW tied to "
+    "a named project or campus but not counted in Risked MW. Unassigned aggregate = "
+    "operator-level pipeline, contract, order-book, or platform guidance not yet mapped "
+    "to named project rows."
+)
+
 RECORDED_MW_HELP = (
     "Recorded MW is the project capacity currently counted in dashboard totals. "
     "It is called unverified because public sources use different bases: IT load, "
