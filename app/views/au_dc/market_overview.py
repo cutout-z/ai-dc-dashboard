@@ -15,7 +15,9 @@ from app.lib.au_dc_charts import (
 )
 from app.lib.au_dc_methodology import RISKED_MW_HELP
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc" / "processed"
+AU_DC_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
+DATA_DIR = AU_DC_DIR / "processed"
+REFERENCE_DIR = AU_DC_DIR / "reference"
 
 st.title("Market Overview")
 
@@ -31,6 +33,12 @@ if "include_in_project_totals" in projects.columns:
     projects_for_totals = projects[projects["include_in_project_totals"].fillna(True)]
 else:
     projects_for_totals = projects
+aggregate_guidance_path = REFERENCE_DIR / "operator_aggregate_guidance.csv"
+aggregate_guidance = (
+    pd.read_csv(aggregate_guidance_path)
+    if aggregate_guidance_path.exists()
+    else pd.DataFrame()
+)
 spot_check_path = DATA_DIR / "spot_check.json"
 spot_check = json.loads(spot_check_path.read_text()) if spot_check_path.exists() else None
 
@@ -148,7 +156,7 @@ with col1:
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    fig = capacity_by_operator_bar(projects_for_totals)
+    fig = capacity_by_operator_bar(projects_for_totals, aggregate_guidance=aggregate_guidance)
     st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("### Forecast Pipeline by Risk Category")
