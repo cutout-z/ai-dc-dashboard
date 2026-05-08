@@ -44,26 +44,11 @@ def _chart_layout():
 CHART_LAYOUT = _chart_layout()
 
 
-def capacity_by_region_bar(df: pd.DataFrame, title: str = "Capacity by Region") -> go.Figure:
-    agg = df.groupby(["nem_region", "status"])["facility_mw"].sum().reset_index()
-    fig = px.bar(
-        agg, x="nem_region", y="facility_mw", color="status",
-        color_discrete_map=COLOUR_PALETTE, title=title,
-        labels={"facility_mw": "Capacity (MW)", "nem_region": "NEM Region", "status": "Status"},
-        barmode="stack",
-    )
-    fig.update_layout(
-        legend=dict(orientation="h", yanchor="top", y=-0.2, x=0),
-        **{**CHART_LAYOUT, "margin": dict(l=40, r=20, t=40, b=80)},
-    )
-    return fig
-
-
-def capacity_by_operator_bar(
+def operator_capacity_segments(
     df: pd.DataFrame,
     aggregate_guidance: pd.DataFrame | None = None,
-    top_n: int = 15,
-) -> go.Figure:
+) -> pd.DataFrame:
+    """Return operator-level capacity split used by the top-operators chart."""
     agg = df.groupby("operator").agg(
         risked=("risked_mw", "sum"),
         unrisked=("facility_mw", "sum"),
@@ -103,6 +88,30 @@ def capacity_by_operator_bar(
         agg[col] = agg[col].fillna(0)
     agg["operator"] = agg["operator"].fillna("Unknown")
     agg["announced_total"] = agg["unrisked"] + agg["unassigned_aggregate"]
+    return agg
+
+
+def capacity_by_region_bar(df: pd.DataFrame, title: str = "Capacity by Region") -> go.Figure:
+    agg = df.groupby(["nem_region", "status"])["facility_mw"].sum().reset_index()
+    fig = px.bar(
+        agg, x="nem_region", y="facility_mw", color="status",
+        color_discrete_map=COLOUR_PALETTE, title=title,
+        labels={"facility_mw": "Capacity (MW)", "nem_region": "NEM Region", "status": "Status"},
+        barmode="stack",
+    )
+    fig.update_layout(
+        legend=dict(orientation="h", yanchor="top", y=-0.2, x=0),
+        **{**CHART_LAYOUT, "margin": dict(l=40, r=20, t=40, b=80)},
+    )
+    return fig
+
+
+def capacity_by_operator_bar(
+    df: pd.DataFrame,
+    aggregate_guidance: pd.DataFrame | None = None,
+    top_n: int = 15,
+) -> go.Figure:
+    agg = operator_capacity_segments(df, aggregate_guidance)
     agg = agg.sort_values("announced_total", ascending=True).tail(top_n)
 
     # Aggregate sources per operator for hover tooltip
