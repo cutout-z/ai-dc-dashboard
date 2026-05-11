@@ -10,6 +10,7 @@ Hybrid approach:
 from __future__ import annotations
 
 import logging
+import re
 import time
 import urllib.parse
 from dataclasses import dataclass
@@ -41,46 +42,80 @@ DIRECT_FEEDS = {
     "The Register DC": "https://www.theregister.com/data_centre/headlines.atom",
 }
 
+BLOCKED_SOURCE_PATTERNS = (
+    "analytics india magazine",
+    "business standard",
+    "deccan herald",
+    "economic times",
+    "financial express",
+    "hindustan times",
+    "india today",
+    "indian express",
+    "inc42",
+    "livemint",
+    "moneycontrol",
+    "ndtv",
+    "news18",
+    "the hindu",
+    "the times of india",
+    "times of india",
+    "trak.in",
+    "varindia",
+    "yourstory",
+    "zeebiz",
+)
+
+
+def is_blocked_news_source(source: str) -> bool:
+    lower = source.lower()
+    return any(pattern in lower for pattern in BLOCKED_SOURCE_PATTERNS)
+
+
+def normalise_title_key(title: str) -> str:
+    # Google News often appends " - Source" to titles; remove that tail for de-duping.
+    base = re.sub(r"\s+-\s+[^-]{2,80}$", "", title).lower()
+    return re.sub(r"[^a-z0-9]+", " ", base).strip()
+
 BUCKETS: dict[str, dict] = {
     "Frontier Labs": {
         "queries": [
-            "(OpenAI OR Anthropic OR xAI OR DeepMind OR Mistral) AI",
-            "DeepSeek OR Moonshot AI",
+            "(OpenAI OR Anthropic OR xAI OR DeepMind OR Mistral) (funding OR valuation OR revenue OR contract OR cloud OR regulator OR investigation OR \"EU Commission\" OR losses OR margin)",
+            "(Cerebras OR CoreWeave OR DeepSeek OR Moonshot AI) (IPO OR funding OR valuation OR contract OR demand OR customer OR margin)",
         ],
         "direct": [],
     },
     "Hyperscaler CAPEX": {
         "queries": [
-            "(Microsoft OR Amazon OR Google OR Meta) \"data center\" capex",
-            "(Microsoft OR Amazon OR Google OR Meta) \"AI infrastructure\"",
+            "(Microsoft OR Amazon OR Google OR Meta OR Apple OR Oracle) (\"data center\" OR \"data centre\" OR \"AI infrastructure\") (capex OR investment OR build OR campus OR power OR renewable OR PPA OR MW OR GW OR delay OR cancelled)",
+            "(Microsoft OR Amazon OR Google OR Meta OR Apple OR Oracle) (\"cloud contract\" OR \"AI infrastructure\" OR \"data center power\" OR \"capacity reservation\" OR \"contract loss\")",
         ],
         "direct": [],
     },
     "Supply Chain": {
         "queries": [
-            "(TSMC OR ASML OR Nvidia OR Broadcom OR AMD) supply OR shortage OR demand",
-            "HBM memory OR advanced packaging OR CoWoS",
+            "(TSMC OR ASML OR Nvidia OR Broadcom OR AMD OR Cerebras) (supply OR shortage OR demand OR order OR IPO OR valuation)",
+            "(HBM OR \"advanced packaging\" OR CoWoS OR \"SK Hynix\" OR Samsung) (capacity OR shortage OR bottleneck OR supply)",
         ],
         "direct": ["DatacenterDynamics", "The Register DC"],
     },
     "Model Releases": {
         "queries": [
-            "\"model release\" (GPT OR Claude OR Gemini OR Llama OR DeepSeek)",
-            "AI benchmark (MMLU OR GPQA OR \"SWE-bench\")",
+            "(GPT OR Claude OR Gemini OR Llama OR DeepSeek) (\"price cut\" OR pricing OR cheaper OR efficiency OR benchmark OR \"model release\")",
+            "AI benchmark (MMLU OR GPQA OR \"SWE-bench\") (frontier OR cost OR efficiency OR plateau)",
         ],
         "direct": [],
     },
     "ANZ DC": {
         "queries": [
-            "(NextDC OR AirTrunk OR CDC OR Infratil OR Macquarie) \"data centre\" Australia",
-            "\"data centre\" (Australia OR \"New Zealand\")",
+            "(NextDC OR AirTrunk OR CDC OR Infratil OR Macquarie OR Goodman) \"data centre\" (Australia OR \"New Zealand\") (capacity OR MW OR campus OR investment OR power OR contract)",
+            "\"data centre\" (Australia OR \"New Zealand\") (MW OR power OR renewable OR campus OR hyperscale)",
         ],
         "direct": [],
     },
     "China / Export Controls": {
         "queries": [
-            "China AI chip export controls",
-            "Huawei OR DeepSeek OR SMIC AI",
+            "China AI chip export controls Nvidia Huawei SMIC",
+            "(Huawei OR DeepSeek OR SMIC) (AI chip OR export controls OR sanctions OR GPU)",
         ],
         "direct": [],
     },
@@ -152,11 +187,14 @@ def _fetch_feed(url: str, source_fallback: str) -> list[NewsItem]:
         link = getattr(entry, "link", "").strip()
         if not title or not link:
             continue
+        source = _entry_source(entry, source_fallback)
+        if is_blocked_news_source(source):
+            continue
         items.append(
             NewsItem(
                 title=title,
                 url=link,
-                source=_entry_source(entry, source_fallback),
+                source=source,
                 published=_parse_published(entry),
                 summary=getattr(entry, "summary", "")[:300],
             )
@@ -173,14 +211,17 @@ def fetch_news_buckets(max_per_bucket: int = 20) -> dict[str, list[dict]]:
     result: dict[str, list[dict]] = {}
     for label, cfg in BUCKETS.items():
         seen_urls: set[str] = set()
+        seen_titles: set[str] = set()
         items: list[NewsItem] = []
 
         for query in cfg.get("queries", []):
             url = _gn_url(query)
             for item in _fetch_feed(url, source_fallback="Google News"):
-                if item.url in seen_urls:
+                title_key = normalise_title_key(item.title)
+                if item.url in seen_urls or title_key in seen_titles:
                     continue
                 seen_urls.add(item.url)
+                seen_titles.add(title_key)
                 items.append(item)
 
         for direct_name in cfg.get("direct", []):
@@ -188,9 +229,11 @@ def fetch_news_buckets(max_per_bucket: int = 20) -> dict[str, list[dict]]:
             if not feed_url:
                 continue
             for item in _fetch_feed(feed_url, source_fallback=direct_name):
-                if item.url in seen_urls:
+                title_key = normalise_title_key(item.title)
+                if item.url in seen_urls or title_key in seen_titles:
                     continue
                 seen_urls.add(item.url)
+                seen_titles.add(title_key)
                 items.append(item)
 
         # Sort by published desc, None last

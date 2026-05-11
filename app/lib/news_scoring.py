@@ -4,9 +4,10 @@ Attaches a composite materiality score (0.0–1.0) to each news item without
 changing the UI.  The score is ready for a future sort-by-materiality toggle.
 
 Composite formula:
-    score = w_recency * recency + w_trust * source_trust + w_ticker * ticker_match
+    score = event + source + entity + magnitude + recency - noise penalties
 
-Default weights: recency 0.40, trust 0.25, ticker 0.35.
+HIGH is reserved for material thesis events: contracts, capex/power/MW,
+regulatory action, funding/IPO/valuation, export controls, or supply constraints.
 """
 
 from __future__ import annotations
@@ -42,6 +43,8 @@ _SOURCE_TRUST: dict[str, float] = {
     "oracle": 1.0,
     "tsmc": 1.0,
     "sec.gov": 1.0,
+    "european commission": 1.0,
+    "eu commission": 1.0,
     # Tier 2 — financial press
     "bloomberg": 0.85,
     "financial times": 0.85,
@@ -55,6 +58,8 @@ _SOURCE_TRUST: dict[str, float] = {
     "ft.com": 0.85,
     # Tier 3 — trade press
     "datacenterdynamics": 0.70,
+    "data center dynamics": 0.70,
+    "data center knowledge": 0.70,
     "the register": 0.70,
     "semianalysis": 0.70,
     "anandtech": 0.70,
@@ -74,6 +79,11 @@ _SOURCE_TRUST: dict[str, float] = {
     "engadget": 0.55,
     "zdnet": 0.55,
     "cnet": 0.55,
+    "tipranks": 0.45,
+    "yahoo finance": 0.45,
+    "investing.com": 0.45,
+    "verdict": 0.25,
+    "the daily star": 0.25,
 }
 
 _DEFAULT_TRUST = 0.40
@@ -124,6 +134,7 @@ _TRACKED_PATTERNS: dict[str, list[re.Pattern]] = {
     "DeepSeek":  [re.compile(r"\bDeepSeek\b")],
     "Mistral":   [re.compile(r"\bMistral\b")],
     "CoreWeave": [re.compile(r"\bCoreWeave\b"), re.compile(r"\bCRWV\b")],
+    "Cerebras": [re.compile(r"\bCerebras\b")],
 }
 
 # Adjacent entities — relevant but not directly tracked
@@ -175,6 +186,97 @@ def get_recency_score(published: datetime | None) -> float:
 
 
 # ──────────────────────────────────────────────
+# Event materiality
+# ──────────────────────────────────────────────
+
+_HIGH_EVENT_PATTERNS: list[re.Pattern] = [
+    re.compile(
+        r"\b(signs?|signed|inks?|contract|deal|agreement|partnership|wins?|loses?|lost|cancell?ed|terminated|renegotiated)\b"
+        r".{0,90}\b(\$|bn|billion|cloud|renewable|ppa|mw|gw|data cent(?:er|re)|ai infrastructure|capacity reservation)\b",
+        re.I,
+    ),
+    re.compile(
+        r"\b(\$|bn|billion|cloud|renewable|ppa|mw|gw|data cent(?:er|re)|ai infrastructure|capacity reservation)\b"
+        r".{0,90}\b(signs?|signed|inks?|contract|deal|agreement|partnership|wins?|loses?|lost|cancell?ed|terminated|renegotiated)\b",
+        re.I,
+    ),
+    re.compile(
+        r"\b(eu commission|european commission|ftc|doj|cma|regulator|antitrust|probe|investigation|in talks with)\b"
+        r".{0,120}\b(openai|anthropic|microsoft|google|amazon|apple|meta|nvidia|ai model|cloud)\b",
+        re.I,
+    ),
+    re.compile(
+        r"\b(ipo|valuation|funding|fundraise|raises?|raise|debt|bond|burn rate|cash burn|losses|margin)\b"
+        r".{0,100}\b(\$|bn|billion|ai demand|cerebras|coreweave|openai|anthropic|xai|revenue)\b",
+        re.I,
+    ),
+    re.compile(
+        r"\b(capex|capital expenditure|investment|campus|build|expansion|delay|delayed|pause|paused|cut|cuts)\b"
+        r".{0,100}\b(\$|bn|billion|mw|gw|data cent(?:er|re)|ai infrastructure|hyperscale)\b",
+        re.I,
+    ),
+    re.compile(
+        r"\b(export controls?|chip curbs?|sanctions?|licen[cs]e|ban)\b"
+        r".{0,100}\b(china|nvidia|huawei|smic|gpu|ai chip)\b",
+        re.I,
+    ),
+    re.compile(
+        r"\b(cowos|hbm|advanced packaging|blackwell|gpu)\b"
+        r".{0,100}\b(shortage|bottleneck|supply|capacity|allocation|orders?)\b",
+        re.I,
+    ),
+    re.compile(
+        r"\b(price cut|price war|pricing pressure|margin compression|utili[sz]ation|overcapacity|oversupply|demand slowdown)\b",
+        re.I,
+    ),
+    re.compile(
+        r"\b(power constraint|grid constraint|interconnection queue|ppa|renewable|nuclear|gas power)\b"
+        r".{0,100}\b(data cent(?:er|re)|ai infrastructure|hyperscale|mw|gw)\b",
+        re.I,
+    ),
+]
+
+_MEDIUM_EVENT_PATTERNS: list[re.Pattern] = [
+    re.compile(r"\b(earnings|revenue|guidance|margin|forecast|outlook)\b", re.I),
+    re.compile(r"\b(model release|benchmark|gpqa|swe-bench|mmlu|frontier model)\b", re.I),
+    re.compile(r"\b(partnership|launch|expands?|rollout)\b", re.I),
+]
+
+_MAGNITUDE_PATTERNS: list[re.Pattern] = [
+    re.compile(r"(\$|us\$|a\$)\s?\d", re.I),
+    re.compile(r"\b\d+(?:\.\d+)?\s?(bn|billion|million|mw|gw)\b", re.I),
+]
+
+_NOISE_PATTERNS: list[re.Pattern] = [
+    re.compile(r"\b(evil ai|blackmail|fictional|tropes?|meme|viral|stock is crashing)\b", re.I),
+    re.compile(r"\b(token|solana|crypto|airdrop)\b", re.I),
+    re.compile(r"\b(how to|explainer|opinion|what is|guide)\b", re.I),
+]
+
+
+def get_event_materiality(text: str) -> float:
+    for pattern in _HIGH_EVENT_PATTERNS:
+        if pattern.search(text):
+            return 1.0
+    for pattern in _MEDIUM_EVENT_PATTERNS:
+        if pattern.search(text):
+            return 0.45
+    return 0.0
+
+
+def get_magnitude_score(text: str) -> float:
+    return 1.0 if any(pattern.search(text) for pattern in _MAGNITUDE_PATTERNS) else 0.0
+
+
+def get_noise_penalty(text: str) -> float:
+    penalty = 0.0
+    for pattern in _NOISE_PATTERNS:
+        if pattern.search(text):
+            penalty += 0.22
+    return min(penalty, 0.45)
+
+
+# ──────────────────────────────────────────────
 # Composite score
 # ──────────────────────────────────────────────
 
@@ -184,25 +286,36 @@ def score_news_item(
     source: str,
     published: datetime | None,
     *,
-    recency_weight: float = 0.40,
-    trust_weight: float = 0.25,
-    ticker_weight: float = 0.35,
+    event_weight: float = 0.40,
+    trust_weight: float = 0.20,
+    ticker_weight: float = 0.25,
+    magnitude_weight: float = 0.10,
+    recency_weight: float = 0.05,
 ) -> float:
     """Compute materiality score for a single news item (0.0–1.0)."""
+    text = f"{title} {summary}"
     recency = get_recency_score(published)
     trust = get_source_trust(source)
-    ticker = get_ticker_relevance(f"{title} {summary}")
-    return round(
-        recency_weight * recency + trust_weight * trust + ticker_weight * ticker,
-        3,
+    ticker = get_ticker_relevance(text)
+    event = get_event_materiality(text)
+    magnitude = get_magnitude_score(text)
+    penalty = get_noise_penalty(text)
+    raw = (
+        event_weight * event
+        + trust_weight * trust
+        + ticker_weight * ticker
+        + magnitude_weight * magnitude
+        + recency_weight * recency
+        - penalty
     )
+    return round(max(0.0, min(raw, 1.0)), 3)
 
 
 # ──────────────────────────────────────────────
 # Materiality tiers
 # ──────────────────────────────────────────────
 
-TIER_HIGH_THRESHOLD = 0.65
+TIER_HIGH_THRESHOLD = 0.85
 TIER_MEDIUM_THRESHOLD = 0.40
 
 TIER_COLORS = {
