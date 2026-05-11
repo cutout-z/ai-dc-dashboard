@@ -54,7 +54,29 @@ No secrets or environment variables are required — all data sources are public
 
 ## Keeping data current
 
-The dashboard's reference data needs periodic refreshing as new figures are published. The ETL scripts in `scripts/` and `etl/` handle this:
+The Streamlit app is a reader of committed dashboard data. It does not call the VPS timers during page load.
+
+The active production refresh process runs on a Hetzner VPS:
+
+1. systemd timers run ETL, AU DC refreshes, source-health checks, and report-only research briefs.
+2. Refresh scripts rebuild compact dashboard-ready outputs under `data/`.
+3. If tracked outputs change, the VPS bot commits and pushes to GitHub.
+4. Streamlit Community Cloud picks up the latest committed data on its normal redeploy/restart path.
+
+Current VPS lanes:
+
+| Lane | Timer | Cadence | Dashboard impact |
+|---|---|---|---|
+| Source health | `ai-dc-health.timer` | Daily, around 07:20 Perth | Writes Markdown/JSON operational reports on the VPS. |
+| Deterministic ETL | `ai-dc-etl.timer` | Mon/Wed/Fri, around 07:40 Perth | Refreshes financials, macro, consensus, earnings dates, capex staleness, and ZeroEval/LLM benchmark data; commits changed dashboard data. |
+| Research brief | `ai-dc-research-brief.timer` | Weekly Monday morning Perth | Stages a review prompt/report only; no CSV/DB writes. |
+| AU DC data | `ai-dc-au-data.timer` | Weekly Monday morning Perth | Refreshes AEMO generation/grid/project outputs, runs AU DC checks, prunes raw cache, and commits changed processed outputs. |
+
+Operational details live in `deploy/`.
+
+### Manual refreshes
+
+The dashboard's reference data can still be refreshed manually when needed. The ETL scripts in `scripts/` and `etl/` handle this:
 
 ```bash
 # Refresh financial data (CAPEX, revenue, income statements via yfinance)
@@ -71,16 +93,16 @@ python etl/refresh_consensus.py
 python etl/fetch_macro.py
 ```
 
-Run these before pushing updates to keep the Streamlit Cloud deployment current.
+Run these before pushing updates when doing a supervised local refresh.
 
 ### VPS automation
 
-Production-style automation lives in `deploy/`. The intended VPS model is:
+Production automation lives in `deploy/`. The Hetzner model is:
 
 - deterministic ETL refreshes commit dashboard-ready data when outputs change;
 - AU DC refreshes run as a separate lane and skip the full historical demand rebuild by default;
-- source-health reports are written as Markdown/JSON;
-- LLM-backed research runs are report-only until reviewed and promoted manually.
+- source-health reports are written as Markdown/JSON under `/var/lib/ai-dc-dashboard/reports`;
+- LLM-backed research is report-only until reviewed and promoted manually.
 
 Raw AU DC AEMO/NEMOSIS cache is pruned with `scripts/prune_au_dc_raw_cache.py`; processed parquet/CSV outputs are the durable dashboard layer.
 
