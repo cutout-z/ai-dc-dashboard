@@ -26,7 +26,15 @@ if [[ "${RUN_ZEROEVAL}" == "1" ]]; then
 fi
 
 if [[ "${RUN_REFERENCE_AUDIT}" == "1" ]]; then
+  set +e
   "${PYTHON}" scripts/audit_reference_data.py
+  audit_status=$?
+  set -e
+  if [[ "${audit_status}" -ge 2 ]]; then
+    exit "${audit_status}"
+  elif [[ "${audit_status}" -ne 0 ]]; then
+    echo "Reference audit emitted warnings; continuing because no hard errors were found."
+  fi
 fi
 
 "${PYTHON}" scripts/source_health_report.py --out-dir "${REPORT_DIR:-/var/lib/ai-dc-dashboard/reports/source-health}" >/dev/null
@@ -47,4 +55,3 @@ if [[ "${PUSH_CHANGES}" == "1" ]]; then
 else
   echo "PUSH_CHANGES=0; commit created but not pushed."
 fi
-
