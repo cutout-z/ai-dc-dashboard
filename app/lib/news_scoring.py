@@ -370,3 +370,32 @@ def get_materiality_tier(score: float) -> str:
     if score >= TIER_MEDIUM_THRESHOLD:
         return "MEDIUM"
     return "LOW"
+
+
+def get_display_tier(item: dict, bucket: str) -> str:
+    """Classify an item for the visible feed after source-quality gates.
+
+    Raw scoring deliberately stays broad so we can audit the feed. The display
+    tier is stricter: non-ANZ Medium items need both a trusted source and a
+    thesis-relevant event; ANZ DC keeps a lower materiality bar but still blocks
+    weak sources.
+    """
+    score = item.get("materiality_score", 0)
+    tier = get_materiality_tier(score)
+    if tier != "MEDIUM":
+        return tier
+
+    source_trust = get_source_trust(item.get("source", ""))
+    text = f"{item.get('title', '')} {item.get('summary', '')}"
+    if bucket == "ANZ DC":
+        has_material_marker = (
+            get_event_materiality(text) > 0
+            or get_magnitude_score(text) > 0
+            or score >= 0.48
+        )
+        return tier if source_trust >= 0.70 and has_material_marker else "LOW"
+
+    event = get_event_materiality(text)
+    if source_trust < 0.70 or event < 1.0 or score < 0.78:
+        return "LOW"
+    return tier

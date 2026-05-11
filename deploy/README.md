@@ -27,7 +27,7 @@ The service user is `ai-dc`, with a repo-scoped deploy key named `ai-dc-vps-bot`
 | Lane | Timer | Cadence | Script | Purpose |
 | --- | --- | --- | --- | --- |
 | Source health | `ai-dc-health.timer` | Daily around 07:20 Perth | `run-vps-health.sh` | Write a Markdown/JSON source-health report without changing repo data. |
-| Deterministic ETL | `ai-dc-etl.timer` | Mon/Wed/Fri around 07:40 Perth | `run-vps-etl.sh` | Refresh financials, macro, consensus, earnings dates, capex staleness, ZeroEval/LLM benchmark data when enabled, then commit changed dashboard data. |
+| Deterministic ETL | `ai-dc-etl.timer` | Mon/Wed/Fri around 07:40 Perth | `run-vps-etl.sh` | Refresh financials, macro, consensus, earnings dates, capex staleness, news catalogue snapshots, ZeroEval/LLM benchmark data when enabled, then commit changed dashboard data. |
 | Research brief | `ai-dc-research-brief.timer` | Weekly Monday morning Perth | `run-vps-research-brief.sh` | Build a structured research prompt and optionally run an LLM command. Current production mode is report-only: no DB/CSV writes. |
 | AU DC data | `ai-dc-au-data.timer` | Weekly Monday morning Perth | `run-vps-au-data.sh` | Refresh AEMO generation/grid/project outputs, run AU DC checks, prune raw cache, and commit changed processed outputs. Routine lane skips the full 2020+ demand rebuild. |
 

@@ -16,5 +16,11 @@
     "status": "ok",
     "count": 0,
     "notes": "0 stale, 0 current"
+  },
+  "catalog_news.py": {
+    "last_run": "2026-05-11T12:36:19Z",
+    "status": "ok",
+    "count": 14,
+    "notes": "added=14, updated=0, total_catalogued=14"
   }
 }

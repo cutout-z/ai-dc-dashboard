@@ -98,6 +98,7 @@ FILE_FRESH_DAYS = {
     "gpu_lease_prices.csv": 60,
     "h100_rental_prices.csv": 60,
     "model_releases.csv": 30,
+    "news_catalog.csv": 7,
     "dc_power_forecasts.csv": 180,
     "ai_supplement.csv": 90,         # curated, updates with earnings
     "consensus.json": 7,             # refreshed via etl/refresh_consensus.py
@@ -380,7 +381,7 @@ live_rows = [
         "Source": "fetch_news_buckets() — news feeds",
         "TTL": "30m",
         "API": "feedparser (Google News RSS + direct)",
-        "Fallback": "None — RSS generally works on Cloud",
+        "Fallback": "data/reference/news_catalog.csv (durable snapshots via scripts/catalog_news.py)",
     },
 ]
 st.dataframe(pd.DataFrame(live_rows), use_container_width=True, hide_index=True,
