@@ -1,0 +1,14 @@
+[Unit]
+Description=Run AI & DC AU DC data refresh
+Documentation=https://github.com/cutout-z/ai-dc-dashboard
+
+[Timer]
+# Weekly, after AEMO publication checks have usually settled.
+OnCalendar=Sun *-*-* 23:55:00
+RandomizedDelaySec=45m
+Persistent=true
+Unit=ai-dc-au-data.service
+
+[Install]
+WantedBy=timers.target
+

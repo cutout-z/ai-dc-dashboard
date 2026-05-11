@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -25,6 +26,10 @@ BENCH_COLS = ["gpqa_score", "swe_bench_verified_score", "hle_score", "aime_2025_
 
 
 def _get_api_key() -> str | None:
+    env_key = os.environ.get("ZEROEVAL_API_KEY") or os.environ.get("LLM_STATS_API_KEY")
+    if env_key:
+        return env_key.strip()
+
     try:
         result = subprocess.run(
             ["security", "find-generic-password", "-s", "llm-stats-api", "-w"],
@@ -47,7 +52,7 @@ def _score(model: dict) -> float | None:
 def main() -> None:
     api_key = _get_api_key()
     if not api_key:
-        print("ERROR: No API key found. Store via:")
+        print("ERROR: No API key found. Set ZEROEVAL_API_KEY or store via:")
         print('  security add-generic-password -a "llm-stats" -s "llm-stats-api" -w "KEY"')
         return
 

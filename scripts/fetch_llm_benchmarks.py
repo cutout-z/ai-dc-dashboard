@@ -13,6 +13,7 @@ Usage:
 from __future__ import annotations
 
 import sqlite3
+import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -49,6 +50,10 @@ ORG_TO_PROVIDER = {
 
 
 def _get_api_key() -> str | None:
+    env_key = os.environ.get("ZEROEVAL_API_KEY") or os.environ.get("LLM_STATS_API_KEY")
+    if env_key:
+        return env_key.strip()
+
     try:
         result = subprocess.run(
             ["security", "find-generic-password", "-s", "llm-stats-api", "-w"],
@@ -64,7 +69,7 @@ def _get_api_key() -> str | None:
 def run() -> None:
     api_key = _get_api_key()
     if not api_key:
-        print("ERROR: No API key. Store via Keychain (service: llm-stats-api).")
+        print("ERROR: No API key. Set ZEROEVAL_API_KEY or store via Keychain (service: llm-stats-api).")
         return
 
     print("Fetching from api.zeroeval.com ...")

@@ -1,0 +1,17 @@
+[Unit]
+Description=AI & DC Dashboard source health report
+Documentation=https://github.com/cutout-z/ai-dc-dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ai-dc
+Group=ai-dc
+WorkingDirectory=/opt/ai-dc-dashboard
+EnvironmentFile=-/etc/ai-dc-dashboard/health.env
+ExecStart=/opt/ai-dc-dashboard/deploy/run-vps-health.sh
+TimeoutStartSec=30m
+StandardOutput=journal
+StandardError=journal
+

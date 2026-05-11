@@ -73,6 +73,17 @@ python etl/fetch_macro.py
 
 Run these before pushing updates to keep the Streamlit Cloud deployment current.
 
+### VPS automation
+
+Production-style automation lives in `deploy/`. The intended VPS model is:
+
+- deterministic ETL refreshes commit dashboard-ready data when outputs change;
+- AU DC refreshes run as a separate lane and skip the full historical demand rebuild by default;
+- source-health reports are written as Markdown/JSON;
+- LLM-backed research runs are report-only until reviewed and promoted manually.
+
+Raw AU DC AEMO/NEMOSIS cache is pruned with `scripts/prune_au_dc_raw_cache.py`; processed parquet/CSV outputs are the durable dashboard layer.
+
 ### Research pass pattern
 
 For data the ETL scripts can't cover — DC pipeline announcements, new funding deals, nuclear PPAs — we use a **research pass** pattern: a structured web research session (manual or AI-assisted) that collects new datapoints and appends them to `data/reference/funding_deals.csv` and the research findings database.

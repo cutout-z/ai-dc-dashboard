@@ -1,0 +1,14 @@
+[Unit]
+Description=Run AI & DC source health report
+Documentation=https://github.com/cutout-z/ai-dc-dashboard
+
+[Timer]
+# 23:20 UTC = 07:20 Australia/Perth.
+OnCalendar=*-*-* 23:20:00
+RandomizedDelaySec=10m
+Persistent=true
+Unit=ai-dc-health.service
+
+[Install]
+WantedBy=timers.target
+

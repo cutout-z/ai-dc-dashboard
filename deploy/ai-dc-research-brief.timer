@@ -1,0 +1,14 @@
+[Unit]
+Description=Run AI & DC report-only research brief
+Documentation=https://github.com/cutout-z/ai-dc-dashboard
+
+[Timer]
+# Weekly Monday morning Perth.
+OnCalendar=Sun *-*-* 22:30:00
+RandomizedDelaySec=30m
+Persistent=true
+Unit=ai-dc-research-brief.service
+
+[Install]
+WantedBy=timers.target
+
