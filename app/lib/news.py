@@ -56,13 +56,35 @@ BLOCKED_SOURCE_PATTERNS = (
     "moneycontrol",
     "ndtv",
     "news18",
+    "ad hoc news",
+    "asatunews",
+    "finimize",
+    "futu",
+    "kalkine media",
+    "marketscreener",
+    "moomoo",
+    "msn",
+    "prop news time",
+    "proactive financial news",
+    "proactive investors",
+    "stocktwits",
+    "stocks down under",
+    "tahawultech",
+    "the fast mode",
     "the hindu",
+    "the daily star",
+    "the motley fool",
     "the times of india",
+    "thebull",
     "times of india",
+    "tradingview",
     "trak.in",
     "varindia",
+    "verdict",
+    "wccftech",
     "yourstory",
     "zeebiz",
+    "富途牛牛",
 )
 
 
@@ -75,6 +97,21 @@ def normalise_title_key(title: str) -> str:
     # Google News often appends " - Source" to titles; remove that tail for de-duping.
     base = re.sub(r"\s+-\s+[^-]{2,80}$", "", title).lower()
     return re.sub(r"[^a-z0-9]+", " ", base).strip()
+
+
+def normalise_event_key(title: str) -> str:
+    lower = normalise_title_key(title)
+    if "cdc" in lower and "555" in lower and "data cent" in lower:
+        return "cdc-555mw-data-centre-contract"
+    if "anthropic" in lower and "akamai" in lower and ("1 8" in lower or "cloud deal" in lower):
+        return "anthropic-akamai-cloud-contract"
+    if "eu commission" in lower and "openai" in lower and "anthropic" in lower:
+        return "eu-commission-openai-anthropic"
+    if "cerebras" in lower and "ipo" in lower:
+        return "cerebras-ipo"
+    if "apple" in lower and "cleanmax" in lower and "150mw" in lower:
+        return "apple-cleanmax-150mw"
+    return lower
 
 
 _ANZ_OPERATOR_PATTERNS = [
@@ -91,10 +128,19 @@ _ANZ_OPERATOR_PATTERNS = [
     re.compile(r"\bNCI\b.{0,140}\bdata cent(?:er|re)\b", re.I),
 ]
 
+_ANZ_REGION_PATTERNS = [
+    re.compile(r"\b(Australia|Australian|Aussie|New Zealand|NZ|ASX|NZX)\b", re.I),
+    re.compile(r"\b(Sydney|Melbourne|Brisbane|Perth|Canberra|Adelaide|Auckland|Wellington)\b", re.I),
+    re.compile(r"\b(NSW|Victoria|Queensland|Western Australia|South Australia)\b", re.I),
+    re.compile(r"\b(NEXTDC|NXT\.AX|DigiCo|Infratil|IFT\.NZ|CDC Data Centres?)\b", re.I),
+]
+
 
 def is_anz_operator_news(title: str, summary: str = "") -> bool:
     text = f"{title} {summary}"
-    return any(pattern.search(text) for pattern in _ANZ_OPERATOR_PATTERNS)
+    has_operator = any(pattern.search(text) for pattern in _ANZ_OPERATOR_PATTERNS)
+    has_region = any(pattern.search(text) for pattern in _ANZ_REGION_PATTERNS)
+    return has_operator and has_region
 
 
 BUCKETS: dict[str, dict] = {
@@ -243,7 +289,7 @@ def fetch_news_buckets(max_per_bucket: int = 30) -> dict[str, list[dict]]:
             for item in _fetch_feed(url, source_fallback="Google News"):
                 if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
                     continue
-                title_key = normalise_title_key(item.title)
+                title_key = normalise_event_key(item.title)
                 if item.url in seen_urls or title_key in seen_titles:
                     continue
                 seen_urls.add(item.url)
@@ -257,7 +303,7 @@ def fetch_news_buckets(max_per_bucket: int = 30) -> dict[str, list[dict]]:
             for item in _fetch_feed(feed_url, source_fallback=direct_name):
                 if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
                     continue
-                title_key = normalise_title_key(item.title)
+                title_key = normalise_event_key(item.title)
                 if item.url in seen_urls or title_key in seen_titles:
                     continue
                 seen_urls.add(item.url)
