@@ -12,7 +12,7 @@ from app.lib.equities import (
     MAG7_AI_STOCKS,
     fetch_earnings_dates,
 )
-from app.lib.news import BUCKETS, fetch_news_buckets
+from app.lib.news import BUCKETS, fetch_news_buckets, normalise_title_key
 from app.lib.news_scoring import (
     TIER_COLORS, TIER_LABELS,
     TIER_HIGH_THRESHOLD, TIER_MEDIUM_THRESHOLD,
@@ -56,19 +56,19 @@ now = pd.Timestamp.now()
 for t in all_tickers:
     ed = _parse_date(dates.get(t["symbol"]))
     days_away = (ed - now).days if ed is not None else None
+    stale = days_away is not None and days_away < 0
     rows.append({
         "Ticker": t["symbol"],
         "Name": t["name"],
         "Group": t["group"],
         "Region": t["region"],
         "Earnings Date": ed.strftime("%Y-%m-%d") if ed is not None else "—",
-        "Days Away": days_away,
-        "_sort": ed if ed is not None else pd.Timestamp.max,
+        "Days Away": days_away if not stale and days_away is not None else "—",
+        "Status": "Stale provider date" if stale else ("Unavailable" if ed is None else "Upcoming"),
+        "_sort": ed if ed is not None and not stale else pd.Timestamp.max,
     })
 
 df_earn = pd.DataFrame(rows).sort_values("_sort").drop(columns=["_sort"])
-# Drop past earnings (negative days) — yfinance sometimes returns the last reported date
-df_earn = df_earn[df_earn["Days Away"].isna() | (df_earn["Days Away"] >= 0)]
 
 # Split into two tiles: Global and ANZ
 col_global, col_anz = st.columns(2)
@@ -77,6 +77,7 @@ with col_global:
     with st.container(border=True):
         st.subheader("Global (Mag 7 + AI Infra + DC Operators)")
         df_g = df_earn[df_earn["Region"] == "US"].drop(columns=["Region"])
+        df_g = df_g[df_g["Status"] == "Upcoming"].drop(columns=["Status"])
         st.dataframe(df_g, use_container_width=True, hide_index=True, height=35 * (len(df_g) + 1) + 3)
 
 with col_anz:
@@ -90,8 +91,9 @@ with col_anz:
 # ══════════════════════════════════════════════
 st.header("News Feed")
 st.caption(
-    "Ranked by materiality — source trust, ticker relevance, and recency. "
-    "Google News + curated DC feeds. Cached 30 min."
+    "Ranked for AI-bubble risk and mitigants: valuations, financing, material contracts, "
+    "capex/power, supply-chain constraints, regulation, and industry economics. "
+    "Indian news sources are excluded. Cached 30 min."
 )
 
 # Dot / label colour per bucket
@@ -120,15 +122,19 @@ else:
     # Flatten all buckets → single feed (deduplicated by URL)
     all_items: list[dict] = []
     seen_urls: set[str] = set()
+    seen_titles: set[str] = set()
     for bucket_label, items in news_data.items():
         for it in items:
-            if it["url"] not in seen_urls:
-                seen_urls.add(it["url"])
-                all_items.append({
-                    **it,
-                    "bucket": bucket_label,
-                    "tier": get_materiality_tier(it.get("materiality_score", 0)),
-                })
+            title_key = normalise_title_key(it["title"])
+            if it["url"] in seen_urls or title_key in seen_titles:
+                continue
+            seen_urls.add(it["url"])
+            seen_titles.add(title_key)
+            all_items.append({
+                **it,
+                "bucket": bucket_label,
+                "tier": get_materiality_tier(it.get("materiality_score", 0)),
+            })
 
     # PRIMARY: materiality score desc — SECONDARY: published desc
     all_items.sort(
