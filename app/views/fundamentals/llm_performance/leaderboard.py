@@ -1,8 +1,11 @@
 """LLM Leaderboard — frontier models ranked by performance, price, and speed."""
 from __future__ import annotations
 
+import html
+
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 from app.lib.llm_perf import fetch_zeroeval_models, fetch_zeroeval_indexes, chart_layout  # noqa: F401
 
@@ -27,6 +30,155 @@ _INDEX_LABELS = {
     "search": "Search",
     "knowledge": "Knowledge",
 }
+
+
+def _blended_price(input_price, output_price):
+    """LLM Stats blended price: 8 input tokens for every 1 output token."""
+    if pd.isna(input_price) or pd.isna(output_price):
+        return None
+    try:
+        return (8 * float(input_price) + float(output_price)) / 9
+    except (TypeError, ValueError):
+        return None
+
+
+def _fmt_blended_price(value):
+    if value is None or pd.isna(value):
+        return "-"
+    return f"${value:.2f}"
+
+
+def _render_index_price_chart(idx_df: pd.DataFrame, label: str) -> str:
+    scores = pd.to_numeric(idx_df["conservative"], errors="coerce")
+    score_max = scores.max()
+    score_floor = scores.min() - 1
+    score_span = score_max - score_floor if score_max > score_floor else 1
+
+    prices = pd.to_numeric(idx_df["blended_price"], errors="coerce")
+    price_max = prices.max()
+    if pd.isna(price_max) or price_max <= 0:
+        price_max = 1
+
+    rows = []
+    for rank, row in enumerate(idx_df.itertuples(index=False), start=1):
+        score = float(row.conservative)
+        score_width = max(0, min(100, ((score - score_floor) / score_span) * 100))
+        price = row.blended_price
+        has_price = price is not None and not pd.isna(price)
+        price_width = max(0, min(100, (float(price) / price_max) * 100)) if has_price else 0
+        price_text = _fmt_blended_price(price)
+        model = html.escape(str(row.display_name))
+        colour = html.escape(str(row.colour))
+
+        rows.append(
+            f"""<div class="llm-index-row">
+    <div class="llm-rank">{rank:02d}</div>
+    <div class="llm-model">{model}</div>
+    <div class="llm-track">
+        <div class="llm-score-fill" style="width:{score_width:.1f}%; background:{colour};"></div>
+    </div>
+    <div class="llm-score">{score:.1f}</div>
+    <div class="llm-track">
+        <div class="llm-price-fill" style="width:{price_width:.1f}%;"></div>
+    </div>
+    <div class="llm-price {'is-missing' if not has_price else ''}">{price_text}</div>
+</div>
+            """
+        )
+
+    label_upper = html.escape(label.upper())
+    return f"""
+    <style>
+    html,
+    body {{
+        background: transparent;
+        margin: 0;
+        padding: 0;
+    }}
+    .llm-index-chart {{
+        --muted: rgba(229, 231, 235, 0.46);
+        --faint: rgba(229, 231, 235, 0.12);
+        --track: rgba(229, 231, 235, 0.08);
+        --text: #e5e7eb;
+        --price: #22d3a5;
+        margin-top: 1.25rem;
+        overflow-x: auto;
+        border-top: 1px solid var(--faint);
+        border-bottom: 1px solid var(--faint);
+        padding: 1rem 0 1.5rem;
+    }}
+    .llm-index-header,
+    .llm-index-row {{
+        display: grid;
+        grid-template-columns: 3.2rem minmax(12rem, 22rem) minmax(18rem, 1fr) 4rem minmax(13rem, 20rem) 5.2rem;
+        gap: 0.9rem;
+        align-items: center;
+        min-width: 980px;
+    }}
+    .llm-index-header {{
+        color: var(--muted);
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        padding-bottom: 0.85rem;
+        text-transform: uppercase;
+    }}
+    .llm-index-row {{
+        min-height: 2.45rem;
+        color: var(--text);
+        font-size: 0.88rem;
+    }}
+    .llm-rank {{
+        color: var(--muted);
+        font-size: 0.78rem;
+        text-align: right;
+    }}
+    .llm-model {{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 650;
+    }}
+    .llm-track {{
+        height: 0.78rem;
+        background: var(--track);
+        border-radius: 3px;
+        overflow: hidden;
+    }}
+    .llm-score-fill,
+    .llm-price-fill {{
+        height: 100%;
+        border-radius: 3px;
+    }}
+    .llm-price-fill {{
+        background: var(--price);
+    }}
+    .llm-score {{
+        color: var(--text);
+        font-weight: 700;
+        text-align: right;
+    }}
+    .llm-price {{
+        color: var(--price);
+        font-weight: 700;
+        text-align: right;
+    }}
+    .llm-price.is-missing {{
+        color: var(--muted);
+    }}
+    </style>
+    <div class="llm-index-chart">
+        <div class="llm-index-header">
+            <div></div>
+            <div></div>
+            <div>{label_upper} INDEX</div>
+            <div>Score</div>
+            <div>$ Price · 8:1 Blend</div>
+            <div>USD / 1M Tok</div>
+        </div>
+        {''.join(rows)}
+    </div>
+    """
 
 ze_df = fetch_zeroeval_models()
 indexes = fetch_zeroeval_indexes()
@@ -150,7 +302,10 @@ else:
     # --- Performance Index bar chart ---
     st.markdown("---")
     st.subheader("Performance Index")
-    st.caption("Composite TrueSkill ratings across published benchmarks")
+    st.caption(
+        "Composite TrueSkill ratings across published benchmarks, paired with each model's "
+        "blended price (8 input : 1 output) per 1M tokens."
+    )
 
     # Tabs for metric selection — pick the categories with meaningful model counts
     _CHART_CATS = [
@@ -237,8 +392,6 @@ else:
     }
     _DEFAULT_COLOUR = "#6b7280"
 
-    import plotly.graph_objects as go
-
     for tab, (label, cat_key) in zip(tabs, _CHART_CATS):
         with tab:
             if cat_key in _CAT_INFO:
@@ -254,47 +407,33 @@ else:
             idx_df = indexes[cat_key].copy()
             idx_df = idx_df.sort_values("conservative", ascending=False).head(15).reset_index(drop=True)
 
-            # Merge org names from main model data
+            # Merge model detail from the live leaderboard data.
+            detail_cols = ["model_id", "name", "organization"]
+            for price_col in ("input_price", "output_price"):
+                if price_col in ze_df.columns:
+                    detail_cols.append(price_col)
             idx_df = idx_df.merge(
-                ze_df[["model_id", "name", "organization"]].drop_duplicates("model_id"),
+                ze_df[detail_cols].drop_duplicates("model_id"),
                 on="model_id", how="left",
             )
+            for price_col in ("input_price", "output_price"):
+                if price_col not in idx_df.columns:
+                    idx_df[price_col] = pd.NA
             idx_df["display_name"] = idx_df["name"].fillna(idx_df["model_id"])
             idx_df["org"] = idx_df["organization"].fillna("")
             idx_df["colour"] = idx_df["org"].map(
                 lambda o: _ORG_COLOURS.get(o, _DEFAULT_COLOUR)
             )
+            idx_df["blended_price"] = [
+                _blended_price(input_price, output_price)
+                for input_price, output_price in zip(idx_df["input_price"], idx_df["output_price"])
+            ]
 
-            # Reverse for plotly (bottom-to-top)
-            idx_df = idx_df.iloc[::-1].reset_index(drop=True)
-
-            # Rank labels (01, 02, ...)
-            n = len(idx_df)
-            rank_labels = [f"{n - i:02d}" for i in range(n)]
-
-            fig = go.Figure()
-            fig.add_trace(go.Bar(
-                x=idx_df["conservative"],
-                y=[f"{rank}  {name}" for rank, name in zip(rank_labels, idx_df["display_name"])],
-                orientation="h",
-                marker_color=idx_df["colour"].tolist(),
-                text=idx_df["conservative"].round(1),
-                textposition="outside",
-                textfont=dict(size=13, color="#e5e7eb"),
-                hovertemplate="%{y}<br>Score: %{x:.1f}<extra></extra>",
-            ))
-            fig.update_layout(
-                height=max(400, n * 45),
-                margin=dict(l=10, r=50, t=10, b=10),
-                plot_bgcolor="rgba(0,0,0,0)",
-                paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="#e5e7eb", size=13),
-                xaxis=dict(visible=False, range=[0, idx_df["conservative"].max() * 1.15]),
-                yaxis=dict(tickfont=dict(size=13), automargin=True),
-                showlegend=False,
-                bargap=0.35,
+            components.html(
+                _render_index_price_chart(idx_df, label),
+                height=max(520, len(idx_df) * 44 + 90),
+                scrolling=True,
             )
-            st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("")
     st.caption(
