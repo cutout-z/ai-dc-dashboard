@@ -1,70 +1,7 @@
 {
-  "updated": "2026-05-11T05:55:20Z",
+  "updated": "2026-05-11T23:46:48Z",
   "source": "fmp",
   "data": {
-    "AAPL": {
-      "rev_0y_avg": 473360.6,
-      "rev_0y_low": 463110.4,
-      "rev_0y_high": 482854.5,
-      "rev_1y_avg": 511528.4,
-      "rev_1y_low": 495096.2,
-      "rev_1y_high": 553784.0,
-      "rev_n": 23,
-      "rev_growth": 0.0806,
-      "eps_0y_avg": 8.6984,
-      "eps_1y_avg": 9.5602,
-      "eps_n": 29,
-      "ebitda_0y_avg": 170852.4,
-      "ebitda_0y_low": 167152.7,
-      "ebitda_0y_high": 174279.1,
-      "ebitda_1y_avg": 184628.5,
-      "ebitda_1y_low": 178697.5,
-      "ebitda_1y_high": 199880.0,
-      "ni_0y_avg": 128391.3,
-      "ni_1y_avg": 138278.0,
-      "pt_current": null,
-      "pt_mean": 319.44,
-      "pt_low": 253.0,
-      "pt_high": 400.0,
-      "pt_analysts": [],
-      "upgrades_downgrades": [
-        {
-          "firm": "Wedbush",
-          "action": "maintain",
-          "new_grade": "Outperform",
-          "prev_grade": "Outperform",
-          "date": "2026-05-08"
-        },
-        {
-          "firm": "Morgan Stanley",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-05-01"
-        },
-        {
-          "firm": "UBS",
-          "action": "maintain",
-          "new_grade": "Neutral",
-          "prev_grade": "Neutral",
-          "date": "2026-05-01"
-        },
-        {
-          "firm": "Rosenblatt",
-          "action": "maintain",
-          "new_grade": "Neutral",
-          "prev_grade": "Neutral",
-          "date": "2026-05-01"
-        },
-        {
-          "firm": "Wedbush",
-          "action": "maintain",
-          "new_grade": "Outperform",
-          "prev_grade": "Outperform",
-          "date": "2026-05-01"
-        }
-      ]
-    },
     "MSFT": {
       "rev_0y_avg": 329125.7,
       "rev_0y_low": 328645.9,
@@ -254,6 +191,132 @@
         }
       ]
     },
+    "AAPL": {
+      "rev_0y_avg": 474033.1,
+      "rev_0y_low": 468726.0,
+      "rev_0y_high": 481314.4,
+      "rev_1y_avg": 512520.8,
+      "rev_1y_low": 493058.6,
+      "rev_1y_high": 551505.0,
+      "rev_n": 25,
+      "rev_growth": 0.0812,
+      "eps_0y_avg": 8.6945,
+      "eps_1y_avg": 9.55,
+      "eps_n": 31,
+      "ebitda_0y_avg": 171095.1,
+      "ebitda_0y_low": 169179.6,
+      "ebitda_0y_high": 173723.2,
+      "ebitda_1y_avg": 184986.7,
+      "ebitda_1y_low": 177962.1,
+      "ebitda_1y_high": 199057.4,
+      "ni_0y_avg": 130756.9,
+      "ni_1y_avg": 138456.1,
+      "pt_current": null,
+      "pt_mean": 319.44,
+      "pt_low": 253.0,
+      "pt_high": 400.0,
+      "pt_analysts": [],
+      "upgrades_downgrades": [
+        {
+          "firm": "Wedbush",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-05-08"
+        },
+        {
+          "firm": "Morgan Stanley",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-05-01"
+        },
+        {
+          "firm": "UBS",
+          "action": "maintain",
+          "new_grade": "Neutral",
+          "prev_grade": "Neutral",
+          "date": "2026-05-01"
+        },
+        {
+          "firm": "Rosenblatt",
+          "action": "maintain",
+          "new_grade": "Neutral",
+          "prev_grade": "Neutral",
+          "date": "2026-05-01"
+        },
+        {
+          "firm": "Wedbush",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-05-01"
+        }
+      ]
+    },
+    "NVDA": {
+      "rev_0y_avg": 368297.7,
+      "rev_0y_low": 336609.7,
+      "rev_0y_high": 393749.0,
+      "rev_1y_avg": 486161.8,
+      "rev_1y_low": 374980.2,
+      "rev_1y_high": 580550.7,
+      "rev_n": 39,
+      "rev_growth": 0.32,
+      "eps_0y_avg": 8.2764,
+      "eps_1y_avg": 11.1327,
+      "eps_n": 31,
+      "ebitda_0y_avg": 188364.1,
+      "ebitda_0y_low": 172157.4,
+      "ebitda_0y_high": 201381.1,
+      "ebitda_1y_avg": 248645.1,
+      "ebitda_1y_low": 191781.8,
+      "ebitda_1y_high": 296919.9,
+      "ni_0y_avg": 201878.6,
+      "ni_1y_avg": 261490.4,
+      "pt_current": null,
+      "pt_mean": 275.74,
+      "pt_low": 140.0,
+      "pt_high": 400.0,
+      "pt_analysts": [],
+      "upgrades_downgrades": [
+        {
+          "firm": "Benchmark",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-03-31"
+        },
+        {
+          "firm": "Rosenblatt",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-03-23"
+        },
+        {
+          "firm": "Cantor Fitzgerald",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-03-23"
+        },
+        {
+          "firm": "Raymond James",
+          "action": "maintain",
+          "new_grade": "Strong Buy",
+          "prev_grade": "Strong Buy",
+          "date": "2026-03-19"
+        },
+        {
+          "firm": "Rosenblatt",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-03-18"
+        }
+      ]
+    },
     "META": {
       "rev_0y_avg": 252795.8,
       "rev_0y_low": 241921.3,
@@ -326,7 +389,7 @@
       "rev_1y_high": 131234.2,
       "rev_n": 35,
       "rev_growth": 0.1513,
-      "eps_0y_avg": 1.9351,
+      "eps_0y_avg": 1.9253,
       "eps_1y_avg": 2.4593,
       "eps_n": 25,
       "ebitda_0y_avg": 16931.4,
@@ -377,195 +440,6 @@
           "new_grade": "Outperform",
           "prev_grade": "Outperform",
           "date": "2026-04-23"
-        }
-      ]
-    },
-    "NVDA": {
-      "rev_0y_avg": 368297.7,
-      "rev_0y_low": 336609.7,
-      "rev_0y_high": 393749.0,
-      "rev_1y_avg": 486161.8,
-      "rev_1y_low": 374980.2,
-      "rev_1y_high": 580550.7,
-      "rev_n": 39,
-      "rev_growth": 0.32,
-      "eps_0y_avg": 8.2764,
-      "eps_1y_avg": 11.1327,
-      "eps_n": 31,
-      "ebitda_0y_avg": 188364.1,
-      "ebitda_0y_low": 172157.4,
-      "ebitda_0y_high": 201381.1,
-      "ebitda_1y_avg": 248645.1,
-      "ebitda_1y_low": 191781.8,
-      "ebitda_1y_high": 296919.9,
-      "ni_0y_avg": 201878.6,
-      "ni_1y_avg": 261490.4,
-      "pt_current": null,
-      "pt_mean": 275.74,
-      "pt_low": 140.0,
-      "pt_high": 400.0,
-      "pt_analysts": [],
-      "upgrades_downgrades": [
-        {
-          "firm": "Benchmark",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-03-31"
-        },
-        {
-          "firm": "Rosenblatt",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-03-23"
-        },
-        {
-          "firm": "Cantor Fitzgerald",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-03-23"
-        },
-        {
-          "firm": "Raymond James",
-          "action": "maintain",
-          "new_grade": "Strong Buy",
-          "prev_grade": "Strong Buy",
-          "date": "2026-03-19"
-        },
-        {
-          "firm": "Rosenblatt",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-03-18"
-        }
-      ]
-    },
-    "PLTR": {
-      "rev_0y_avg": 7597.1,
-      "rev_0y_low": 7196.8,
-      "rev_0y_high": 7857.4,
-      "rev_1y_avg": 10956.9,
-      "rev_1y_low": 9910.5,
-      "rev_1y_high": 11890.5,
-      "rev_n": 22,
-      "rev_growth": 0.4422,
-      "eps_0y_avg": 1.4221,
-      "eps_1y_avg": 2.018,
-      "eps_n": 19,
-      "ebitda_0y_avg": 1812.7,
-      "ebitda_0y_low": 1717.1,
-      "ebitda_0y_high": 1874.8,
-      "ebitda_1y_avg": 2614.3,
-      "ebitda_1y_low": 2364.6,
-      "ebitda_1y_high": 2837.1,
-      "ni_0y_avg": 3374.4,
-      "ni_1y_avg": 4592.3,
-      "pt_current": null,
-      "pt_mean": 191.83,
-      "pt_low": 151.0,
-      "pt_high": 230.0,
-      "pt_analysts": [],
-      "upgrades_downgrades": [
-        {
-          "firm": "Citigroup",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-05-06"
-        },
-        {
-          "firm": "Argus Research",
-          "action": "upgrade",
-          "new_grade": "Buy",
-          "prev_grade": "Hold",
-          "date": "2026-05-06"
-        },
-        {
-          "firm": "RBC Capital",
-          "action": "maintain",
-          "new_grade": "Underperform",
-          "prev_grade": "Underperform",
-          "date": "2026-05-05"
-        },
-        {
-          "firm": "Wedbush",
-          "action": "maintain",
-          "new_grade": "Outperform",
-          "prev_grade": "Outperform",
-          "date": "2026-05-05"
-        },
-        {
-          "firm": "DA Davidson",
-          "action": "maintain",
-          "new_grade": "Neutral",
-          "prev_grade": "Neutral",
-          "date": "2026-05-05"
-        }
-      ]
-    },
-    "AMD": {
-      "rev_0y_avg": 49204.9,
-      "rev_0y_low": 42764.7,
-      "rev_0y_high": 51510.9,
-      "rev_1y_avg": 74388.2,
-      "rev_1y_low": 56467.0,
-      "rev_1y_high": 83298.8,
-      "rev_n": 32,
-      "rev_growth": 0.5118,
-      "eps_0y_avg": 7.3081,
-      "eps_1y_avg": 12.8207,
-      "eps_n": 28,
-      "ebitda_0y_avg": 10676.1,
-      "ebitda_0y_low": 9278.7,
-      "ebitda_0y_high": 11176.4,
-      "ebitda_1y_avg": 16140.1,
-      "ebitda_1y_low": 12251.7,
-      "ebitda_1y_high": 18073.5,
-      "ni_0y_avg": 12334.0,
-      "ni_1y_avg": 16888.1,
-      "pt_current": null,
-      "pt_mean": 401.65,
-      "pt_low": 260.0,
-      "pt_high": 530.0,
-      "pt_analysts": [],
-      "upgrades_downgrades": [
-        {
-          "firm": "Citigroup",
-          "action": "maintain",
-          "new_grade": "Neutral",
-          "prev_grade": "Neutral",
-          "date": "2026-05-07"
-        },
-        {
-          "firm": "Barclays",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-05-06"
-        },
-        {
-          "firm": "Bernstein",
-          "action": "upgrade",
-          "new_grade": "Outperform",
-          "prev_grade": "Market Perform",
-          "date": "2026-05-06"
-        },
-        {
-          "firm": "Wells Fargo",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-05-06"
-        },
-        {
-          "firm": "Mizuho",
-          "action": "maintain",
-          "new_grade": "Outperform",
-          "prev_grade": "Outperform",
-          "date": "2026-05-06"
         }
       ]
     },
@@ -629,6 +503,132 @@
           "new_grade": "Overweight",
           "prev_grade": "Overweight",
           "date": "2026-01-16"
+        }
+      ]
+    },
+    "AMD": {
+      "rev_0y_avg": 49260.0,
+      "rev_0y_low": 42812.6,
+      "rev_0y_high": 51568.5,
+      "rev_1y_avg": 74546.5,
+      "rev_1y_low": 56587.1,
+      "rev_1y_high": 83476.0,
+      "rev_n": 32,
+      "rev_growth": 0.5133,
+      "eps_0y_avg": 7.3174,
+      "eps_1y_avg": 12.8549,
+      "eps_n": 28,
+      "ebitda_0y_avg": 10688.0,
+      "ebitda_0y_low": 9289.1,
+      "ebitda_0y_high": 11188.9,
+      "ebitda_1y_avg": 16174.5,
+      "ebitda_1y_low": 12277.8,
+      "ebitda_1y_high": 18111.9,
+      "ni_0y_avg": 12349.6,
+      "ni_1y_avg": 16888.1,
+      "pt_current": null,
+      "pt_mean": 401.65,
+      "pt_low": 260.0,
+      "pt_high": 530.0,
+      "pt_analysts": [],
+      "upgrades_downgrades": [
+        {
+          "firm": "Citigroup",
+          "action": "maintain",
+          "new_grade": "Neutral",
+          "prev_grade": "Neutral",
+          "date": "2026-05-07"
+        },
+        {
+          "firm": "Barclays",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Bernstein",
+          "action": "upgrade",
+          "new_grade": "Outperform",
+          "prev_grade": "Market Perform",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Wells Fargo",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Mizuho",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-05-06"
+        }
+      ]
+    },
+    "PLTR": {
+      "rev_0y_avg": 7615.8,
+      "rev_0y_low": 7586.1,
+      "rev_0y_high": 7774.2,
+      "rev_1y_avg": 10990.0,
+      "rev_1y_low": 10413.2,
+      "rev_1y_high": 11728.8,
+      "rev_n": 22,
+      "rev_growth": 0.4431,
+      "eps_0y_avg": 1.4321,
+      "eps_1y_avg": 2.0319,
+      "eps_n": 18,
+      "ebitda_0y_avg": 1817.1,
+      "ebitda_0y_low": 1810.0,
+      "ebitda_0y_high": 1854.9,
+      "ebitda_1y_avg": 2622.2,
+      "ebitda_1y_low": 2484.6,
+      "ebitda_1y_high": 2798.5,
+      "ni_0y_avg": 3437.0,
+      "ni_1y_avg": 4719.3,
+      "pt_current": null,
+      "pt_mean": 191.83,
+      "pt_low": 151.0,
+      "pt_high": 230.0,
+      "pt_analysts": [],
+      "upgrades_downgrades": [
+        {
+          "firm": "Citigroup",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "Argus Research",
+          "action": "upgrade",
+          "new_grade": "Buy",
+          "prev_grade": "Hold",
+          "date": "2026-05-06"
+        },
+        {
+          "firm": "RBC Capital",
+          "action": "maintain",
+          "new_grade": "Underperform",
+          "prev_grade": "Underperform",
+          "date": "2026-05-05"
+        },
+        {
+          "firm": "Wedbush",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-05-05"
+        },
+        {
+          "firm": "DA Davidson",
+          "action": "maintain",
+          "new_grade": "Neutral",
+          "prev_grade": "Neutral",
+          "date": "2026-05-05"
         }
       ]
     }
