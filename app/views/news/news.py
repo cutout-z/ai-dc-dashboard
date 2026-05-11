@@ -12,13 +12,10 @@ from app.lib.equities import (
     MAG7_AI_STOCKS,
     fetch_earnings_dates,
 )
-from app.lib.news import BUCKETS, fetch_news_buckets, normalise_event_key
+from app.lib.news import fetch_news_buckets, flatten_news_buckets
 from app.lib.news_scoring import (
-    TIER_COLORS, TIER_LABELS,
-    TIER_HIGH_THRESHOLD, TIER_MEDIUM_THRESHOLD,
-    get_event_materiality,
-    get_materiality_tier,
-    get_source_trust,
+    TIER_COLORS,
+    TIER_LABELS,
 )
 
 st.title("News")
@@ -122,49 +119,10 @@ with st.spinner("Fetching news..."):
     news_data = fetch_news_buckets()
 
 
-def _feed_tier(item: dict, bucket: str) -> str:
-    """Classify for display, with a stricter quality gate outside ANZ DC."""
-    score = item.get("materiality_score", 0)
-    tier = get_materiality_tier(score)
-    if tier != "MEDIUM":
-        return tier
-
-    text = f"{item.get('title', '')} {item.get('summary', '')}"
-    source_trust = get_source_trust(item.get("source", ""))
-    if bucket == "ANZ DC":
-        return tier if source_trust >= 0.70 else "LOW"
-
-    event = get_event_materiality(text)
-    if source_trust < 0.70 or event < 1.0 or score < 0.78:
-        return "LOW"
-    return tier
-
-
 if not any(news_data.values()):
     st.warning("No news items fetched. Check network connectivity.")
 else:
-    # Flatten all buckets → single feed (deduplicated by URL)
-    all_items: list[dict] = []
-    seen_urls: set[str] = set()
-    seen_titles: set[str] = set()
-    for bucket_label, items in news_data.items():
-        for it in items:
-            title_key = normalise_event_key(it["title"])
-            if it["url"] in seen_urls or title_key in seen_titles:
-                continue
-            seen_urls.add(it["url"])
-            seen_titles.add(title_key)
-            all_items.append({
-                **it,
-                "bucket": bucket_label,
-                "tier": _feed_tier(it, bucket_label),
-            })
-
-    # PRIMARY: materiality score desc — SECONDARY: published desc
-    all_items.sort(
-        key=lambda x: (x.get("materiality_score", 0), x.get("published") or ""),
-        reverse=True,
-    )
+    all_items = flatten_news_buckets(news_data)
 
     # Group by tier
     tier_groups: dict[str, list[dict]] = {"HIGH": [], "MEDIUM": [], "LOW": []}
@@ -233,5 +191,5 @@ else:
     if show_low:
         html_parts.append(_render_tier("LOW", tier_groups["LOW"]))
 
-    with st.container(border=True):
+    with st.container(border=True, height=680):
         st.markdown("\n".join(p for p in html_parts if p), unsafe_allow_html=True)

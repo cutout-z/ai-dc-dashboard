@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 import feedparser
 import streamlit as st
 
-from app.lib.news_scoring import score_news_item
+from app.lib.news_scoring import get_display_tier, score_news_item
 
 logger = logging.getLogger("ai_research.news")
 
@@ -101,8 +101,41 @@ def normalise_title_key(title: str) -> str:
 
 def normalise_event_key(title: str) -> str:
     lower = normalise_title_key(title)
-    if "cdc" in lower and "555" in lower and "data cent" in lower:
-        return "cdc-555mw-data-centre-contract"
+    if (
+        ("infratil" in lower or "cdc" in lower)
+        and ("data cent" in lower or "cdc" in lower)
+        and (
+            "555" in lower
+            or "record contract" in lower
+            or "us customer" in lower
+            or "monster" in lower
+            or "deal" in lower
+            or "contract" in lower
+            or "secures" in lower
+            or "wins" in lower
+        )
+        and not any(term in lower for term in ("stake", "valuation", "revaluation"))
+    ):
+        return "cdc-infratil-us-customer-contract"
+    if (
+        "nextdc" in lower
+        and "openai" in lower
+        and (
+            "7b" in lower
+            or "7 b" in lower
+            or "sydney" in lower
+            or "ai infrastructure" in lower
+            or "data centre" in lower
+            or "data center" in lower
+        )
+    ):
+        return "nextdc-openai-sydney-ai-data-centre"
+    if "airtrunk" in lower and ("5bn" in lower or "5 b" in lower) and "melbourne" in lower:
+        return "airtrunk-5bn-melbourne-data-centre"
+    if "goodman" in lower and "90mw" in lower and "sydney" in lower:
+        return "goodman-90mw-sydney-data-centre"
+    if "goodman" in lower and "1gw" in lower and "power" in lower:
+        return "goodman-1gw-data-centre-power-bank"
     if "anthropic" in lower and "akamai" in lower and ("1 8" in lower or "cloud deal" in lower):
         return "anthropic-akamai-cloud-contract"
     if "eu commission" in lower and "openai" in lower and "anthropic" in lower:
@@ -334,6 +367,32 @@ def fetch_news_buckets(max_per_bucket: int = 30) -> dict[str, list[dict]]:
         ]
 
     return result
+
+
+def flatten_news_buckets(news_data: dict[str, list[dict]]) -> list[dict]:
+    """Flatten bucketed news into one deduped, display-tiered feed."""
+    all_items: list[dict] = []
+    seen_urls: set[str] = set()
+    seen_titles: set[str] = set()
+    for bucket_label, items in news_data.items():
+        for item in items:
+            title_key = normalise_event_key(item["title"])
+            if item["url"] in seen_urls or title_key in seen_titles:
+                continue
+            seen_urls.add(item["url"])
+            seen_titles.add(title_key)
+            all_items.append({
+                **item,
+                "bucket": bucket_label,
+                "event_key": title_key,
+                "tier": get_display_tier(item, bucket_label),
+            })
+
+    all_items.sort(
+        key=lambda x: (x.get("materiality_score", 0), x.get("published") or ""),
+        reverse=True,
+    )
+    return all_items
 
 
 def fetch_news_source_health() -> list[dict]:

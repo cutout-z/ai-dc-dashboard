@@ -28,6 +28,7 @@ FILE_FRESH_DAYS = {
     "funding_deals.csv": 30,
     "llm_leaderboard.json": 30,
     "model_releases.csv": 30,
+    "news_catalog.csv": 7,
     "tsmc_monthly_revenue.csv": 15,
 }
 

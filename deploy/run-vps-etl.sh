@@ -19,6 +19,7 @@ git pull --ff-only origin main
 "${PYTHON}" etl/refresh_consensus.py
 "${PYTHON}" etl/refresh_earnings_dates.py
 "${PYTHON}" etl/refresh_capex_guidance.py
+"${PYTHON}" scripts/catalog_news.py
 
 if [[ "${RUN_ZEROEVAL}" == "1" ]]; then
   "${PYTHON}" scripts/fetch_llm_benchmarks.py

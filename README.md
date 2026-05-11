@@ -68,7 +68,7 @@ Current VPS lanes:
 | Lane | Timer | Cadence | Dashboard impact |
 |---|---|---|---|
 | Source health | `ai-dc-health.timer` | Daily, around 07:20 Perth | Writes Markdown/JSON operational reports on the VPS. |
-| Deterministic ETL | `ai-dc-etl.timer` | Mon/Wed/Fri, around 07:40 Perth | Refreshes financials, macro, consensus, earnings dates, capex staleness, and ZeroEval/LLM benchmark data; commits changed dashboard data. |
+| Deterministic ETL | `ai-dc-etl.timer` | Mon/Wed/Fri, around 07:40 Perth | Refreshes financials, macro, consensus, earnings dates, capex staleness, news catalogue snapshots, and ZeroEval/LLM benchmark data; commits changed dashboard data. |
 | Research brief | `ai-dc-research-brief.timer` | Weekly Monday morning Perth | Stages a review prompt/report only; no CSV/DB writes. |
 | AU DC data | `ai-dc-au-data.timer` | Weekly Monday morning Perth | Refreshes AEMO generation/grid/project outputs, runs AU DC checks, prunes raw cache, and commits changed processed outputs. |
 
@@ -85,6 +85,9 @@ python scripts/fetch_financials.py
 # Refresh LLM benchmark + leaderboard data
 python scripts/fetch_llm_benchmarks.py
 python scripts/refresh_llm_leaderboard.py
+
+# Snapshot the curated news feed into an append-only event catalogue
+python scripts/catalog_news.py
 
 # Refresh analyst consensus estimates
 python etl/refresh_consensus.py
@@ -135,6 +138,10 @@ add_finding(
 ```
 
 The table is append-only — rows form a time series for tracking changes across research passes.
+
+The live News page itself is a 30-minute RSS cache. To make news durable over time, run
+`python scripts/catalog_news.py`; it writes material High/Medium feed items to
+`data/reference/news_catalog.csv` with first-seen, last-seen, event key, source, tier, and score.
 
 ---
 
