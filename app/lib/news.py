@@ -76,6 +76,27 @@ def normalise_title_key(title: str) -> str:
     base = re.sub(r"\s+-\s+[^-]{2,80}$", "", title).lower()
     return re.sub(r"[^a-z0-9]+", " ", base).strip()
 
+
+_ANZ_OPERATOR_PATTERNS = [
+    re.compile(r"\b(CDC Data Centres?|NEXTDC|AirTrunk|Keppel Data Centres?|Keppel DC)\b", re.I),
+    re.compile(r"\b(Stack Infrastructure|Macquarie Data Centres?|Vantage Data Cent(?:ers|res))\b", re.I),
+    re.compile(r"\b(Doma Infrastructure Group|Equinix|DigiCo Infrastructure REIT|Leading Edge Data Centres?)\b", re.I),
+    re.compile(r"\bTelstra InfraCo\b", re.I),
+    re.compile(r"\bFujitsu\b.{0,140}\b(data cent(?:er|re)|hyperscale|cloud)\b", re.I),
+    re.compile(r"\bGoodman\b.{0,140}\b(data cent(?:er|re)|hyperscale|AI infrastructure)\b", re.I),
+    re.compile(r"\b(data cent(?:er|re)|hyperscale|AI infrastructure)\b.{0,140}\bGoodman\b", re.I),
+    re.compile(r"\bInfratil\b.{0,140}\b(CDC|data cent(?:er|re)|hyperscale)\b", re.I),
+    re.compile(r"\b(CDC|data cent(?:er|re)|hyperscale)\b.{0,140}\bInfratil\b", re.I),
+    re.compile(r"\bMacquarie\b.{0,140}\b(data cent(?:er|re)|hyperscale|cloud services)\b", re.I),
+    re.compile(r"\bNCI\b.{0,140}\bdata cent(?:er|re)\b", re.I),
+]
+
+
+def is_anz_operator_news(title: str, summary: str = "") -> bool:
+    text = f"{title} {summary}"
+    return any(pattern.search(text) for pattern in _ANZ_OPERATOR_PATTERNS)
+
+
 BUCKETS: dict[str, dict] = {
     "Frontier Labs": {
         "queries": [
@@ -107,6 +128,9 @@ BUCKETS: dict[str, dict] = {
     },
     "ANZ DC": {
         "queries": [
+            "(\"CDC Data Centres\" OR NEXTDC OR AirTrunk OR \"Keppel Data Centres\" OR \"Stack Infrastructure\" OR \"Macquarie Data Centres\" OR Fujitsu OR \"Goodman Group\" OR \"Vantage Data Centers\" OR \"Doma Infrastructure Group\" OR Equinix OR \"DigiCo Infrastructure REIT\" OR \"Telstra InfraCo\" OR \"Leading Edge Data Centres\" OR NCI) (\"data centre\" OR \"data center\" OR hyperscale OR campus OR MW OR power OR capacity OR AI)",
+            "(NextDC OR NXT.AX OR \"CDC Data Centres\" OR AirTrunk OR \"DigiCo Infrastructure REIT\") (earnings OR results OR guidance OR shares OR stock OR acquisition OR investment OR valuation OR contract OR customer)",
+            "(Infratil OR IFT.NZ OR \"Macquarie Group\" OR MQG.AX OR \"Goodman Group\" OR GMG.AX) (\"data centre\" OR \"data center\" OR CDC OR hyperscale OR campus OR MW OR power OR capacity)",
             "(NextDC OR AirTrunk OR CDC OR Infratil OR Macquarie OR Goodman) \"data centre\" (Australia OR \"New Zealand\") (capacity OR MW OR campus OR investment OR power OR contract)",
             "\"data centre\" (Australia OR \"New Zealand\") (MW OR power OR renewable OR campus OR hyperscale)",
         ],
@@ -203,7 +227,7 @@ def _fetch_feed(url: str, source_fallback: str) -> list[NewsItem]:
 
 
 @st.cache_data(ttl=1800, show_spinner=False)
-def fetch_news_buckets(max_per_bucket: int = 20) -> dict[str, list[dict]]:
+def fetch_news_buckets(max_per_bucket: int = 30) -> dict[str, list[dict]]:
     """Fetch all configured buckets. Returns bucket_label -> list of item dicts.
 
     Returns dicts (not NewsItem objects) because Streamlit's cache serializes output.
@@ -217,6 +241,8 @@ def fetch_news_buckets(max_per_bucket: int = 20) -> dict[str, list[dict]]:
         for query in cfg.get("queries", []):
             url = _gn_url(query)
             for item in _fetch_feed(url, source_fallback="Google News"):
+                if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
+                    continue
                 title_key = normalise_title_key(item.title)
                 if item.url in seen_urls or title_key in seen_titles:
                     continue
@@ -229,6 +255,8 @@ def fetch_news_buckets(max_per_bucket: int = 20) -> dict[str, list[dict]]:
             if not feed_url:
                 continue
             for item in _fetch_feed(feed_url, source_fallback=direct_name):
+                if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
+                    continue
                 title_key = normalise_title_key(item.title)
                 if item.url in seen_urls or title_key in seen_titles:
                     continue

@@ -122,11 +122,32 @@ _TRACKED_PATTERNS: dict[str, list[re.Pattern]] = {
     "EQIX":  [re.compile(r"\bEquinix\b"), re.compile(r"\bEQIX\b")],
     "DLR":   [re.compile(r"\bDigital Realty\b"), re.compile(r"\bDLR\b")],
     "AMT":   [re.compile(r"\bAmerican Tower\b"), re.compile(r"\bAMT\b")],
-    # ANZ
-    "NXT.AX": [re.compile(r"\bNextDC\b", re.I)],
-    "IFT.NZ": [re.compile(r"\bInfratil\b"), re.compile(r"\bCDC Data Centres\b")],
-    "MQG.AX": [re.compile(r"\bMacquarie\b")],
-    "GMG.AX": [re.compile(r"\bGoodman Group\b")],
+    # ANZ data-centre operators and listed owners. Diversified listed owners
+    # only match when the headline/summary ties them to data-centre activity.
+    "NXT.AX": [re.compile(r"\bNextDC\b", re.I), re.compile(r"\bNXT\.AX\b", re.I)],
+    "IFT.NZ": [
+        re.compile(r"\bCDC Data Centres\b", re.I),
+        re.compile(r"\bInfratil\b.{0,140}\b(CDC|data cent(?:er|re)|hyperscale)\b", re.I),
+        re.compile(r"\b(CDC|data cent(?:er|re)|hyperscale)\b.{0,140}\bInfratil\b", re.I),
+    ],
+    "MQG.AX": [
+        re.compile(r"\bMacquarie Data Centres\b", re.I),
+        re.compile(r"\bMacquarie\b.{0,140}\b(data cent(?:er|re)|hyperscale|cloud services)\b", re.I),
+    ],
+    "GMG.AX": [
+        re.compile(r"\bGoodman\b.{0,140}\b(data cent(?:er|re)|hyperscale|AI infrastructure)\b", re.I),
+        re.compile(r"\b(data cent(?:er|re)|hyperscale|AI infrastructure)\b.{0,140}\bGoodman\b", re.I),
+    ],
+    "AirTrunk": [re.compile(r"\bAirTrunk\b", re.I)],
+    "Keppel DC": [re.compile(r"\bKeppel Data Centres?\b", re.I), re.compile(r"\bKeppel DC\b", re.I)],
+    "Stack Infrastructure": [re.compile(r"\bStack Infrastructure\b", re.I)],
+    "Fujitsu DC": [re.compile(r"\bFujitsu\b.{0,140}\b(data cent(?:er|re)|hyperscale|cloud)\b", re.I)],
+    "Vantage Data Centers": [re.compile(r"\bVantage Data Cent(?:ers|res)\b", re.I)],
+    "Doma Infrastructure": [re.compile(r"\bDoma Infrastructure Group\b", re.I)],
+    "DigiCo": [re.compile(r"\bDigiCo Infrastructure REIT\b", re.I), re.compile(r"\bDigiCo\b.{0,140}\bdata cent(?:er|re)\b", re.I)],
+    "Telstra InfraCo": [re.compile(r"\bTelstra InfraCo\b", re.I), re.compile(r"\bTelstra\b.{0,140}\bdata cent(?:er|re)\b", re.I)],
+    "Leading Edge DC": [re.compile(r"\bLeading Edge Data Centres?\b", re.I)],
+    "NCI": [re.compile(r"\bNCI\b.{0,140}\bdata cent(?:er|re)\b", re.I)],
     # Key privates (from news buckets)
     "OpenAI":    [re.compile(r"\bOpenAI\b"), re.compile(r"\bSam Altman\b")],
     "Anthropic": [re.compile(r"\bAnthropic\b"), re.compile(r"\bDario Amodei\b")],
@@ -238,6 +259,9 @@ _HIGH_EVENT_PATTERNS: list[re.Pattern] = [
 
 _MEDIUM_EVENT_PATTERNS: list[re.Pattern] = [
     re.compile(r"\b(earnings|revenue|guidance|margin|forecast|outlook)\b", re.I),
+    re.compile(r"\b(results?|shares?|stock|record high|profit|dividend|upgrade|downgrade)\b", re.I),
+    re.compile(r"\b(acquisition|acquires?|sells?|sale|stake|asset sale|takeover)\b", re.I),
+    re.compile(r"\b(secures?|awarded|customer|tenant|lease|pre-commitment)\b", re.I),
     re.compile(r"\b(model release|benchmark|gpqa|swe-bench|mmlu|frontier model)\b", re.I),
     re.compile(r"\b(partnership|launch|expands?|rollout)\b", re.I),
 ]
