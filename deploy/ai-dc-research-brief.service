@@ -1,0 +1,18 @@
+[Unit]
+Description=AI & DC Dashboard report-only research brief
+Documentation=https://github.com/cutout-z/ai-dc-dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ai-dc
+Group=ai-dc
+WorkingDirectory=/opt/ai-dc-dashboard
+EnvironmentFile=-/etc/ai-dc-dashboard/research-brief.env
+ExecStart=/opt/ai-dc-dashboard/deploy/run-vps-research-brief.sh
+TimeoutStartSec=2h
+Nice=10
+StandardOutput=journal
+StandardError=journal
+

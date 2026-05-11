@@ -1,0 +1,14 @@
+[Unit]
+Description=Run AI & DC deterministic ETL refresh
+Documentation=https://github.com/cutout-z/ai-dc-dashboard
+
+[Timer]
+# 23:40 UTC = 07:40 Australia/Perth.
+OnCalendar=Mon,Wed,Fri *-*-* 23:40:00
+RandomizedDelaySec=30m
+Persistent=true
+Unit=ai-dc-etl.service
+
+[Install]
+WantedBy=timers.target
+

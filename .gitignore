@@ -1,5 +1,6 @@
 # Raw proprietary data (source Excel models — not redistributed)
 data/raw/
+data/au_dc/raw/
 *.xlsx
 *.xls
 
@@ -21,3 +22,4 @@ venv/
 # Runtime-generated
 data/*.db
 logs/
+reports/
