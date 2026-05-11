@@ -131,7 +131,7 @@ guidance_revisions = st.Page(
 )
 
 # News
-news = st.Page("views/news/news.py", title="News")
+news = st.Page("views/news/news.py", title="News", url_path="news")
 
 # System
 source_health = st.Page(

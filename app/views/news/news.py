@@ -62,29 +62,32 @@ for t in all_tickers:
         "Name": t["name"],
         "Group": t["group"],
         "Region": t["region"],
-        "Earnings Date": ed.strftime("%Y-%m-%d") if ed is not None else "—",
-        "Days Away": days_away if not stale and days_away is not None else "—",
-        "Status": "Stale provider date" if stale else ("Unavailable" if ed is None else "Upcoming"),
+        "Earnings Date": "—" if stale or ed is None else ed.strftime("%Y-%m-%d"),
+        "Days Away": str(days_away) if not stale and days_away is not None else "—",
+        "Status": "Awaiting next date" if stale else ("Unavailable" if ed is None else "Upcoming"),
+        "_provider_date": ed.strftime("%Y-%m-%d") if stale and ed is not None else "",
         "_sort": ed if ed is not None and not stale else pd.Timestamp.max,
     })
 
 df_earn = pd.DataFrame(rows).sort_values("_sort").drop(columns=["_sort"])
 
-# Split into two tiles: Global and ANZ
-col_global, col_anz = st.columns(2)
+with st.container(border=True):
+    st.subheader("Global (Mag 7 + AI Infra + DC Operators)")
+    df_g = df_earn[df_earn["Region"] == "US"].drop(columns=["Region", "_provider_date"])
+    df_g = df_g[df_g["Status"] == "Upcoming"].drop(columns=["Status"])
+    st.dataframe(df_g, use_container_width=True, hide_index=True, height=35 * (len(df_g) + 1) + 3)
 
-with col_global:
-    with st.container(border=True):
-        st.subheader("Global (Mag 7 + AI Infra + DC Operators)")
-        df_g = df_earn[df_earn["Region"] == "US"].drop(columns=["Region"])
-        df_g = df_g[df_g["Status"] == "Upcoming"].drop(columns=["Status"])
-        st.dataframe(df_g, use_container_width=True, hide_index=True, height=35 * (len(df_g) + 1) + 3)
-
-with col_anz:
-    with st.container(border=True):
-        st.subheader("ANZ")
-        df_a = df_earn[df_earn["Region"] == "ANZ"].drop(columns=["Region"])
-        st.dataframe(df_a, use_container_width=True, hide_index=True, height=35 * (len(df_a) + 1) + 3)
+with st.container(border=True):
+    st.subheader("ANZ")
+    df_a = df_earn[df_earn["Region"] == "ANZ"].drop(columns=["Region", "_provider_date"])
+    st.dataframe(df_a, use_container_width=True, hide_index=True, height=35 * (len(df_a) + 1) + 3)
+    stale_dates = df_earn[(df_earn["Region"] == "ANZ") & (df_earn["_provider_date"] != "")]
+    if not stale_dates.empty:
+        stale_txt = ", ".join(
+            f"{row['Ticker']} last provider date {row['_provider_date']}"
+            for _, row in stale_dates.iterrows()
+        )
+        st.caption(f"Awaiting next announced date from Yahoo/FMP for: {stale_txt}.")
 
 # ══════════════════════════════════════════════
 # 2. NEWS FEED — materiality-ranked
