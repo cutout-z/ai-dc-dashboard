@@ -14,9 +14,10 @@ import re
 import time
 import urllib.parse
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, time as datetime_time, timezone
 
 import feedparser
+import requests
 import streamlit as st
 
 from app.lib.news_scoring import get_display_tier, score_news_item
@@ -31,15 +32,40 @@ logger = logging.getLogger("ai_research.news")
 GN_BASE = "https://news.google.com/rss/search"
 
 
-def _gn_url(query: str, gl: str = "US", hl: str = "en-US") -> str:
+def _format_query_date(value: str | date | None) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, date):
+        return value.isoformat()
+    return str(value)
+
+
+def _gn_url(
+    query: str,
+    gl: str = "US",
+    hl: str = "en-US",
+    start_date: str | date | None = None,
+    end_date: str | date | None = None,
+) -> str:
+    start = _format_query_date(start_date)
+    end = _format_query_date(end_date)
+    dated_query = query
+    if start:
+        dated_query = f"{dated_query} after:{start}"
+    if end:
+        dated_query = f"{dated_query} before:{end}"
     params = {"q": query, "hl": hl, "gl": gl, "ceid": f"{gl}:{hl.split('-')[0]}"}
+    params["q"] = dated_query
     return f"{GN_BASE}?{urllib.parse.urlencode(params)}"
 
 
 # Direct DC-specific feeds
 DIRECT_FEEDS = {
     "DatacenterDynamics": "https://www.datacenterdynamics.com/en/rss/",
-    "The Register DC": "https://www.theregister.com/data_centre/headlines.atom",
+    "The Register On-Prem": (
+        "https://api.theregister.com/api/v1/article?"
+        "limit=25&orderBy=published&query=tag%3Aon_prem&remapper=rss&site_id=2"
+    ),
 }
 
 BLOCKED_SOURCE_PATTERNS = (
@@ -196,7 +222,7 @@ BUCKETS: dict[str, dict] = {
             "(TSMC OR ASML OR Nvidia OR Broadcom OR AMD OR Cerebras) (supply OR shortage OR demand OR order OR IPO OR valuation)",
             "(HBM OR \"advanced packaging\" OR CoWoS OR \"SK Hynix\" OR Samsung) (capacity OR shortage OR bottleneck OR supply)",
         ],
-        "direct": ["DatacenterDynamics", "The Register DC"],
+        "direct": ["DatacenterDynamics", "The Register On-Prem"],
     },
     "Model Releases": {
         "queries": [
@@ -279,7 +305,9 @@ def _entry_source(entry, fallback: str) -> str:
 
 def _fetch_feed(url: str, source_fallback: str) -> list[NewsItem]:
     try:
-        parsed = feedparser.parse(url)
+        response = requests.get(url, timeout=15)
+        response.raise_for_status()
+        parsed = feedparser.parse(response.content)
     except Exception as e:
         logger.warning("feedparser error for %s: %s", url, e)
         return []
@@ -305,8 +333,46 @@ def _fetch_feed(url: str, source_fallback: str) -> list[NewsItem]:
     return items
 
 
+def _date_to_datetime(value: str | date | None, *, end_of_day: bool = False) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.astimezone(timezone.utc)
+    if isinstance(value, date):
+        t = datetime_time.max if end_of_day else datetime_time.min
+        return datetime.combine(value, t, tzinfo=timezone.utc)
+    try:
+        parsed = datetime.fromisoformat(str(value))
+    except ValueError:
+        parsed = datetime.combine(date.fromisoformat(str(value)), datetime_time.min, tzinfo=timezone.utc)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _in_date_window(
+    published: datetime | None,
+    start_date: str | date | None,
+    end_date: str | date | None,
+) -> bool:
+    if published is None:
+        return start_date is None and end_date is None
+    start = _date_to_datetime(start_date)
+    end = _date_to_datetime(end_date)
+    published_utc = published.astimezone(timezone.utc)
+    if start and published_utc.date() < start.date():
+        return False
+    if end and published_utc.date() >= end.date():
+        return False
+    return True
+
+
 @st.cache_data(ttl=1800, show_spinner=False)
-def fetch_news_buckets(max_per_bucket: int = 30) -> dict[str, list[dict]]:
+def fetch_news_buckets(
+    max_per_bucket: int = 30,
+    start_date: str | date | None = None,
+    end_date: str | date | None = None,
+) -> dict[str, list[dict]]:
     """Fetch all configured buckets. Returns bucket_label -> list of item dicts.
 
     Returns dicts (not NewsItem objects) because Streamlit's cache serializes output.
@@ -318,8 +384,10 @@ def fetch_news_buckets(max_per_bucket: int = 30) -> dict[str, list[dict]]:
         items: list[NewsItem] = []
 
         for query in cfg.get("queries", []):
-            url = _gn_url(query)
+            url = _gn_url(query, start_date=start_date, end_date=end_date)
             for item in _fetch_feed(url, source_fallback="Google News"):
+                if not _in_date_window(item.published, start_date, end_date):
+                    continue
                 if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
                     continue
                 title_key = normalise_event_key(item.title)
@@ -334,6 +402,8 @@ def fetch_news_buckets(max_per_bucket: int = 30) -> dict[str, list[dict]]:
             if not feed_url:
                 continue
             for item in _fetch_feed(feed_url, source_fallback=direct_name):
+                if not _in_date_window(item.published, start_date, end_date):
+                    continue
                 if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
                     continue
                 title_key = normalise_event_key(item.title)

@@ -142,6 +142,8 @@ The table is append-only — rows form a time series for tracking changes across
 The live News page itself is a 30-minute RSS cache. To make news durable over time, run
 `python scripts/catalog_news.py`; it writes material High/Medium feed items to
 `data/reference/news_catalog.csv` with first-seen, last-seen, event key, source, tier, and score.
+For historical catch-up, run `python scripts/catalog_news.py --backfill-days 60 --window-days 7`;
+the News page reads the same catalog for the High/Medium history tables.
 
 ---
 

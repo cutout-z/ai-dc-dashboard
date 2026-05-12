@@ -11,7 +11,7 @@ import csv
 import json
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -84,16 +84,18 @@ def _write_log(status: str, count: int, notes: str = "") -> None:
     LOG_PATH.write_text(json.dumps(log, indent=2) + "\n", encoding="utf-8")
 
 
-def catalog_news(max_per_bucket: int, include_low: bool, dry_run: bool) -> tuple[int, int, int]:
-    news_data = fetch_news_buckets(max_per_bucket=max_per_bucket)
-    current_items = flatten_news_buckets(news_data)
+def _merge_items(
+    existing: dict[str, dict],
+    current_items: list[dict],
+    *,
+    seen_at: str,
+    include_low: bool,
+) -> tuple[int, int]:
     current_items = [
         item for item in current_items
         if include_low or item.get("tier") in {"HIGH", "MEDIUM"}
     ]
 
-    existing = _read_catalog(CATALOG_PATH)
-    now = _now_iso()
     added = 0
     updated = 0
 
@@ -110,12 +112,12 @@ def catalog_news(max_per_bucket: int, include_low: bool, dry_run: bool) -> tuple
             old = {field: "" for field in FIELDNAMES}
             old["catalog_key"] = catalog_key
             old["event_key"] = event_key
-            old["first_seen_at"] = now
+            old["first_seen_at"] = seen_at
             old["seen_count"] = "0"
         else:
             updated += 1
 
-        old["last_seen_at"] = now
+        old["last_seen_at"] = seen_at
         old["seen_count"] = str(int(old.get("seen_count") or 0) + 1)
         old["last_bucket"] = item.get("bucket", "")
         old["last_tier"] = item.get("tier", "")
@@ -130,6 +132,37 @@ def catalog_news(max_per_bucket: int, include_low: bool, dry_run: bool) -> tuple
 
         existing[catalog_key] = old
 
+    return added, updated
+
+
+def catalog_news(
+    max_per_bucket: int,
+    include_low: bool,
+    dry_run: bool,
+    *,
+    start_date: str | date | None = None,
+    end_date: str | date | None = None,
+) -> tuple[int, int, int]:
+    news_data = fetch_news_buckets(
+        max_per_bucket=max_per_bucket,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    current_items = flatten_news_buckets(news_data)
+    current_items = [
+        item for item in current_items
+        if include_low or item.get("tier") in {"HIGH", "MEDIUM"}
+    ]
+
+    existing = _read_catalog(CATALOG_PATH)
+    now = _now_iso()
+    added, updated = _merge_items(
+        existing,
+        current_items,
+        seen_at=now,
+        include_low=include_low,
+    )
+
     if not dry_run:
         _write_catalog(CATALOG_PATH, list(existing.values()))
         _write_log(
@@ -141,12 +174,103 @@ def catalog_news(max_per_bucket: int, include_low: bool, dry_run: bool) -> tuple
     return added, updated, len(existing)
 
 
+def _date_windows(days: int, window_days: int) -> list[tuple[date, date]]:
+    if days <= 0:
+        raise ValueError("--backfill-days must be positive")
+    if window_days <= 0:
+        raise ValueError("--window-days must be positive")
+
+    end = datetime.now(timezone.utc).date() + timedelta(days=1)
+    start = end - timedelta(days=days)
+    windows = []
+    cursor = start
+    while cursor < end:
+        nxt = min(cursor + timedelta(days=window_days), end)
+        windows.append((cursor, nxt))
+        cursor = nxt
+    return windows
+
+
+def catalog_backfill(
+    *,
+    days: int,
+    window_days: int,
+    max_per_bucket: int,
+    include_low: bool,
+    dry_run: bool,
+) -> tuple[int, int, int, int]:
+    existing = _read_catalog(CATALOG_PATH)
+    now = _now_iso()
+    added_total = 0
+    updated_total = 0
+    item_total = 0
+    windows = _date_windows(days, window_days)
+
+    for start, end in windows:
+        news_data = fetch_news_buckets(
+            max_per_bucket=max_per_bucket,
+            start_date=start,
+            end_date=end,
+        )
+        current_items = flatten_news_buckets(news_data)
+        current_items = [
+            item for item in current_items
+            if include_low or item.get("tier") in {"HIGH", "MEDIUM"}
+        ]
+        item_total += len(current_items)
+        added, updated = _merge_items(
+            existing,
+            current_items,
+            seen_at=now,
+            include_low=include_low,
+        )
+        added_total += added
+        updated_total += updated
+        print(
+            f"{start.isoformat()} to {end.isoformat()}: "
+            f"items={len(current_items)} added={added} updated={updated}"
+        )
+
+    if not dry_run:
+        _write_catalog(CATALOG_PATH, list(existing.values()))
+        _write_log(
+            "ok",
+            item_total,
+            (
+                f"backfill_days={days}, window_days={window_days}, "
+                f"added={added_total}, updated={updated_total}, "
+                f"total_catalogued={len(existing)}"
+            ),
+        )
+
+    return added_total, updated_total, len(existing), len(windows)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--max-per-bucket", type=int, default=50)
     parser.add_argument("--include-low", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--backfill-days",
+        type=int,
+        default=0,
+        help="Walk Google News date windows for the trailing N days and merge them into the catalog.",
+    )
+    parser.add_argument("--window-days", type=int, default=7)
     args = parser.parse_args()
+
+    if args.backfill_days:
+        added, updated, total, windows = catalog_backfill(
+            days=args.backfill_days,
+            window_days=args.window_days,
+            max_per_bucket=args.max_per_bucket,
+            include_low=args.include_low,
+            dry_run=args.dry_run,
+        )
+        mode = "DRY RUN" if args.dry_run else "WROTE"
+        print(f"{mode}: windows={windows} added={added} updated={updated} total_catalogued={total}")
+        return 0
 
     added, updated, total = catalog_news(
         max_per_bucket=args.max_per_bucket,
