@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-05-11T23:47:04Z",
+  "checked_at": "2026-05-13T23:45:47Z",
   "lookback_days": 14,
-  "cutoff": "2026-04-27",
+  "cutoff": "2026-04-29",
   "stale_tickers": [],
   "fresh_tickers": [],
   "quarterly_actuals": []
