@@ -1,7 +1,7 @@
 {
   "_meta": {
     "source": "https://api.zeroeval.com/leaderboard/models/full",
-    "updated": "2026-05-13",
+    "updated": "2026-05-16",
     "model_count_total": 298,
     "model_count_scored": 239,
     "note": "Top 30 models with composite benchmark score (mean GPQA/SWE-Bench/HLE/AIME-2025)."
@@ -29,10 +29,10 @@
       "org": "OpenAI",
       "source_board": "api",
       "composite_score": 96.7,
-      "context_k": 400.0,
-      "input_price": 1.25,
-      "output_price": 10.0,
-      "speed_cps": 50.0,
+      "context_k": 0.0,
+      "input_price": null,
+      "output_price": null,
+      "speed_cps": null,
       "gpqa": null,
       "aime_2025": 96.7,
       "swe_bench": null,
