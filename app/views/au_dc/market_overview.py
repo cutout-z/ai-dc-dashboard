@@ -14,6 +14,10 @@ from app.lib.au_dc_charts import (
     capacity_forecast_chart,
     COLOUR_PALETTE,
 )
+from app.lib.au_dc_excluded_capacity import (
+    excluded_capacity_components,
+    public_excluded_capacity_overlay,
+)
 from app.lib.au_dc_methodology import OPERATOR_CAPACITY_SEGMENTS_HELP, RISKED_MW_HELP
 
 AU_DC_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
@@ -40,6 +44,8 @@ aggregate_guidance = (
     if aggregate_guidance_path.exists()
     else pd.DataFrame()
 )
+site_leads_path = REFERENCE_DIR / "hyperscaler_site_leads.csv"
+site_leads = pd.read_csv(site_leads_path) if site_leads_path.exists() else pd.DataFrame()
 spot_check_path = DATA_DIR / "spot_check.json"
 spot_check = json.loads(spot_check_path.read_text()) if spot_check_path.exists() else None
 
@@ -74,6 +80,7 @@ operator_segments = operator_capacity_segments(projects_for_totals, aggregate_gu
 capacity_segments = operator_segments[
     ["risked", "announced_site_tied", "unassigned_aggregate", "announced_total"]
 ].sum()
+excluded_overlay = public_excluded_capacity_overlay(projects, aggregate_guidance, site_leads)
 
 with k1:
     st.metric("Total Projects", total_projects, delta=f"{quarantined} quarantined" if quarantined else None)
@@ -95,6 +102,53 @@ with k5:
             "Total announced capacity used by the Top Operators chart: included named project/campus MW "
             "plus unassigned aggregate operator guidance that is not yet mapped to named project rows."
         ),
+    )
+
+st.markdown("### Excluded Public-Source Capacity Signals")
+st.caption(
+    "Screening overlay for public-source capacity that is deliberately excluded from default project MW totals. "
+    "Components can use mixed capacity bases and may overlap until reconciled to named project rows."
+)
+e1, e2, e3, e4 = st.columns(4)
+with e1:
+    st.metric(
+        "Screening Total",
+        f"{excluded_overlay['screening_total_mw']:,.0f} MW",
+        help="Quarantined named rows + unmatched aggregate guidance + physical site leads. This is not an additive market-capacity estimate.",
+    )
+with e2:
+    st.metric(
+        "Quarantined Project MW",
+        f"{excluded_overlay['quarantined_project_mw']:,.0f} MW",
+        delta=f"{excluded_overlay['quarantined_project_rows']:,.0f} rows",
+        help="Named project rows retained for audit trail but excluded from default totals.",
+    )
+with e3:
+    st.metric(
+        "Unmatched Aggregate MW",
+        f"{excluded_overlay['unmatched_aggregate_mw']:,.0f} MW",
+        delta=f"{excluded_overlay['aggregate_records_with_mw']:,.0f} records",
+        help="Public operator or platform guidance not yet mapped to named included project rows.",
+    )
+with e4:
+    st.metric(
+        "Physical Lead MW",
+        f"{excluded_overlay['sourced_site_lead_mw']:,.0f} MW",
+        delta=f"{excluded_overlay['site_leads_with_mw']:,.0f} leads",
+        help="Named physical site leads with public MW evidence, excluded pending promotion through the evidence audit.",
+    )
+
+with st.expander("Excluded capacity breakdown", icon=":material/search:"):
+    st.dataframe(
+        excluded_capacity_components(excluded_overlay),
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "component": "Component",
+            "mw": st.column_config.NumberColumn("MW", format="%d"),
+            "rows": st.column_config.NumberColumn("Rows / Records", format="%d"),
+            "treatment": st.column_config.TextColumn("Treatment", width="large"),
+        },
     )
 
 with st.expander("Data sources & methodology", icon=":material/info:"):

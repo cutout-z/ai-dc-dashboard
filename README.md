@@ -25,6 +25,17 @@ All data is fetched live or maintained in public reference CSVs — no proprieta
 - **Reference data** — hand-curated CSVs for CAPEX guidance, frontier lab valuations, model releases, GPU lease prices, DC power forecasts, TSMC monthly revenue
 - **Supply chain universe** — curated stock mapping across AI infra segments (included in repo)
 
+### Australian data-centre capacity treatment
+
+The Australian Market pages separate public-source data into distinct capacity layers:
+
+- **Included project capacity** — named project or campus rows with source-backed MW evidence; these feed default project totals and risked MW.
+- **Quarantined project MW** — named rows retained for audit where MW evidence is weaker or not yet reconciled; excluded from default totals.
+- **Unmatched aggregate guidance** — operator, platform, contract, order-book, or precinct disclosures that do not map cleanly to named project rows; shown as screening intelligence, not additive project capacity.
+- **Physical site leads** — named public-source site leads with MW where available; excluded until promoted through the project evidence audit.
+
+The dashboard's excluded-capacity overlay combines the latter three as a screening signal only. It should not be read as a standalone market-capacity estimate because components can use different capacity bases and may overlap until reconciled.
+
 ---
 
 ## Run locally
