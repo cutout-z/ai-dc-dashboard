@@ -1,25 +1,32 @@
 operator,operator_type,parent_company,listed,ticker
-NEXTDC,Colocation,NEXTDC,true,ASX:NXT
-CDC Data Centres,Colocation,Infratil,true,NZX:IFT
-AirTrunk,Colocation,Blackstone,false,
-Macquarie Data Centres,Colocation,Macquarie Technology Group,true,ASX:MAQ
-Goodman Group,Developer,Goodman Group,true,ASX:GMG
-Equinix,Colocation,Equinix,true,NASDAQ:EQIX
-Digital Realty,Colocation,Digital Realty,true,NYSE:DLR
-Amazon Web Services,Hyperscaler,Amazon,true,NASDAQ:AMZN
-Microsoft Azure,Hyperscaler,Microsoft,true,NASDAQ:MSFT
-Google Cloud,Hyperscaler,Alphabet,true,NASDAQ:GOOGL
-Oracle Cloud,Hyperscaler,Oracle,true,NYSE:ORCL
-Meta,Hyperscaler,Meta Platforms,true,NASDAQ:META
-Vocus,Telecom,Vocus Group,false,
-Fujitsu,Technology,Fujitsu,true,TYO:6702
-NTT,Telecom,NTT,true,TYO:9432
-DCI Data Centres,Colocation,Brookfield,false,
-Global Switch,Colocation,Global Switch,false,
-KINX,Colocation,KINX,false,
-Canberra Data Centres,Colocation,Canberra Data Centres,false,
-Harbour ISP,Telecom,Harbour ISP,false,
-SUBco,Telecom,SUBco,false,
-Yondr Group,Developer,Yondr Group,false,
-CloudHQ,Developer,CloudHQ,false,
-Stack Infrastructure,Developer,IPI Partners,false,
+NEXTDC,Colocation,NEXTDC,True,ASX:NXT
+CDC Data Centres,Colocation,Infratil,True,NZX:IFT
+AirTrunk,Colocation,Blackstone,False,
+Macquarie Data Centres,Colocation,Macquarie Technology Group,True,ASX:MAQ
+Goodman Group,Developer,Goodman Group,True,ASX:GMG
+Equinix,Colocation,Equinix,True,NASDAQ:EQIX
+Digital Realty,Colocation,Digital Realty,True,NYSE:DLR
+Amazon Web Services,Hyperscaler,Amazon,True,NASDAQ:AMZN
+Microsoft Azure,Hyperscaler,Microsoft,True,NASDAQ:MSFT
+Google Cloud,Hyperscaler,Alphabet,True,NASDAQ:GOOGL
+Oracle Cloud,Hyperscaler,Oracle,True,NYSE:ORCL
+Meta,Hyperscaler,Meta Platforms,True,NASDAQ:META
+Vocus,Telecom,Vocus Group,False,
+Fujitsu,Technology,Fujitsu,True,TYO:6702
+NTT,Telecom,NTT,True,TYO:9432
+DCI Data Centres,Colocation,Brookfield,False,
+Global Switch,Colocation,Global Switch,False,
+KINX,Colocation,KINX,False,
+Canberra Data Centres,Colocation,Canberra Data Centres,False,
+Harbour ISP,Telecom,Harbour ISP,False,
+SUBco,Telecom,SUBco,False,
+Yondr Group,Developer,Yondr Group,False,
+CloudHQ,Developer,CloudHQ,False,
+Stack Infrastructure,Developer,IPI Partners,False,
+Plan Project Management,Developer,ISPT / IFM Investors,False,
+Unattributed Planning Applicant,Developer,Unattributed Planning Applicant,False,
+ISPT,Developer,IFM Investors,False,
+Firmus Technologies,Technology,Firmus Technologies,False,
+Pilot Energy,Developer,Pilot Energy,True,ASX:PGY
+Cloud Carrier,Colocation,Cloud Carrier,False,
+Quinbrook Infrastructure Partners,Developer,Quinbrook Infrastructure Partners,False,

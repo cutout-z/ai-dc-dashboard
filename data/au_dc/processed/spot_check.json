@@ -1,13 +1,13 @@
 {
-  "run_at": "2026-05-18T00:14:24.246830+00:00",
-  "project_count": 87,
-  "total_mw_unrisked": 6114.424999999999,
-  "total_mw_risked": 3232.825,
+  "run_at": "2026-05-19T11:37:11.478335+00:00",
+  "project_count": 98,
+  "total_mw_unrisked": 8655.825,
+  "total_mw_risked": 3503.825,
   "checks": [
     {
       "level": "ok",
       "code": "seed_parquet_row_count",
-      "message": "Seed and parquet row counts match (87 rows).",
+      "message": "Seed and parquet row counts match (98 rows).",
       "count": 0,
       "projects": []
     },
@@ -42,8 +42,8 @@
     {
       "level": "warn",
       "code": "capex_mostly_estimated",
-      "message": "85/87 projects (98%) have estimated CAPEX; estimated rows represent 91% of capacity. Do not present blended CAPEX as disclosed market spend.",
-      "count": 85,
+      "message": "91/98 projects (93%) have estimated CAPEX; estimated rows represent 72% of capacity. Do not present blended CAPEX as disclosed market spend.",
+      "count": 91,
       "projects": [
         {
           "project_name": "Keppel Morwell",
@@ -100,17 +100,17 @@
           "capex_aud_m": 3312.0
         },
         {
-          "project_name": "M3",
-          "operator": "NEXTDC",
-          "facility_mw": 225.0,
-          "capex_aud_m": 2700.0
+          "project_name": "STACK MEL02",
+          "operator": "Stack Infrastructure",
+          "facility_mw": 252.0,
+          "capex_aud_m": 3780.0
         }
       ]
     },
     {
       "level": "warn",
       "code": "uc_power_not_explicit",
-      "message": "7/9 under-construction project(s) have no explicit power_secured flag; the risk model currently weights them at 100%.",
+      "message": "7/11 under-construction project(s) have no explicit power_secured flag; the risk model currently weights them at 100%.",
       "count": 7,
       "projects": [
         {
@@ -209,18 +209,21 @@
     {
       "level": "warn",
       "code": "top_operator_no_operating",
-      "message": "3 top-10 operator(s) by total MW have zero operating capacity \u2014 may be correct (pure pipeline) or a data gap.",
-      "count": 3,
+      "message": "6 top-10 operator(s) by total MW have zero operating capacity \u2014 may be correct (pure pipeline) or a data gap.",
+      "count": 6,
       "projects": [
-        "Keppel Data Centres",
+        "Plan Project Management",
         "Stack Infrastructure",
-        "Doma Infrastructure Group"
+        "Keppel Data Centres",
+        "Goodman Group",
+        "Unattributed Planning Applicant",
+        "ISPT"
       ]
     },
     {
       "level": "ok",
       "code": "operating_share",
-      "message": "78% of projects are Operating (sanity range \u226530%).",
+      "message": "70% of projects are Operating (sanity range \u226530%).",
       "count": 0,
       "projects": []
     },

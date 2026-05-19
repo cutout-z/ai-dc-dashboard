@@ -6,6 +6,10 @@ import plotly.express as px
 from pathlib import Path
 
 from app.lib.au_dc_charts import COLOUR_PALETTE, CHART_LAYOUT
+from app.lib.au_dc_excluded_capacity import (
+    excluded_capacity_components,
+    public_excluded_capacity_overlay,
+)
 from app.lib.au_dc_methodology import (
     CAMPUS_SCOPE_HELP,
     CAPEX_ESTIMATION_HELP,
@@ -26,6 +30,18 @@ if not projects_path.exists():
     st.stop()
 
 projects = pd.read_parquet(projects_path)
+aggregate_guidance_path = REFERENCE_DIR / "operator_aggregate_guidance.csv"
+aggregate_guidance_for_overlay = (
+    pd.read_csv(aggregate_guidance_path)
+    if aggregate_guidance_path.exists()
+    else pd.DataFrame()
+)
+site_leads_path = REFERENCE_DIR / "hyperscaler_site_leads.csv"
+site_leads_for_overlay = (
+    pd.read_csv(site_leads_path)
+    if site_leads_path.exists()
+    else pd.DataFrame()
+)
 audit_path = DATA_DIR / "project_evidence_audit.csv"
 if audit_path.exists():
     audit_cols = [
@@ -178,6 +194,53 @@ if "capacity_scope" in filtered.columns and campus_scope_mask.any():
         "For staged campuses, the status is a best available campus/project label and may not apply to every building. "
         "Use the Capacity Scope and Stage Caveat columns before treating these MW as current operating capacity.",
         icon=":material/info:",
+    )
+
+st.markdown("### Excluded Public-Source Capacity Signals")
+st.caption(
+    "Whole-database overlay for public-source capacity kept out of default project totals. "
+    "It is a screening view, not an additive market-capacity estimate."
+)
+excluded_overlay = public_excluded_capacity_overlay(
+    projects, aggregate_guidance_for_overlay, site_leads_for_overlay
+)
+e1, e2, e3, e4 = st.columns(4)
+with e1:
+    st.metric(
+        "Screening Total",
+        f"{excluded_overlay['screening_total_mw']:,.0f} MW",
+        help="Quarantined named rows + unmatched aggregate guidance + physical site leads. Components can have mixed capacity bases and may overlap.",
+    )
+with e2:
+    st.metric(
+        "Quarantined Project MW",
+        f"{excluded_overlay['quarantined_project_mw']:,.0f} MW",
+        delta=f"{excluded_overlay['quarantined_project_rows']:,.0f} rows",
+    )
+with e3:
+    st.metric(
+        "Unmatched Aggregate MW",
+        f"{excluded_overlay['unmatched_aggregate_mw']:,.0f} MW",
+        delta=f"{excluded_overlay['aggregate_records_with_mw']:,.0f} records",
+    )
+with e4:
+    st.metric(
+        "Physical Lead MW",
+        f"{excluded_overlay['sourced_site_lead_mw']:,.0f} MW",
+        delta=f"{excluded_overlay['site_leads_with_mw']:,.0f} leads",
+    )
+
+with st.expander("Excluded capacity treatment", icon=":material/search:"):
+    st.dataframe(
+        excluded_capacity_components(excluded_overlay),
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "component": "Component",
+            "mw": st.column_config.NumberColumn("MW", format="%d"),
+            "rows": st.column_config.NumberColumn("Rows / Records", format="%d"),
+            "treatment": st.column_config.TextColumn("Treatment", width="large"),
+        },
     )
 
 st.markdown("### Capacity by Development Status — Projects Shown Only")
@@ -391,7 +454,6 @@ if hyperscaler_path.exists():
 # ========================================
 # Operator Aggregate Guidance
 # ========================================
-aggregate_guidance_path = REFERENCE_DIR / "operator_aggregate_guidance.csv"
 if aggregate_guidance_path.exists():
     aggregate_guidance = pd.read_csv(aggregate_guidance_path)
     numeric_cols = [
@@ -489,7 +551,6 @@ if aggregate_guidance_path.exists():
 # ========================================
 # Hyperscaler Physical Site Leads
 # ========================================
-site_leads_path = REFERENCE_DIR / "hyperscaler_site_leads.csv"
 if site_leads_path.exists():
     hyperscaler_site_leads = pd.read_csv(site_leads_path)
 
@@ -506,7 +567,7 @@ if site_leads_path.exists():
     it_mw = hyperscaler_site_leads.get(
         "critical_it_mw", pd.Series(dtype="float64")
     ).fillna(0)
-    sourced_mw = facility_mw + it_mw
+    sourced_mw = facility_mw.where(facility_mw.gt(0), it_mw)
     direct_operator_rows = hyperscaler_site_leads[
         hyperscaler_site_leads.get("evidence_tier", pd.Series("", index=hyperscaler_site_leads.index)).eq("A")
     ]
