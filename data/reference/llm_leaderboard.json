@@ -1,9 +1,9 @@
 {
   "_meta": {
     "source": "https://api.zeroeval.com/leaderboard/models/full",
-    "updated": "2026-05-16",
-    "model_count_total": 298,
-    "model_count_scored": 239,
+    "updated": "2026-05-19",
+    "model_count_total": 299,
+    "model_count_scored": 240,
     "note": "Top 30 models with composite benchmark score (mean GPQA/SWE-Bench/HLE/AIME-2025)."
   },
   "models": [
@@ -416,6 +416,23 @@
       "rank": 24
     },
     {
+      "name": "Mistral Medium 3.5",
+      "org": "Mistral AI",
+      "source_board": "api",
+      "composite_score": 82.0,
+      "context_k": 256.0,
+      "input_price": 1.5,
+      "output_price": 7.5,
+      "speed_cps": null,
+      "gpqa": null,
+      "aime_2025": 86.3,
+      "swe_bench": 77.6,
+      "hle": null,
+      "license": "modified_mit_license",
+      "release_date": "2026-04-29",
+      "rank": 25
+    },
+    {
       "name": "Qwen3.5-9B",
       "org": "Alibaba Cloud / Qwen Team",
       "source_board": "api",
@@ -430,7 +447,7 @@
       "hle": null,
       "license": "apache_2_0",
       "release_date": "2026-03-02",
-      "rank": 25
+      "rank": 26
     },
     {
       "name": "Claude Opus 4.6",
@@ -447,7 +464,7 @@
       "hle": 53.1,
       "license": "proprietary",
       "release_date": "2026-02-05",
-      "rank": 26
+      "rank": 27
     },
     {
       "name": "MiniMax M2.5",
@@ -464,7 +481,7 @@
       "hle": null,
       "license": "mit",
       "release_date": "2026-02-12",
-      "rank": 27
+      "rank": 28
     },
     {
       "name": "Grok-4 Heavy",
@@ -481,7 +498,7 @@
       "hle": 50.7,
       "license": "proprietary",
       "release_date": null,
-      "rank": 28
+      "rank": 29
     },
     {
       "name": "o1-pro",
@@ -498,23 +515,6 @@
       "hle": null,
       "license": "proprietary",
       "release_date": "2024-12-17",
-      "rank": 29
-    },
-    {
-      "name": "Claude Opus 4.7",
-      "org": "Anthropic",
-      "source_board": "api",
-      "composite_score": 78.8,
-      "context_k": 1000.0,
-      "input_price": 5.0,
-      "output_price": 25.0,
-      "speed_cps": 42.0,
-      "gpqa": 94.2,
-      "aime_2025": null,
-      "swe_bench": 87.6,
-      "hle": 54.7,
-      "license": "proprietary",
-      "release_date": "2026-04-16",
       "rank": 30
     }
   ]
