@@ -140,6 +140,11 @@ guidance_revisions = st.Page(
 # News
 news = st.Page("views/news/news.py", title="News", url_path="news")
 
+# Interesting Articles (from Brain dashboard investment radar)
+interesting_articles = st.Page(
+    "views/threads/interesting_articles.py", title="Interesting Articles"
+)
+
 # System
 source_health = st.Page(
     "views/system/source_health.py", title="Source Health"
@@ -194,7 +199,7 @@ pg = st.navigation(
             au_company,
             au_project,
         ],
-        "Other": [news, source_health, acronyms],
+        "Other": [news, interesting_articles, source_health, acronyms],
     }
 )
 
