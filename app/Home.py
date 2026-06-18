@@ -2,14 +2,11 @@
 
 import sys
 from pathlib import Path
-import os
 
-# Ensure repo root is on sys.path so `from app.lib.xxx` imports work on Streamlit Cloud
+import streamlit as st
 _repo_root = str(Path(__file__).resolve().parent.parent)
 if _repo_root not in sys.path:
     sys.path.insert(0, _repo_root)
-
-import streamlit as st
 
 st.set_page_config(
     page_title="AI & DC Dashboard",
@@ -74,9 +71,6 @@ landing = st.Page("views/landing.py", title="Overview", default=True, url_path="
 dc_risk_monitor = st.Page(
     "views/dc_risk_monitor.py", title="DC Risk Monitor", url_path="dc-risk-monitor"
 )
-SHOW_DC_RISK_MONITOR = os.getenv("SHOW_DC_RISK_MONITOR", "").lower() in {
-    "1", "true", "yes", "on",
-}
 
 # Fundamentals Tracking
 equity_analysis = st.Page(
@@ -172,7 +166,7 @@ au_project = st.Page(
 
 pg = st.navigation(
     {
-        "Dashboard": [landing] + ([dc_risk_monitor] if SHOW_DC_RISK_MONITOR else []),
+        "Dashboard": [landing, dc_risk_monitor],
         "Financial Analysis": [
             equity_analysis,
             financials,
