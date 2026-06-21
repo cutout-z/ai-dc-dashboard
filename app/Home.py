@@ -115,7 +115,33 @@ llm_gpu_hardware = st.Page(
     "views/fundamentals/llm_performance/gpu_hardware.py", title="GPU Hardware & Pricing"
 )
 
-# Supply Chain
+# Supply Chain — Component Deep-Dives (Lanes 0-7)
+lane0_primer = st.Page(
+    "views/supply_chain/components/credit_primer.py", title="0. Hardware Credit Primer"
+)
+lane1_accel = st.Page(
+    "views/supply_chain/components/accelerator_architecture.py", title="1. AI Accelerator Architecture"
+)
+lane2_memory = st.Page(
+    "views/supply_chain/components/memory_subsystem.py", title="2. Memory Subsystem"
+)
+lane3_packaging = st.Page(
+    "views/supply_chain/components/advanced_packaging.py", title="3. Advanced Packaging"
+)
+lane4_interconnect = st.Page(
+    "views/supply_chain/components/interconnect_networking.py", title="4. Interconnect & Networking"
+)
+lane5_system = st.Page(
+    "views/supply_chain/components/system_integration.py", title="5. System Integration"
+)
+lane6_supply = st.Page(
+    "views/supply_chain/components/supply_chain_mapping.py", title="6. Supply Chain Mapping"
+)
+lane7_roadmaps = st.Page(
+    "views/supply_chain/components/technology_roadmaps.py", title="7. Technology Roadmaps"
+)
+
+# Supply Chain — Markets & Prospecting
 value_chain = st.Page(
     "views/supply_chain/value_chain.py", title="AI Infra Value Chain"
 )
@@ -185,7 +211,8 @@ pg = st.navigation(
             llm_lab_revenue,
             llm_gpu_hardware,
         ],
-        "Supply Chain": [value_chain, dc_inputs, prospecting],
+        "Supply Chain — Components": [lane0_primer, lane1_accel, lane2_memory, lane3_packaging, lane4_interconnect, lane5_system, lane6_supply, lane7_roadmaps],
+        "Supply Chain — Markets": [value_chain, dc_inputs, prospecting],
         "Australian Market": [
             au_landing,
             au_market_overview,
