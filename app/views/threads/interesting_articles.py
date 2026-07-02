@@ -12,7 +12,12 @@ from pathlib import Path
 
 import streamlit as st
 
-STATUS_PATH = Path.home() / "ai-wif-brain-dashboard" / "data" / "status.json"
+# Look for status.json relative to the repo root first (works on Streamlit Cloud),
+# then fall back to the Brain Dashboard home-directory path (local deployment).
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+_REPO_STATUS = _REPO_ROOT / "data" / "status.json"
+_HOME_STATUS = Path.home() / "ai-wif-brain-dashboard" / "data" / "status.json"
+STATUS_PATH = _REPO_STATUS if _REPO_STATUS.exists() else _HOME_STATUS
 VAULT_ROOT = (
     Path.home()
     / "Library/Mobile Documents/iCloud~md~obsidian/Documents/ZC_Mac_Vault"
@@ -45,8 +50,16 @@ CONFIDENCE_BADGE: dict[str, str] = {
 
 # ── helpers ────────────────────────────────────────────────────────────────
 
-@st.cache_data(ttl=300, show_spinner=False)
-def _load_dashboard_items() -> list[dict]:
+def _get_status_mtime() -> float:
+    """Get status.json mtime for cache busting."""
+    try:
+        return STATUS_PATH.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def _load_dashboard_items(status_mtime: float = 0.0) -> list[dict]:
     if not STATUS_PATH.exists():
         return []
 
@@ -181,7 +194,7 @@ st.caption(
 )
 
 with st.spinner("Loading articles..."):
-    items = _load_dashboard_items()
+    items = _load_dashboard_items(status_mtime=_get_status_mtime())
 
 if not items:
     st.info(
