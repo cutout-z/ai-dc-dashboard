@@ -1,13 +1,13 @@
 {
-  "run_at": "2026-05-19T11:37:11.478335+00:00",
-  "project_count": 98,
-  "total_mw_unrisked": 8655.825,
-  "total_mw_risked": 3503.825,
+  "run_at": "2026-07-05T23:31:28.235191+00:00",
+  "project_count": 99,
+  "total_mw_unrisked": 8785.825,
+  "total_mw_risked": 3633.825,
   "checks": [
     {
       "level": "ok",
       "code": "seed_parquet_row_count",
-      "message": "Seed and parquet row counts match (98 rows).",
+      "message": "Seed and parquet row counts match (99 rows).",
       "count": 0,
       "projects": []
     },
@@ -42,8 +42,8 @@
     {
       "level": "warn",
       "code": "capex_mostly_estimated",
-      "message": "91/98 projects (93%) have estimated CAPEX; estimated rows represent 72% of capacity. Do not present blended CAPEX as disclosed market spend.",
-      "count": 91,
+      "message": "92/99 projects (93%) have estimated CAPEX; estimated rows represent 73% of capacity. Do not present blended CAPEX as disclosed market spend.",
+      "count": 92,
       "projects": [
         {
           "project_name": "Keppel Morwell",
@@ -110,7 +110,7 @@
     {
       "level": "warn",
       "code": "uc_power_not_explicit",
-      "message": "7/11 under-construction project(s) have no explicit power_secured flag; the risk model currently weights them at 100%.",
+      "message": "7/12 under-construction project(s) have no explicit power_secured flag; the risk model currently weights them at 100%.",
       "count": 7,
       "projects": [
         {
@@ -160,12 +160,11 @@
     {
       "level": "warn",
       "code": "pipeline_missing_mw",
-      "message": "3 pipeline project(s) (UC/Proposed/Approved) have no facility_mw \u2014 they won't appear in capacity charts.",
-      "count": 3,
+      "message": "2 pipeline project(s) (UC/Proposed/Approved) have no facility_mw \u2014 they won't appear in capacity charts.",
+      "count": 2,
       "projects": [
         "DCI Sydney",
-        "EdgeConneX Macquarie Park",
-        "GreenSquareDC Norwest"
+        "EdgeConneX Macquarie Park"
       ]
     },
     {
@@ -223,7 +222,7 @@
     {
       "level": "ok",
       "code": "operating_share",
-      "message": "70% of projects are Operating (sanity range \u226530%).",
+      "message": "71% of projects are Operating (sanity range \u226530%).",
       "count": 0,
       "projects": []
     },
