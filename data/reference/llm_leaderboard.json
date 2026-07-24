@@ -1,9 +1,9 @@
 {
   "_meta": {
     "source": "https://api.zeroeval.com/leaderboard/models/full",
-    "updated": "2026-07-17",
-    "model_count_total": 331,
-    "model_count_scored": 268,
+    "updated": "2026-07-24",
+    "model_count_total": 335,
+    "model_count_scored": 269,
     "note": "Top 30 models with composite benchmark score (mean GPQA/SWE-Bench/HLE/AIME-2025)."
   },
   "models": [
@@ -83,13 +83,13 @@
       "context_k": 500.0,
       "input_price": 2.0,
       "output_price": 6.0,
-      "speed_cps": 90.0,
+      "speed_cps": 80.0,
       "gpqa": 93.0,
       "aime_2025": null,
       "swe_bench": null,
       "hle": null,
       "license": "proprietary",
-      "release_date": "2026-07-08",
+      "release_date": "2026-07-16",
       "rank": 5
     },
     {

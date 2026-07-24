@@ -1,33 +1,110 @@
 {
-  "updated": "2026-07-17T23:50:48Z",
+  "updated": "2026-07-24T23:50:37Z",
   "source": "fmp",
   "data": {
-    "AMZN": {
-      "rev_0y_avg": 824318.3,
-      "rev_0y_low": 810677.1,
-      "rev_0y_high": 835464.7,
-      "rev_1y_avg": 933151.6,
-      "rev_1y_low": 894145.3,
-      "rev_1y_high": 983289.8,
-      "rev_n": 45,
-      "rev_growth": 0.132,
-      "eps_0y_avg": 8.8196,
-      "eps_1y_avg": 10.0749,
-      "eps_n": 43,
-      "ebitda_0y_avg": 134068.0,
-      "ebitda_0y_low": 131849.4,
-      "ebitda_0y_high": 135880.9,
-      "ebitda_1y_avg": 151768.8,
-      "ebitda_1y_low": 145424.8,
-      "ebitda_1y_high": 159923.3,
-      "ni_0y_avg": 94943.9,
-      "ni_1y_avg": 108593.2,
+    "GOOGL": {
+      "rev_0y_avg": 495337.1,
+      "rev_0y_low": 488407.1,
+      "rev_0y_high": 504359.0,
+      "rev_1y_avg": 604560.8,
+      "rev_1y_low": 564916.9,
+      "rev_1y_high": 673888.2,
+      "rev_n": 35,
+      "rev_growth": 0.2205,
+      "eps_0y_avg": 19.4819,
+      "eps_1y_avg": 14.9712,
+      "eps_n": 38,
+      "ebitda_0y_avg": 183773.5,
+      "ebitda_0y_low": 181202.4,
+      "ebitda_0y_high": 187120.7,
+      "ebitda_1y_avg": 224296.2,
+      "ebitda_1y_low": 209588.1,
+      "ebitda_1y_high": 250017.2,
+      "ni_0y_avg": 241088.7,
+      "ni_1y_avg": 182253.7,
       "pt_current": null,
-      "pt_mean": 308.7,
+      "pt_mean": 423.44,
+      "pt_low": 350.0,
+      "pt_high": 475.0,
+      "pt_analysts": [],
+      "upgrades_downgrades": [
+        {
+          "firm": "Wells Fargo",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-07-23"
+        },
+        {
+          "firm": "Barclays",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-07-23"
+        },
+        {
+          "firm": "Roth Capital",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-07-23"
+        },
+        {
+          "firm": "Rosenblatt",
+          "action": "maintain",
+          "new_grade": "Neutral",
+          "prev_grade": "Neutral",
+          "date": "2026-07-23"
+        },
+        {
+          "firm": "BMO Capital",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-07-23"
+        }
+      ]
+    },
+    "AMZN": {
+      "rev_0y_avg": 824938.1,
+      "rev_0y_low": 810619.4,
+      "rev_0y_high": 835405.3,
+      "rev_1y_avg": 934885.6,
+      "rev_1y_low": 894043.6,
+      "rev_1y_high": 983177.9,
+      "rev_n": 45,
+      "rev_growth": 0.1333,
+      "eps_0y_avg": 8.837,
+      "eps_1y_avg": 10.0658,
+      "eps_n": 43,
+      "ebitda_0y_avg": 134168.9,
+      "ebitda_0y_low": 131840.0,
+      "ebitda_0y_high": 135871.2,
+      "ebitda_1y_avg": 152050.8,
+      "ebitda_1y_low": 145408.2,
+      "ebitda_1y_high": 159905.1,
+      "ni_0y_avg": 95178.5,
+      "ni_1y_avg": 108715.9,
+      "pt_current": null,
+      "pt_mean": 311.76,
       "pt_low": 175.0,
       "pt_high": 335.0,
       "pt_analysts": [],
       "upgrades_downgrades": [
+        {
+          "firm": "Wedbush",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-07-23"
+        },
+        {
+          "firm": "Wells Fargo",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-07-21"
+        },
         {
           "firm": "Keybanc",
           "action": "maintain",
@@ -48,61 +125,61 @@
           "new_grade": "Buy",
           "prev_grade": "Buy",
           "date": "2026-07-08"
-        },
-        {
-          "firm": "Wells Fargo",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-07-02"
-        },
-        {
-          "firm": "Truist Securities",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-05-29"
         }
       ]
     },
     "MSFT": {
-      "rev_0y_avg": 384383.6,
-      "rev_0y_low": 371762.8,
-      "rev_0y_high": 391011.2,
-      "rev_1y_avg": 455550.4,
-      "rev_1y_low": 455232.3,
-      "rev_1y_high": 455868.5,
+      "rev_0y_avg": 384707.9,
+      "rev_0y_low": 372476.7,
+      "rev_0y_high": 391287.7,
+      "rev_1y_avg": 456585.9,
+      "rev_1y_low": 430220.1,
+      "rev_1y_high": 509642.0,
       "rev_n": 41,
-      "rev_growth": 0.1851,
-      "eps_0y_avg": 19.4423,
-      "eps_1y_avg": 22.7693,
-      "eps_n": 31,
-      "ebitda_0y_avg": 201366.0,
-      "ebitda_0y_low": 194754.4,
-      "ebitda_0y_high": 204838.0,
-      "ebitda_1y_avg": 238647.9,
-      "ebitda_1y_low": 238481.3,
-      "ebitda_1y_high": 238814.6,
-      "ni_0y_avg": 145607.2,
-      "ni_1y_avg": 169666.0,
+      "rev_growth": 0.1868,
+      "eps_0y_avg": 19.4588,
+      "eps_1y_avg": 22.7672,
+      "eps_n": 32,
+      "ebitda_0y_avg": 201535.9,
+      "ebitda_0y_low": 195128.3,
+      "ebitda_0y_high": 204982.8,
+      "ebitda_1y_avg": 239190.4,
+      "ebitda_1y_low": 225378.2,
+      "ebitda_1y_high": 266984.8,
+      "ni_0y_avg": 144722.5,
+      "ni_1y_avg": 167579.5,
       "pt_current": null,
-      "pt_mean": 548.73,
+      "pt_mean": 549.08,
       "pt_low": 400.0,
       "pt_high": 680.0,
       "pt_analysts": [],
       "upgrades_downgrades": [
         {
+          "firm": "Truist Securities",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-07-22"
+        },
+        {
+          "firm": "Oppenheimer",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-07-22"
+        },
+        {
+          "firm": "Bernstein",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-07-22"
+        },
+        {
           "firm": "Wells Fargo",
           "action": "maintain",
           "new_grade": "Overweight",
           "prev_grade": "Overweight",
-          "date": "2026-07-15"
-        },
-        {
-          "firm": "Citigroup",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
           "date": "2026-07-15"
         },
         {
@@ -111,112 +188,42 @@
           "new_grade": "Outperform",
           "prev_grade": "Outperform",
           "date": "2026-07-15"
-        },
-        {
-          "firm": "Evercore ISI Group",
-          "action": "maintain",
-          "new_grade": "Outperform",
-          "prev_grade": "Outperform",
-          "date": "2026-07-15"
-        },
-        {
-          "firm": "Argus Research",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-07-10"
-        }
-      ]
-    },
-    "GOOGL": {
-      "rev_0y_avg": 487033.4,
-      "rev_0y_low": 480480.3,
-      "rev_0y_high": 496173.2,
-      "rev_1y_avg": 583071.4,
-      "rev_1y_low": 545950.5,
-      "rev_1y_high": 651263.2,
-      "rev_n": 37,
-      "rev_growth": 0.1972,
-      "eps_0y_avg": 14.2664,
-      "eps_1y_avg": 14.7893,
-      "eps_n": 39,
-      "ebitda_0y_avg": 180692.7,
-      "ebitda_0y_low": 178261.5,
-      "ebitda_0y_high": 184083.7,
-      "ebitda_1y_avg": 216323.5,
-      "ebitda_1y_low": 202551.4,
-      "ebitda_1y_high": 241623.1,
-      "ni_0y_avg": 173596.0,
-      "ni_1y_avg": 178415.3,
-      "pt_current": null,
-      "pt_mean": 419.14,
-      "pt_low": 360.0,
-      "pt_high": 460.0,
-      "pt_analysts": [],
-      "upgrades_downgrades": [
-        {
-          "firm": "UBS",
-          "action": "maintain",
-          "new_grade": "Neutral",
-          "prev_grade": "Neutral",
-          "date": "2026-07-13"
-        },
-        {
-          "firm": "Keybanc",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-07-10"
-        },
-        {
-          "firm": "Wells Fargo",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-07-02"
-        },
-        {
-          "firm": "Morgan Stanley",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-06-30"
-        },
-        {
-          "firm": "Needham",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-06-03"
         }
       ]
     },
     "AAPL": {
-      "rev_0y_avg": 478079.0,
-      "rev_0y_low": 472400.3,
-      "rev_0y_high": 485237.3,
-      "rev_1y_avg": 519962.6,
-      "rev_1y_low": 497126.3,
-      "rev_1y_high": 559860.8,
-      "rev_n": 28,
-      "rev_growth": 0.0876,
-      "eps_0y_avg": 8.7609,
-      "eps_1y_avg": 9.6562,
+      "rev_0y_avg": 478172.9,
+      "rev_0y_low": 471644.9,
+      "rev_0y_high": 484461.4,
+      "rev_1y_avg": 520806.7,
+      "rev_1y_low": 497612.6,
+      "rev_1y_high": 560012.6,
+      "rev_n": 29,
+      "rev_growth": 0.0892,
+      "eps_0y_avg": 8.7613,
+      "eps_1y_avg": 9.6723,
       "eps_n": 31,
-      "ebitda_0y_avg": 172555.4,
-      "ebitda_0y_low": 170505.8,
-      "ebitda_0y_high": 175139.1,
-      "ebitda_1y_avg": 187672.7,
-      "ebitda_1y_low": 179430.3,
-      "ebitda_1y_high": 202073.3,
-      "ni_0y_avg": 131905.6,
-      "ni_1y_avg": 139925.6,
+      "ebitda_0y_avg": 172589.3,
+      "ebitda_0y_low": 170233.1,
+      "ebitda_0y_high": 174859.0,
+      "ebitda_1y_avg": 187977.3,
+      "ebitda_1y_low": 179605.8,
+      "ebitda_1y_high": 202128.1,
+      "ni_0y_avg": 131610.7,
+      "ni_1y_avg": 138561.4,
       "pt_current": null,
-      "pt_mean": 328.83,
-      "pt_low": 250.0,
+      "pt_mean": 340.68,
+      "pt_low": 253.0,
       "pt_high": 400.0,
       "pt_analysts": [],
       "upgrades_downgrades": [
+        {
+          "firm": "HSBC",
+          "action": "upgrade",
+          "new_grade": "Buy",
+          "prev_grade": "Hold",
+          "date": "2026-07-17"
+        },
         {
           "firm": "Keybanc",
           "action": "downgrade",
@@ -244,36 +251,155 @@
           "new_grade": "Hold",
           "prev_grade": "Outperform",
           "date": "2026-06-22"
+        }
+      ]
+    },
+    "TSLA": {
+      "rev_0y_avg": 105092.1,
+      "rev_0y_low": 97359.5,
+      "rev_0y_high": 113526.7,
+      "rev_1y_avg": 120230.3,
+      "rev_1y_low": 103886.2,
+      "rev_1y_high": 130752.8,
+      "rev_n": 33,
+      "rev_growth": 0.144,
+      "eps_0y_avg": 1.8127,
+      "eps_1y_avg": 2.3469,
+      "eps_n": 25,
+      "ebitda_0y_avg": 17300.0,
+      "ebitda_0y_low": 16027.1,
+      "ebitda_0y_high": 18688.5,
+      "ebitda_1y_avg": 19792.0,
+      "ebitda_1y_low": 17101.5,
+      "ebitda_1y_high": 21524.2,
+      "ni_0y_avg": 6424.2,
+      "ni_1y_avg": 8130.9,
+      "pt_current": null,
+      "pt_mean": 431.36,
+      "pt_low": 370.0,
+      "pt_high": 508.0,
+      "pt_analysts": [],
+      "upgrades_downgrades": [
+        {
+          "firm": "Piper Sandler",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-07-24"
         },
         {
-          "firm": "B of A Securities",
+          "firm": "TD Cowen",
           "action": "maintain",
           "new_grade": "Buy",
           "prev_grade": "Buy",
-          "date": "2026-06-18"
+          "date": "2026-07-23"
+        },
+        {
+          "firm": "Mizuho",
+          "action": "maintain",
+          "new_grade": "Outperform",
+          "prev_grade": "Outperform",
+          "date": "2026-07-23"
+        },
+        {
+          "firm": "JP Morgan",
+          "action": "maintain",
+          "new_grade": "Neutral",
+          "prev_grade": "Neutral",
+          "date": "2026-07-23"
+        },
+        {
+          "firm": "UBS",
+          "action": "maintain",
+          "new_grade": "Neutral",
+          "prev_grade": "Neutral",
+          "date": "2026-07-23"
+        }
+      ]
+    },
+    "META": {
+      "rev_0y_avg": 253314.4,
+      "rev_0y_low": 249485.4,
+      "rev_0y_high": 258173.1,
+      "rev_1y_avg": 303671.9,
+      "rev_1y_low": 295793.0,
+      "rev_1y_high": 318900.4,
+      "rev_n": 44,
+      "rev_growth": 0.1988,
+      "eps_0y_avg": 32.9432,
+      "eps_1y_avg": 35.1753,
+      "eps_n": 42,
+      "ebitda_0y_avg": 115410.4,
+      "ebitda_0y_low": 113665.9,
+      "ebitda_0y_high": 117624.1,
+      "ebitda_1y_avg": 138353.4,
+      "ebitda_1y_low": 134763.8,
+      "ebitda_1y_high": 145291.6,
+      "ni_0y_avg": 89137.4,
+      "ni_1y_avg": 98544.5,
+      "pt_current": null,
+      "pt_mean": 820.0,
+      "pt_low": 700.0,
+      "pt_high": 900.0,
+      "pt_analysts": [],
+      "upgrades_downgrades": [
+        {
+          "firm": "Arete",
+          "action": "upgrade",
+          "new_grade": "Buy",
+          "prev_grade": "Neutral",
+          "date": "2026-06-02"
+        },
+        {
+          "firm": "JP Morgan",
+          "action": "downgrade",
+          "new_grade": "Neutral",
+          "prev_grade": "Overweight",
+          "date": "2026-04-30"
+        },
+        {
+          "firm": "Erste Group",
+          "action": "downgrade",
+          "new_grade": "Hold",
+          "prev_grade": "Buy",
+          "date": "2026-04-02"
+        },
+        {
+          "firm": "Erste Group",
+          "action": "upgrade",
+          "new_grade": "Buy",
+          "prev_grade": "Hold",
+          "date": "2026-03-05"
+        },
+        {
+          "firm": "Arete",
+          "action": "downgrade",
+          "new_grade": "Neutral",
+          "prev_grade": "Buy",
+          "date": "2026-03-05"
         }
       ]
     },
     "NVDA": {
-      "rev_0y_avg": 393178.6,
-      "rev_0y_low": 363499.8,
-      "rev_0y_high": 406374.9,
-      "rev_1y_avg": 561311.6,
-      "rev_1y_low": 459174.9,
-      "rev_1y_high": 628318.6,
-      "rev_n": 39,
-      "rev_growth": 0.4276,
-      "eps_0y_avg": 8.9875,
-      "eps_1y_avg": 12.6908,
-      "eps_n": 32,
-      "ebitda_0y_avg": 201089.3,
-      "ebitda_0y_low": 185910.2,
-      "ebitda_0y_high": 207838.5,
-      "ebitda_1y_avg": 287080.2,
-      "ebitda_1y_low": 234842.8,
-      "ebitda_1y_high": 321350.5,
-      "ni_0y_avg": 227339.5,
-      "ni_1y_avg": 304837.7,
+      "rev_0y_avg": 393405.5,
+      "rev_0y_low": 363512.6,
+      "rev_0y_high": 401855.0,
+      "rev_1y_avg": 563213.0,
+      "rev_1y_low": 454754.1,
+      "rev_1y_high": 622269.4,
+      "rev_n": 40,
+      "rev_growth": 0.4316,
+      "eps_0y_avg": 8.9961,
+      "eps_1y_avg": 12.767,
+      "eps_n": 33,
+      "ebitda_0y_avg": 201205.3,
+      "ebitda_0y_low": 185916.8,
+      "ebitda_0y_high": 205526.8,
+      "ebitda_1y_avg": 288052.6,
+      "ebitda_1y_low": 232581.8,
+      "ebitda_1y_high": 318256.7,
+      "ni_0y_avg": 218278.5,
+      "ni_1y_avg": 308396.6,
       "pt_current": null,
       "pt_mean": 319.48,
       "pt_low": 218.0,
@@ -317,233 +443,44 @@
         }
       ]
     },
-    "TSLA": {
-      "rev_0y_avg": 103893.7,
-      "rev_0y_low": 97447.5,
-      "rev_0y_high": 113629.3,
-      "rev_1y_avg": 119179.4,
-      "rev_1y_low": 104074.0,
-      "rev_1y_high": 130989.2,
-      "rev_n": 35,
-      "rev_growth": 0.1471,
-      "eps_0y_avg": 1.9764,
-      "eps_1y_avg": 2.481,
-      "eps_n": 26,
-      "ebitda_0y_avg": 17102.7,
-      "ebitda_0y_low": 16041.6,
-      "ebitda_0y_high": 18705.4,
-      "ebitda_1y_avg": 19619.0,
-      "ebitda_1y_low": 17132.4,
-      "ebitda_1y_high": 21563.1,
-      "ni_0y_avg": 4629.2,
-      "ni_1y_avg": 7092.6,
-      "pt_current": null,
-      "pt_mean": 441.7,
-      "pt_low": 360.0,
-      "pt_high": 540.0,
-      "pt_analysts": [],
-      "upgrades_downgrades": [
-        {
-          "firm": "Morgan Stanley",
-          "action": "maintain",
-          "new_grade": "Equal Weight",
-          "prev_grade": "Equal Weight",
-          "date": "2026-07-14"
-        },
-        {
-          "firm": "Barclays",
-          "action": "maintain",
-          "new_grade": "Equal Weight",
-          "prev_grade": "Equal Weight",
-          "date": "2026-07-14"
-        },
-        {
-          "firm": "Wells Fargo",
-          "action": "maintain",
-          "new_grade": "Underweight",
-          "prev_grade": "Underweight",
-          "date": "2026-07-14"
-        },
-        {
-          "firm": "Jefferies",
-          "action": "maintain",
-          "new_grade": "Hold",
-          "prev_grade": "Hold",
-          "date": "2026-07-13"
-        },
-        {
-          "firm": "UBS",
-          "action": "maintain",
-          "new_grade": "Neutral",
-          "prev_grade": "Neutral",
-          "date": "2026-07-09"
-        }
-      ]
-    },
-    "META": {
-      "rev_0y_avg": 252947.6,
-      "rev_0y_low": 249094.7,
-      "rev_0y_high": 257768.8,
-      "rev_1y_avg": 301970.6,
-      "rev_1y_low": 294290.7,
-      "rev_1y_high": 317280.8,
-      "rev_n": 44,
-      "rev_growth": 0.1938,
-      "eps_0y_avg": 32.9075,
-      "eps_1y_avg": 34.9763,
-      "eps_n": 41,
-      "ebitda_0y_avg": 115243.4,
-      "ebitda_0y_low": 113487.9,
-      "ebitda_0y_high": 117439.9,
-      "ebitda_1y_avg": 137578.3,
-      "ebitda_1y_low": 134079.3,
-      "ebitda_1y_high": 144553.7,
-      "ni_0y_avg": 84487.4,
-      "ni_1y_avg": 90196.8,
-      "pt_current": null,
-      "pt_mean": 827.5,
-      "pt_low": 700.0,
-      "pt_high": 910.0,
-      "pt_analysts": [],
-      "upgrades_downgrades": [
-        {
-          "firm": "Arete",
-          "action": "upgrade",
-          "new_grade": "Buy",
-          "prev_grade": "Neutral",
-          "date": "2026-06-02"
-        },
-        {
-          "firm": "JP Morgan",
-          "action": "downgrade",
-          "new_grade": "Neutral",
-          "prev_grade": "Overweight",
-          "date": "2026-04-30"
-        },
-        {
-          "firm": "Erste Group",
-          "action": "downgrade",
-          "new_grade": "Hold",
-          "prev_grade": "Buy",
-          "date": "2026-04-02"
-        },
-        {
-          "firm": "Arete",
-          "action": "downgrade",
-          "new_grade": "Neutral",
-          "prev_grade": "Buy",
-          "date": "2026-03-05"
-        },
-        {
-          "firm": "Erste Group",
-          "action": "upgrade",
-          "new_grade": "Buy",
-          "prev_grade": "Hold",
-          "date": "2026-03-05"
-        }
-      ]
-    },
-    "TSM": {
-      "rev_0y_avg": 166993.6,
-      "rev_0y_low": 160321.7,
-      "rev_0y_high": 171307.0,
-      "rev_1y_avg": 219390.7,
-      "rev_1y_low": 209320.8,
-      "rev_1y_high": 238344.1,
-      "rev_n": 15,
-      "rev_growth": 0.3138,
-      "eps_0y_avg": 521.4908,
-      "eps_1y_avg": 673.9526,
-      "eps_n": 8,
-      "ebitda_0y_avg": 116782.5,
-      "ebitda_0y_low": 112116.7,
-      "ebitda_0y_high": 119799.0,
-      "ebitda_1y_avg": 153425.1,
-      "ebitda_1y_low": 146382.9,
-      "ebitda_1y_high": 166679.6,
-      "ni_0y_avg": 84515.9,
-      "ni_1y_avg": 109224.8,
-      "pt_current": null,
-      "pt_mean": 586.0,
-      "pt_low": 480.0,
-      "pt_high": 700.0,
-      "pt_analysts": [],
-      "upgrades_downgrades": [
-        {
-          "firm": "TD Cowen",
-          "action": "maintain",
-          "new_grade": "Hold",
-          "prev_grade": "Hold",
-          "date": "2026-07-17"
-        },
-        {
-          "firm": "Barclays",
-          "action": "maintain",
-          "new_grade": "Overweight",
-          "prev_grade": "Overweight",
-          "date": "2026-07-17"
-        },
-        {
-          "firm": "DA Davidson",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-07-17"
-        },
-        {
-          "firm": "Susquehanna",
-          "action": "maintain",
-          "new_grade": "Positive",
-          "prev_grade": "Positive",
-          "date": "2026-07-16"
-        },
-        {
-          "firm": "B of A Securities",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-06-24"
-        }
-      ]
-    },
     "AMD": {
-      "rev_0y_avg": 49991.5,
-      "rev_0y_low": 47940.4,
-      "rev_0y_high": 52920.1,
-      "rev_1y_avg": 77343.3,
-      "rev_1y_low": 62138.3,
-      "rev_1y_high": 88398.5,
+      "rev_0y_avg": 50089.1,
+      "rev_0y_low": 47761.0,
+      "rev_0y_high": 53830.2,
+      "rev_1y_avg": 78110.8,
+      "rev_1y_low": 61082.2,
+      "rev_1y_high": 100100.4,
       "rev_n": 36,
-      "rev_growth": 0.5471,
-      "eps_0y_avg": 7.4668,
-      "eps_1y_avg": 13.3814,
+      "rev_growth": 0.5594,
+      "eps_0y_avg": 7.4898,
+      "eps_1y_avg": 13.5209,
       "eps_n": 30,
-      "ebitda_0y_avg": 10846.7,
-      "ebitda_0y_low": 10401.7,
-      "ebitda_0y_high": 11482.2,
-      "ebitda_1y_avg": 16781.3,
-      "ebitda_1y_low": 13482.2,
-      "ebitda_1y_high": 19180.0,
-      "ni_0y_avg": 12139.6,
-      "ni_1y_avg": 17839.7,
+      "ebitda_0y_avg": 10867.9,
+      "ebitda_0y_low": 10362.8,
+      "ebitda_0y_high": 11679.6,
+      "ebitda_1y_avg": 16947.8,
+      "ebitda_1y_low": 13253.1,
+      "ebitda_1y_high": 21718.9,
+      "ni_0y_avg": 12277.8,
+      "ni_1y_avg": 22706.1,
       "pt_current": null,
-      "pt_mean": 513.42,
+      "pt_mean": 563.88,
       "pt_low": 260.0,
-      "pt_high": 725.0,
+      "pt_high": 1250.0,
       "pt_analysts": [],
       "upgrades_downgrades": [
-        {
-          "firm": "B of A Securities",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-07-14"
-        },
         {
           "firm": "Keybanc",
           "action": "maintain",
           "new_grade": "Overweight",
           "prev_grade": "Overweight",
+          "date": "2026-07-14"
+        },
+        {
+          "firm": "B of A Securities",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
           "date": "2026-07-14"
         },
         {
@@ -569,6 +506,69 @@
         }
       ]
     },
+    "TSM": {
+      "rev_0y_avg": 168172.7,
+      "rev_0y_low": 159205.2,
+      "rev_0y_high": 173534.6,
+      "rev_1y_avg": 223973.0,
+      "rev_1y_low": 207908.2,
+      "rev_1y_high": 236735.6,
+      "rev_n": 21,
+      "rev_growth": 0.3318,
+      "eps_0y_avg": 530.1101,
+      "eps_1y_avg": 687.4784,
+      "eps_n": 8,
+      "ebitda_0y_avg": 117607.1,
+      "ebitda_0y_low": 111336.0,
+      "ebitda_0y_high": 121356.8,
+      "ebitda_1y_avg": 156629.6,
+      "ebitda_1y_low": 145395.1,
+      "ebitda_1y_high": 165554.8,
+      "ni_0y_avg": 85912.8,
+      "ni_1y_avg": 111416.9,
+      "pt_current": null,
+      "pt_mean": 586.0,
+      "pt_low": 480.0,
+      "pt_high": 700.0,
+      "pt_analysts": [],
+      "upgrades_downgrades": [
+        {
+          "firm": "DA Davidson",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-07-17"
+        },
+        {
+          "firm": "Barclays",
+          "action": "maintain",
+          "new_grade": "Overweight",
+          "prev_grade": "Overweight",
+          "date": "2026-07-17"
+        },
+        {
+          "firm": "TD Cowen",
+          "action": "maintain",
+          "new_grade": "Hold",
+          "prev_grade": "Hold",
+          "date": "2026-07-17"
+        },
+        {
+          "firm": "Susquehanna",
+          "action": "maintain",
+          "new_grade": "Positive",
+          "prev_grade": "Positive",
+          "date": "2026-07-16"
+        },
+        {
+          "firm": "B of A Securities",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-06-24"
+        }
+      ]
+    },
     "PLTR": {
       "rev_0y_avg": 7721.5,
       "rev_0y_low": 7691.4,
@@ -578,8 +578,8 @@
       "rev_1y_high": 11944.8,
       "rev_n": 23,
       "rev_growth": 0.4549,
-      "eps_0y_avg": 1.4575,
-      "eps_1y_avg": 2.0845,
+      "eps_0y_avg": 1.4556,
+      "eps_1y_avg": 2.0784,
       "eps_n": 19,
       "ebitda_0y_avg": 1842.4,
       "ebitda_0y_low": 1835.2,
@@ -590,11 +590,25 @@
       "ni_0y_avg": 3449.0,
       "ni_1y_avg": 4829.2,
       "pt_current": null,
-      "pt_mean": 187.25,
+      "pt_mean": 185.36,
       "pt_low": 138.0,
       "pt_high": 230.0,
       "pt_analysts": [],
       "upgrades_downgrades": [
+        {
+          "firm": "Citigroup",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-07-24"
+        },
+        {
+          "firm": "DA Davidson",
+          "action": "maintain",
+          "new_grade": "Buy",
+          "prev_grade": "Buy",
+          "date": "2026-07-17"
+        },
         {
           "firm": "DA Davidson",
           "action": "upgrade",
@@ -610,25 +624,11 @@
           "date": "2026-06-16"
         },
         {
-          "firm": "Rosenblatt",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-06-05"
-        },
-        {
           "firm": "Wedbush",
           "action": "maintain",
           "new_grade": "Outperform",
           "prev_grade": "Outperform",
           "date": "2026-06-05"
-        },
-        {
-          "firm": "Rosenblatt",
-          "action": "maintain",
-          "new_grade": "Buy",
-          "prev_grade": "Buy",
-          "date": "2026-05-21"
         }
       ]
     }

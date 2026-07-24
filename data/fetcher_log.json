@@ -1,6 +1,6 @@
 {
   "refresh_earnings_dates.py": {
-    "last_run": "2026-07-17T23:51:07Z",
+    "last_run": "2026-07-24T23:50:55Z",
     "status": "ok",
     "count": 18,
     "notes": "0 dates changed"
@@ -12,15 +12,15 @@
     "notes": "Holdings from 4 ETFs: AIQ, BOTZ, ROBT, CHAT"
   },
   "refresh_capex_guidance.py": {
-    "last_run": "2026-07-17T23:51:18Z",
+    "last_run": "2026-07-24T23:51:06Z",
     "status": "ok",
     "count": 0,
     "notes": "0 stale, 0 current"
   },
   "catalog_news.py": {
-    "last_run": "2026-07-17T23:51:39Z",
+    "last_run": "2026-07-24T23:51:26Z",
     "status": "ok",
-    "count": 13,
-    "notes": "added=7, updated=6, total_catalogued=86"
+    "count": 10,
+    "notes": "added=3, updated=7, total_catalogued=89"
   }
 }
