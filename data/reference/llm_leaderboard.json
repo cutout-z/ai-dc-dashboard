@@ -1,8 +1,8 @@
 {
   "_meta": {
     "source": "https://api.zeroeval.com/leaderboard/models/full",
-    "updated": "2026-08-14",
-    "model_count_total": 358,
+    "updated": "2026-08-21",
+    "model_count_total": 359,
     "model_count_scored": 281,
     "note": "Top 30 models with composite benchmark score (mean GPQA/SWE-Bench/HLE/AIME-2025)."
   },
