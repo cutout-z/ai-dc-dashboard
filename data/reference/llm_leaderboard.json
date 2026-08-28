@@ -1,9 +1,9 @@
 {
   "_meta": {
     "source": "https://api.zeroeval.com/leaderboard/models/full",
-    "updated": "2026-08-21",
-    "model_count_total": 359,
-    "model_count_scored": 281,
+    "updated": "2026-08-28",
+    "model_count_total": 362,
+    "model_count_scored": 284,
     "note": "Top 30 models with composite benchmark score (mean GPQA/SWE-Bench/HLE/AIME-2025)."
   },
   "models": [
@@ -280,6 +280,23 @@
       "rank": 16
     },
     {
+      "name": "EXAONE 4.5 33B",
+      "org": "LG AI Research",
+      "source_board": "api",
+      "composite_score": 86.7,
+      "context_k": 0.0,
+      "input_price": null,
+      "output_price": null,
+      "speed_cps": null,
+      "gpqa": 80.5,
+      "aime_2025": 92.9,
+      "swe_bench": null,
+      "hle": null,
+      "license": "proprietary",
+      "release_date": "2026-04-09",
+      "rank": 17
+    },
+    {
       "name": "GPT OSS 120B High",
       "org": "OpenAI",
       "source_board": "api",
@@ -294,7 +311,7 @@
       "hle": null,
       "license": "apache_2_0",
       "release_date": "2025-08-05",
-      "rank": 17
+      "rank": 18
     },
     {
       "name": "GPT OSS 20B High",
@@ -311,7 +328,7 @@
       "hle": null,
       "license": "apache_2_0",
       "release_date": "2025-08-05",
-      "rank": 18
+      "rank": 19
     },
     {
       "name": "GPT-5.1",
@@ -328,7 +345,7 @@
       "hle": null,
       "license": "proprietary",
       "release_date": "2025-11-13",
-      "rank": 19
+      "rank": 20
     },
     {
       "name": "GPT-5.1 Instant",
@@ -345,7 +362,7 @@
       "hle": null,
       "license": "proprietary",
       "release_date": "2025-11-12",
-      "rank": 20
+      "rank": 21
     },
     {
       "name": "GPT-5.1 Thinking",
@@ -362,7 +379,7 @@
       "hle": null,
       "license": "proprietary",
       "release_date": "2025-11-12",
-      "rank": 21
+      "rank": 22
     },
     {
       "name": "Step-3.5-Flash",
@@ -379,7 +396,7 @@
       "hle": null,
       "license": "apache_2_0",
       "release_date": "2026-02-02",
-      "rank": 22
+      "rank": 23
     },
     {
       "name": "Claude Sonnet 4.5",
@@ -396,7 +413,7 @@
       "hle": null,
       "license": "proprietary",
       "release_date": "2025-09-29",
-      "rank": 23
+      "rank": 24
     },
     {
       "name": "MAI-Thinking-1",
@@ -413,7 +430,7 @@
       "hle": null,
       "license": "proprietary",
       "release_date": "2026-06-02",
-      "rank": 24
+      "rank": 25
     },
     {
       "name": "Claude Mythos Preview",
@@ -430,7 +447,7 @@
       "hle": 64.7,
       "license": "proprietary",
       "release_date": null,
-      "rank": 25
+      "rank": 26
     },
     {
       "name": "Hy3",
@@ -447,7 +464,7 @@
       "hle": null,
       "license": "apache_2_0",
       "release_date": "2026-07-06",
-      "rank": 26
+      "rank": 27
     },
     {
       "name": "ChatGPT-4o Latest",
@@ -464,7 +481,7 @@
       "hle": null,
       "license": "proprietary",
       "release_date": "2024-05-13",
-      "rank": 27
+      "rank": 28
     },
     {
       "name": "Claude Opus 4.5",
@@ -481,7 +498,7 @@
       "hle": null,
       "license": "proprietary",
       "release_date": "2025-11-24",
-      "rank": 28
+      "rank": 29
     },
     {
       "name": "Seed 2.0 Lite",
@@ -498,23 +515,6 @@
       "hle": null,
       "license": "proprietary",
       "release_date": "2026-02-14",
-      "rank": 29
-    },
-    {
-      "name": "GPT-5.5 Instant",
-      "org": "OpenAI",
-      "source_board": "api",
-      "composite_score": 83.4,
-      "context_k": 400.0,
-      "input_price": 5.0,
-      "output_price": 30.0,
-      "speed_cps": 100.0,
-      "gpqa": 85.6,
-      "aime_2025": 81.2,
-      "swe_bench": null,
-      "hle": null,
-      "license": "proprietary",
-      "release_date": "2026-05-05",
       "rank": 30
     }
   ]
