@@ -79,6 +79,19 @@ def _fetch_day_range(start: str, end: str, key: str) -> list[dict]:
     return payload.get("data", [])
 
 
+def _fetch_all(start: str, end: str, key: str) -> list[dict]:
+    """Fetch the full [start, end] window in <=365-day chunks (API limit)."""
+    rows: list[dict] = []
+    cur = dt.date.fromisoformat(start)
+    last = dt.date.fromisoformat(end)
+    while cur <= last:
+        chunk_end = min(cur + dt.timedelta(days=364), last)
+        print(f"  chunk {cur.isoformat()} → {chunk_end.isoformat()} ...")
+        rows.extend(_fetch_day_range(cur.isoformat(), chunk_end.isoformat(), key))
+        cur = chunk_end + dt.timedelta(days=1)
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--full", action="store_true", help="force full backfill from 2025-01-01")
@@ -107,7 +120,7 @@ def main() -> None:
         return
 
     print(f"Fetching rankings-daily {start} → {end} (UTC) ...")
-    rows = _fetch_day_range(start, end, key)
+    rows = _fetch_all(start, end, key)
     if not rows:
         print("  API returned no rows for the window.")
         return
