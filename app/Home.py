@@ -114,6 +114,11 @@ llm_lab_revenue = st.Page(
 llm_gpu_hardware = st.Page(
     "views/fundamentals/llm_performance/gpu_hardware.py", title="GPU Hardware & Pricing"
 )
+llm_openrouter_traffic = st.Page(
+    "views/fundamentals/llm_performance/openrouter_tokens.py",
+    title="Token Traffic (OpenRouter)",
+    url_path="openrouter-token-traffic",
+)
 
 # Supply Chain — Component Deep-Dives (Lanes 0-7)
 lane0_primer = st.Page(
@@ -210,6 +215,7 @@ pg = st.navigation(
             llm_speed,
             llm_lab_revenue,
             llm_gpu_hardware,
+            llm_openrouter_traffic,
         ],
         "Supply Chain — Components": [lane0_primer, lane1_accel, lane2_memory, lane3_packaging, lane4_interconnect, lane5_system, lane6_supply, lane7_roadmaps],
         "Supply Chain — Markets": [value_chain, dc_inputs, prospecting],
