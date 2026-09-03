@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T13:59:22.792885",
+  "generated_at": "2026-09-02T20:42:32.890236",
   "action_needed": [
     {
       "date": "2026-06-30",
@@ -29,8 +29,8 @@
     },
     {
       "name": "Best Rate Locator",
-      "status_emoji": "\ud83d\udd34",
-      "status": "Not started (plan only)",
+      "status_emoji": "\u26ab",
+      "status": "Killed 2026-07-06 \u2014 replaced by [[18 Norham Bills]] simple bills workflow",
       "path": "AI Wif Brain Projects/Best rate locator (utilities)"
     },
     {
@@ -308,9 +308,9 @@
   ],
   "open_loops": [
     {
-      "loop_id": "426d5121cae86f89",
-      "text": "to-do Feature Watch \u2014 configure or accept heuristic judge \u2014 opened 2026-06-04 \u2014 dashboard `status.json` reports Feature Watch uses the heuristic judge because no `FEATURE_WATCH_JUDGE_CMD` is configured; close after a provider-backed judge is configured or the heuristic is explicitly accepted as trustworthy enough for this radar.",
-      "opened": "2026-06-04",
+      "loop_id": "41142fa661fd7cd1",
+      "text": "to-do X extraction \u2014 set up xurl CLI (official X API) \u2014 opened 2026-09-01 \u2014 skill `xurl` is installed but CLI + OAuth app are not set up; would replace cookie-babysitting for the X pipeline entirely (no cookies, auto-refreshing OAuth). Needs Zalen: create app at developer.x.com, run `xurl auth apps add` + `xurl auth oauth2` + `xurl auth default` (secrets must never pass through agent session). Interim: extract-threads + x-cookie-refresh pipeline continues; real-profile browser covers interactive X reads on the Mac.",
+      "opened": "2026-09-01",
       "type": "todo",
       "type_label": "To-do",
       "owner": "agent",
@@ -328,9 +328,9 @@
       "attention_label": "Project work"
     },
     {
-      "loop_id": "138d63635611d088",
-      "text": "Personal Finance \u2014 bills/agreement rate-monitoring workflow \u2014 opened 2026-05-19 \u2014 ignored local intake now lives at `side-projects/personal-finance/bills`; close after Codex has a scheduled workflow that reads supported bill/agreement files, extracts current providers/rates/renewal terms with traceable evidence, researches better verified rates/promos for utilities, car/home insurance, and similar recurring costs, and reports recommendations without fabricating estimates.",
-      "opened": "2026-05-19",
+      "loop_id": "426d5121cae86f89",
+      "text": "to-do Feature Watch \u2014 configure or accept heuristic judge \u2014 opened 2026-06-04 \u2014 dashboard `status.json` reports Feature Watch uses the heuristic judge because no `FEATURE_WATCH_JUDGE_CMD` is configured; close after a provider-backed judge is configured or the heuristic is explicitly accepted as trustworthy enough for this radar.",
+      "opened": "2026-06-04",
       "type": "todo",
       "type_label": "To-do",
       "owner": "agent",
@@ -408,8 +408,8 @@
       "attention_label": "Project work"
     },
     {
-      "loop_id": "16ab6dd8f6fd8a31",
-      "text": "Credit Risk News Monitor \u2014 stale workflow check \u2014 expected daily NAS scheduled job, last run 31d ago; close after a fresh successful run is visible or the monitor is formally retired.",
+      "loop_id": "39964146f4e0adc9",
+      "text": "Credit Risk News Monitor \u2014 stale workflow check \u2014 expected daily NAS scheduled job, last run 93d ago; close after a fresh successful run is visible or the monitor is formally retired.",
       "opened": null,
       "type": "issue",
       "type_label": "Project issue",
@@ -428,8 +428,8 @@
       "attention_label": "Agent backlog"
     },
     {
-      "loop_id": "bf8fbb92a37b1da5",
-      "text": "AEMO Negative Prices Data Publish \u2014 stale workflow check \u2014 expected NAS scheduled monitor; publish only on data change, last run 52d ago; close after a fresh successful run is visible or the monitor is formally retired.",
+      "loop_id": "80db2a868bb81ec8",
+      "text": "AEMO Negative Prices Data Publish \u2014 stale workflow check \u2014 expected NAS scheduled monitor; publish only on data change, last run 114d ago; close after a fresh successful run is visible or the monitor is formally retired.",
       "opened": null,
       "type": "issue",
       "type_label": "Project issue",
@@ -466,115 +466,9 @@
       },
       "attention_status": "check_due",
       "attention_label": "Check due"
-    },
-    {
-      "loop_id": "75a58fbc48927a7d",
-      "text": "Plain `claude` (Anthropic) auth may be broken \u2014 got 401s throughout. Not investigated \u2014 focus was GLM.",
-      "opened": null,
-      "type": "issue",
-      "type_label": "Project issue",
-      "owner": "agent",
-      "agent_actionable": true,
-      "automation_policy": "patch",
-      "commit_actionable": false,
-      "patch_actionable": true,
-      "automation": {
-        "state": "not_queued",
-        "label": "not queued",
-        "class": "idle",
-        "job": null
-      },
-      "attention_status": "needs_agent_queue",
-      "attention_label": "Agent backlog"
-    },
-    {
-      "loop_id": "917b47f7ccc42ed6",
-      "text": "The wrapper script reads key from `/tmp/glm_key_line.txt` (temp file). More robust approach: read directly from `.env`.",
-      "opened": null,
-      "type": "issue",
-      "type_label": "Project issue",
-      "owner": "agent",
-      "agent_actionable": true,
-      "automation_policy": "patch",
-      "commit_actionable": false,
-      "patch_actionable": true,
-      "automation": {
-        "state": "not_queued",
-        "label": "not queued",
-        "class": "idle",
-        "job": null
-      },
-      "attention_status": "needs_agent_queue",
-      "attention_label": "Agent backlog"
-    },
-    {
-      "loop_id": "72ba0db4f60bc04b",
-      "text": "Claude Code settings.json env section removed (doesn't work). Wrapper handles all GLM config.",
-      "opened": null,
-      "type": "issue",
-      "type_label": "Project issue",
-      "owner": "agent",
-      "agent_actionable": true,
-      "automation_policy": "patch",
-      "commit_actionable": false,
-      "patch_actionable": true,
-      "automation": {
-        "state": "not_queued",
-        "label": "not queued",
-        "class": "idle",
-        "job": null
-      },
-      "attention_status": "needs_agent_queue",
-      "attention_label": "Agent backlog"
     }
   ],
-  "recent_sessions": [
-    {
-      "date": "2026-06-26",
-      "sessions": [
-        {
-          "title": "GLM 5.2 Coding Setup \u2014 Hermes & Claude Code",
-          "done": [
-            "Diagnosed GLM 5.2 failures in Hermes desktop: provider mismatch (model set to glm-5.2 but provider stayed as `nous`)",
-            "Switched zai provider base_url from `api.z.ai` to `open.bigmodel.cn` (ZhipuAI Coding Plan endpoint)",
-            "Verified Coding Plan API key works with both OpenAI and Anthropic protocol endpoints",
-            "Set up Claude Code + GLM 5.2 via Coding Plan's Anthropic protocol",
-            "Created wrapper script `~/.local/bin/claude-glm` (env var approach \u2014 OAuth bridge blocks settings.json approach)",
-            "Added NAS deny rules to Claude Code settings.json: Backups, Photos, Videos, Multimedia, Public blocked",
-            "Cleaned up corrupted settings.json (PostCompact hook error after edit)"
-          ],
-          "open_threads": [
-            "Plain `claude` (Anthropic) auth may be broken \u2014 got 401s throughout. Not investigated \u2014 focus was GLM.",
-            "The wrapper script reads key from `/tmp/glm_key_line.txt` (temp file). More robust approach: read directly from `.env`.",
-            "Claude Code settings.json env section removed (doesn't work). Wrapper handles all GLM config."
-          ]
-        },
-        {
-          "title": "Hermes Model Routing Architecture \u2014 GLM Brain + DeepSeek Worker",
-          "done": [
-            "**Flipped Hermes model architecture**: GLM 5.2 now primary brain (provider: zai), DeepSeek V4 Pro as delegation worker (provider: deepseek)",
-            "Set `model.default: glm-5.2`, `model.provider: zai`; `delegation.model: deepseek-v4-pro`, `delegation.provider: deepseek`",
-            "Reset Z.AI credential pool exhaustion (was stuck on 429)",
-            "Fixed Z.AI auth.json base_url from `api.z.ai` \u2192 `open.bigmodel.cn`",
-            "Set `delegation.reasoning_effort: ''` (default \u2014 DeepSeek doesn't need high reasoning for procedural tasks)",
-            "Updated all 3 agent-based cron jobs to use DeepSeek V4 Pro directly via per-job model overrides:",
-            "`brain-ops-lane-status-daily`, `brain-ops-lane-notify-daily`, `vault-auto-format`",
-            "Fixed Claude settings.json: removed invalid `PostCompact` hook (not a supported Claude event)",
-            "Updated `~/.zshrc`:",
-            "`claude()` renamed from `claude-glm()` \u2014 now the default when typing `claude`; fixed recursion bug (uses `command claude` internally)",
-            "`codex()` updated to route through godex proxy (`OPENAI_BASE_URL=http://localhost:5678/v1`, `-c model=glm-5.2`)",
-            "`cc()` (dashboard shortcut) calls `claude` function \u2192 inherits GLM config",
-            "`claude-glm` alias kept for backward compatibility",
-            "Syntax-checked: `zsh -n` passes clean"
-          ],
-          "open_threads": [
-            "Need `/reset` in current Hermes session for delegation config to take effect (loaded at session start)",
-            "New terminal tabs needed to pick up `.zshrc` changes (or `source ~/.zshrc`)"
-          ]
-        }
-      ]
-    }
-  ],
+  "recent_sessions": [],
   "skill_health": {
     "flagged": [],
     "status": "healthy"
@@ -865,176 +759,81 @@
   },
   "recent_extractions": [
     {
-      "date": "2026-07-02",
+      "date": "2026-09-02",
       "items": [
         {
-          "name": "Inference keeps getting carved up, and every cut makes intelligence cheaper.",
-          "url": "https://x.com/semianalysis_/status/2072417510272499858?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "Quick math: Assume your an AI lab and you got a ~1.8T param MoE model, 16 experts \u00d7 ~111B params, with 2 experts active",
-          "url": "https://x.com/0xbadb01e/status/2072193798789341286?s=12",
+          "name": "Nobody is talking seriously about AI demand",
+          "url": "https://x.com/giovannicatt3/status/2094815425972539565?s=12",
           "type": "telegram"
         }
       ]
     },
     {
-      "date": "2026-07-01",
+      "date": "2026-09-01",
       "items": [
         {
-          "name": "I just published my article on how hyperscalers like $AMZN, $MSFT, and $GOOGL will benefit in the token optimization era",
-          "url": "https://x.com/rihardjarc/status/2071579306682110380?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "One of the most underappreciated ways to play the AI semiconductor buildout may be through materials rather than chips t",
-          "url": "https://x.com/semianalysis_/status/2071640089575223591?s=12",
+          "name": "Calling all Hermes Agent operators and users: I would love to compare memory setups.",
+          "url": "https://x.com/owlcoreai/status/2094093140517167498?s=12",
           "type": "telegram"
         }
       ]
     },
     {
-      "date": "2026-06-30",
+      "date": "2026-08-31",
       "items": [
         {
-          "name": "More on Hermes Agent web search &amp; extraction: https://t.co/uX33OmZ9GJ",
-          "url": "https://x.com/nousresearch/status/2071974809609605224?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "Everyone and their mother is talking about humanoids on my timeline, so I thought I'd give it a go.",
-          "url": "https://x.com/ren_stocks/status/2071362306207109504?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "How To Make $5k+/Month With AI Girls Using Claude + Fanvue MCP",
-          "url": "https://x.com/insomnia_vip/status/2069013720945103063?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "how to build agentic marketing workflows that don't produce slop:",
-          "url": "https://x.com/exm7777/status/2071258393130811854?s=12",
+          "name": "here's every AI tool i use...",
+          "url": "https://x.com/exm7777/status/2094425738778964465?s=12",
           "type": "telegram"
         }
       ]
     },
     {
-      "date": "2026-06-28",
+      "date": "2026-08-30",
       "items": [
         {
-          "name": "The strongest models are gated and access is granted only to a select few.",
-          "url": "https://x.com/nousresearch/status/2070610321278988385?s=12",
+          "name": "tonbi",
+          "url": "https://x.com/tonbistudio/status/2093764090619638228?s=12",
           "type": "telegram"
         },
         {
-          "name": "How To Use Loop Engineering To Build A Self-Improving Quant Trading System",
-          "url": "https://x.com/rohonchain/status/2069056530960490835?s=12",
+          "name": "TSMC fumbles Copackaged optics for the Nth time like some fucking donkeys and now the whole industry is limping towards",
+          "url": "https://x.com/bubbleboi/status/2063735227382677573?s=12",
           "type": "telegram"
         }
       ]
     },
     {
-      "date": "2026-06-27",
+      "date": "2026-08-28",
       "items": [
         {
-          "name": "@bradmillscan @73j4X Honcho adds an AI-native long-term memory layer on top of Hermes\u2019 built-in files. It runs a backgro",
-          "url": "https://x.com/grok/status/2070705734954684899?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "What Makes a Robotics Business Economically Viable",
-          "url": "https://x.com/jacklouisp/status/2070176870549606860?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "I like Nic and generally agree with a lot of his work, but I think he's using the wrong framework here. This isn't a CCC",
-          "url": "https://x.com/bkclaims/status/2070228774264697174?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "Hermes Agent's Kanban got a bit better today!",
-          "url": "https://x.com/teknium/status/2070559754414637390?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "stop telling Claude Code/Codex \"read this file\".",
-          "url": "https://x.com/voxyz_ai/status/2070495084374581535?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "This \"Taste\" Skill is cracked.",
-          "url": "https://x.com/milesdeutscher/status/2070367709448355841?s=12",
-          "type": "telegram"
-        },
-        {
-          "name": "may be useful to recognize you're in the most extreme gamma squeeze in history - while you still have a chance to recogn",
-          "url": "https://x.com/hussmanjp/status/2054702321112686772",
-          "type": "telegram"
-        },
-        {
-          "name": "Andrej Karpathy: \"90% of your AI coding bill is paying for context you didn't need to send\"",
-          "url": "https://x.com/deronin_/status/2054255152555545079",
-          "type": "telegram"
-        },
-        {
-          "name": "~93% of the cap table is locked",
-          "url": "https://x.com/benitoz/status/2052057314530922739",
-          "type": "telegram"
-        },
-        {
-          "name": "This pricing is not arbitrary. As you move along the Pareto frontier to higher interactivities (faster tokens for your s",
-          "url": "https://x.com/semianalysis_/status/2054713648489132310",
+          "name": "fin",
+          "url": "https://x.com/fi56622380/status/2093040177711329673?s=12",
           "type": "telegram"
         }
       ]
     },
     {
-      "date": "2026-06-26",
+      "date": "2026-08-27",
       "items": [
         {
-          "name": "\"Memory is cyclical, everyone knows that, and the recent run up in memory names is an obvious bubble.\" That's the easy,",
-          "url": "https://x.com/alexcorrino/status/2053610835793400216",
+          "name": "Stale or irrelevant config has come up for me at least 4 times with my Hermes install",
+          "url": "https://x.com/trevin/status/2092674783523885111?s=12",
           "type": "telegram"
         },
         {
-          "name": "no-mistakes is open sourced at https://t.co/7QwvaWfT8b the latest v1.16.0 release introduced the `no-mistakes stats\" com",
-          "url": "https://x.com/kunchenguid/status/2053598738619511124",
-          "type": "telegram"
-        },
-        {
-          "name": "I've been testing this self-building Hermes agent for 37 days now. Here are the 10 best builds it has produced so far (o",
-          "url": "https://x.com/gkisokay/status/2053613051182772461",
-          "type": "telegram"
-        },
-        {
-          "name": "ChatGPT Images 2.0 is insanely impressive. People are unlocking new creative ways to use it. 10 wild examples:",
-          "url": "https://x.com/minchoi/status/2053496423363097066",
-          "type": "telegram"
-        },
-        {
-          "name": "USE THE PROMPT BELOW IN CODEX/CC TO PROTECT YOUR SYSTEM AND CODEBASE FROM NPM SUPPLY CHAIN ATTACKS (LIKE TANSTACK TODAY)",
-          "url": "https://x.com/kingbootoshi/status/2054025614798295530",
-          "type": "telegram"
-        },
-        {
-          "name": "Retatrutide is positioned to be the best-selling drug ever. In trials, it led to 24% weight loss over 48 weeks and rever",
-          "url": "https://x.com/realpeptides/status/2053911796751429663",
-          "type": "telegram"
-        },
-        {
-          "name": "after a couple nightmare sessions using /goal (the Codex agent) -- have some high level heuristics 1. \"It's done! (but u",
-          "url": "https://x.com/goodalexander/status/2054205162143588732",
+          "name": "i finally cracked frontend design with AI... without using any skill",
+          "url": "https://x.com/exm7777/status/2092250905655812121?s=12",
           "type": "telegram"
         }
       ]
     },
     {
-      "date": "2026-06-09",
+      "date": "2026-08-26",
       "items": [
         {
-          "name": "robostrategy is up 50% since this tweet 4 days ago",
-          "url": "https://x.com/redhairshanks86/status/2064273149420523677?s=12",
+          "name": "J.B.",
+          "url": "https://x.com/vibemarketer_/status/2092243372929151135?s=12",
           "type": "telegram"
         }
       ]
@@ -1449,7 +1248,7 @@
       {
         "name": "Ai Wif Brain Canonical 2026 05 18",
         "path": "/Users/zalen/Documents/Zalen/AI Wif Brain Projects/ai-wif-brain-ops/reports/mirror-scans/ai-wif-brain-canonical-2026-05-18.json",
-        "generated_at": "2026-05-18T20:01:04.391998",
+        "generated_at": "2026-08-25T19:30:16.395787",
         "allowed_count": 260,
         "excluded_count": 4,
         "warning_count": 60,
@@ -1505,8 +1304,8 @@
             "reason": "excluded_by_content_pattern:sk-[A-Za-z0-9_\\-]{20,}"
           }
         ],
-        "reviewed_for_first_push": true,
-        "ready_for_first_push": true
+        "reviewed_for_first_push": false,
+        "ready_for_first_push": false
       },
       {
         "name": "Ai Wif Brain",
@@ -1702,6 +1501,49 @@
         "routing_reason": "Matched setup/workflow/security signals with enough concrete or trusted context."
       },
       {
+        "date": "2026-07-05",
+        "text": "@EXM7777 - The Fable Loop Library 25 Workflows on Autopilot [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "The Fable Loop Library: 25 Workflows on Autopilot",
+        "source": "threads",
+        "source_path": "Claude Code/@EXM7777 - The Fable Loop Library 25 Workflows on Autopilot.md",
+        "action": "security",
+        "action_label": "SECURITY",
+        "category": "agent workflow",
+        "why_it_matters": "A bulk third-party loop library imported into an agent harness is a repo-trust and prompt-injection surface.",
+        "recommended_action": "Do not bulk-import; review any individual loop line-by-line as untrusted input before touching production configs.",
+        "confidence": "medium",
+        "effort": "low",
+        "risk": "medium",
+        "llm_judged": true,
+        "providers": [
+          "anthropic",
+          "openai",
+          "google"
+        ],
+        "routing_reason": "Matched setup/workflow/security signals with enough concrete or trusted context."
+      },
+      {
+        "date": "2026-06-21",
+        "text": "@mvanhorn - WTF Is a Loop Part 2 The 15 Loops People Are Actually Running (and the Commands to\u2026 [agents, automation, claude, claude-code, prompt-engineering]",
+        "snippet": "WTF Is a Loop? Part 2: The 15 Loops People Are Actually Running (and the Commands to Steal Them)",
+        "source": "threads",
+        "source_path": "Claude Code/@mvanhorn - WTF Is a Loop Part 2 The 15 Loops People Are Actually Running (and the Commands to\u2026.md",
+        "action": "security",
+        "action_label": "SECURITY",
+        "category": "agent workflow",
+        "why_it_matters": "Copy-paste loop commands are unvetted third-party instructions that risk prompt-injection when pasted into agent configs.",
+        "recommended_action": "Treat as reference patterns only; never paste commands verbatim into production harness configs.",
+        "confidence": "medium",
+        "effort": "medium",
+        "risk": "medium",
+        "llm_judged": true,
+        "providers": [
+          "anthropic",
+          "openai"
+        ],
+        "routing_reason": "Matched setup/workflow/security signals with enough concrete or trusted context."
+      },
+      {
         "date": "2026-06-18",
         "text": "@PrajwalTomar_ - Vibe coders are getting sued [agents, claude-code]",
         "snippet": "People are launching apps with real users but skipping the boring stuff that can actually kill the product.",
@@ -1785,18 +1627,907 @@
         "routing_reason": "Matched setup/workflow/security signals with enough concrete or trusted context."
       }
     ],
-    "total_findings": 6,
+    "total_findings": 8,
     "routing": {
-      "scanned": 197,
-      "setup": 73,
-      "investment": 77,
-      "noise": 47
+      "scanned": 315,
+      "setup": 123,
+      "investment": 125,
+      "noise": 67
     },
     "judge": "llm",
     "since": "2026-04-14"
   },
   "investment_radar": {
     "leads": [
+      {
+        "date": "2026-09-02",
+        "text": "@giovannicatt3 - Nobody is talking seriously about AI demand [datacenter, gpu, investing, llm, openai]",
+        "snippet": "Nobody is talking seriously about AI demand",
+        "source": "threads",
+        "source_path": "Data Centres/@giovannicatt3 - Nobody is talking seriously about AI demand.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "Amazon",
+          "OpenAI",
+          "Anthropic"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-30",
+        "text": "@bubbleboi - TSMC fumbles Copackaged optics for the Nth time like some fucking donkeys and now the whole\u2026 [datacenter, gpu, infrastructure]",
+        "snippet": "TSMC fumbles Copackaged optics for the Nth time like some fucking donkeys and now the whole industry is limping towards\u2026",
+        "source": "threads",
+        "source_path": "Data Centres/@bubbleboi - TSMC fumbles Copackaged optics for the Nth time like some fucking donkeys and now the whole\u2026.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "bear / risk",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "TSMC",
+          "Intel"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bear-case or risk signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-30",
+        "text": "@tonbistudio - tonbi [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "Hermes Agent Masterclass: 10. Security",
+        "source": "threads",
+        "source_path": "Claude Code/@tonbistudio - tonbi.md",
+        "route": "investment",
+        "themes": [
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-30",
+        "text": "@tonbistudio - Hermes Agent Masterclass 10. Security [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "Hermes Agent Masterclass: 10. Security",
+        "source": "threads",
+        "source_path": "Claude Code/@tonbistudio - Hermes Agent Masterclass 10. Security.md",
+        "route": "investment",
+        "themes": [
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-28",
+        "text": "@fi56622380 - AI Semiconductor Endgame 2026 (III) [agents, automation, claude-code, llm, openai]",
+        "snippet": "AI Semiconductor Endgame 2026 (III)",
+        "source": "threads",
+        "source_path": "Claude Code/@fi56622380 - AI Semiconductor Endgame 2026 (III).md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "OpenAI"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-28",
+        "text": "@fi56622380 - fin [agents, automation, claude-code, llm, openai]",
+        "snippet": "AI Semiconductor Endgame 2026 (III)",
+        "source": "threads",
+        "source_path": "Claude Code/@fi56622380 - fin.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "OpenAI"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-14",
+        "text": "@VibeMarketer_ - How to Build a Full Outbound GTM Agent With Hermes [agents, automation, claude-code, llm]",
+        "snippet": "How to Build a Full Outbound GTM Agent With Hermes",
+        "source": "threads",
+        "source_path": "Claude Code/@VibeMarketer_ - How to Build a Full Outbound GTM Agent With Hermes.md",
+        "route": "investment",
+        "themes": [
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-14",
+        "text": "@VibeMarketer_ - J.B 2 [agents, automation, claude-code, llm]",
+        "snippet": "How to Build a Full Outbound GTM Agent With Hermes",
+        "source": "threads",
+        "source_path": "Claude Code/@VibeMarketer_ - J.B 2.md",
+        "route": "investment",
+        "themes": [
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-13",
+        "text": "@aakashgupta - Airlines don't know who you are and they don't care [ai]",
+        "snippet": "Airlines don't know who you are and they don't care. The \"clear your cookies\" hack is one of the most persistent myths\u2026",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@aakashgupta - Airlines don't know who you are and they don't care.md",
+        "route": "investment",
+        "themes": [
+          "Macro"
+        ],
+        "polarity": "bull / upside",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Bull-case or upside signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-10",
+        "text": "@ctindale - The paper\u2019s significance is demonstrating how autonomous AI could scale cheaply [agents, automation, claude-code, llm]",
+        "snippet": "The paper\u2019s  significance is demonstrating how autonomous AI could scale cheaply. Instead of running a frontier LLM for\u2026",
+        "source": "threads",
+        "source_path": "Claude Code/@ctindale - The paper\u2019s significance is demonstrating how autonomous AI could scale cheaply.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-06",
+        "text": "@pequityresearch - Morgan Stanley The Paths to 25-50% GenAI ROIC [datacenter, gpu, infrastructure, llm]",
+        "snippet": "GenAI ROIC Frameworks & Unit Economics",
+        "source": "threads",
+        "source_path": "Data Centres/@pequityresearch - Morgan Stanley The Paths to 25-50% GenAI ROIC.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "bull / upside",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "NVDA",
+          "AMD",
+          "GOOGL",
+          "AVGO",
+          "AMZN",
+          "META",
+          "MSFT",
+          "NVIDIA"
+        ],
+        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bull-case or upside signal. Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-04",
+        "text": "@jukan05 - [TF Overseas Tech] Why the Rise of Open Source and the Collapse of the Closed Model\u2026 [datacenter, gpu, infrastructure, llm]",
+        "snippet": "[TF Overseas Tech] Why the Rise of Open Source and the Collapse of the Closed Model Monopoly Is Good for Cloud",
+        "source": "threads",
+        "source_path": "Data Centres/@jukan05 - [TF Overseas Tech] Why the Rise of Open Source and the Collapse of the Closed Model\u2026.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Commodities / energy"
+        ],
+        "polarity": "bull / upside",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-08-02",
+        "text": "@porterstansb - What Everyone Missed In Leo\u2019s Blow-Up [agents, claude-code, datacenter, gpu, llm, openai]",
+        "snippet": "What Everyone Missed In Leo\u2019s Blow-Up",
+        "source": "threads",
+        "source_path": "Claude Code/@porterstansb - What Everyone Missed In Leo\u2019s Blow-Up.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "mixed",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "BE",
+          "SNDK",
+          "MU",
+          "CRWV",
+          "NBIS",
+          "ADBE",
+          "WDAY",
+          "INTU"
+        ],
+        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-29",
+        "text": "@bubbleboi - This has been an absolutely brutal month for the Kospi. Here\u2019s how I read it as an\u2026 [ai, llm]",
+        "snippet": "This has been an absolutely brutal month for the Kospi. Here\u2019s how I read it as an engineer/speculator:",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@bubbleboi - This has been an absolutely brutal month for the Kospi. Here\u2019s how I read it as an\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Supply chain",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "bull / upside",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "Micron"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-27",
+        "text": "@ctindale - The Metabolism of Artificial Intelligence [agents, claude-code, datacenter, gpu, llm]",
+        "snippet": "The Metabolism of Artificial Intelligence",
+        "source": "threads",
+        "source_path": "Claude Code/@ctindale - The Metabolism of Artificial Intelligence.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "NVDA",
+          "AMD"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-27",
+        "text": "@ctindale - Craig Tindale [agents, claude-code, datacenter, gpu, llm]",
+        "snippet": "The Metabolism of Artificial Intelligence",
+        "source": "threads",
+        "source_path": "Claude Code/@ctindale - Craig Tindale.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "NVDA",
+          "AMD"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-23",
+        "text": "@EXM7777 - How to master graph engineering (Full Course) [agents, automation, claude, claude-code, prompt-engineering]",
+        "snippet": "How to master graph engineering (Full Course)",
+        "source": "threads",
+        "source_path": "Claude Code/@EXM7777 - How to master graph engineering (Full Course).md",
+        "route": "investment",
+        "themes": [
+          "Market structure"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-23",
+        "text": "@EXM7777 - Machina 3 [agents, automation, claude, claude-code, prompt-engineering]",
+        "snippet": "How to master graph engineering (Full Course)",
+        "source": "threads",
+        "source_path": "Claude Code/@EXM7777 - Machina 3.md",
+        "route": "investment",
+        "themes": [
+          "Market structure"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-13",
+        "text": "@pequityresearch - Morgan Stanley Bearings [investing, openai]",
+        "snippet": "The Big Picture: Bearings as a Core Robotics Play",
+        "source": "threads",
+        "source_path": "Investing/@pequityresearch - Morgan Stanley Bearings.md",
+        "route": "investment",
+        "themes": [
+          "Investing"
+        ],
+        "polarity": "mixed",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "OpenAI"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-11",
+        "text": "@chenzeling4 - 744B parameters. On a laptop. With 25GB RAM [datacenter, gpu, infrastructure]",
+        "snippet": "Colibri runs GLM-5.2 (744B MoE) in pure C with zero dependencies. The trick: only ~40B params activate per token, so it\u2026",
+        "source": "threads",
+        "source_path": "Data Centres/@chenzeling4 - 744B parameters. On a laptop. With 25GB RAM.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC"
+        ],
+        "polarity": "bull / upside",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard",
+        "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-06",
+        "text": "@chrisbarber - I interviewed [datacenter, gpu, infrastructure]",
+        "snippet": "about his ratings of AI supply chain bottlenecks.",
+        "source": "threads",
+        "source_path": "Data Centres/@chrisbarber - I interviewed.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "Alphabet",
+          "TSMC",
+          "ASML",
+          "Intel"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-06",
+        "text": "@willdepue - A Stargate for Data [agents, automation, claude-code, gpu, llm, openai]",
+        "snippet": "A Stargate for Data",
+        "source": "threads",
+        "source_path": "Claude Code/@willdepue - A Stargate for Data.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "OpenAI",
+          "Anthropic"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-06",
+        "text": "@SHL0MS - i'm open sourcing UNBROKER a tool that finds where your personal info is exposed by data brokers\u2026 [agents, automation, claude-code, llm]",
+        "snippet": "i'm open sourcing UNBROKER: a tool that finds where your personal info is exposed by data brokers and files the\u2026",
+        "source": "threads",
+        "source_path": "Claude Code/@SHL0MS - i'm open sourcing UNBROKER a tool that finds where your personal info is exposed by data brokers\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-05",
+        "text": "@marfinxx - I REPLACED A $340 MONTH AI STACK WITH AN OBSIDIAN + NOTEBOOKLM + HERMES AGENT, LOCAL\u2026 [agents, automation, claude, claude-code, prompt-engineering]",
+        "snippet": "I REPLACED A $340/MONTH AI STACK WITH AN OBSIDIAN + NOTEBOOKLM + HERMES AGENT, LOCAL SECOND BRAIN",
+        "source": "threads",
+        "source_path": "Claude Code/@marfinxx - I REPLACED A $340 MONTH AI STACK WITH AN OBSIDIAN + NOTEBOOKLM + HERMES AGENT, LOCAL\u2026.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "Google",
+          "OpenAI"
+        ],
+        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-05",
+        "text": "@marfinxx - marfin [agents, automation, claude, claude-code, prompt-engineering]",
+        "snippet": "I REPLACED A $340/MONTH AI STACK WITH AN OBSIDIAN + NOTEBOOKLM + HERMES AGENT, LOCAL SECOND BRAIN",
+        "source": "threads",
+        "source_path": "Claude Code/@marfinxx - marfin.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "Google",
+          "OpenAI"
+        ],
+        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-05",
+        "text": "@EXM7777 - The Fable Loop Library 25 Workflows on Autopilot [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "The Fable Loop Library: 25 Workflows on Autopilot",
+        "source": "threads",
+        "source_path": "Claude Code/@EXM7777 - The Fable Loop Library 25 Workflows on Autopilot.md",
+        "route": "investment",
+        "themes": [
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "bull / upside",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "Meta",
+          "Google"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Bull-case or upside signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-05",
+        "text": "@EXM7777 - Machina 2 [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "The Fable Loop Library: 25 Workflows on Autopilot",
+        "source": "threads",
+        "source_path": "Claude Code/@EXM7777 - Machina 2.md",
+        "route": "investment",
+        "themes": [
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "bull / upside",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "Meta",
+          "Google"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Bull-case or upside signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-04",
+        "text": "@galactiator - Understanding Venice's $DIEM Economics [thread-extraction]",
+        "snippet": "Tokenized inference looks like a cost on first glance. The actual economics tell a different story",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@galactiator - Understanding Venice's $DIEM Economics.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "DIEM",
+          "oil"
+        ],
+        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-04",
+        "text": "@ParadisLabs - Need help building some conviction in your AI names during this market downturn [agents, claude-code, datacenter, gpu, llm, openai]",
+        "snippet": "Need help building some conviction in your AI names during this market downturn?",
+        "source": "threads",
+        "source_path": "Claude Code/@ParadisLabs - Need help building some conviction in your AI names during this market downturn.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "AVGO",
+          "MSFT",
+          "GOOGL",
+          "AMZN",
+          "META",
+          "ORCL",
+          "MU",
+          "NVDA"
+        ],
+        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-04",
+        "text": "@YanLiberman - VVV Crypto AI's Most Underappreciated Revenue Story [ai]",
+        "snippet": "Venice is a privacy-first AI inference platform that lets users access frontier and open-source models without\u2026",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@YanLiberman - VVV Crypto AI's Most Underappreciated Revenue Story.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "bull / upside",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "Anthropic"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-04",
+        "text": "@magicsilicon - Deep Moats and Platform Shifts in Computing - Part 2 [thread-extraction]",
+        "snippet": "NVIDIA, CUDA and the New Challengers",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@magicsilicon - Deep Moats and Platform Shifts in Computing - Part 2.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "Google",
+          "Amazon",
+          "Microsoft",
+          "OpenAI",
+          "AMD",
+          "Intel"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-04",
+        "text": "@maverickecom - How to Automate TikTok Slideshow Content Creation with Claude Opus 4.7 (Step-by-Step GUIDE) [thread-extraction]",
+        "snippet": "Most e-commerce brands are running TikTok the wrong way.",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@maverickecom - How to Automate TikTok Slideshow Content Creation with Claude Opus 4.7 (Step-by-Step GUIDE).md",
+        "route": "investment",
+        "themes": [
+          "Market structure"
+        ],
+        "polarity": "mixed",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "Meta",
+          "Google",
+          "Amazon"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-03",
+        "text": "@bubbleboi - 7 Predictions for the Next 3 Years [datacenter, gpu, infrastructure, investing, llm]",
+        "snippet": "7 Predictions for the Next 3 Years",
+        "source": "threads",
+        "source_path": "Data Centres/@bubbleboi - 7 Predictions for the Next 3 Years.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Commodities / energy",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "Google",
+          "TSMC",
+          "Broadcom",
+          "Micron",
+          "Intel",
+          "Marvell"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-03",
+        "text": "@(2) bubble boi - 7 Predictions for the Next 3 Years - Intel becomes a trillion dollar company as it takes away half of TSMC\u2019s market cap as well as cutting out Broadcom Marvell &amp; MediaTek as mi [datacenter, gpu, infrastructure, investing, llm]",
+        "snippet": "7 Predictions for the Next 3 Years",
+        "source": "threads",
+        "source_path": "Data Centres/@(2) bubble boi - 7 Predictions for the Next 3 Years - Intel becomes a trillion dollar company as it takes away half of TSMC\u2019s market cap as well as cutting out Broadcom Marvell &amp; MediaTek as mi.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Commodities / energy",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "Google",
+          "TSMC",
+          "Broadcom",
+          "Micron",
+          "Intel",
+          "Marvell"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-02",
+        "text": "@0xBADB01E - Quick math [automation, datacenter, gpu, infrastructure, llm]",
+        "snippet": "Assume your an AI lab and you got a ~1.8T param MoE model, 16 experts \u00d7 ~111B params, with 2 experts active per token =\u2026",
+        "source": "threads",
+        "source_path": "Data Centres/@0xBADB01E - Quick math.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "Anthropic"
+        ],
+        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
       {
         "date": "2026-07-02",
         "text": "@(2) Big Boss - Quick math Assume your an AI lab and you got a ~1.8T param MoE model, 16 experts \u00d7 ~111B params, with 2 experts active per token = ~280B active params. If you serve at FP8 (1 byte par [automation, datacenter, gpu, infrastructure, llm]",
@@ -1843,6 +2574,66 @@
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
       {
+        "date": "2026-07-02",
+        "text": "@EXM7777 - Machina [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "How to Build a Frontier Agent OS:",
+        "source": "threads",
+        "source_path": "Claude Code/@EXM7777 - Machina.md",
+        "route": "investment",
+        "themes": [
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-02",
+        "text": "@EXM7777 - How to Build a Frontier Agent OS [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "How to Build a Frontier Agent OS:",
+        "source": "threads",
+        "source_path": "Claude Code/@EXM7777 - How to Build a Frontier Agent OS.md",
+        "route": "investment",
+        "themes": [
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-02",
+        "text": "@(2) Machina - How to Build a Frontier Agent OS [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "How to Build a Frontier Agent OS:",
+        "source": "threads",
+        "source_path": "Claude Code/@(2) Machina - How to Build a Frontier Agent OS.md",
+        "route": "investment",
+        "themes": [
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
         "date": "2026-07-01",
         "text": "@SemiAnalysis_ - One of the most underappreciated ways to play the AI semiconductor buildout may be through materials rather than chips themselves [datacenter, gpu, infrastructure]",
         "snippet": "As the industry races to produce more advanced semiconductors, demand isn\u2019t just rising for GPUs and wafer fab\u2026",
@@ -1869,6 +2660,30 @@
         "snippet": "I just published my article on how hyperscalers like",
         "source": "threads",
         "source_path": "Data Centres/@(2) Rihard Jarc - I just published my article on how hyperscalers like $AMZN, $MSFT, and $GOOGL will benefit in the token optimization era and why I believe the companies will re-rate much higher. ht.md",
+        "route": "investment",
+        "themes": [
+          "Macro"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "AMZN",
+          "MSFT",
+          "GOOGL"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-07-01",
+        "text": "@RihardJarc - I just published my article on how hyperscalers like [datacenter, infrastructure]",
+        "snippet": "I just published my article on how hyperscalers like",
+        "source": "threads",
+        "source_path": "Data Centres/@RihardJarc - I just published my article on how hyperscalers like.md",
         "route": "investment",
         "themes": [
           "Macro"
@@ -1921,6 +2736,28 @@
       },
       {
         "date": "2026-06-30",
+        "text": "@insomnia_vip - How To Make $5k+ Month With AI Girls Using Claude + Fanvue MCP [automation, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "How To Make $5k+/Month With AI Girls Using Claude + Fanvue MCP",
+        "source": "threads",
+        "source_path": "Claude Code/@insomnia_vip - How To Make $5k+ Month With AI Girls Using Claude + Fanvue MCP.md",
+        "route": "investment",
+        "themes": [
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-30",
         "text": "@(3) Insomnia - How To Make $5k+ Month With AI Girls Using Claude + Fanvue MCP [automation, claude, claude-code, mcp, prompt-engineering]",
         "snippet": "How To Make $5k+/Month With AI Girls Using Claude + Fanvue MCP",
         "source": "threads",
@@ -1942,11 +2779,79 @@
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
       {
+        "date": "2026-06-30",
+        "text": "@insomnia_vip - Insomnia [automation, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "How To Make $5k+/Month With AI Girls Using Claude + Fanvue MCP",
+        "source": "threads",
+        "source_path": "Claude Code/@insomnia_vip - Insomnia.md",
+        "route": "investment",
+        "themes": [
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-27",
+        "text": "@JacklouisP - Jack [automation, investing, llm]",
+        "snippet": "What Makes a Robotics Business Economically Viable",
+        "source": "threads",
+        "source_path": "Investing/@JacklouisP - Jack.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
         "date": "2026-06-27",
         "text": "@(3) Jack \ud83e\udd16 - What Makes a Robotics Business Economically Viable [automation, investing, llm]",
         "snippet": "What Makes a Robotics Business Economically Viable",
         "source": "threads",
         "source_path": "Investing/@(3) Jack \ud83e\udd16 - What Makes a Robotics Business Economically Viable.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-27",
+        "text": "@JacklouisP - What Makes a Robotics Business Economically Viable [automation, investing, llm]",
+        "snippet": "What Makes a Robotics Business Economically Viable",
+        "source": "threads",
+        "source_path": "Investing/@JacklouisP - What Makes a Robotics Business Economically Viable.md",
         "route": "investment",
         "themes": [
           "AI/DC",
@@ -1981,6 +2886,26 @@
         "entities": [
           "WOLF"
         ],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-27",
+        "text": "@Bkclaims - I like Nic and generally agree with a lot of his work, but I think he's using the wrong\u2026 [crypto, investing]",
+        "snippet": "I like Nic and generally agree with a lot of his work, but I think he's using the wrong framework here. This isn't a\u2026",
+        "source": "threads",
+        "source_path": "Investing/@Bkclaims - I like Nic and generally agree with a lot of his work, but I think he's using the wrong\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Macro"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
         "destination": "Personal investing",
         "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
         "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
@@ -2070,6 +2995,32 @@
       },
       {
         "date": "2026-06-26",
+        "text": "@AlexCorrino - Memory is cyclical, everyone knows that, and the recent run up in memory names is an\u2026 [agents, claude-code, gpu, investing]",
+        "snippet": "\"Memory is cyclical, everyone knows that, and the recent run up in memory names is an obvious bubble.\"",
+        "source": "threads",
+        "source_path": "Claude Code/@AlexCorrino - Memory is cyclical, everyone knows that, and the recent run up in memory names is an\u2026.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVDA",
+          "Micron"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-26",
         "text": "@(3) Alex Corrino - Memory is cyclical, everyone knows that, and the recent run up in memory names is an obvious bubble. That's the easy, re [agents, claude-code, gpu, investing]",
         "snippet": "\"Memory is cyclical, everyone knows that, and the recent run up in memory names is an obvious bubble.\"",
         "source": "threads",
@@ -2117,10 +3068,53 @@
       },
       {
         "date": "2026-06-26",
+        "text": "@bubbleboi - What we are seeing is the equivalent of your house being on fire and the fire fighters\u2026 [ai]",
+        "snippet": "What we are seeing is the equivalent of your house being on fire and the fire fighters asking for a bribe to put it\u2026",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@bubbleboi - What we are seeing is the equivalent of your house being on fire and the fire fighters\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Macro",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-26",
         "text": "@(3) goodalexander - after a couple nightmare sessions using goal (the Codex agent) -- have some high level heuristics 1. It's done! (but uh [agents, automation, claude-code, openai, prompt-engineering]",
         "snippet": "after a couple nightmare sessions using /goal (the Codex agent) -- have some high level heuristics",
         "source": "threads",
         "source_path": "Claude Code/@(3) goodalexander - after a couple nightmare sessions using goal (the Codex agent) -- have some high level heuristics 1. It's done! (but uh.md",
+        "route": "investment",
+        "themes": [
+          "Macro"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "OpenAI"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-26",
+        "text": "@goodalexander - after a couple nightmare sessions using goal (the Codex agent) -- have some high level\u2026 [agents, automation, claude-code, openai, prompt-engineering]",
+        "snippet": "after a couple nightmare sessions using /goal (the Codex agent) -- have some high level heuristics",
+        "source": "threads",
+        "source_path": "Claude Code/@goodalexander - after a couple nightmare sessions using goal (the Codex agent) -- have some high level\u2026.md",
         "route": "investment",
         "themes": [
           "Macro"
@@ -2160,10 +3154,54 @@
       },
       {
         "date": "2026-06-25",
+        "text": "@horizon_trade_x - How Quants Keep a Trading Loop From Overfitting (Full Framework) [investing, trading]",
+        "snippet": "How Quants Keep a Trading Loop From Overfitting (Full Framework)",
+        "source": "threads",
+        "source_path": "Investing/@horizon_trade_x - How Quants Keep a Trading Loop From Overfitting (Full Framework).md",
+        "route": "investment",
+        "themes": [
+          "Macro",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-25",
         "text": "@(3) Horizon - How Quants Keep a Trading Loop From Overfitting (Full Framework) [investing, trading]",
         "snippet": "@horizon_trade_x",
         "source": "threads",
         "source_path": "Investing/@(3) Horizon - How Quants Keep a Trading Loop From Overfitting (Full Framework).md",
+        "route": "investment",
+        "themes": [
+          "Macro",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-25",
+        "text": "@horizon_trade_x - Horizon [investing, trading]",
+        "snippet": "@horizon_trade_x",
+        "source": "threads",
+        "source_path": "Investing/@horizon_trade_x - Horizon.md",
         "route": "investment",
         "themes": [
           "Macro",
@@ -2223,6 +3261,51 @@
       },
       {
         "date": "2026-06-22",
+        "text": "@todd_hannigan - Memory is going to need more hafnium supply, and will need to compete with higher demand\u2026 [investing]",
+        "snippet": "Memory is going to need more hafnium supply, and will need to compete with higher demand from many sectors",
+        "source": "threads",
+        "source_path": "Investing/@todd_hannigan - Memory is going to need more hafnium supply, and will need to compete with higher demand\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Supply chain",
+          "Geopolitics"
+        ],
+        "polarity": "bull / upside",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-22",
+        "text": "@tugot17 - Quite a bad take [datacenter, gpu, infrastructure, llm]",
+        "snippet": "Quite a bad take",
+        "source": "threads",
+        "source_path": "Data Centres/@tugot17 - Quite a bad take.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Company / security"
+        ],
+        "polarity": "bull / upside",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "Anthropic"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-22",
         "text": "@(3) Piotr Mazurek - Quite a bad take \ud83d\ude00 1. Frontier US models are expensive not because they are pricey to serve but because they serve at a [datacenter, gpu, infrastructure, llm]",
         "snippet": "Quite a bad take",
         "source": "threads",
@@ -2242,6 +3325,34 @@
         "destination": "AI & DC Dashboard + Personal investing",
         "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
         "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-20",
+        "text": "@semidoped - New episode Advanced packaging for AI chips, from wire bonds to TSMC CoWOS and Intel\u2026 [ai]",
+        "snippet": "New episode: Advanced packaging for AI chips, from wire bonds to TSMC CoWOS and Intel EMIB.",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@semidoped - New episode Advanced packaging for AI chips, from wire bonds to TSMC CoWOS and Intel\u2026.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "SpaceX",
+          "Google",
+          "TSMC",
+          "Intel"
+        ],
+        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
         "confidence": "high",
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
@@ -2292,10 +3403,52 @@
       },
       {
         "date": "2026-06-20",
+        "text": "@0xRicker - Ricker [agents, claude-code, llm, prompt-engineering]",
+        "snippet": "The Self-Verifying Loop: 300 agents, 4,000 steps, 5 live data feeds on autopilot with Kimi K2.6",
+        "source": "threads",
+        "source_path": "Claude Code/@0xRicker - Ricker.md",
+        "route": "investment",
+        "themes": [
+          "Macro",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-20",
         "text": "@(3) 0xRicker - The Self-Verifying Loop 300 agents, 4,000 steps, 5 live data feeds on autopilot with Kimi K2.6 [agents, claude-code, llm, prompt-engineering]",
         "snippet": "The Self-Verifying Loop: 300 agents, 4,000 steps, 5 live data feeds on autopilot with Kimi K2.6",
         "source": "threads",
         "source_path": "Claude Code/@(3) 0xRicker - The Self-Verifying Loop 300 agents, 4,000 steps, 5 live data feeds on autopilot with Kimi K2.6.md",
+        "route": "investment",
+        "themes": [
+          "Macro",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-20",
+        "text": "@0xRicker - The Self-Verifying Loop 300 agents, 4,000 steps, 5 live data feeds on autopilot with\u2026 [agents, claude-code, llm, prompt-engineering]",
+        "snippet": "The Self-Verifying Loop: 300 agents, 4,000 steps, 5 live data feeds on autopilot with Kimi K2.6",
+        "source": "threads",
+        "source_path": "Claude Code/@0xRicker - The Self-Verifying Loop 300 agents, 4,000 steps, 5 live data feeds on autopilot with\u2026.md",
         "route": "investment",
         "themes": [
           "Macro",
@@ -2368,33 +3521,6 @@
         ],
         "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
         "why_it_matters": "Bear-case or risk signal. Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
-        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
-        "confidence": "high",
-        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
-      },
-      {
-        "date": "2026-06-18",
-        "text": "@galactiator - Understanding Venice's $DIEM Economics [thread-extraction]",
-        "snippet": "Tokenized inference looks like a cost on first glance. The actual economics tell a different story",
-        "source": "threads",
-        "source_path": "Artificial Intelligence/@galactiator - Understanding Venice's $DIEM Economics.md",
-        "route": "investment",
-        "themes": [
-          "AI/DC",
-          "Macro",
-          "Commodities / energy",
-          "Market structure",
-          "Company / security"
-        ],
-        "polarity": "mixed",
-        "action": "miner",
-        "action_label": "MINER",
-        "entities": [
-          "DIEM",
-          "oil"
-        ],
-        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
-        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
         "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
         "confidence": "high",
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
@@ -2800,31 +3926,6 @@
       },
       {
         "date": "2026-06-18",
-        "text": "@YanLiberman - VVV Crypto AI's Most Underappreciated Revenue Story [ai]",
-        "snippet": "Venice is a privacy-first AI inference platform that lets users access frontier and open-source models without\u2026",
-        "source": "threads",
-        "source_path": "Artificial Intelligence/@YanLiberman - VVV Crypto AI's Most Underappreciated Revenue Story.md",
-        "route": "investment",
-        "themes": [
-          "AI/DC",
-          "Macro",
-          "Market structure",
-          "Company / security"
-        ],
-        "polarity": "bull / upside",
-        "action": "dashboard",
-        "action_label": "DASHBOARD",
-        "entities": [
-          "Anthropic"
-        ],
-        "destination": "AI & DC Dashboard + Personal investing",
-        "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
-        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
-        "confidence": "high",
-        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
-      },
-      {
-        "date": "2026-06-18",
         "text": "@CernBasher - http x.com i article 2055840634364145664 [ai]",
         "snippet": "Your AI Agent Called. It Wants More Memory.",
         "source": "threads",
@@ -2966,38 +4067,6 @@
         "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
         "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
         "confidence": "medium",
-        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
-      },
-      {
-        "date": "2026-06-18",
-        "text": "@magicsilicon - Deep Moats and Platform Shifts in Computing - Part 2 [thread-extraction]",
-        "snippet": "NVIDIA, CUDA and the New Challengers",
-        "source": "threads",
-        "source_path": "Artificial Intelligence/@magicsilicon - Deep Moats and Platform Shifts in Computing - Part 2.md",
-        "route": "investment",
-        "themes": [
-          "AI/DC",
-          "Supply chain",
-          "Macro",
-          "Commodities / energy",
-          "Company / security"
-        ],
-        "polarity": "mixed",
-        "action": "dashboard",
-        "action_label": "DASHBOARD",
-        "entities": [
-          "NVIDIA",
-          "Google",
-          "Amazon",
-          "Microsoft",
-          "OpenAI",
-          "AMD",
-          "Intel"
-        ],
-        "destination": "AI & DC Dashboard + Personal investing",
-        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
-        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
-        "confidence": "high",
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
       {
@@ -3579,30 +4648,6 @@
       },
       {
         "date": "2026-06-18",
-        "text": "@maverickecom - How to Automate TikTok Slideshow Content Creation with Claude Opus 4.7 (Step-by-Step GUIDE) [thread-extraction]",
-        "snippet": "Most e-commerce brands are running TikTok the wrong way.",
-        "source": "threads",
-        "source_path": "Artificial Intelligence/@maverickecom - How to Automate TikTok Slideshow Content Creation with Claude Opus 4.7 (Step-by-Step GUIDE).md",
-        "route": "investment",
-        "themes": [
-          "Market structure"
-        ],
-        "polarity": "mixed",
-        "action": "research",
-        "action_label": "RESEARCH",
-        "entities": [
-          "Meta",
-          "Google",
-          "Amazon"
-        ],
-        "destination": "Personal investing",
-        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
-        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
-        "confidence": "high",
-        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
-      },
-      {
-        "date": "2026-06-18",
         "text": "@AustinBarack - 13 months to the 1st million Venice users. 6.5 months to the 2nd million users [ai, llm]",
         "snippet": "And as predicted, half of that again to 3 million users (just about 3 months for the 3rd million).",
         "source": "threads",
@@ -4050,6 +5095,31 @@
       },
       {
         "date": "2026-06-17",
+        "text": "@RnaudBertrand - Fascinating argument by Bloomberg's top energy analyst Javier Blas he argues that China\u2026 [investing]",
+        "snippet": "Fascinating argument by Bloomberg's top energy analyst Javier Blas : he argues that China effectively saved the world\u2026",
+        "source": "threads",
+        "source_path": "Investing/@RnaudBertrand - Fascinating argument by Bloomberg's top energy analyst Javier Blas he argues that China\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Commodities / energy",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "oil",
+          "coal"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-17",
         "text": "@(3) Arnaud Bertrand - Fascinating argument by Bloomberg's top energy analyst Javier Blas \ud83d\udc47 he argues that China effectively saved the world [investing]",
         "snippet": "Arnaud Bertrand",
         "source": "threads",
@@ -4097,6 +5167,29 @@
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
       {
+        "date": "2026-06-16",
+        "text": "@edzitron - Exclusive I have seen OpenAI's audited financials for 2024 and 2025 [ai, openai]",
+        "snippet": "Exclusive: I have seen OpenAI's audited financials for 2024 and 2025.",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@edzitron - Exclusive I have seen OpenAI's audited financials for 2024 and 2025.md",
+        "route": "investment",
+        "themes": [
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "Microsoft",
+          "OpenAI"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
         "date": "2026-06-15",
         "text": "@(2) dom - My interpretation of this Right now, Anthropic and OpenAI are making a killing by selling enterprise FDE services to F500s, build [automation, claude-code, gpu, llm, openai]",
         "snippet": "My interpretation of this:",
@@ -4117,6 +5210,31 @@
         "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
         "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
         "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-15",
+        "text": "@demi_hl - everyone asking how. here's the actual build [agents, automation, claude, claude-code, llm]",
+        "snippet": "everyone asking how. here's the actual build.",
+        "source": "threads",
+        "source_path": "Claude Code/@demi_hl - everyone asking how. here's the actual build.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "medium",
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
       {
@@ -4145,6 +5263,29 @@
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
       {
+        "date": "2026-06-15",
+        "text": "@ryiacy - My interpretation of this [automation, claude-code, gpu, llm, openai]",
+        "snippet": "My interpretation of this:",
+        "source": "threads",
+        "source_path": "Claude Code/@ryiacy - My interpretation of this.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC"
+        ],
+        "polarity": "context",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "OpenAI",
+          "Anthropic"
+        ],
+        "destination": "AI & DC Dashboard",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
         "date": "2026-06-14",
         "text": "@zerohedge - How fast is AI debt rising In Q3 '25 total hyperscaler IG leverage was 0.9x. 6 months later it is 1.8x, bigger than all of Ener [datacenter, infrastructure]",
         "snippet": "_No text content was returned by the extractor._",
@@ -4163,6 +5304,32 @@
         "destination": "AI & DC Dashboard + Personal investing",
         "why_it_matters": "Bear-case or risk signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
         "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-13",
+        "text": "@shaundadevens - shaunda devens [crypto, investing, llm, trading]",
+        "snippet": "Addressing Hyperliquid's HIP-3 Deployer Bottleneck",
+        "source": "threads",
+        "source_path": "Investing/@shaundadevens - shaunda devens.md",
+        "route": "investment",
+        "themes": [
+          "Macro",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "SpaceX",
+          "Broadcom"
+        ],
+        "destination": "Investment Miner + Personal investing",
+        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
         "confidence": "high",
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
@@ -4193,11 +5360,59 @@
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
       {
+        "date": "2026-06-13",
+        "text": "@shaundadevens - Addressing Hyperliquid's HIP-3 Deployer Bottleneck [crypto, investing, llm, trading]",
+        "snippet": "Addressing Hyperliquid's HIP-3 Deployer Bottleneck",
+        "source": "threads",
+        "source_path": "Investing/@shaundadevens - Addressing Hyperliquid's HIP-3 Deployer Bottleneck.md",
+        "route": "investment",
+        "themes": [
+          "Macro",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "mixed",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "SpaceX",
+          "Broadcom"
+        ],
+        "destination": "Investment Miner + Personal investing",
+        "why_it_matters": "Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
         "date": "2026-06-12",
         "text": "@(2) SemiAnalysis - Intel Should Raise Capital Intel's woes are behind them. The heavy spending is ahead of them. Why an equity issuance in [investing]",
         "snippet": "Intel Should Raise Capital",
         "source": "threads",
         "source_path": "Investing/@(2) SemiAnalysis - Intel Should Raise Capital Intel's woes are behind them. The heavy spending is ahead of them. Why an equity issuance in.md",
+        "route": "investment",
+        "themes": [
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "Intel"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-12",
+        "text": "@SemiAnalysis_ - Intel Should Raise Capital [investing]",
+        "snippet": "Intel Should Raise Capital",
+        "source": "threads",
+        "source_path": "Investing/@SemiAnalysis_ - Intel Should Raise Capital.md",
         "route": "investment",
         "themes": [
           "Company / security"
@@ -4294,10 +5509,80 @@
       },
       {
         "date": "2026-06-10",
+        "text": "@bubbleboi - The commodity thesis is half right, and it\u2019s the half that\u2019s doesn\u2019t pay [agents, claude-code, llm]",
+        "snippet": "The commodity thesis is half right, and it\u2019s the half that\u2019s doesn\u2019t pay.",
+        "source": "threads",
+        "source_path": "Claude Code/@bubbleboi - The commodity thesis is half right, and it\u2019s the half that\u2019s doesn\u2019t pay.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Commodities / energy",
+          "Company / security"
+        ],
+        "polarity": "bull / upside",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "oil"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-10",
         "text": "@(2) Rahul - Loops What Every AI Engineer Needs to Know in 2026 [agents, claude, claude-code, mcp, prompt-engineering]",
         "snippet": "Loops: What Every AI Engineer Needs to Know in 2026",
         "source": "threads",
         "source_path": "Claude Code/@(2) Rahul - Loops What Every AI Engineer Needs to Know in 2026.md",
+        "route": "investment",
+        "themes": [
+          "Macro"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "OpenAI",
+          "Anthropic"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-10",
+        "text": "@sairahul1 - Rahul [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "Loops: What Every AI Engineer Needs to Know in 2026",
+        "source": "threads",
+        "source_path": "Claude Code/@sairahul1 - Rahul.md",
+        "route": "investment",
+        "themes": [
+          "Macro"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "OpenAI",
+          "Anthropic"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-10",
+        "text": "@sairahul1 - Loops What Every AI Engineer Needs to Know in 2026 [agents, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "Loops: What Every AI Engineer Needs to Know in 2026",
+        "source": "threads",
+        "source_path": "Claude Code/@sairahul1 - Loops What Every AI Engineer Needs to Know in 2026.md",
         "route": "investment",
         "themes": [
           "Macro"
@@ -4361,6 +5646,28 @@
       },
       {
         "date": "2026-06-06",
+        "text": "@citrini - Robotics likely won\u2019t have a \u201cchatGPT moment\u201d until we\u2019re well into the industrial ramp\u2026 [automation, investing, openai]",
+        "snippet": "Robotics likely won\u2019t have a \u201cchatGPT moment\u201d until we\u2019re well into the industrial ramp for the next gen of automation,\u2026",
+        "source": "threads",
+        "source_path": "Investing/@citrini - Robotics likely won\u2019t have a \u201cchatGPT moment\u201d until we\u2019re well into the industrial ramp\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Investing"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "OpenAI"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-06",
         "text": "Disclosure Citrinitas Capital Management Inc is an investor in Robostrategy. httpst.coLEf657SSib [automation, investing, openai]",
         "snippet": "Robotics likely won\u2019t have a \u201cchatGPT moment\u201d until we\u2019re well into the industrial ramp for the next gen of automation,\u2026",
         "source": "threads",
@@ -4402,6 +5709,424 @@
         "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
         "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
         "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-06-04",
+        "text": "@SiliconSalvage - There is a graveyard in American tech right now and nobody is walking through it [investing, trading]",
+        "snippet": "There is a graveyard in American tech right now and nobody is walking through it. Companies down 70, 80, 90% from the\u2026",
+        "source": "threads",
+        "source_path": "Investing/@SiliconSalvage - There is a graveyard in American tech right now and nobody is walking through it.md",
+        "route": "investment",
+        "themes": [
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "NVDA"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-30",
+        "text": "@zerohedge - Goldman Delta One head, Rich Privorotsky, on tokenomics [datacenter, infrastructure, llm]",
+        "snippet": "Goldman Delta One head, Rich Privorotsky, on tokenomics",
+        "source": "threads",
+        "source_path": "Data Centres/@zerohedge - Goldman Delta One head, Rich Privorotsky, on tokenomics.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC"
+        ],
+        "polarity": "bull / upside",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard",
+        "why_it_matters": "Bull-case or upside signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-26",
+        "text": "@nic_carter - AI is hiking your energy bill is the most popular political talking point of 2026. The data\u2026 [ai]",
+        "snippet": "\"AI is hiking your energy bill\" is the most popular political talking point of 2026. The data doesn't support it. A\u2026",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@nic_carter - AI is hiking your energy bill is the most popular political talking point of 2026. The data\u2026.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Commodities / energy"
+        ],
+        "polarity": "context",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-26",
+        "text": "@SemiAnalysis_ - With modern agentic workloads and long context windows, a common bottleneck in serving\u2026 [agents, claude-code, gpu, llm]",
+        "snippet": "With modern agentic workloads and long context windows, a common bottleneck in serving LLMs at scale is where to store\u2026",
+        "source": "threads",
+        "source_path": "Claude Code/@SemiAnalysis_ - With modern agentic workloads and long context windows, a common bottleneck in serving\u2026.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Company / security"
+        ],
+        "polarity": "bear / risk",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bear-case or risk signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-26",
+        "text": "@bookwormengr - DeepSeek's 10 trillion USD grand strategy [agents, automation, claude-code, gpu, llm, openai]",
+        "snippet": "DeepSeek's 10 trillion USD grand strategy",
+        "source": "threads",
+        "source_path": "Claude Code/@bookwormengr - DeepSeek's 10 trillion USD grand strategy.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "OpenAI"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-26",
+        "text": "@bookwormengr - GDP [agents, automation, claude-code, gpu, llm, openai]",
+        "snippet": "DeepSeek's 10 trillion USD grand strategy",
+        "source": "threads",
+        "source_path": "Claude Code/@bookwormengr - GDP.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Macro",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "mixed",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "OpenAI"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-26",
+        "text": "@zerohedge - If Iran Imposes A Permanent Toll On Hormuz, Who Will Start Charging Next Deep Dive\u2026 [ai]",
+        "snippet": "If Iran Imposes A Permanent Toll On Hormuz, Who Will Start Charging Next: Deep Dive Inside The World's Oil Chokepoints",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@zerohedge - If Iran Imposes A Permanent Toll On Hormuz, Who Will Start Charging Next Deep Dive\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Commodities / energy"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "oil"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-26",
+        "text": "@bubbleboi - I find it quite surprising that the FX market is accurately pricing in an invasion of\u2026 [investing]",
+        "snippet": "I find it quite surprising that the FX market is accurately pricing in an invasion of Taiwan which you can see if you\u2026",
+        "source": "threads",
+        "source_path": "Investing/@bubbleboi - I find it quite surprising that the FX market is accurately pricing in an invasion of\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Macro",
+          "Market structure",
+          "Geopolitics"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-26",
+        "text": "@CRUDEOIL231 - Just went through the latest OIES report on what\u2019s been happening in the oil paper market\u2026 [investing, trading]",
+        "snippet": "Just went through the latest OIES report on what\u2019s been happening in the oil paper market over the last three months.\u2026",
+        "source": "threads",
+        "source_path": "Investing/@CRUDEOIL231 - Just went through the latest OIES report on what\u2019s been happening in the oil paper market\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Commodities / energy",
+          "Market structure",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "bear / risk",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [
+          "oil",
+          "Brent",
+          "WTI"
+        ],
+        "destination": "Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-18",
+        "text": "@jukan05 - Why did xAI hand over a 220,000-GPU cluster to Anthropic [datacenter, gpu, infrastructure, llm, openai]",
+        "snippet": "Why did xAI hand over a 220,000-GPU cluster to Anthropic?",
+        "source": "threads",
+        "source_path": "Data Centres/@jukan05 - Why did xAI hand over a 220,000-GPU cluster to Anthropic.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Macro",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security",
+          "Geopolitics"
+        ],
+        "polarity": "bear / risk",
+        "action": "miner",
+        "action_label": "MINER",
+        "entities": [
+          "NVIDIA",
+          "SpaceX",
+          "Meta",
+          "Google",
+          "OpenAI",
+          "Anthropic"
+        ],
+        "destination": "Investment Miner + AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bear-case or risk signal. Contains a company, ticker, filing, index, ownership, contract, or financial-data lead that could become an Investment Miner research candidate.",
+        "recommended_action": "Check whether the named entity has verifiable disclosure or market data before promoting it into the Investment Miner workflow.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-18",
+        "text": "@CernBasher - Your AI Agent Called [agents, ai, automation, llm, openai, prompt-engineering]",
+        "snippet": "Your AI Agent Called. It Wants More Memory.",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@CernBasher - Your AI Agent Called.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "Meta",
+          "Google",
+          "Amazon",
+          "Microsoft",
+          "OpenAI",
+          "Broadcom",
+          "AMD"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-18",
+        "text": "@CernBasher - Cern Basher [agents, ai, automation, llm, openai, prompt-engineering]",
+        "snippet": "Your AI Agent Called. It Wants More Memory.",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@CernBasher - Cern Basher.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Supply chain",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [
+          "NVIDIA",
+          "Meta",
+          "Google",
+          "Amazon",
+          "Microsoft",
+          "OpenAI",
+          "Broadcom",
+          "AMD"
+        ],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-18",
+        "text": "@HyperliquidX - Coinbase has announced its plan to activate AQAv2 on USDC as the treasury deployer, with\u2026 [investing]",
+        "snippet": "Coinbase has announced its plan to activate AQAv2 on USDC as the treasury deployer, with Circle serving as the\u2026",
+        "source": "threads",
+        "source_path": "Investing/@HyperliquidX - Coinbase has announced its plan to activate AQAv2 on USDC as the treasury deployer, with\u2026.md",
+        "route": "investment",
+        "themes": [
+          "Macro",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-17",
+        "text": "@akshay_pachaar - Akshay [agents, ai, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "@akshay_pachaar",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@akshay_pachaar - Akshay.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "bear / risk",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bear-case or risk signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-17",
+        "text": "@akshay_pachaar - Everything you need to understand and customize Hermes Agent [agents, ai, claude, claude-code, mcp, prompt-engineering]",
+        "snippet": "Hermes Agent Masterclass",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@akshay_pachaar - Everything you need to understand and customize Hermes Agent.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "bear / risk",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "Bear-case or risk signal. May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "medium",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-17",
+        "text": "@EricBalchunas - New filing for ProShares AI Computing Power ETF which will track GPU compute power futures\u2026 [datacenter, gpu, infrastructure, investing]",
+        "snippet": "New filing for ProShares AI Computing Power ETF which will track GPU compute power futures contracts. Intriguing..",
+        "source": "threads",
+        "source_path": "Data Centres/@EricBalchunas - New filing for ProShares AI Computing Power ETF which will track GPU compute power futures\u2026.md",
+        "route": "investment",
+        "themes": [
+          "AI/DC",
+          "Commodities / energy",
+          "Market structure",
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "dashboard",
+        "action_label": "DASHBOARD",
+        "entities": [],
+        "destination": "AI & DC Dashboard + Personal investing",
+        "why_it_matters": "May affect AI infrastructure assumptions, capex durability, bottlenecks, power availability, or supply-chain winners and losers.",
+        "recommended_action": "Use it as thesis context for AI & DC Dashboard or personal investing; promote only if the source gives a verifiable datapoint or named company lead.",
+        "confidence": "high",
+        "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
+      },
+      {
+        "date": "2026-05-17",
+        "text": "@fejau_inc - @J_PMoregain Gross margins have nearly doubled 2 [ai]",
+        "snippet": "_No text content was returned by the extractor._",
+        "source": "threads",
+        "source_path": "Artificial Intelligence/@fejau_inc - @J_PMoregain Gross margins have nearly doubled 2.md",
+        "route": "investment",
+        "themes": [
+          "Company / security"
+        ],
+        "polarity": "context",
+        "action": "research",
+        "action_label": "RESEARCH",
+        "entities": [],
+        "destination": "Personal investing",
+        "why_it_matters": "Looks relevant to market structure, macro, commodities, company exposure, or portfolio risk.",
+        "recommended_action": "Keep as a personal investing research lead and verify the factual claim before acting on it.",
+        "confidence": "medium",
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       },
       {
@@ -4858,17 +6583,17 @@
         "routing_reason": "Matched market, macro, supply-chain, company, or portfolio relevance outside Feature Watch."
       }
     ],
-    "total_findings": 126,
+    "total_findings": 204,
     "routing": {
-      "scanned": 197,
-      "investment": 126,
-      "setup_excluded": 52,
-      "noise": 19
+      "scanned": 315,
+      "investment": 204,
+      "setup_excluded": 82,
+      "noise": 29
     },
     "since": "2026-04-14"
   },
   "outstanding_issues": {
-    "total_count": 22,
+    "total_count": 19,
     "monitoring_triggers": [
       {
         "company": "Ichthys LNG",
@@ -4877,48 +6602,33 @@
         "source": "07 - ESG Metrics Tracker.md"
       }
     ],
-    "unresolved_threads": [
-      {
-        "text": "Plain `claude` (Anthropic) auth may be broken \u2014 got 401s throughout. Not investigated \u2014 focus was GLM.",
-        "first_seen": "2026-06-26",
-        "last_seen": "2026-06-26",
-        "occurrences": 1,
-        "recurring": false,
-        "source": "GLM 5.2 Coding Setup \u2014 Hermes & Claude Code"
-      },
-      {
-        "text": "The wrapper script reads key from `/tmp/glm_key_line.txt` (temp file). More robust approach: read directly from `.env`.",
-        "first_seen": "2026-06-26",
-        "last_seen": "2026-06-26",
-        "occurrences": 1,
-        "recurring": false,
-        "source": "GLM 5.2 Coding Setup \u2014 Hermes & Claude Code"
-      },
-      {
-        "text": "Claude Code settings.json env section removed (doesn't work). Wrapper handles all GLM config.",
-        "first_seen": "2026-06-26",
-        "last_seen": "2026-06-26",
-        "occurrences": 1,
-        "recurring": false,
-        "source": "GLM 5.2 Coding Setup \u2014 Hermes & Claude Code"
-      }
-    ],
+    "unresolved_threads": [],
     "uncommitted_changes": [
       {
         "project": "AFL Fantasy - Team Selector",
         "has_git": true,
         "modified": [
-          "eague_teams.json",
+          "ontent.js",
+          "free_agent_analyzer.py",
+          "league_teams.json",
+          "lineup_selector.py",
+          "monitor.py",
           "squad.json"
         ],
         "untracked": [
+          "README.md",
+          "backtest_captain.py",
+          "backtest_captain2.py",
+          "backtest_emergency.py",
+          "captain_selector.py",
+          "check_squads.py",
+          "core/",
           "dashboard/",
-          "draft_fixture.json",
-          "scrape_fixture.py",
-          "scrape_fixture_api.py"
+          "debug_conf.py",
+          "docs/playbook-2027.md"
         ],
-        "modified_count": 2,
-        "untracked_count": 4
+        "modified_count": 6,
+        "untracked_count": 32
       },
       {
         "project": "Credit Risk Research",
@@ -4955,13 +6665,13 @@
       },
       {
         "project": "Best Rate Locator",
-        "status": "\ud83d\udd34 Not started. Fully scoped in `tasks/todo.md` \u2014 no code written yet.",
+        "status": "\u26ab **Killed 2026-07-06** \u2014 replaced by simpler [[18 Norham Bills]] workflow. Full scraper approach was overengineered. The replacement workflow: drop PDF invoices into a bills folder \u2192 Hermes parses them \u2192 monthly cron searches for better deals using web search (no custom scrapers). See `side-projects/personal-finance/bills/` in the AI Wif Brain Projects directory.",
         "open_threads": [
           "When to start? (no blocking dependencies)",
           "Perth-specific: store IDs, suburbs, postcode 6006 (North Perth)"
         ],
         "phase2_items": [],
-        "not_started": true
+        "not_started": false
       }
     ],
     "config_issues": [],
@@ -4971,7 +6681,7 @@
         "name": "Credit Risk News Monitor",
         "expected": "daily NAS scheduled job",
         "last_run": "2026-06-01T00:00:00",
-        "age_days": 31,
+        "age_days": 93,
         "is_stale": true,
         "check_method": "output_file",
         "max_age_days": 3
@@ -4980,7 +6690,7 @@
         "name": "AEMO Negative Prices Data Publish",
         "expected": "NAS scheduled monitor; publish only on data change",
         "last_run": "2026-05-11T12:24:46",
-        "age_days": 52,
+        "age_days": 114,
         "is_stale": true,
         "check_method": "git_remote",
         "max_age_days": 35
@@ -4988,7 +6698,7 @@
       {
         "name": "Dan Murphy's Scanner",
         "expected": "daily",
-        "last_run": "2026-07-02T02:09:48",
+        "last_run": "2026-09-02T01:52:20",
         "age_days": 0,
         "is_stale": false,
         "check_method": "gh_actions",
@@ -4997,8 +6707,8 @@
       {
         "name": "AFL Fantasy Monitor",
         "expected": "daily (during season, Thu-Sun only)",
-        "last_run": "2026-07-02T04:58:34",
-        "age_days": 0,
+        "last_run": "2026-08-30T12:09:16",
+        "age_days": 3,
         "is_stale": false,
         "check_method": "gh_actions",
         "max_age_days": 5
@@ -5009,77 +6719,77 @@
         "company": "AirTrunk",
         "module": "02 - Board & Management",
         "research_date": "2026-03-16",
-        "age_days": 108,
+        "age_days": 170,
         "threshold_days": 90
       },
       {
         "company": "Canberra Data Centres",
         "module": "02 - Board & Management",
         "research_date": "2026-03-16",
-        "age_days": 108,
+        "age_days": 170,
         "threshold_days": 90
       },
       {
         "company": "Clarke Creek Wind Farm",
         "module": "02 - Board & Management",
         "research_date": "2026-03-16",
-        "age_days": 108,
+        "age_days": 170,
         "threshold_days": 90
       },
       {
         "company": "CleanPeak Energy",
         "module": "02 - Board & Management",
         "research_date": "2026-03-16",
-        "age_days": 108,
+        "age_days": 170,
         "threshold_days": 90
       },
       {
         "company": "Collgar Wind Farm",
         "module": "02 - Board & Management",
         "research_date": "2026-03-16",
-        "age_days": 108,
+        "age_days": 170,
         "threshold_days": 90
       },
       {
         "company": "Ichthys LNG",
         "module": "02 - Board & Management",
         "research_date": "2026-03-16",
-        "age_days": 107,
+        "age_days": 170,
         "threshold_days": 90
       },
       {
         "company": "Ichthys LNG",
         "module": "06 - Financial Analysis",
         "research_date": "2026-03-16",
-        "age_days": 107,
+        "age_days": 170,
         "threshold_days": 90
       },
       {
         "company": "Melbourne Metro",
         "module": "02 - Board & Management",
         "research_date": "2026-03-16",
-        "age_days": 108,
+        "age_days": 170,
         "threshold_days": 90
       },
       {
         "company": "Pacific Energy",
         "module": "02 - Board & Management",
         "research_date": "2026-03-17",
-        "age_days": 107,
+        "age_days": 169,
         "threshold_days": 90
       },
       {
         "company": "Royal Melbourne Showgrounds",
         "module": "02 - Board & Management",
         "research_date": "2026-03-17",
-        "age_days": 107,
+        "age_days": 169,
         "threshold_days": 90
       },
       {
         "company": "Sydney Metro",
         "module": "02 - Board & Management",
         "research_date": "2026-03-16",
-        "age_days": 107,
+        "age_days": 170,
         "threshold_days": 90
       }
     ],
@@ -5094,5 +6804,113 @@
       "detail": "",
       "command": ""
     }
+  },
+  "alignment": {
+    "timestamp": "2026-08-25T23:07:05.263875+00:00",
+    "summary": {
+      "total_checks": 16,
+      "passed": 11,
+      "drift": 1,
+      "errors": 5,
+      "issues": [
+        "GIT DRIFT (Mac): ai-dc-dashboard \u2014 ahead (behind=0, ahead=21)",
+        "CRON ERROR: brain-ops-lane-status-daily \u2014 TimeoutError: Cron job 'brain-ops-lane-status-daily' idle for 760s (limit 600s) \u2014 last activity: initializing",
+        "CRON ERROR: brain-ops-lane-notify-daily \u2014 RuntimeError: Hermes can't reach the model provider. You may be offline. Check your internet connection and try again.  (2 failures in a row)",
+        "CRON ERROR: Sync Brain status.json to NAS \u2014 Script exited with code 1",
+        "CRON ERROR: Mac-NAS Alignment Check \u2014 TimeoutError: Cron job 'Mac-NAS Alignment Check' idle for 864s (limit 600s) \u2014 last activity: terminal command running (10s elapsed)",
+        "LAUNCHAGENTS DEAD: 1 KeepAlive agent(s) not running: hermes-tunnel"
+      ]
+    },
+    "files": [
+      {
+        "status": "synced",
+        "mac_path": "/Users/zalen/ai-wif-brain-dashboard/bin/parse-status.py",
+        "nas_path": "/workspace/repos/ai-wif-brain-dashboard/bin/parse-status.py",
+        "mac_md5": "303b88e0bb8a945fcc592fa216e23f04",
+        "nas_md5": "303b88e0bb8a945fcc592fa216e23f04",
+        "mac_lines": 3709,
+        "nas_lines": 3709
+      }
+    ],
+    "mac_git": [
+      {
+        "name": "aemo-generator-credit-dashboard",
+        "status": "synced",
+        "behind": 0,
+        "ahead": 0
+      },
+      {
+        "name": "ai-dc-dashboard",
+        "status": "ahead",
+        "behind": 0,
+        "ahead": 21
+      }
+    ],
+    "nas_git": [
+      {
+        "name": "aemo-generator-credit-dashboard",
+        "status": "synced",
+        "behind": 0,
+        "ahead": 0
+      },
+      {
+        "name": "ai-dc-dashboard",
+        "status": "synced",
+        "behind": 0,
+        "ahead": 0
+      }
+    ],
+    "cron_jobs": [
+      {
+        "name": "brain-ops-lane-status-daily",
+        "status": "error"
+      },
+      {
+        "name": "brain-ops-lane-notify-daily",
+        "status": "error"
+      },
+      {
+        "name": "vault-auto-format",
+        "status": "ok"
+      },
+      {
+        "name": "aemo-dashboard-autopull",
+        "status": "ok"
+      },
+      {
+        "name": "Sync Brain status.json to NAS",
+        "status": "error"
+      },
+      {
+        "name": "Mac-NAS Alignment Check",
+        "status": "error"
+      },
+      {
+        "name": "localhost-health-watchdog",
+        "status": "ok"
+      },
+      {
+        "name": "feature-watch-x-monitor",
+        "status": "ok"
+      }
+    ],
+    "vault_mirrors": [
+      {
+        "path": "/Users/zalen/.hermes/vault-mirror/zc-mac-vault-mirror",
+        "accessible": true,
+        "md_files": 0
+      },
+      {
+        "path": "/Users/zalen/.hermes/vault-mirror/ai-wif-brain-mirror",
+        "accessible": true,
+        "md_files": 13
+      }
+    ],
+    "nas": {
+      "connected": true,
+      "status_json": true,
+      "raw": ""
+    },
+    "available": true
   }
 }
