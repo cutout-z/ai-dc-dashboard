@@ -13,7 +13,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from app.lib.llm_perf import PROVIDER_COLOURS, chart_layout
+from app.lib.llm_perf import chart_layout
 from app.lib.openrouter_usage import (
     CSV_PATH, META_PATH,
     daily_totals, fmt_tokens, load_rankings_daily, load_usage_meta,
@@ -90,36 +90,124 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ---- Main trend chart (a16z-style 7-day average) ---------------------------
-sm = st.checkbox("Show 7-day rolling average", value=True)
-fig = go.Figure()
-fig.add_trace(go.Scatter(
-    x=total["date"], y=total["total_tokens"],
-    mode="lines", name="Daily total",
-    line=dict(color=PROVIDER_COLOURS["DeepSeek"], width=1.2),
-    hovertemplate="%{x|%b %d, %Y}: %{y:,.0f} tokens<extra></extra>",
-))
-if sm:
-    fig.add_trace(go.Scatter(
-        x=sev.index, y=sev.values,
-        mode="lines", name="7-day average",
-        line=dict(color="#3b82f6", width=3),
-        hovertemplate="7-day avg %{x|%b %d, %Y}: %{y:,.0f} tokens<extra></extra>",
-    ))
-    if pd.notna(growth):
-        fig.add_annotation(
-            x=sev.index[-1], y=latest_7,
-            text=f"{growth:.1f}× vs start of dataset",
-            showarrow=False, xshift=12, yshift=10,
-            font=dict(size=11, color="#3b82f6"),
-        )
-fig.update_layout(
-    title="Daily tokens processed through OpenRouter",
-    xaxis_title="", yaxis_title="Tokens / day",
-    height=420, **CHART_LAYOUT,
+# ---- Main chart: Top Models — weekly stacked bars (OpenRouter rankings) ----
+NAMED_SERIES = 9
+NAME_FIXES = {"Gpt": "GPT", "Openai": "OpenAI", "Deepseek": "DeepSeek",
+              "Xai": "xAI", "Glm": "GLM", "Ai": "AI", "Llm": "LLM"}
+
+
+def _short_name(slug: str) -> str:
+    """'deepseek/deepseek-r1-0528' -> 'DeepSeek R1 0528'; 'other' -> 'Others'."""
+    if slug == "other":
+        return "Others"
+    words = slug.split("/", 1)[-1].replace("-", " ").replace("_", " ").split()
+    return " ".join(NAME_FIXES.get(w.capitalize(), w.capitalize()) for w in words)
+
+
+wk = df.copy()
+wk["week"] = wk["date"] - pd.to_timedelta(wk["date"].dt.dayofweek, unit="D")  # Mon-based
+top_models = wk.groupby("model")["total_tokens"].sum().sort_values(ascending=False)
+named = [m for m in top_models.index if m != "other"][:NAMED_SERIES]
+wk["series"] = wk["model"].where(wk["model"].isin(named), "other")
+piv = (
+    wk.pivot_table(index="week", columns="series", values="total_tokens", aggfunc="sum")
+    .fillna(0).sort_index()
 )
-fig.update_yaxes(tickformat=".2s")
-st.plotly_chart(fig, use_container_width=True)
+latest_week = piv.index.max()
+named_by_latest = piv.loc[latest_week, named].sort_values(ascending=False).index.tolist()
+series_order = ["other"] + named_by_latest
+
+# Vivid categorical palette in the spirit of openrouter.ai/rankings; long tail pink at base.
+MODEL_PALETTE = ["#f97316", "#4ade80", "#facc15", "#3b82f6", "#8b5cf6",
+                 "#38bdf8", "#f472b6", "#14b8a6", "#e879f9"]
+series_colour = {"other": "#ec4899"}
+series_colour.update({m: c for m, c in zip(named_by_latest, MODEL_PALETTE)})
+
+data_end = df["date"].max()
+partial_last = data_end < latest_week + pd.Timedelta(days=6)
+bar_width_ms = int(4.6 * 86400 * 1000)
+
+
+def _bar_trace(s: str, use_pattern: bool) -> go.Bar:
+    disp = _short_name(s)
+    marker = dict(color=series_colour[s], line=dict(width=0))
+    if use_pattern and partial_last:
+        marker["pattern"] = dict(shape=["/" if w == latest_week else "" for w in piv.index])
+    return go.Bar(
+        x=piv.index, y=piv[s], name=disp, width=bar_width_ms, marker=marker,
+        customdata=[fmt_tokens(float(v)) for v in piv[s]],
+        hovertemplate="%{x|%b %d, %Y}<br>%{customdata} tokens<extra>" + disp + "</extra>",
+    )
+
+
+fig = go.Figure()
+try:
+    for s in series_order:
+        fig.add_trace(_bar_trace(s, use_pattern=True))
+except ValueError:  # per-point pattern not supported on this plotly build -> dim the partial week
+    fig = go.Figure()
+    for s in series_order:
+        fig.add_trace(_bar_trace(s, use_pattern=False))
+    if partial_last:
+        for tr in fig.data:
+            tr.marker.opacity = [0.45 if w == latest_week else 1.0 for w in piv.index]
+
+fig.update_layout(
+    barmode="stack", showlegend=False, hovermode="x unified",
+    title="Top Models — weekly token usage across OpenRouter",
+    xaxis_title="", yaxis_title="",
+    height=440, **CHART_LAYOUT,
+)
+tick_i = list(range(0, len(piv), 5))
+fig.update_xaxes(
+    tickvals=[piv.index[i] for i in tick_i],
+    ticktext=[
+        piv.index[i].strftime("%b %d, %Y") if i == 0 else piv.index[i].strftime("%b %d")
+        for i in tick_i
+    ],
+    showgrid=False, showline=False,
+)
+fig.update_yaxes(showgrid=False, zeroline=False, tickformat="~s")  # 30T / 60T / 90T style
+if st.radio("Scale", ["Linear", "Log"], horizontal=True, label_visibility="collapsed") == "Log":
+    fig.update_yaxes(type="log")
+
+
+def _week_breakdown(col, week: pd.Timestamp) -> None:
+    """Pinned latest-week breakdown panel (the source's tooltip/legend card)."""
+    rows = "".join(
+        "<div style='display:flex;align-items:center;gap:7px;padding:2.5px 0'>"
+        f"<span style='width:9px;height:9px;border-radius:50%;background:{series_colour[s]};flex:none'></span>"
+        f"<span style='flex:1;color:#d4d4d4;font-size:12.5px;white-space:nowrap;overflow:hidden;"
+        f"text-overflow:ellipsis'>{_short_name(s)}</span>"
+        f"<span style='color:#fafafa;font-size:12.5px;font-variant-numeric:tabular-nums'>{fmt_tokens(float(piv.loc[week, s]))}</span>"
+        "</div>"
+        for s in series_order
+    )
+    html = (
+        "<div style='border:1px solid #2f2f2f;border-radius:10px;background:#1a1a1a;padding:12px 14px'>"
+        f"<div style='display:inline-block;border:1px solid #3a3a3a;border-radius:6px;padding:2px 10px;"
+        f"font-size:12px;color:#fafafa;margin-bottom:10px'>Week of {week.strftime('%B %d, %Y')}</div>"
+        + rows
+        + "<hr style='border:none;border-top:1px solid #2f2f2f;margin:8px 0 6px'>"
+        "<div style='display:flex;justify-content:space-between;font-size:13px'>"
+        "<span style='color:#fafafa;font-weight:600'>Total</span>"
+        f"<span style='color:#fafafa;font-weight:600'>{fmt_tokens(float(piv.loc[week].sum()))}</span></div>"
+        "</div>"
+    )
+    col.markdown(html, unsafe_allow_html=True)
+
+
+st.caption(
+    "Weekly tokens stacked by model — top 9 by cumulative volume plus the aggregated long tail. "
+    "Weeks start Monday"
+    + (
+        f"; the final bar covers a partial week (data through {data_end.date().isoformat()})."
+        if partial_last else "."
+    )
+)
+chart_col, panel_col = st.columns([3.4, 1], gap="small")
+chart_col.plotly_chart(fig, use_container_width=True)
+_week_breakdown(panel_col, latest_week)
 
 # ---- Provider share ---------------------------------------------------------
 st.subheader("Share by provider")
