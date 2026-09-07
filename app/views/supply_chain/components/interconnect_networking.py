@@ -8,6 +8,11 @@ import plotly.graph_objects as go
 
 st.title("Interconnect & Networking")
 
+st.caption(
+    "Sources & as-of (2026-09): NVIDIA/AMD/Broadcom/Marvell product disclosures and public spec reporting. "
+    "Bandwidth/latency/cost figures are approximate public estimates — re-verify before lending decisions."
+)
+
 tab_nv, tab_ib, tab_top, tab_deep = st.tabs(["NVLink & NVSwitch", "InfiniBand vs Ethernet", "Scale & Topology", "Deep Dive"])
 
 with tab_nv:
@@ -104,7 +109,7 @@ RDMA (Remote Direct Memory Access) allows one computer to access another's memor
 
     with st.expander("Credit Implications"):
         st.markdown("""
-**Collateral value risk:** Networking depreciates slower (5-7yr) than GPUs (3-6yr). InfiniBand switches retain value better than GPUs but face transition risk from Ethernet/UEC.
+**Collateral value risk (editorial, as-of 2026-09):** Networking is commonly depreciated slower (5-7yr) than GPUs (3-6yr) and typically retains value better than GPUs, but faces transition risk from Ethernet/UEC and copper→optics — residual value depends on the pace of those transitions and on secondary-market demand.
 
 **Concentration risk:** NVIDIA Mellanox >90% InfiniBand. UEC is the first credible competitive threat but still maturing. Broadcom and Marvell provide Ethernet alternatives.
 

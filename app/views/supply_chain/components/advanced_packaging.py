@@ -8,6 +8,12 @@ import plotly.graph_objects as go
 
 st.title("Advanced Packaging")
 
+st.caption(
+    "Sources & as-of (2026-09): TSMC/Intel/Samsung/ASE packaging disclosures and industry reporting "
+    "(TrendForce-style estimates). Capacity and share figures are approximate estimates; cost figures "
+    "are indicative ranges, not quotes — re-verify before lending decisions."
+)
+
 tab_tech, tab_supply, tab_deep = st.tabs(["Technology Comparison", "Supply Chain", "Deep Dive"])
 
 with tab_tech:

@@ -8,6 +8,12 @@ import plotly.express as px
 
 st.title("System Integration")
 
+st.caption(
+    "Sources & as-of (2026-09): NVIDIA system disclosures, Uptime Institute tier definitions, and "
+    "public reliability studies (Meta/Google/Titan). TCO numbers are an illustrative worked example, "
+    "not a quote; reliability statistics are as published by the cited operators."
+)
+
 tab_tco, tab_rel, tab_cool, tab_deep = st.tabs(["TCO Framework", "Reliability", "Power & Cooling", "Deep Dive"])
 
 with tab_tco:
@@ -113,7 +119,7 @@ SDC is hardware that produces wrong results without any error flag. It is the mo
 
     with st.expander("Credit Implications"):
         st.markdown("""
-**Collateral value mismatch:** GPU economic life (18-36 months) is a fraction of building life (25-40 years). A 7-year loan on a data centre must survive 4-5 GPU generations. The building retains value; the GPUs inside do not.
+**Collateral value mismatch (editorial, as-of 2026-09):** GPU *frontier-training* economic life (commonly cited 18-36 months) is a fraction of building life (25-40 years). A 7-year loan on a data centre must survive 4-5 GPU generations. The building's value is more durable, while GPU value is workload- and price-dependent — prior generations typically keep earning on inference/secondary workloads, so residual-value assumptions should be conservative rather than assuming the GPUs become worthless at the next launch.
 
 **Concentration risk:** NVIDIA controls the DGX/HGX platform standard. No credible alternative for integrated AI server systems exists at scale. AMD OAM is an emerging alternative but lacks the software integration of DGX.
 

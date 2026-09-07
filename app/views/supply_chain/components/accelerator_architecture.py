@@ -9,6 +9,12 @@ import plotly.graph_objects as go
 
 st.title("AI Accelerator Architecture")
 
+st.caption(
+    "Sources & as-of (2026-09): NVIDIA/AMD/Google/AWS product disclosures and public spec reporting. "
+    "Peak performance figures are vendor datasheet numbers (some include sparsity/boost modes — treat "
+    "as comparable marketing figures, not mixed-benchmark results); deep-dive estimates are marked est."
+)
+
 st.header("NVIDIA Data Centre GPU — Generational Evolution")
 gpu_data = pd.DataFrame([
     {"Architecture": "Volta", "GPU": "V100", "Year": "2017", "Process": "12nm FFN", "Transistors (B)": 21.1,
@@ -71,7 +77,7 @@ NVIDIA's Streaming Multiprocessor (SM) is the fundamental compute unit. Each gen
 - **Hopper (H100):** 128 FP32 + 64 INT32 + 4 Tensor Cores per SM. 132 SMs. Transformer Engine.
 - **Blackwell (B200):** 128 FP32 + 4 Tensor Cores per SM. 148 SMs. New Tensor Memory (TMEM).
 
-**Credit insight:** A 3-year-old GPU is economically stranded for frontier training because each generation delivers 4x total compute. This is why GPU depreciation is much faster than accounting schedules suggest.
+**Credit insight (editorial, as-of 2026-09):** A 3-year-old GPU is generally past its *frontier-training* window because each generation claims large compute jumps — but its economic life depends on the workload it serves. Inference, fine-tuning and lower-tier training keep prior generations revenue-generating; this is why actual GPU value retention is workload- and price-dependent, not purely a function of accounting schedules.
     """)
 
 with st.expander("Tensor Core Generations"):
@@ -119,8 +125,8 @@ A single die cannot exceed ~858 mm2 — that is the maximum area the lithography
 
 ### Credit Relevance
 
-- **Collateral obsolescence accelerates with node cadence.** A GPU on an old node (e.g. 7nm A100) cannot be upgraded — the entire chip must be replaced. Each node transition strands the previous generation.
-- **Node shrinks are slowing.** The jump from 7nm to 4nm delivered ~1.6x density (not 2x). N3 to N2 is projected at ~1.3x. Future GPU gains will come more from architecture and packaging than from process shrinks alone — but those architectural gains require new chips, not upgrades.
+- **Collateral value risk (editorial, as-of 2026-09):** Node cadence accelerates performance turnover. A GPU on an old node (e.g. 7nm A100) cannot be upgraded — the chip must be replaced to capture new-node gains. Each node transition narrows the *frontier-viability* window of the previous generation, but does not by itself remove its value for non-frontier workloads; value depends on workload, utilisation and prices.
+- **Node shrinks are slowing.** The jump from 7nm to 4nm delivered ~1.6x density (not 2x). N3 to N2 is projected at ~1.3x (est.). Future GPU gains will come more from architecture and packaging than from process shrinks alone — but those architectural gains require new chips, not upgrades.
 - **TSMC is the only foundry delivering these nodes at volume.** Any disruption to TSMC's N3/N2 ramp delays the entire AI GPU roadmap. This is a single-supplier risk embedded in every GPU generation.
     """)
 
@@ -155,11 +161,11 @@ The software stack determines which hardware can be used for AI workloads. This 
 
 with st.expander("Credit Implications"):
     st.markdown("""
-**Collateral value risk:** GPU economic life is 18-36 months for frontier training. Each generation delivers 2-4x performance improvement, making previous generations economically uncompetitive. Accounting depreciation of 5-6 years far exceeds economic life.
+**Collateral value risk (editorial, as-of 2026-09):** *Frontier-training* economic life is commonly cited at 18-36 months; each generation claims large performance jumps, narrowing the frontier window. Accounting depreciation of 5-6 years may exceed the frontier window — but residual value for inference/secondary workloads depends on demand and prices, so assumptions should be conservative, not zero.
 
-**Concentration risk:** NVIDIA controls ~95% of AI training GPU market. TSMC manufactures essentially all advanced AI chips. Dual dependency: if either supplier fails, no AI chips ship.
+**Concentration risk:** NVIDIA is estimated to control ~90%+ of AI training GPU market (2026, editorial est.). TSMC manufactures essentially all advanced AI chips. Dual dependency: if either supplier fails, no AI chips ship.
 
-**Cost exposure:** GPU TDP has grown from 300W (V100) to 1,200W (B300). Power costs represent the dominant OpEx for AI clusters. A 1,000 GPU cluster at $0.08/kWh costs ~$560K/year in power alone.
+**Cost exposure:** GPU TDP has grown from 300W (V100) to 1,200W (B300). Power costs represent the dominant OpEx for AI clusters. A 1,000 GPU cluster at $0.08/kWh costs ~$560K/year in power alone (illustrative arithmetic).
 
 **Transition risk:** The GPU-to-ASIC shift (Google TPU, AWS Trainium) is accelerating. ASICs now dominate inference and are targeting training parity by 2027-29. A GPU-heavy collateral portfolio faces competitive displacement risk.
     """)

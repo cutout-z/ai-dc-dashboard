@@ -8,6 +8,12 @@ import plotly.graph_objects as go
 
 st.title("Hardware Credit Primer")
 st.caption(
+    "Sources & as-of (2026-09): compiled from public vendor disclosures and industry reporting "
+    "(NVIDIA, TSMC, AMD, SK hynix, Samsung, ASML, Uptime Institute). Shares, shares-of-total and "
+    "dependency figures are editorial estimates, not audited market data; qualitative tiers are "
+    "judgements — verify current conditions before lending decisions."
+)
+st.caption(
     "This section of the dashboard maps the AI data centre hardware stack — from silicon to rack — "
     "for credit officers who need to understand what they are lending against. "
     "Each lane (0-7) covers a specific component domain: GPU architecture, memory subsystems, "
@@ -84,16 +90,16 @@ with tab_map:
 
     st.subheader("Single Points of Failure")
     spof_data = pd.DataFrame([
-        ("Advanced Fab (<7nm)", "TSMC (~90%)", "Samsung (limited), Intel (2027+)", "No AI chips for anyone. Total supply halt.", 5),
-        ("EUV Lithography", "ASML (100%)", "None", "No leading-edge chips, period.", 5),
-        ("HBM3e Memory", "SK Hynix (>90%)", "Samsung (ramping), Micron (qualified)", "GPU shipments halted. B200 cannot ship without HBM.", 5),
-        ("CoWoS Packaging", "TSMC (~95%)", "ASE/SPIL (limited), Samsung I-Cube", "GPUs and HBM manufactured but cannot be assembled.", 4),
-        ("ABF Substrate", "Ibiden (~50%)", "Unimicron, Shinko", "Interposer substrate shortage. Packaging slowed.", 3),
-        ("InfiniBand / NVLink", "NVIDIA Mellanox (>90%)", "Ethernet via UEC (Broadcom, Marvell)", "GPU clusters cannot scale. Training halted beyond single node.", 3),
-        ("CUDA Software", "NVIDIA (proprietary)", "ROCm (AMD), Triton (open)", "All existing workloads locked. Migration takes years.", 3),
-    ], columns=["Component", "Sole Source?", "Alternative", "Failure Impact", "Score"])
+        ("Advanced Fab (<7nm)", "TSMC (~90%)", "Samsung (limited), Intel (2027+)", "No AI chips for anyone. Total supply halt."),
+        ("EUV Lithography", "ASML (100%)", "None", "No leading-edge chips, period."),
+        ("HBM3e Memory", "SK Hynix (>90%)", "Samsung (ramping), Micron (qualified)", "GPU shipments halted. B200 cannot ship without HBM."),
+        ("CoWoS Packaging", "TSMC (~95%)", "ASE/SPIL (limited), Samsung I-Cube", "GPUs and HBM manufactured but cannot be assembled."),
+        ("ABF Substrate", "Ibiden (~50%)", "Unimicron, Shinko", "Interposer substrate shortage. Packaging slowed."),
+        ("InfiniBand / NVLink", "NVIDIA Mellanox (>90%)", "Ethernet via UEC (Broadcom, Marvell)", "GPU clusters cannot scale. Training halted beyond single node."),
+        ("CUDA Software", "NVIDIA (proprietary)", "ROCm (AMD), Triton (open)", "All existing workloads locked. Migration takes years."),
+    ], columns=["Component", "Dominant Supplier (est. share)", "Alternative", "Failure Impact"])
 
-    st.dataframe(spof_data[["Component", "Sole Source?", "Alternative", "Failure Impact"]],
+    st.dataframe(spof_data,
         use_container_width=True, hide_index=True,
         column_config={"Failure Impact": st.column_config.TextColumn(width=450)})
 
@@ -166,6 +172,7 @@ with tab_risk:
 
 with tab_nvidia:
     st.subheader("NVIDIA Dependency Index")
+    st.caption("Editorial dependency estimate (indicative share, as of 2026-09). Share figures are judgements from public reporting, not audited market data; the two 100% rows are structural (proprietary, no alternative) rather than measured share.")
     nvidia_data = pd.DataFrame([
         ("AI Training GPUs", 95, "AMD ~5%"),
         ("CUDA Software", 95, "Developer lock-in. ~5M devs."),
@@ -175,12 +182,12 @@ with tab_nvidia:
         ("GPU Lease Pricing", 70, "Competitive market."),
         ("NVLink (chip-chip)", 100, "Proprietary. No alternative."),
         ("NVSwitch", 100, "Proprietary. No alternative."),
-    ], columns=["Layer", "NVIDIA Share %", "Notes"])
+    ], columns=["Layer", "Indicative NVIDIA share (%, editorial est.)", "Notes"])
 
-    fig_nv = go.Figure(go.Bar(x=nvidia_data["NVIDIA Share %"], y=nvidia_data["Layer"], orientation="h",
-        text=nvidia_data["NVIDIA Share %"], texttemplate="%{text}%", textposition="outside",
+    fig_nv = go.Figure(go.Bar(x=nvidia_data["Indicative NVIDIA share (%, editorial est.)"], y=nvidia_data["Layer"], orientation="h",
+        text=nvidia_data["Indicative NVIDIA share (%, editorial est.)"], texttemplate="%{text}%", textposition="outside",
         marker_color=["#22c55e"]*2 + ["#f59e0b"]*2 + ["#3b82f6"]*2 + ["#ef4444"]*2))
-    fig_nv.update_layout(height=400, xaxis=dict(range=[0, 110], title="NVIDIA Market Share (%)"),
+    fig_nv.update_layout(height=400, xaxis=dict(range=[0, 110], title="Indicative NVIDIA share (%, editorial est., 2026-09)"),
         yaxis=dict(autorange="reversed"), showlegend=False, margin=dict(l=20, r=60, t=10, b=20))
     st.plotly_chart(fig_nv, use_container_width=True)
 
@@ -188,12 +195,13 @@ with tab_nvidia:
     st.markdown("""
 | Timeframe | Event | Impact |
 |---|---|---|
-| 2025-26 | AMD MI350/MI400 ramp | Potential 10-15% training share if ROCm matures |
+| 2025-26 | AMD MI350/MI400 ramp | Potential meaningful training-share gain if ROCm matures (editorial scenario) |
 | 2025-26 | UEC Ethernet for AI | Reduces InfiniBand dependency |
 | 2026-27 | AWS Trainium2/3, TPU v6 | Hyperscalers reduce NVIDIA dependency |
 | 2026-27 | UCIe chiplet standard | Multi-vendor chiplet assembly |
 | 2027-28 | ZLUDA / Triton maturity | Open-source CUDA compatibility |
 | 2028+ | Optical interconnects | Could disrupt NVLink advantage |
     """)
+    st.caption("Timeline is an editorial view as of 2026-09 — events/impacts are qualitative, not probability-weighted forecasts.")
 
 

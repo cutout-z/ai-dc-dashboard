@@ -8,31 +8,56 @@ import plotly.express as px
 
 st.title("Supply Chain Mapping")
 
+st.caption(
+    "Sources & as-of (2026-09): compiled from public vendor disclosures and industry reporting "
+    "(NVIDIA, TSMC, AMD, ASML, SK hynix, Samsung, Micron, Ajinomoto, Ibiden). Specs approximate; "
+    "risk tiers and likelihoods below are editorial judgements, not calibrated scores or "
+    "probabilities — verify current conditions before lending decisions."
+)
+
 tab_conc, tab_lead, tab_geo, tab_deep = st.tabs(["Concentration", "Lead Times", "Geopolitical", "Deep Dive"])
 
 with tab_conc:
-    st.header("Supply Chain Concentration — Risk-Scored")
+    st.header("Supply Chain Concentration — Editorial Risk Tiers")
+    tier_rank = {"Maximum": 0, "High": 1, "Elevated": 2, "Moderate": 3, "Low": 4}
     conc_data = pd.DataFrame([
-        ("EUV Lithography", "ASML", 100, "Sole source", 4.75),
-        ("Advanced Fab (<7nm)", "TSMC", 90, "Sole source", 4.75),
-        ("CoWoS Packaging", "TSMC", 95, "Sole source", 4.50),
-        ("ABF Film", "Ajinomoto", 95, "Sole source", 3.75),
-        ("HBM3e Memory", "SK Hynix", 90, "Single source", 3.75),
-        ("InfiniBand", "NVIDIA Mellanox", 90, "Single source", 3.50),
-        ("ABF Substrate", "Ibiden", 75, "Single source", 3.25),
-        ("GPU Training", "NVIDIA", 95, "Single source", 3.50),
-        ("Transformers", "Multiple", 60, "Oligopoly", 2.25),
-        ("Generators", "Caterpillar/Cummins", 80, "Duopoly", 1.75),
-    ], columns=["Component", "Dominant Supplier", "Share %", "Type", "Score"])
+        ("EUV Lithography", "ASML", 100, "Sole source", "Maximum"),
+        ("Advanced Fab (<7nm)", "TSMC", 90, "Sole source", "Maximum"),
+        ("ABF Film", "Ajinomoto", 95, "Sole source", "Maximum"),
+        ("CoWoS Packaging", "TSMC", 95, "Sole source", "High"),
+        ("HBM3e Memory", "SK Hynix", 90, "Single source", "Elevated"),
+        ("InfiniBand", "NVIDIA Mellanox", 90, "Single source", "Elevated"),
+        ("ABF Substrate", "Ibiden", 75, "Single source", "Elevated"),
+        ("GPU Training", "NVIDIA", 95, "Single source", "Moderate"),
+        ("Transformers", "Multiple", 60, "Oligopoly", "Low"),
+        ("Generators", "Caterpillar/Cummins", 80, "Duopoly", "Low"),
+    ], columns=["Component", "Dominant Supplier", "Share %", "Type", "Risk Tier"])
 
-    fig_conc = px.bar(conc_data.sort_values("Score"), x="Score", y="Component", orientation="h",
-        color="Score", color_continuous_scale=["#22c55e", "#f59e0b", "#ef4444"], range_color=[1, 5], text="Score")
-    fig_conc.update_traces(texttemplate="%{text:.1f}", textposition="outside")
-    fig_conc.update_layout(height=450, xaxis=dict(range=[0, 5.5]), showlegend=False, margin=dict(l=20, r=40, t=10, b=0))
+    conc_sorted = conc_data.assign(_tier=conc_data["Risk Tier"].map(tier_rank)) \
+        .sort_values(["_tier", "Share %"], ascending=[True, False])
+    tier_colors = {"Maximum": "#ef4444", "High": "#f97316", "Elevated": "#f59e0b",
+                   "Moderate": "#3b82f6", "Low": "#22c55e"}
+
+    fig_conc = px.bar(conc_sorted, x="Share %", y="Component", orientation="h",
+        color="Risk Tier", color_discrete_map=tier_colors, text="Share %")
+    fig_conc.update_traces(texttemplate="%{text:.0f}%", textposition="outside")
+    fig_conc.update_layout(height=450, xaxis=dict(range=[0, 110], title="Approx. supplier share (%)"),
+        showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=1.02),
+        margin=dict(l=20, r=40, t=10, b=0))
     st.plotly_chart(fig_conc, use_container_width=True)
-    st.caption("Score = f(Supplier Concentration, Lead Time Risk, Geopolitical Risk, Economic Impact). >=3.5 = Extreme/High.")
+    st.caption(
+        "Risk Tier = qualitative editorial judgement as of 2026-09, mapped to the Sole vs Single Source "
+        "hierarchy in Deep Dive (Maximum = sole source without a roadmap; High = sole source with a "
+        "credible alternative timeline; Elevated = single source with high barriers; Moderate = single "
+        "source with active competition; Low = oligopoly/competitive supply). Share % = approximate "
+        "concentration, direction only."
+    )
 
-    st.dataframe(conc_data.sort_values("Score", ascending=False), use_container_width=True, hide_index=True)
+    st.dataframe(
+        conc_data.assign(_tier=conc_data["Risk Tier"].map(tier_rank))
+        .sort_values(["_tier", "Share %"], ascending=[True, False])
+        [["Component", "Dominant Supplier", "Share %", "Type", "Risk Tier"]],
+        use_container_width=True, hide_index=True)
 
 with tab_lead:
     st.header("Component Lead Times — Construction Loan Impact")
@@ -52,6 +77,7 @@ with tab_lead:
 
 with tab_geo:
     st.header("Geopolitical Risk Matrix")
+    st.caption("Probability/impact = qualitative editorial words as of 2026-09, not calibrated probabilities.")
     geo_data = pd.DataFrame([
         ("Taiwan Strait", "High", "Very High", "TSMC (fab+packaging), ASE, >90% advanced chips"),
         ("China Export Controls", "Moderate", "High", "NVIDIA H100/B200, ASML tools to China"),
@@ -62,13 +88,14 @@ with tab_geo:
     st.dataframe(geo_data, use_container_width=True, hide_index=True)
 
     st.subheader("Stress Test Scenarios")
+    st.caption("Likelihood is a qualitative editorial judgement for the 12-month horizon from 2026-09 — not a calibrated probability.")
     stress_data = pd.DataFrame([
-        ("Taiwan blockade (>1 month)", "Low (5-10%)", "Catastrophic", "Global chip supply halts. >90% advanced chips in Taiwan."),
-        ("SK Hynix production halt", "Low-Mod (10-15%)", "Severe", "HBM3e supply stops. >90% from SK Hynix."),
-        ("CoWoS capacity stall", "Moderate (20-30%)", "Significant", "Packaging bottleneck tightens. TSMC single point."),
-        ("Transformer lead time extension", "High (40-50%)", "Moderate", "DC construction delayed 3+ years."),
-        ("China export control escalation", "Mod-High (30-40%)", "Moderate", "NVIDIA revenue impacted. Huawei Ascend domestic alt."),
-    ], columns=["Scenario", "Probability", "Credit Impact", "Description"])
+        ("Taiwan blockade (>1 month)", "Low", "Catastrophic", "Global chip supply halts. >90% advanced chips in Taiwan."),
+        ("SK Hynix production halt", "Low-Moderate", "Severe", "HBM3e supply stops. >90% from SK Hynix."),
+        ("CoWoS capacity stall", "Moderate", "Significant", "Packaging bottleneck tightens. TSMC single point."),
+        ("Transformer lead time extension", "Moderate-High", "Moderate", "DC construction delayed 3+ years."),
+        ("China export control escalation", "Moderate-High", "Moderate", "NVIDIA revenue impacted. Huawei Ascend domestic alt."),
+    ], columns=["Scenario", "Likelihood (editorial, 12-mo)", "Credit Impact", "Description"])
     st.dataframe(stress_data, use_container_width=True, hide_index=True)
 
 with tab_deep:
@@ -92,10 +119,10 @@ with tab_deep:
 
     with st.expander("Manufacturing Economics — Yield & Binning"):
         st.markdown("""
-**Die yield:** Not every die on a wafer works. Yield rates by process node:
-- N5 (mature): ~90% good dies per wafer
-- N3 (early ramp): ~60-80%
-- N2 (projected early ramp): ~50-70%
+**Die yield:** Not every die on a wafer works. Yield rates are closely held by foundries; these are rough public-estimate ranges, not confirmed figures:
+- N5 (mature): ~90% good dies per wafer (est.)
+- N3 (early ramp): ~60-80% (est.)
+- N2 (projected early ramp): ~50-70% (est.)
 
 **Binning:** Working dies are tested and sorted into performance bins. A single wafer yields multiple SKUs:
 - H100 (fully functional, highest bin)
@@ -110,7 +137,7 @@ with tab_deep:
 
     with st.expander("Credit Implications"):
         st.markdown("""
-**Concentration risk scoring:** 6 components score 3.5+ (Extreme/High risk) — EUV, Advanced Fab, CoWoS, ABF Film, HBM3e, InfiniBand. A supply disruption at any of these halts AI hardware shipments.
+**Concentration risk tiering:** 4 components tier Maximum/High (EUV, Advanced Fab, CoWoS, ABF Film) and 3 more Elevated (HBM3e, InfiniBand, ABF Substrate) — see the Concentration tab. A supply disruption at any of these halts AI hardware shipments.
 
 **Lead time risk:** Transformers at 140-160+ weeks must be ordered before loan close. This is a hard gate — no amount of money accelerates delivery. Verification of transformer orders should be a condition precedent to construction drawdowns.
 

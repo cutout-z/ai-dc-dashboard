@@ -8,6 +8,12 @@ import plotly.graph_objects as go
 
 st.title("Memory Subsystem")
 
+st.caption(
+    "Sources & as-of (2026-09): JEDEC/SK hynix/Samsung/Micron public disclosures and industry reporting. "
+    "Bandwidth/cost figures are approximate public estimates; supplier shares are editorial estimates, "
+    "not audited market data. Market prices move — re-verify before lending decisions."
+)
+
 st.header("HBM vs GDDR")
 hbm_gddr = pd.DataFrame([
     ("HBM3e", "3D-stacked on interposer", "819.2-bit", "8,000 GB/s", "36 GB", "1.2W", "~$15-18/GB", "~10 mm", "AI training/inference", "H200, B200"),
@@ -127,7 +133,7 @@ For AI clusters: CXL could enable GPU clusters to share a large memory pool, red
 
 with st.expander("Credit Implications"):
     st.markdown("""
-**Collateral value risk:** HBM is generation-locked to specific GPUs. HBM3e GPUs cannot use HBM4. An H200 GPU (HBM3e) has zero standalone memory value when HBM4 GPUs ship. HBM represents 35-47% of AI server BOM cost.
+**Collateral value risk (editorial, as-of 2026-09):** HBM is generation-locked to specific GPUs — an HBM3e GPU cannot be upgraded to HBM4. When HBM4 parts ship, the HBM3e GPU's value depends on continued demand for HBM3e-class systems (typically several more years for inference/secondary markets); it is not automatically zero. HBM is commonly cited at 35-47% of AI server BOM cost (est.).
 
 **Concentration risk:** SK Hynix controls >90% of HBM3e supply. Samsung and Micron are ramping but cannot fill the gap. HBM consumes ~3x wafer capacity per GB vs DDR — supply expansion is constrained by fab capacity.
 
