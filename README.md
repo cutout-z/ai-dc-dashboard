@@ -65,23 +65,37 @@ No secrets or environment variables are required — all data sources are public
 
 ## Keeping data current
 
-The Streamlit app is a reader of committed dashboard data. It does not call the VPS timers during page load.
+The Streamlit app is a reader of committed dashboard data. It does not call
+the NAS lanes during page load.
 
-The active production refresh process runs on a Hetzner VPS:
+The active production refresh process runs on the NAS runner (QNAP
+`ai-wif-runner` container), scheduled by QNAP scheduled tasks and dispatched
+by `nas-job ai-dc-*`:
 
-1. systemd timers run ETL, AU DC refreshes, source-health checks, and report-only research briefs.
-2. Refresh scripts rebuild compact dashboard-ready outputs under `data/`.
-3. If tracked outputs change, the VPS bot commits and pushes to GitHub.
-4. Streamlit Community Cloud picks up the latest committed data on its normal redeploy/restart path.
+1. Scheduled lanes run ETL, AU DC refreshes, source-health checks, and
+   report-only research briefs (lane registry + cadence windows in
+   `tools/nas-runner/configs/brain-ops.nas.toml`).
+2. The dispatcher reuses this repo's `deploy/run-vps-*.sh` scripts as entry
+   points, overriding `APP_DIR`/`PYTHON`/`REPORT_DIR` for the container
+   layout. The `run-vps-*` names are retained for compatibility — they are
+   NAS lanes now, not VPS services.
+3. Refresh scripts rebuild compact dashboard-ready outputs under `data/`.
+4. If tracked outputs change, the lane commits and pushes to GitHub.
+5. Streamlit Community Cloud picks up the latest committed data on its
+   normal redeploy/restart path.
 
-Current VPS lanes:
+Current NAS lanes (definitive cadence: `tools/nas-runner/configs/brain-ops.nas.toml`):
 
-| Lane | Timer | Cadence | Dashboard impact |
-|---|---|---|---|
-| Source health | `ai-dc-health.timer` | Daily, around 07:20 Perth | Writes Markdown/JSON operational reports on the VPS. |
-| Deterministic ETL | `ai-dc-etl.timer` | Mon/Wed/Fri, around 07:40 Perth | Refreshes financials, macro, consensus, earnings dates, capex staleness, news catalogue snapshots, and ZeroEval/LLM benchmark data; commits changed dashboard data. |
-| Research brief | `ai-dc-research-brief.timer` | Weekly Monday morning Perth | Stages a review prompt/report only; no CSV/DB writes. |
-| AU DC data | `ai-dc-au-data.timer` | Weekly Monday morning Perth | Refreshes AEMO generation/grid/project outputs, runs AU DC checks, prunes raw cache, and commits changed processed outputs. |
+| Lane | Dashboard impact |
+|---|---|
+| Source health (`ai-dc-health`) | Runs source-health checks; writes Markdown/JSON operational reports. |
+| Deterministic ETL (`ai-dc-etl`) | Refreshes financials, macro, consensus, earnings dates, capex staleness, news catalogue snapshots, and ZeroEval/LLM benchmark data; commits changed dashboard data. |
+| Research brief (`ai-dc-research-brief`) | Stages a review prompt/report only; no CSV/DB writes. |
+| AU DC data (`ai-dc-au-data`) | Refreshes AEMO generation/grid/project outputs, runs AU DC checks, prunes raw cache, and commits changed processed outputs. |
+
+The earlier Hetzner VPS + systemd timers era is **historical** — see
+`deploy/README.md` for the current NAS runner setup and what remains of the
+old VPS instructions.
 
 Operational details live in `deploy/`.
 
@@ -110,14 +124,19 @@ python etl/fetch_macro.py
 
 Run these before pushing updates when doing a supervised local refresh.
 
-### VPS automation
+### NAS automation
 
-Production automation lives in `deploy/`. The Hetzner model is:
+Production automation lives in `deploy/` and runs on the NAS runner. The
+model is:
 
 - deterministic ETL refreshes commit dashboard-ready data when outputs change;
 - AU DC refreshes run as a separate lane and skip the full historical demand rebuild by default;
-- source-health reports are written as Markdown/JSON under `/var/lib/ai-dc-dashboard/reports`;
+- source-health reports are written as Markdown/JSON under the lane's
+  `REPORT_DIR` (container path — see `tools/nas-runner/configs/brain-ops.nas.toml`);
 - LLM-backed research is report-only until reviewed and promoted manually.
+
+The `run-vps-*.sh` filenames in `deploy/` are historical compatibility names —
+the NAS dispatcher invokes them with its own environment overrides.
 
 Raw AU DC AEMO/NEMOSIS cache is pruned with `scripts/prune_au_dc_raw_cache.py`; processed parquet/CSV outputs are the durable dashboard layer.
 
