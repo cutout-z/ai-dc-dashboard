@@ -160,8 +160,14 @@ def build():
 
 if __name__ == "__main__":
     build()
-    # Run data quality spot check after every build
-    import importlib.util, subprocess
+    # Run data quality spot check after every build. Hard errors (exit >= 2)
+    # must propagate so the ETL lane stops instead of publishing a broken DB
+    # (S2-04: check=False discarded even hard-error exits). Warnings (exit 1)
+    # remain non-fatal but visible in the spot check output above.
+    import subprocess
+
     spot_check = PROJECT_ROOT / "scripts" / "au_dc_spot_check.py"
     if spot_check.exists():
-        subprocess.run([sys.executable, str(spot_check)], check=False)
+        result = subprocess.run([sys.executable, str(spot_check)])
+        if result.returncode >= 2:
+            raise SystemExit(result.returncode)

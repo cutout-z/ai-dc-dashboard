@@ -303,14 +303,33 @@ def _entry_source(entry, fallback: str) -> str:
     return fallback
 
 
-def _fetch_feed(url: str, source_fallback: str) -> list[NewsItem]:
+def _fetch_feed(
+    url: str,
+    source_fallback: str,
+    *,
+    stats: dict | None = None,
+    failed_label: str | None = None,
+) -> list[NewsItem]:
+    """Fetch one feed URL.
+
+    When ``stats`` is given, the attempt is counted (attempted/succeeded);
+    a failed feed is appended to ``stats["failed_feeds"]`` using
+    ``failed_label`` (defaulting to the source fallback name).
+    """
+    if stats is not None:
+        stats["attempted"] += 1
     try:
         response = requests.get(url, timeout=15)
         response.raise_for_status()
         parsed = feedparser.parse(response.content)
     except Exception as e:
         logger.warning("feedparser error for %s: %s", url, e)
+        if stats is not None:
+            stats["failed_feeds"].append(failed_label or source_fallback)
+            return []
         return []
+    if stats is not None:
+        stats["succeeded"] += 1
 
     items: list[NewsItem] = []
     for entry in parsed.entries:
@@ -367,15 +386,17 @@ def _in_date_window(
     return True
 
 
-@st.cache_data(ttl=1800, show_spinner=False)
-def fetch_news_buckets(
-    max_per_bucket: int = 30,
-    start_date: str | date | None = None,
-    end_date: str | date | None = None,
+def _fetch_news_buckets_uncached(
+    max_per_bucket: int,
+    start_date,
+    end_date,
+    stats: dict | None,
 ) -> dict[str, list[dict]]:
-    """Fetch all configured buckets. Returns bucket_label -> list of item dicts.
+    """Live fetch of all configured buckets (no caching).
 
-    Returns dicts (not NewsItem objects) because Streamlit's cache serializes output.
+    ``stats``, when given, is filled with feed-request level results —
+    attempted/succeeded counts plus per-feed failure labels — giving the
+    catalogue producer the S2-04 attempted/succeeded contract.
     """
     result: dict[str, list[dict]] = {}
     for label, cfg in BUCKETS.items():
@@ -385,7 +406,12 @@ def fetch_news_buckets(
 
         for query in cfg.get("queries", []):
             url = _gn_url(query, start_date=start_date, end_date=end_date)
-            for item in _fetch_feed(url, source_fallback="Google News"):
+            for item in _fetch_feed(
+                url,
+                source_fallback="Google News",
+                stats=stats,
+                failed_label=f"google_news:{query}",
+            ):
                 if not _in_date_window(item.published, start_date, end_date):
                     continue
                 if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
@@ -401,7 +427,12 @@ def fetch_news_buckets(
             feed_url = DIRECT_FEEDS.get(direct_name)
             if not feed_url:
                 continue
-            for item in _fetch_feed(feed_url, source_fallback=direct_name):
+            for item in _fetch_feed(
+                feed_url,
+                source_fallback=direct_name,
+                stats=stats,
+                failed_label=f"direct:{direct_name}",
+            ):
                 if not _in_date_window(item.published, start_date, end_date):
                     continue
                 if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
@@ -437,6 +468,35 @@ def fetch_news_buckets(
         ]
 
     return result
+
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def fetch_news_buckets(
+    max_per_bucket: int = 30,
+    start_date: str | date | None = None,
+    end_date: str | date | None = None,
+) -> dict[str, list[dict]]:
+    """Fetch all configured buckets. Returns bucket_label -> list of item dicts.
+
+    Cached wrapper around :func:`_fetch_news_buckets_uncached`. Producer
+    scripts that need per-feed attempted/succeeded stats call the uncached
+    core directly with a ``stats`` dict.
+    Returns dicts (not NewsItem objects) because Streamlit's cache serializes output.
+    """
+    return _fetch_news_buckets_uncached(max_per_bucket, start_date, end_date, None)
+
+
+def fetch_stats_summary(stats: dict) -> str:
+    """One-line human summary of a feed-stats dict (S2-04 contract)."""
+    attempted = stats.get("attempted", 0)
+    succeeded = stats.get("succeeded", 0)
+    failed = stats.get("failed_feeds", [])
+    base = f"{succeeded}/{attempted} feed requests succeeded"
+    if failed:
+        shown = ", ".join(failed[:5])
+        more = f" (+{len(failed) - 5} more)" if len(failed) > 5 else ""
+        return f"{base}; failed: {shown}{more}"
+    return base
 
 
 def flatten_news_buckets(news_data: dict[str, list[dict]]) -> list[dict]:

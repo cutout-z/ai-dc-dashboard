@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -24,9 +25,43 @@ DB_PATH = Path(st.session_state["db_path"])
 DATA_DIR = Path(__file__).parent.parent.parent.parent / "data"
 REF_DIR = DATA_DIR / "reference"
 AU_DC_DIR = DATA_DIR / "au_dc"
+PROJECT_ROOT = DATA_DIR.parent
 
 st.title("Source Health")
 st.caption("Freshness audit across CSVs, JSON, parquets, DB tables, live fetchers, and news feeds.")
+
+# ──────────────────────────────────────────────
+# 0. EXPECTED-INPUT INVENTORY (S2-04)
+# Missing files must be visible, not silently skipped by directory scans.
+# ──────────────────────────────────────────────
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+from scripts.source_health_report import scan_all  # noqa: E402
+
+try:
+    _inventory = scan_all()
+    _hard = [
+        e for e in _inventory["expected"]
+        if e["role"] in ("data", "enrichment")
+        and e["status"] in ("missing", "unreadable", "unexpected-format")
+    ]
+    _soft = [
+        e for e in _inventory["expected"]
+        if e["role"] not in ("data", "enrichment")
+        and e["status"] in ("missing", "unreadable", "unexpected-format")
+    ]
+    if _hard:
+        st.error(
+            "Expected inputs missing or unreadable (dashboards/ETL depend on these): "
+            + "; ".join(f"`{e['source']}` ({e['status']})" for e in _hard)
+        )
+    if _soft:
+        st.warning(
+            "Secondary inputs absent (rebuildable/diagnostic): "
+            + "; ".join(f"`{e['source']}` ({e['status']})" for e in _soft)
+        )
+except Exception as _inv_err:  # inventory must never take the page down
+    st.info(f"Expected-input inventory unavailable: {_inv_err}")
 
 
 # ──────────────────────────────────────────────
@@ -461,7 +496,8 @@ st.caption("Item counts and latest article per bucket (from cached fetch).")
 st.header("ETL Script Last Runs")
 st.caption(
     "Populated by ETL scripts that write to `data/fetcher_log.json` on completion. "
-    "Shows when each script last ran and whether it succeeded."
+    "Attempts vs successes are separate: a failed run advances Last Attempt while "
+    "Last Success keeps the last usable output visible."
 )
 
 FETCHER_LOG_PATH = DATA_DIR / "fetcher_log.json"
@@ -478,26 +514,49 @@ else:
         etl_log = json.loads(FETCHER_LOG_PATH.read_text())
         etl_rows = []
         for script, entry in sorted(etl_log.items()):
+            if not isinstance(entry, dict):
+                continue
             last_run = entry.get("last_run", "")
             status = entry.get("status", "")
-            count = entry.get("count", "")
             notes = entry.get("notes", "")
 
-            # Calculate age
-            age_s = None
-            if last_run:
+            # S2-04: prefer last_success (preserved across failures) over last_run
+            # (advanced on every attempt), so staleness stays visible after errors.
+            last_success = entry.get("last_success") or last_run
+            success_age = None
+            success_dt = None
+            if last_success:
                 try:
-                    run_dt = datetime.fromisoformat(last_run.replace("Z", "+00:00"))
-                    age_s = (datetime.now(timezone.utc) - run_dt).total_seconds()
+                    success_dt = datetime.fromisoformat(str(last_success).replace("Z", "+00:00"))
+                    success_age = (datetime.now(timezone.utc) - success_dt).total_seconds()
                 except Exception:
                     pass
 
+            attempt_age = None
+            if last_run:
+                try:
+                    attempt_dt = datetime.fromisoformat(last_run.replace("Z", "+00:00"))
+                    attempt_age = (datetime.now(timezone.utc) - attempt_dt).total_seconds()
+                except Exception:
+                    pass
+
+            counts = ""
+            if "succeeded" in entry:
+                counts = f"{entry.get('succeeded', '?')}/{entry.get('attempted', '?')}"
+            elif entry.get("count") not in (None, ""):
+                counts = str(entry.get("count"))
+
             etl_rows.append({
                 "Script": script,
-                "Last Run": last_run[:16].replace("T", " ") if last_run else "—",
-                "Age": _fmt_age(age_s),
+                "Last Attempt": last_run[:16].replace("T", " ") if last_run else "—",
+                "Last Success": (
+                    success_dt.strftime("%Y-%m-%d %H:%M") if success_dt is not None
+                    else (str(last_success)[:16].replace("T", " ") if last_success else "—")
+                ),
+                "Success Age": _fmt_age(success_age),
+                "Age": _fmt_age(attempt_age),
                 "Status": "OK" if status == "ok" else status.upper(),
-                "Count": count,
+                "Count": counts,
                 "Notes": notes,
             })
 

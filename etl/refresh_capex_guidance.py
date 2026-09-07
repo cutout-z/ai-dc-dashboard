@@ -28,6 +28,14 @@ import yfinance as yf
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from app.lib.run_result import (  # noqa: E402
+    final_status,
+    now_iso,
+    read_log_record,
+    write_log_record,
+)
+
 DATA_DIR = Path(__file__).parent.parent / "data" / "reference"
 GUIDANCE_PATH = DATA_DIR / "capex_guidance.csv"
 HISTORY_PATH = DATA_DIR / "capex_guidance_history.csv"
@@ -35,20 +43,6 @@ STALE_PATH = Path(__file__).parent.parent / "data" / "stale_guidance.json"
 LOG_PATH = Path(__file__).parent.parent / "data" / "fetcher_log.json"
 
 LOOKBACK_DAYS = 14
-
-
-def _write_log(status: str, count: int, notes: str = "") -> None:
-    try:
-        log = json.loads(LOG_PATH.read_text()) if LOG_PATH.exists() else {}
-    except Exception:
-        log = {}
-    log["refresh_capex_guidance.py"] = {
-        "last_run": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "status": status,
-        "count": count,
-        "notes": notes,
-    }
-    LOG_PATH.write_text(json.dumps(log, indent=2))
 
 
 def load_guidance() -> list[dict]:
@@ -105,7 +99,7 @@ def get_quarterly_capex(ticker_symbol: str) -> tuple[str | None, float | None]:
         return None, None
 
 
-def main() -> None:
+def main() -> int:
     lookback = int(sys.argv[1]) if len(sys.argv) > 1 else LOOKBACK_DAYS
     cutoff = (datetime.now(timezone.utc) - timedelta(days=lookback)).date()
 
@@ -118,11 +112,14 @@ def main() -> None:
     stale = []
     fresh = []
     quarterly_actuals = []
+    unknown_earnings = []
 
     for ticker in tickers:
         last_earnings = get_last_earnings_date(ticker)
         if last_earnings is None:
+            # Unknown is not current: the ticker must not be counted as fresh.
             print(f"  {ticker}: could not determine last earnings date")
+            unknown_earnings.append(ticker)
             continue
 
         # Fetch latest quarterly capex
@@ -180,11 +177,57 @@ def main() -> None:
                 ),
             })
 
+    assessed = len(stale) + len(fresh)
+    attempted = assessed + len(unknown_earnings)
+    status = final_status(attempted - len(unknown_earnings), attempted)
+
+    # Observation coverage: newest embedded earnings date actually assessed
+    # (empty when nothing was assessed — absence of data is not freshness).
+    assessed_dates = [s["last_earnings_date"] for s in stale] + [
+        str(r) for r in (
+            get_last_earnings_date(t) for t in fresh
+        )
+    ]
+    coverage_latest = max(assessed_dates) if assessed_dates else None
+
+    if status == "error":
+        # Every lookup failed (or nothing was assessable): keep the previous
+        # stale_guidance.json untouched so last-good survives, log honestly,
+        # and fail the run. The old "All guidance is current" on total outage
+        # is exactly the failure this replaces.
+        previous = read_log_record(LOG_PATH, "refresh_capex_guidance.py")
+        print(
+            "\nAll earnings lookups failed (or no ticker was assessable) — "
+            "stale_guidance.json left untouched "
+            f"(previous run: {previous.get('last_success') or 'never succeeded'})."
+        )
+        write_log_record(
+            LOG_PATH,
+            "refresh_capex_guidance.py",
+            status="error",
+            attempted=attempted,
+            succeeded=attempted - len(unknown_earnings),
+            observations=assessed,
+            notes=(
+                f"{len(unknown_earnings)}/{attempted} earnings lookups failed; "
+                f"stale_guidance.json preserved"
+            ),
+            count=assessed,
+        )
+        return 2
+
     # Write stale_guidance.json
     output = {
-        "checked_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "schema_version": 2,
+        "checked_at": now_iso(),
         "lookback_days": lookback,
         "cutoff": str(cutoff),
+        "status": status,
+        "attempted": attempted,
+        "succeeded": attempted - len(unknown_earnings),
+        "tickers_tracked": len(tickers),
+        "newest_observed_earnings_date": coverage_latest,
+        "unknown_earnings": unknown_earnings,
         "stale_tickers": stale,
         "fresh_tickers": fresh,
         "quarterly_actuals": quarterly_actuals,
@@ -212,15 +255,46 @@ def main() -> None:
                 f"prior {range_str}, reported {s['last_earnings_date']}"
             )
         print(f"\nWrote {STALE_PATH}")
+    elif fresh:
+        print(
+            f"All assessed guidance is current as of newest observed earnings "
+            f"{coverage_latest} — no updates needed."
+        )
     else:
-        print("All guidance is current — no updates needed.")
+        print(
+            "No ticker was assessable in this window (none reported within the "
+            f"{lookback}-day lookback). This is not proof of freshness."
+        )
 
-    total = len(stale) + len(fresh)
-    print(f"\nDone. {len(stale)} stale, {len(fresh)} current, "
-          f"{len(quarterly_actuals)} quarterly actuals fetched.")
+    if unknown_earnings:
+        print(
+            f"\nWARNING: earnings date unknown for {len(unknown_earnings)} "
+            f"ticker(s): {', '.join(unknown_earnings)} — excluded from the "
+            f"fresh/stale assessment."
+        )
 
-    _write_log("ok", total, f"{len(stale)} stale, {len(fresh)} current")
+    print(
+        f"\nDone [{status}]. {len(stale)} stale, {len(fresh)} current, "
+        f"{len(unknown_earnings)} unknown, {len(quarterly_actuals)} quarterly "
+        f"actuals fetched; newest observed earnings {coverage_latest or 'n/a'}."
+    )
+
+    write_log_record(
+        LOG_PATH,
+        "refresh_capex_guidance.py",
+        status=status,
+        attempted=attempted,
+        succeeded=attempted - len(unknown_earnings),
+        observations=assessed,
+        notes=(
+            f"{len(stale)} stale, {len(fresh)} current, "
+            f"{len(unknown_earnings)} unknown; newest observed earnings "
+            f"{coverage_latest or 'n/a'}"
+        ),
+        count=assessed,
+    )
+    return 0 if status == "ok" else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

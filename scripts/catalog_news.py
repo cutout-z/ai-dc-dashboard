@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 import re
 import sys
 from datetime import date, datetime, timedelta, timezone
@@ -19,7 +18,12 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.lib.news import fetch_news_buckets, flatten_news_buckets  # noqa: E402
+from app.lib.news import (  # noqa: E402
+    _fetch_news_buckets_uncached,
+    fetch_stats_summary,
+    flatten_news_buckets,
+)
+from app.lib.run_result import final_status, now_iso, write_log_record  # noqa: E402
 
 
 CATALOG_PATH = PROJECT_ROOT / "data" / "reference" / "news_catalog.csv"
@@ -40,10 +44,6 @@ FIELDNAMES = [
     "published",
     "summary",
 ]
-
-
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _clean_text(value: str | None) -> str:
@@ -68,20 +68,6 @@ def _write_catalog(path: Path, rows: list[dict]) -> None:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         writer.writeheader()
         writer.writerows(rows)
-
-
-def _write_log(status: str, count: int, notes: str = "") -> None:
-    try:
-        log = json.loads(LOG_PATH.read_text()) if LOG_PATH.exists() else {}
-    except Exception:
-        log = {}
-    log["catalog_news.py"] = {
-        "last_run": _now_iso(),
-        "status": status,
-        "count": count,
-        "notes": notes,
-    }
-    LOG_PATH.write_text(json.dumps(log, indent=2) + "\n", encoding="utf-8")
 
 
 def _merge_items(
@@ -143,19 +129,48 @@ def catalog_news(
     start_date: str | date | None = None,
     end_date: str | date | None = None,
 ) -> tuple[int, int, int]:
-    news_data = fetch_news_buckets(
+    # Live fetch (bypasses the Streamlit cache) with per-feed result stats so
+    # all-feeds-down is detectable instead of collapsing into a silent "ok".
+    feed_stats = {"attempted": 0, "succeeded": 0, "failed_feeds": []}
+    news_data = _fetch_news_buckets_uncached(
         max_per_bucket=max_per_bucket,
         start_date=start_date,
         end_date=end_date,
+        stats=feed_stats,
     )
     current_items = flatten_news_buckets(news_data)
     current_items = [
         item for item in current_items
         if include_low or item.get("tier") in {"HIGH", "MEDIUM"}
     ]
+    attempted, succeeded = feed_stats["attempted"], feed_stats["succeeded"]
+    status = final_status(succeeded, attempted)
 
     existing = _read_catalog(CATALOG_PATH)
-    now = _now_iso()
+
+    if not current_items and not dry_run:
+        # Feeds may be down but the catalog is not empty: an unchanged (or
+        # empty) rewrite would advance mtime without observations and look
+        # like success. Preserve last-good rows, log the failure, exit hard.
+        write_log_record(
+            LOG_PATH,
+            "catalog_news.py",
+            status="error",
+            attempted=attempted,
+            succeeded=succeeded,
+            observations=0,
+            notes=(
+                f"no observations fetched ({fetch_stats_summary(feed_stats)}); "
+                f"catalog unchanged with {len(existing)} rows"
+            ),
+            count=0,
+        )
+        raise SystemExit(
+            "catalog_news: no observations fetched — catalog preserved, "
+            f"see {LOG_PATH} ({fetch_stats_summary(feed_stats)})"
+        )
+
+    now = now_iso()
     added, updated = _merge_items(
         existing,
         current_items,
@@ -165,10 +180,18 @@ def catalog_news(
 
     if not dry_run:
         _write_catalog(CATALOG_PATH, list(existing.values()))
-        _write_log(
-            "ok",
-            len(current_items),
-            f"added={added}, updated={updated}, total_catalogued={len(existing)}",
+        write_log_record(
+            LOG_PATH,
+            "catalog_news.py",
+            status=status,
+            attempted=attempted,
+            succeeded=succeeded,
+            observations=len(current_items),
+            notes=(
+                f"added={added}, updated={updated}, "
+                f"total_catalogued={len(existing)}; {fetch_stats_summary(feed_stats)}"
+            ),
+            count=len(current_items),
         )
 
     return added, updated, len(existing)
@@ -200,17 +223,19 @@ def catalog_backfill(
     dry_run: bool,
 ) -> tuple[int, int, int, int]:
     existing = _read_catalog(CATALOG_PATH)
-    now = _now_iso()
+    now = now_iso()
     added_total = 0
     updated_total = 0
     item_total = 0
+    feed_stats = {"attempted": 0, "succeeded": 0, "failed_feeds": []}
     windows = _date_windows(days, window_days)
 
     for start, end in windows:
-        news_data = fetch_news_buckets(
+        news_data = _fetch_news_buckets_uncached(
             max_per_bucket=max_per_bucket,
             start_date=start,
             end_date=end,
+            stats=feed_stats,
         )
         current_items = flatten_news_buckets(news_data)
         current_items = [
@@ -231,16 +256,64 @@ def catalog_backfill(
             f"items={len(current_items)} added={added} updated={updated}"
         )
 
+    attempted, succeeded = feed_stats["attempted"], feed_stats["succeeded"]
+    status = final_status(succeeded, attempted)
+
     if not dry_run:
+        if item_total == 0:
+            # No observations at all: an unchanged rewrite would advance mtime
+            # without content. Preserve last-good rows and report honestly.
+            if succeeded == 0:
+                write_log_record(
+                    LOG_PATH,
+                    "catalog_news.py",
+                    status="error",
+                    attempted=attempted,
+                    succeeded=succeeded,
+                    observations=0,
+                    notes=(
+                        f"backfill fetched no observations, all feed requests failed "
+                        f"({fetch_stats_summary(feed_stats)}); catalog unchanged "
+                        f"with {len(existing)} rows"
+                    ),
+                    count=0,
+                )
+                raise SystemExit(
+                    "catalog_backfill: no observations fetched — catalog "
+                    f"preserved, see {LOG_PATH}"
+                )
+            write_log_record(
+                LOG_PATH,
+                "catalog_news.py",
+                status=status,
+                attempted=attempted,
+                succeeded=succeeded,
+                observations=0,
+                notes=(
+                    f"backfill_days={days}, window_days={window_days}: feeds "
+                    f"responded but no items matched the windows; catalog "
+                    f"unchanged with {len(existing)} rows; "
+                    f"{fetch_stats_summary(feed_stats)}"
+                ),
+                count=0,
+            )
+            print("No items matched any window — catalog left unchanged (mtime preserved).")
+            return added_total, updated_total, len(existing), len(windows)
+
         _write_catalog(CATALOG_PATH, list(existing.values()))
-        _write_log(
-            "ok",
-            item_total,
-            (
+        write_log_record(
+            LOG_PATH,
+            "catalog_news.py",
+            status=status,
+            attempted=attempted,
+            succeeded=succeeded,
+            observations=item_total,
+            notes=(
                 f"backfill_days={days}, window_days={window_days}, "
                 f"added={added_total}, updated={updated_total}, "
-                f"total_catalogued={len(existing)}"
+                f"total_catalogued={len(existing)}; {fetch_stats_summary(feed_stats)}"
             ),
+            count=item_total,
         )
 
     return added_total, updated_total, len(existing), len(windows)
