@@ -14,6 +14,8 @@ from typing import Any
 import pandas as pd
 
 
+from app.lib import capex_guidance_meta as cgm
+
 DATA_DIR = Path(__file__).parent.parent.parent / "data" / "reference"
 AU_DC_DIR = Path(__file__).parent.parent.parent / "data" / "au_dc" / "reference"
 
@@ -84,10 +86,15 @@ def capex_commitment_signal(data_dir: Path = DATA_DIR) -> RiskSignal:
 
     df = df.copy()
     df["notes"] = df["notes"].fillna("")
-    df["is_actual"] = df["notes"].str.contains("actual full-year", case=False, na=False)
-    guidance = df[~df["is_actual"]].sort_values(["company", "fiscal_year", "announced_date"]).copy()
-    guidance["prev_guidance"] = guidance.groupby(["company", "fiscal_year"])["guidance_usd_b"].shift(1)
-    guidance["revision_pct"] = (guidance["guidance_usd_b"] / guidance["prev_guidance"] - 1) * 100
+    df = cgm.with_metadata(df)
+    # Revisions are only ever computed between comparable observations: same
+    # company + period (fiscal_year) + record_type + measurement_basis. An
+    # analyst estimate is not a management-guidance revision, a lease-inclusive
+    # figure is not a PP&E figure, and a calendar-year disclosure never revises
+    # a fiscal-year record — so a change in period/type/lease basis alone can
+    # never register as a cut/raise.
+    guidance = df[df["record_type"] != cgm.ACTUAL]
+    guidance = cgm.comparable_revisions(guidance)
 
     latest_date = guidance["announced_date"].max()
     recent_cutoff = latest_date - pd.Timedelta(days=365)
@@ -133,7 +140,8 @@ def capex_commitment_signal(data_dir: Path = DATA_DIR) -> RiskSignal:
             )
 
     table_cols = [
-        "company", "fiscal_year", "guidance_usd_b", "prev_guidance",
+        "company", "fiscal_year", "record_type", "measurement_basis",
+        "guidance_usd_b", "prev_guidance",
         "revision_pct", "announced_date", "source", "notes",
     ]
     table = latest_by_company[[c for c in table_cols if c in latest_by_company.columns]].copy()

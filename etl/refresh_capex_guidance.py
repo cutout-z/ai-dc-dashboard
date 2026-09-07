@@ -29,6 +29,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from app.lib.capex_guidance_meta import select_forward_row  # noqa: E402
 from app.lib.run_result import (  # noqa: E402
     final_status,
     now_iso,
@@ -153,12 +154,11 @@ def main() -> int:
 
             company = next((r["company"] for r in ticker_rows), ticker)
 
-            # Find the forward-looking guidance row (highest fiscal year)
-            fy_row = max(
-                ticker_rows,
-                key=lambda r: r.get("fiscal_year", ""),
-                default={},
-            )
+            # Find the forward-looking guidance row: the open (non-actual)
+            # row whose period ends latest, selected by period end — never by
+            # string-maxing the fiscal_year label (CY2026 sorts before FY2025,
+            # which would pick a closed period as the "forward" row).
+            fy_row = select_forward_row(ticker_rows) or {}
 
             stale.append({
                 "ticker": ticker,

@@ -5,8 +5,9 @@ import sqlite3
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import calendar
 from pathlib import Path
+
+from app.lib import capex_guidance_meta as cgm
 
 DB_PATH = st.session_state["db_path"]
 DATA_DIR = Path(__file__).parent.parent.parent.parent / "data" / "reference"
@@ -134,7 +135,8 @@ if not df_annual.empty:
                 df_gd = df_gd[df_gd["guidance_usd_b"].notna() & df_gd["company"].isin(selected)]
                 display_cols = ["company", "fiscal_year", "fy_end_month",
                                 "guidance_usd_b", "guidance_low", "guidance_high",
-                                "prior_guidance_usd_b", "guidance_date", "notes"]
+                                "prior_guidance_usd_b", "guidance_date",
+                                "record_type", "measurement_basis", "notes"]
                 display_cols = [c for c in display_cols if c in df_gd.columns]
                 st.dataframe(df_gd[display_cols], use_container_width=True, hide_index=True)
 
@@ -149,7 +151,8 @@ if not df_annual.empty:
                     )
                     hist_cols = ["company", "fiscal_year", "guidance_usd_b",
                                  "guidance_low", "guidance_high",
-                                 "announced_date", "source", "notes"]
+                                 "announced_date", "record_type",
+                                 "measurement_basis", "source", "notes"]
                     hist_cols = [c for c in hist_cols if c in df_hist.columns]
                     st.dataframe(df_hist[hist_cols], use_container_width=True,
                                  hide_index=True)
@@ -170,16 +173,22 @@ history_path_b = DATA_DIR / "capex_guidance_history.csv"
 
 if guidance_path_b.exists():
     df_guide_b = pd.read_csv(guidance_path_b)
+    df_guide_b["notes"] = df_guide_b.get("notes", pd.Series(index=df_guide_b.index, dtype=object)).fillna("")
     df_guide_b = df_guide_b[
         df_guide_b["guidance_usd_b"].notna() & df_guide_b["company"].isin(selected)
     ]
-    df_guide_b["year_num"] = (
-        df_guide_b["fiscal_year"].str.extract(r"(\d{4})").astype(int)
-    )
+    df_guide_b = cgm.with_metadata(df_guide_b)
 
-    # Forward-looking fiscal year per company (max year)
-    idx_b = df_guide_b.groupby("company")["year_num"].idxmax()
-    fwd_guide = df_guide_b.loc[idx_b].copy().sort_values("company")
+    # Forward-looking row per company: the open (non-actual) guidance whose
+    # period ends latest — selected by period end, never by string-maxing the
+    # fiscal_year label (CY2026 sorts before FY2025, so a label max would pick
+    # a closed period).
+    fwd_rows = []
+    for _co, grp in df_guide_b.groupby("company", sort=False):
+        fwd = cgm.select_forward_row(grp.to_dict("records"))
+        if fwd is not None:
+            fwd_rows.append(fwd)
+    fwd_guide = pd.DataFrame(fwd_rows).sort_values("company").reset_index(drop=True)
 
     # Fresh quarterly query (unfiltered — bridge needs all available quarters)
     df_q_bridge = pd.read_sql(
@@ -192,11 +201,15 @@ if guidance_path_b.exists():
     df_q_bridge["period"] = pd.to_datetime(df_q_bridge["period"])
     df_q_bridge["capex_bn"] = df_q_bridge["capex_usd"] / 1e9
 
-    # Revision history
+    # Revision history (metadata columns used to keep prior-guidance markers
+    # off reported-actual rows)
     df_hist_b = pd.DataFrame()
     if history_path_b.exists():
         df_hist_b = pd.read_csv(history_path_b)
-        df_hist_b = df_hist_b[df_hist_b["company"].isin(selected)]
+        if not df_hist_b.empty:
+            df_hist_b["notes"] = df_hist_b["notes"].fillna("") if "notes" in df_hist_b.columns else ""
+            df_hist_b = cgm.with_metadata(df_hist_b)
+            df_hist_b = df_hist_b[df_hist_b["company"].isin(selected)]
 
     Q_COLORS = {1: "#1B4F72", 2: "#2E86C1", 3: "#5DADE2", 4: "#85C1E9"}
     REMAIN_CLR = "rgba(100,100,100,0.25)"
@@ -207,21 +220,23 @@ if guidance_path_b.exists():
 
     for _, gr in fwd_guide.iterrows():
         co = gr["company"]
-        fy_m = int(gr["fy_end_month"])
-        yr = int(gr["year_num"])
         g_bn = gr["guidance_usd_b"]
         fy_lbl = gr["fiscal_year"]
+        mb = gr.get("measurement_basis") or cgm.UNSPECIFIED
 
-        # Fiscal year boundaries
-        fy_end_day = calendar.monthrange(yr, fy_m)[1]
-        fy_end_dt = pd.Timestamp(yr, fy_m, fy_end_day)
-        fy_start_dt = (
-            pd.Timestamp(yr, 1, 1)
-            if fy_m == 12
-            else pd.Timestamp(yr - 1, fy_m + 1, 1)
-        )
+        # Period window comes from the label semantics (FY<YYYY> = the fiscal
+        # year ending YYYY; CY<YYYY> = Jan–Dec). A CY2026 disclosure therefore
+        # selects January–December actuals, never the July–June fiscal window.
+        fy_start_dt, fy_end_dt = cgm.parse_period(fy_lbl, int(gr["fy_end_month"]))
+        fy_start_dt, fy_end_dt = pd.Timestamp(fy_start_dt), pd.Timestamp(fy_end_dt)
 
-        # Actuals falling within this fiscal year
+        # The DB actuals are cash-flow PP&E additions. Cash-basis actuals can
+        # only be bridged to PP&E or basis-unspecified guidance; a declared
+        # lease-inclusive figure is never measured against them (no assumption
+        # that cash and lease-inclusive CAPEX are interchangeable).
+        cash_comparable = mb in (cgm.UNSPECIFIED, cgm.PP_E)
+
+        # Actuals falling within this period
         m = (
             (df_q_bridge["company"] == co)
             & (df_q_bridge["period"] >= fy_start_dt)
@@ -253,22 +268,44 @@ if guidance_path_b.exists():
             )
             cumul += qr["capex_bn"]
 
-        # Remaining to guidance
-        remain = max(0.0, g_bn - cumul)
-        show_r = "Remaining" not in _shown
-        if show_r:
-            _shown.add("Remaining")
-        fig_bridge.add_trace(
-            go.Bar(
-                x=[x_lbl],
-                y=[remain],
-                name="Remaining",
-                legendgroup="Remaining",
-                marker=dict(color=REMAIN_CLR, line=dict(color="#888", width=1)),
-                showlegend=show_r,
-                hovertemplate=f"Remaining: ${remain:.1f}B<extra>{co}</extra>",
+        # Remaining to guidance — only when the actuals are cash-comparable
+        if cash_comparable:
+            remain = max(0.0, g_bn - cumul)
+            show_r = "Remaining" not in _shown
+            if show_r:
+                _shown.add("Remaining")
+            fig_bridge.add_trace(
+                go.Bar(
+                    x=[x_lbl],
+                    y=[remain],
+                    name="Remaining",
+                    legendgroup="Remaining",
+                    marker=dict(color=REMAIN_CLR, line=dict(color="#888", width=1)),
+                    showlegend=show_r,
+                    hovertemplate=f"Remaining: ${remain:.1f}B<extra>{co}</extra>",
+                )
             )
-        )
+        else:
+            # Guidance value drawn as a marker, not a remaining bar — it is not
+            # directly measurable against cash-basis actuals.
+            fig_bridge.add_trace(
+                go.Scatter(
+                    x=[x_lbl],
+                    y=[g_bn],
+                    mode="markers",
+                    marker=dict(size=13, symbol="diamond",
+                                color="rgba(255,80,80,0.9)",
+                                line=dict(width=1.5,
+                                          color=st.session_state["marker_line_color"])),
+                    showlegend=False,
+                    hovertemplate=(
+                        f"Guidance ${g_bn:.0f}B ({mb})<br>"
+                        "Cash-basis actuals are not directly comparable — "
+                        "no remaining bar computed."
+                        f"<extra>{co}</extra>"
+                    ),
+                )
+            )
 
         # Guidance range (low–high) as error bars
         g_lo = gr["guidance_low"]
@@ -297,11 +334,12 @@ if guidance_path_b.exists():
                 )
             )
 
-        # Prior guidance revisions (diamond markers)
+        # Prior guidance revisions (diamond markers) — guidance rows only; a
+        # reported actual is a result, never a "prior guidance" marker.
         if not df_hist_b.empty:
             rev_m = (df_hist_b["company"] == co) & (
                 df_hist_b["fiscal_year"] == fy_lbl
-            )
+            ) & (df_hist_b["record_type"] != cgm.ACTUAL)
             df_rev = df_hist_b[rev_m].sort_values("announced_date")
             if len(df_rev) > 1:
                 for _, rr in df_rev.iloc[:-1].iterrows():
@@ -332,26 +370,39 @@ if guidance_path_b.exists():
                         )
                     )
 
-        # Annotations: guidance total on top, fill % inside actuals
-        annots.append(
-            dict(
-                x=x_lbl,
-                y=g_bn,
-                text=f"${g_bn:.0f}B",
-                showarrow=False,
-                yshift=14,
-                font=dict(size=11, color=st.session_state["annotation_color"]),
-            )
-        )
-        if cumul > 0:
-            pct = cumul / g_bn * 100
+        # Annotations: guidance total on top, fill % inside actuals — the % is
+        # only meaningful when the actuals are measured on the same basis
+        if cash_comparable:
             annots.append(
                 dict(
                     x=x_lbl,
-                    y=cumul / 2,
-                    text=f"{pct:.0f}%",
+                    y=g_bn,
+                    text=f"${g_bn:.0f}B",
                     showarrow=False,
-                    font=dict(size=12, color=st.session_state["annotation_color"]),
+                    yshift=14,
+                    font=dict(size=11, color=st.session_state["annotation_color"]),
+                )
+            )
+            if cumul > 0:
+                pct = cumul / g_bn * 100
+                annots.append(
+                    dict(
+                        x=x_lbl,
+                        y=cumul / 2,
+                        text=f"{pct:.0f}%",
+                        showarrow=False,
+                        font=dict(size=12, color=st.session_state["annotation_color"]),
+                    )
+                )
+        else:
+            annots.append(
+                dict(
+                    x=x_lbl,
+                    y=g_bn,
+                    text=f"${g_bn:.0f}B ({mb})",
+                    showarrow=False,
+                    yshift=14,
+                    font=dict(size=11, color=st.session_state["annotation_color"]),
                 )
             )
 
@@ -364,6 +415,32 @@ if guidance_path_b.exists():
         annotations=annots,
     )
     st.plotly_chart(fig_bridge, use_container_width=True)
+
+    # Basis / type transparency for each forward row drawn above
+    bridge_notes = []
+    for _, gr in fwd_guide.iterrows():
+        mb = gr.get("measurement_basis") or cgm.UNSPECIFIED
+        rt = gr.get("record_type") or cgm.MANAGEMENT_GUIDANCE
+        fy_lbl = gr["fiscal_year"]
+        co = gr["company"]
+        if rt == cgm.ANALYST_ESTIMATE:
+            bridge_notes.append(
+                f"**{co} ({fy_lbl}):** forward figure is an analyst estimate, "
+                "not company guidance."
+            )
+        if mb == cgm.UNSPECIFIED:
+            bridge_notes.append(
+                f"**{co} ({fy_lbl}):** guidance measurement basis is "
+                "unspecified — treated as cash (PP&E) for the bridge. If the "
+                "figure is lease-inclusive the remaining bar understates the gap."
+            )
+        elif mb == cgm.LEASE_INCLUSIVE:
+            bridge_notes.append(
+                f"**{co} ({fy_lbl}):** guidance is lease-inclusive — cash-basis "
+                "actuals are not directly comparable, so no remaining bar is shown."
+            )
+    for note in bridge_notes:
+        st.caption(note)
 
 # ══════════════════════════════════════════════════════════════
 # Quarterly CAPEX
