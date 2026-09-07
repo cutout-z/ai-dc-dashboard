@@ -161,6 +161,12 @@ For historical catch-up, run `python scripts/catalog_news.py --backfill-days 60 
 the News page reads the same catalog for the High/Medium history tables. Catalogs keyed
 by the pre-2026-09 title-derived keys can be migrated with
 `python scripts/migrate_news_catalog.py` (dry-run report first; `--write` persists).
+Display tiers obey a common source-quality (trust) gate before any visible material
+tier (S2-10): HIGH and MEDIUM both require a verified source (trust >= 0.70), so an
+article from an unrecognised/aggregator outlet stays LOW no matter how large the
+claimed magnitude. Stored HIGH rows from before the gate can be reclassified with
+`python scripts/migrate_news_catalog_tiers.py` (dry-run report first; `--write`
+persists) — rows are kept as historical evidence, only `last_tier` changes.
 
 ---
 

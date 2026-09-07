@@ -56,6 +56,8 @@ _SOURCE_TRUST: dict[str, float] = {
     "nikkei": 0.85,
     "barron": 0.85,
     "ft.com": 0.85,
+    "new york times": 0.85,
+    "nytimes": 0.85,
     "australian financial review": 0.85,
     "afr": 0.85,
     "the australian": 0.85,
@@ -350,6 +352,14 @@ def score_news_item(
 TIER_HIGH_THRESHOLD = 0.85
 TIER_MEDIUM_THRESHOLD = 0.40
 
+# Common source-quality (trust) gate (S2-10): no item may display a visible
+# material tier (HIGH or MEDIUM) unless its source clears this boundary —
+# verified primary (company/first-party) and financial/trade press only.
+# Unrecognised — and recognised-but-unverified — sources stay LOW on the
+# visible feed no matter how large the claimed magnitude; large numbers can
+# never override the source-quality boundary.
+TRUSTED_SOURCE_THRESHOLD = 0.70
+
 TIER_COLORS = {
     "HIGH":   "#ef4444",  # red
     "MEDIUM": "#f59e0b",  # amber
@@ -373,19 +383,27 @@ def get_materiality_tier(score: float) -> str:
 
 
 def get_display_tier(item: dict, bucket: str) -> str:
-    """Classify an item for the visible feed after source-quality gates.
+    """Classify an item for the visible feed after the common source-quality gate.
 
     Raw scoring deliberately stays broad so we can audit the feed. The display
-    tier is stricter: non-ANZ Medium items need both a trusted source and a
-    thesis-relevant event; ANZ DC keeps a lower materiality bar but still blocks
-    weak sources.
+    tier is stricter and applies to HIGH and MEDIUM alike (S2-10): a common
+    trust gate runs FIRST — any visible material tier requires a verified
+    source (trust >= ``TRUSTED_SOURCE_THRESHOLD``); an unverified source can
+    never display HIGH/MEDIUM, magnitude alone is not a quality signal. Once
+    the source is trusted, ANZ DC keeps a deliberately lower materiality bar
+    for genuine operator news; non-ANZ buckets additionally require a
+    HIGH-level (thesis-relevant) event before MEDIUM is shown.
     """
     score = item.get("materiality_score", 0)
     tier = get_materiality_tier(score)
-    if tier != "MEDIUM":
-        return tier
+    if tier == "LOW":
+        return "LOW"
 
     source_trust = get_source_trust(item.get("source", ""))
+    # Common trust gate — HIGH no longer bypasses it (S2-10).
+    if source_trust < TRUSTED_SOURCE_THRESHOLD:
+        return "LOW"
+
     text = f"{item.get('title', '')} {item.get('summary', '')}"
     if bucket == "ANZ DC":
         has_material_marker = (
@@ -393,9 +411,9 @@ def get_display_tier(item: dict, bucket: str) -> str:
             or get_magnitude_score(text) > 0
             or score >= 0.48
         )
-        return tier if source_trust >= 0.70 and has_material_marker else "LOW"
+        return tier if has_material_marker else "LOW"
 
     event = get_event_materiality(text)
-    if source_trust < 0.70 or event < 1.0 or score < 0.78:
+    if event < 1.0 or score < 0.78:
         return "LOW"
     return tier
