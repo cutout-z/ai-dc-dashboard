@@ -21,10 +21,12 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 REPO_PUBLIC = _REPO_ROOT / "data" / "investment_radar_public.json"
 _HOME_PUBLIC = Path.home() / "ai-wif-brain-dashboard" / "data" / "investment_radar_public.json"
 
-# Local mode: the projection came from the home copy and the private vault is
-# on this machine, so full-note reading is possible. On Cloud it is not.
-LOCAL_MODE = not REPO_PUBLIC.exists() and _HOME_PUBLIC.exists()
-STATUS_PATH = _HOME_PUBLIC if LOCAL_MODE else REPO_PUBLIC
+# Local mode: the private vault snapshot exists on this machine, so full-note
+# reading is possible. On Streamlit Cloud it is not (no local snapshot there).
+_PRIVATE_LOCAL_STATUS = Path.home() / "ai-wif-brain-dashboard" / "data" / "status.json"
+LOCAL_MODE = _PRIVATE_LOCAL_STATUS.exists()
+
+STATUS_PATH = _HOME_PUBLIC if not REPO_PUBLIC.exists() else REPO_PUBLIC
 
 VAULT_ROOT = (
     Path.home()
@@ -99,9 +101,6 @@ def _load_note_content(source_path: str) -> str | None:
         return note_path.read_text(encoding="utf-8")
     except OSError:
         return None
-
-
-_PRIVATE_LOCAL_STATUS = Path.home() / "ai-wif-brain-dashboard" / "data" / "status.json"
 
 
 @st.cache_data(ttl=600, show_spinner=False)
