@@ -1,8 +1,13 @@
-"""Interesting Articles — investment radar items surfaced for the DC Dashboard.
+"""Interesting Articles — public investment-radar articles for the DC Dashboard.
 
-Reads the Brain dashboard's status.json and filters investment_radar leads
-for items specifically classified as DASHBOARD (action='dashboard') by the
-investment radar logic.
+Astra 2026-09-04 remediation (F01/S2-01): reads ONLY the allowlisted public
+projection `data/investment_radar_public.json` produced by the Brain
+dashboard's `export-public-articles.py`. The full private Brain snapshot
+(`status.json`) is never loaded here.
+
+Load order:
+  1. repo `data/investment_radar_public.json` — works on Streamlit Cloud
+  2. `~/ai-wif-brain-dashboard/data/investment_radar_public.json` — local mode
 """
 
 from __future__ import annotations
@@ -12,12 +17,15 @@ from pathlib import Path
 
 import streamlit as st
 
-# Look for status.json relative to the repo root first (works on Streamlit Cloud),
-# then fall back to the Brain Dashboard home-directory path (local deployment).
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-_REPO_STATUS = _REPO_ROOT / "data" / "status.json"
-_HOME_STATUS = Path.home() / "ai-wif-brain-dashboard" / "data" / "status.json"
-STATUS_PATH = _REPO_STATUS if _REPO_STATUS.exists() else _HOME_STATUS
+REPO_PUBLIC = _REPO_ROOT / "data" / "investment_radar_public.json"
+_HOME_PUBLIC = Path.home() / "ai-wif-brain-dashboard" / "data" / "investment_radar_public.json"
+
+# Local mode: the projection came from the home copy and the private vault is
+# on this machine, so full-note reading is possible. On Cloud it is not.
+LOCAL_MODE = not REPO_PUBLIC.exists() and _HOME_PUBLIC.exists()
+STATUS_PATH = _HOME_PUBLIC if LOCAL_MODE else REPO_PUBLIC
+
 VAULT_ROOT = (
     Path.home()
     / "Library/Mobile Documents/iCloud~md~obsidian/Documents/ZC_Mac_Vault"
@@ -51,7 +59,7 @@ CONFIDENCE_BADGE: dict[str, str] = {
 # ── helpers ────────────────────────────────────────────────────────────────
 
 def _get_status_mtime() -> float:
-    """Get status.json mtime for cache busting."""
+    """Get projection mtime for cache busting."""
     try:
         return STATUS_PATH.stat().st_mtime
     except OSError:
@@ -60,24 +68,21 @@ def _get_status_mtime() -> float:
 
 @st.cache_data(ttl=60, show_spinner=False)
 def _load_dashboard_items(status_mtime: float = 0.0) -> list[dict]:
+    """Load the allowlisted public articles (schema_version 1 projection)."""
     if not STATUS_PATH.exists():
         return []
 
     try:
-        status = json.loads(STATUS_PATH.read_text())
+        export = json.loads(STATUS_PATH.read_text())
     except (json.JSONDecodeError, OSError):
         return []
 
-    radar = status.get("investment_radar", {})
-    all_items: list[dict] = radar.get("leads", []) + radar.get("watch", [])
-
-    dashboard_items = [
-        item for item in all_items
-        if item.get("action") == "dashboard"
-    ]
-
-    dashboard_items.sort(key=lambda x: x.get("date", ""), reverse=True)
-    return dashboard_items
+    if not isinstance(export, dict) or export.get("schema_version") != 1:
+        return []
+    articles = export.get("articles", [])
+    if not isinstance(articles, list):
+        return []
+    return [a for a in articles if isinstance(a, dict)]
 
 
 def _html_escape(s: str) -> str:
@@ -94,6 +99,28 @@ def _load_note_content(source_path: str) -> str | None:
         return note_path.read_text(encoding="utf-8")
     except OSError:
         return None
+
+
+_PRIVATE_LOCAL_STATUS = Path.home() / "ai-wif-brain-dashboard" / "data" / "status.json"
+
+
+@st.cache_data(ttl=600, show_spinner=False)
+def _resolve_local_source_path(date: str, text: str) -> str:
+    """Locally only: recover a vault ref from the private snapshot by identity.
+
+    The public projection deliberately carries no source_path. On this Mac the
+    private snapshot exists, so match (date, text) to restore note access.
+    Never published — this runs exclusively in local mode.
+    """
+    try:
+        status = json.loads(_PRIVATE_LOCAL_STATUS.read_text())
+    except (json.JSONDecodeError, OSError):
+        return ""
+    radar = status.get("investment_radar", {})
+    for item in radar.get("leads", []) + radar.get("watch", []):
+        if isinstance(item, dict) and item.get("date") == date and item.get("text") == text:
+            return str(item.get("source_path", ""))
+    return ""
 
 
 def _render_card_html(item: dict) -> str:
@@ -189,8 +216,12 @@ def _render_card_html(item: dict) -> str:
 st.title("Interesting Articles")
 st.caption(
     "Extracted threads and articles surfaced by the Brain dashboard's "
-    "investment radar for AI & DC Dashboard relevance. "
-    "Click **📄 View full note** on any card to read the underlying vault note."
+    "investment radar for AI & DC Dashboard relevance."
+    + (
+        " Click **📄 View full note** on any card to read the underlying vault note."
+        if LOCAL_MODE
+        else " Vault notes are available locally only."
+    )
 )
 
 with st.spinner("Loading articles..."):
@@ -199,8 +230,9 @@ with st.spinner("Loading articles..."):
 if not items:
     st.info(
         "No dashboard-classified articles found. "
-        "The Brain dashboard's `status.json` may not be available or the "
-        "investment radar hasn't surfaced any DC-relevant items yet."
+        "The public article projection (`investment_radar_public.json`) may not "
+        "be available yet, or the investment radar hasn't surfaced any "
+        "DC-relevant items."
     )
     st.caption(f"Looking at: `{STATUS_PATH}`")
 else:
@@ -258,33 +290,37 @@ else:
     # ── render cards ──
     with st.container(height=700, border=False):
         for i, item in enumerate(filtered):
-            source_path = item.get("source_path", "")
-            card_key = f"card_{i}_{source_path}"
+            card_key = f"card_{i}"
 
             # Card HTML
             st.markdown(_render_card_html(item), unsafe_allow_html=True)
 
-            # View full note button
-            view_col, _ = st.columns([1, 4])
-            with view_col:
-                if st.button("📄 View full note", key=f"btn_{card_key}"):
-                    st.session_state.setdefault("expanded_notes", set())
-                    if card_key in st.session_state["expanded_notes"]:
-                        st.session_state["expanded_notes"].discard(card_key)
-                    else:
-                        st.session_state["expanded_notes"].add(card_key)
+            # View full note button — local mode only (vault note exists here)
+            if LOCAL_MODE:
+                view_col, _ = st.columns([1, 4])
+                with view_col:
+                    if st.button("📄 View full note", key=f"btn_{card_key}"):
+                        st.session_state.setdefault("expanded_notes", set())
+                        if card_key in st.session_state["expanded_notes"]:
+                            st.session_state["expanded_notes"].discard(card_key)
+                        else:
+                            st.session_state["expanded_notes"].add(card_key)
 
-            # Show note content if expanded
-            if st.session_state.get("expanded_notes", set()) and card_key in st.session_state["expanded_notes"]:
-                with st.container(border=True):
-                    if source_path:
-                        note_content = _load_note_content(source_path)
+                # Show note content if expanded
+                if st.session_state.get("expanded_notes", set()) and card_key in st.session_state["expanded_notes"]:
+                    with st.container(border=True):
+                        source_path = _resolve_local_source_path(
+                            item.get("date", ""), item.get("text", "")
+                        )
+                        note_content = _load_note_content(source_path) if source_path else None
                         if note_content:
                             st.markdown(note_content)
                         else:
-                            st.warning(f"Note not found: `{source_path}`")
-                    else:
-                        st.caption("No source path available for this article.")
+                            st.warning(
+                                f"Note not found locally for this article."
+                                + (f" (looked up: `{source_path}`)" if source_path else "")
+                            )
+            # On Cloud (not LOCAL_MODE): no vault access — nothing to show.
 
             # Divider between cards
             st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)

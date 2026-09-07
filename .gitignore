@@ -23,3 +23,6 @@ venv/
 data/*.db
 logs/
 reports/
+
+# Private Brain snapshot — never publish (Astra F01/S2-01)
+data/status.json
