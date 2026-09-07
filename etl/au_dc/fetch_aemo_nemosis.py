@@ -7,20 +7,66 @@ List (fuel source) to produce the grid_capacity.parquet file.
 
 Also integrates the AEMO Generation Information workbook (if available)
 for committed/proposed generation pipeline data.
+
+Source horizons are resolved dynamically, never hard-coded (S2-08):
+
+- The registration snapshot (DUDETAILSUMMARY/DUDETAIL) is taken as of the
+  first instant of the *latest published AEMO MMS archive month* — a
+  publication-lag candidate advanced by the clock, confirmed by the archive
+  actually returning data (bounded backstep when the newest month is not out
+  yet). A run can never silently re-serve the January-2026 snapshot again.
+- Demand (DISPATCHREGIONSUM) refreshes incrementally: only months after the
+  last month already present in ``nem_demand_actual.parquet`` are fetched
+  (up to the latest published archive month), never a replay of the full
+  history. ``--full-demand-backfill`` keeps an explicit full rebuild path.
+- Every output records its source vintage in a ``<file>.parquet.vintage.json``
+  sidecar (archive month, registration snapshot date, workbook edition), so a
+  rewritten file is never mistaken for advanced source coverage.
 """
 
 import os
 import sys
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
 from nemosis import dynamic_data_compiler
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if __package__ in (None, ""):
+    # Allow running as a plain script (python etl/au_dc/fetch_aemo_nemosis.py)
+    # while keeping package imports for the test suite.
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from etl.au_dc.aemo_horizon import (  # noqa: E402
+    Month,
+    add_months,
+    day2_instant,
+    first_instant,
+    latest_candidate_month,
+    max_month,
+    month_label,
+    parse_month_label,
+    registration_snapshot_date,
+    window_month_keys,
+)
+from etl.au_dc.source_vintage import (  # noqa: E402
+    vintage_dict,
+    write_parquet_with_vintage,
+)
+
 AU_DC_DIR = PROJECT_ROOT / "data" / "au_dc"
 CACHE_DIR = AU_DC_DIR / "raw" / "aemo" / "nemosis_cache"
 PROCESSED_DIR = AU_DC_DIR / "processed"
 RAW_DIR = AU_DC_DIR / "raw" / "aemo"
+
+#: Registration/demand snapshot horizon rules (see aemo_horizon docstring).
+PUBLICATION_LAG_DAYS = 10
+#: How many months the snapshot resolver walks back from the lag candidate
+#: when the newest archive month is not actually published yet.
+ARCHIVE_BACKSTEP_MAX = 3
+#: Full-history demand rebuild origin (kept from the original fetch window).
+DEMAND_HISTORY_START: Month = (2020, 1)
 
 # Path to NEM Registration List (authoritative fuel source data)
 # Downloaded from: https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/participant-information/nem-registration-and-exemption-list
@@ -214,16 +260,46 @@ FUEL_CATEGORIES = {
 }
 
 
-def load_aemo_pipeline() -> pd.DataFrame:
+def _file_edition_meta(path: Path) -> dict | None:
+    """Identity marker for a manually downloaded source file (edition record).
+
+    Parsing an old workbook again does not refresh its publication vintage, so
+    the vintage sidecar records *which* file edition supplied the pipeline rows
+    (name, mtime, short sha256) instead of implying it is current.
+    """
+    if path is None or not Path(path).exists():
+        return None
+    p = Path(path)
+    import hashlib
+    from datetime import datetime, timezone
+
+    digest = None
+    try:
+        digest = hashlib.sha256(p.read_bytes()).hexdigest()[:12]
+    except OSError:
+        pass
+    meta = {
+        "file": p.name,
+        "file_mtime_utc": datetime.fromtimestamp(
+            p.stat().st_mtime, tz=timezone.utc
+        ).isoformat(),
+    }
+    if digest:
+        meta["sha256_prefix"] = digest
+    return meta
+
+
+def load_aemo_pipeline() -> tuple[pd.DataFrame, dict | None]:
     """Load committed/proposed generators from the AEMO Gen Info workbook.
 
-    Returns a DataFrame with the same schema as our generators output,
-    or an empty DataFrame if the workbook is unavailable.
+    Returns (DataFrame with the same schema as our generators output, or an
+    empty DataFrame if the workbook is unavailable) and (edition metadata for
+    the workbook that supplied the rows, or None when nothing was parsed).
     """
     gen_info_path = RAW_DIR / "nem-generation-information-latest.xlsx"
     if not gen_info_path.exists():
         print("  No AEMO Gen Info workbook — skipping pipeline data")
-        return pd.DataFrame()
+        return pd.DataFrame(), None
 
     try:
         from etl.au_dc.fetch_aemo import parse_generation_info
@@ -233,14 +309,15 @@ def load_aemo_pipeline() -> pd.DataFrame:
 
     try:
         gen_df = parse_generation_info(gen_info_path)
+        edition_meta = _file_edition_meta(gen_info_path)
     except Exception as e:
         print(f"  WARNING: Could not parse AEMO Gen Info workbook: {e}")
-        return pd.DataFrame()
+        return pd.DataFrame(), None
 
     # Keep only pipeline (committed + proposed)
     pipeline = gen_df[gen_df["status"].isin(["Committed", "Proposed"])].copy()
     if pipeline.empty:
-        return pd.DataFrame()
+        return pd.DataFrame(), edition_meta
 
     # Standardise to our schema
     result = pd.DataFrame({
@@ -256,38 +333,53 @@ def load_aemo_pipeline() -> pd.DataFrame:
         "status": pipeline["status"],
     })
 
-    return result
+    return result, edition_meta
 
 
-def fetch_regional_demand():
-    """Fetch actual NEM demand by region via NEMOSIS DISPATCHREGIONSUM.
+DEMAND_TABLE = "DISPATCHREGIONSUM"
+DEMAND_PATH = PROCESSED_DIR / "nem_demand_actual.parquet"
 
-    Aggregates 5-min dispatch data to monthly averages per region.
-    Saves to nem_demand_actual.parquet.
-    """
-    print("\n--- Fetching Actual NEM Demand ---")
 
+def _read_existing_demand_months(out_path: Path) -> list[Month] | None:
+    """Months present in an existing demand parquet (ascending); None when absent/unreadable."""
+    out_path = Path(out_path)
+    if not out_path.exists():
+        return None
     try:
-        demand = dynamic_data_compiler(
-            start_time="2020/01/01 00:00:00",
-            end_time="2026/04/01 00:00:00",
-            table_name="DISPATCHREGIONSUM",
-            raw_data_location=str(CACHE_DIR),
-            select_columns=["REGIONID", "TOTALDEMAND", "SETTLEMENTDATE"],
-            fformat="csv",
+        existing = pd.read_parquet(out_path)
+    except Exception as e:  # unreadable — cannot trust last-present
+        print(f"  WARNING: could not read existing {out_path.name}: {e}")
+        return None
+    if existing is None or existing.empty or "year_month" not in existing.columns:
+        return None
+    months: list[Month] = []
+    for raw in sorted(existing["year_month"].dropna().unique()):
+        parsed = parse_month_label(str(raw))
+        if parsed is not None:
+            months.append(parsed)
+    return months or None
+
+
+def _aggregate_demand_rows(raw: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate raw DISPATCHREGIONSUM rows to the monthly schema.
+
+    Mirrors the original aggregation exactly (same column maths, same
+    unshifted month bucketing) so appended rows stay numerically comparable
+    with the historical series.
+    """
+    if raw is None or raw.empty:
+        return pd.DataFrame(
+            columns=["nem_region", "year_month", "avg_demand_mw", "max_demand_mw",
+                     "intervals", "hours", "energy_twh"]
         )
-    except Exception as e:
-        print(f"  WARNING: Could not fetch DISPATCHREGIONSUM: {e}")
-        return
-
-    print(f"  Fetched {len(demand):,} dispatch intervals")
-
-    demand["SETTLEMENTDATE"] = pd.to_datetime(demand["SETTLEMENTDATE"])
-    demand["TOTALDEMAND"] = pd.to_numeric(demand["TOTALDEMAND"], errors="coerce")
-    demand["year_month"] = demand["SETTLEMENTDATE"].dt.to_period("M").astype(str)
+    df = raw.copy()
+    df["SETTLEMENTDATE"] = pd.to_datetime(df["SETTLEMENTDATE"], errors="coerce")
+    df["TOTALDEMAND"] = pd.to_numeric(df["TOTALDEMAND"], errors="coerce")
+    df = df.dropna(subset=["SETTLEMENTDATE"])
+    df["year_month"] = df["SETTLEMENTDATE"].dt.to_period("M").astype(str)
 
     monthly = (
-        demand.groupby(["REGIONID", "year_month"])
+        df.groupby(["REGIONID", "year_month"])
         .agg(
             avg_demand_mw=("TOTALDEMAND", "mean"),
             max_demand_mw=("TOTALDEMAND", "max"),
@@ -296,24 +388,239 @@ def fetch_regional_demand():
         .reset_index()
         .rename(columns={"REGIONID": "nem_region"})
     )
-
     # Compute monthly energy (TWh) = avg_MW * hours_in_month / 1e6
     monthly["hours"] = monthly["intervals"] * 5 / 60  # 5-min intervals
     monthly["energy_twh"] = monthly["avg_demand_mw"] * monthly["hours"] / 1_000_000
+    return monthly
 
-    out_path = PROCESSED_DIR / "nem_demand_actual.parquet"
-    monthly.to_parquet(out_path, index=False)
-    print(f"  Saved: {out_path.name} ({len(monthly)} rows)")
+
+def _contiguous_last_month(months: list[Month], history_start: Month) -> Month | None:
+    """Last month of the contiguous run starting at ``history_start``.
+
+    AEMO monthly archives are contiguous, so any hole in the stored series is
+    a fetch artifact that the next incremental run should backfill. Planning
+    from the *contiguous* last month (not the global max) makes a transient
+    partial download self-heal: months behind the newest present month get
+    re-requested until the run is whole again.
+    """
+    expected = history_start
+    last_contiguous: Month | None = None
+    for m in sorted(months):
+        if m == expected:
+            last_contiguous = m
+            expected = add_months(expected, 1)
+        elif m > expected:
+            break  # hole at `expected`
+        # m < expected: duplicate/superseded month — ignore
+    return last_contiguous
+
+
+def _plan_demand_window(
+    out_path: Path,
+    today: date,
+    full_backfill: bool,
+) -> dict:
+    """Decide which archive months a demand run must fetch.
+
+    Incremental (default): only months after the last *contiguous* month
+    already present in the output parquet are fetched, up to the latest
+    publication-lag candidate month — complete missing months, never a replay
+    of the full history. Full backfill: from DEMAND_HISTORY_START. Returns
+    ``{start_month, horizon, mode}`` with mode one of
+    ``incremental``/``full``/``noop`` (noop = series already through the
+    candidate month).
+    """
+    horizon = latest_candidate_month(today, PUBLICATION_LAG_DAYS)
+    if full_backfill:
+        return {"start_month": DEMAND_HISTORY_START, "horizon": horizon, "mode": "full"}
+    existing_months = _read_existing_demand_months(out_path)
+    last_present = (
+        _contiguous_last_month(existing_months, DEMAND_HISTORY_START)
+        if existing_months else None
+    )
+    if last_present is None:
+        # No trustworthy contiguous series yet — full history is the only
+        # correct first build (also self-heals a file that starts late).
+        return {"start_month": DEMAND_HISTORY_START, "horizon": horizon, "mode": "full"}
+    start_month = add_months(last_present, 1)
+    if start_month > horizon:
+        return {"start_month": start_month, "horizon": horizon, "mode": "noop"}
+    return {"start_month": start_month, "horizon": horizon, "mode": "incremental"}
+
+
+def fetch_regional_demand(full_backfill: bool = False, today: date | None = None) -> dict | None:
+    """Fetch actual NEM demand by region via NEMOSIS DISPATCHREGIONSUM.
+
+    Publication-lag-aware and incremental: only archive months after the last
+    month already in ``nem_demand_actual.parquet`` are requested (or the full
+    2020+ history when ``full_backfill`` is set / no series exists yet). The
+    output and its vintage sidecar are only written when the run actually
+    advanced or rebuilt the series; a failed fetch leaves the previous file
+    untouched (last-good preserved).
+    """
+    today = today or date.today()
+    print("\n--- Fetching Actual NEM Demand ---")
+
+    plan = _plan_demand_window(DEMAND_PATH, today, full_backfill)
+    if plan["mode"] == "noop":
+        print(
+            f"  Demand series already extends through "
+            f"{month_label(plan['horizon'])} (latest candidate archive); nothing to fetch."
+        )
+        return None
+
+    start_month, horizon = plan["start_month"], plan["horizon"]
+    start_time = first_instant(start_month)
+    end_time = first_instant(add_months(horizon, 1))
+    requested = window_month_keys(start_month, horizon)
+    print(
+        f"  Horizon: latest candidate archive month {month_label(horizon)} "
+        f"(publication lag {PUBLICATION_LAG_DAYS}d); fetch mode {plan['mode']}"
+    )
+    print(f"  Requesting months {requested[0]}..{requested[-1]} ({len(requested)} month(s))")
+
+    try:
+        demand = dynamic_data_compiler(
+            start_time=start_time,
+            end_time=end_time,
+            table_name=DEMAND_TABLE,
+            raw_data_location=str(CACHE_DIR),
+            select_columns=["REGIONID", "TOTALDEMAND", "SETTLEMENTDATE"],
+            fformat="csv",
+        )
+    except Exception as e:
+        print(f"  WARNING: Could not fetch DISPATCHREGIONSUM: {e}")
+        return None
+    if demand is None or demand.empty:
+        print("  WARNING: fetch returned no dispatch intervals — leaving existing series untouched")
+        return None
+
+    print(f"  Fetched {len(demand):,} dispatch intervals")
+    monthly = _aggregate_demand_rows(demand)
+    monthly = monthly[
+        monthly["year_month"].between(requested[0], requested[-1])
+    ].copy()
+    if monthly.empty:
+        print("  WARNING: no complete archive months in the requested window — series untouched")
+        return None
+
+    if plan["mode"] == "incremental":
+        existing = pd.read_parquet(DEMAND_PATH)
+        kept = existing[existing["year_month"] < requested[0]]
+        result = pd.concat([kept, monthly], ignore_index=True)
+        result = result.drop_duplicates(
+            subset=["nem_region", "year_month"], keep="last"
+        )
+        result = result.sort_values(["nem_region", "year_month"]).reset_index(drop=True)
+    else:
+        result = monthly.sort_values(["nem_region", "year_month"]).reset_index(drop=True)
+
+    out_path = DEMAND_PATH
+    data_through = max_month(result["year_month"]) if len(result) else None
+    vintage = vintage_dict(
+        out_path.name,
+        source_tables=[DEMAND_TABLE],
+        extra={
+            "series_kind": "actual monthly averages (historical; never projected)",
+            "fetch_mode": plan["mode"],
+            "data_through_month": month_label(data_through) if data_through else None,
+            # The newest month actually present in the output is the honest
+            # vintage: if the candidate month's archive was not published yet,
+            # data_through trails the horizon and the sidecar says so.
+            "archive_month": month_label(data_through) if data_through else None,
+        },
+        row_count=len(result),
+    )
+    write_parquet_with_vintage(result, out_path, vintage)
+    print(f"  Saved: {out_path.name} ({len(result)} rows, through {vintage['data_through_month']})")
 
     # Annual summary
-    monthly["year"] = pd.to_datetime(monthly["year_month"]).dt.year
-    annual = monthly.groupby("year")["energy_twh"].sum()
+    result["year"] = pd.to_datetime(result["year_month"]).dt.year
+    annual = result.groupby("year")["energy_twh"].sum()
     print("  Annual NEM demand (TWh):")
     for year, twh in annual.items():
-        print(f"    {year}: {twh:.1f} TWh")
+        print(f"    {int(year)}: {twh:.1f} TWh")
+    return vintage
 
 
-def fetch_and_build(skip_demand: bool = False):
+def _fetch_summary_snapshot(month: Month, cache_dir: Path) -> pd.DataFrame:
+    """DUDETAILSUMMARY rows for the registration state at the first instant of ``month``.
+
+    As-of window reproduces the original fixed snapshot (day 1 00:00 → day 2
+    00:00): rows whose START_DATE/END_DATE interval covers the first instant of
+    the archive month. Raises/returns empty when the archive is not published.
+    """
+    return dynamic_data_compiler(
+        start_time=first_instant(month),
+        end_time=day2_instant(month),
+        table_name="DUDETAILSUMMARY",
+        raw_data_location=str(cache_dir),
+        select_columns="all",
+        fformat="csv",
+    )
+
+
+def _resolve_snapshot_month(cache_dir: Path, today: date | None = None) -> tuple[Month, pd.DataFrame]:
+    """Resolve the newest published archive month and fetch its registration summary.
+
+    Starts at the publication-lag candidate month for ``today`` and walks back
+    at most ARCHIVE_BACKSTEP_MAX months while the archive yields no data (a
+    not-yet-published release makes nemosis log "not downloaded" and return
+    nothing — never a false claim). The month that actually produced data is
+    the returned snapshot month; outputs must record it as their vintage. When
+    no month in the window yields data the run fails loudly (fail closed)
+    rather than silently re-serving an older snapshot.
+    """
+    candidate = latest_candidate_month(today or date.today(), PUBLICATION_LAG_DAYS)
+    tried: list[str] = []
+    month: Month = candidate
+    for _ in range(ARCHIVE_BACKSTEP_MAX + 1):
+        tried.append(month_label(month))
+        try:
+            summary = _fetch_summary_snapshot(month, cache_dir)
+        except Exception as e:
+            print(f"  WARNING: DUDETAILSUMMARY fetch for {month_label(month)} failed: {e}")
+            summary = None
+        if summary is not None and len(summary) > 0:
+            return month, summary
+        print(
+            f"  WARNING: no registration data published for archive month "
+            f"{month_label(month)} — stepping back one month"
+        )
+        month = add_months(month, -1)
+    raise RuntimeError(
+        "No published AEMO MMS archive found for the registration snapshot: tried "
+        + ", ".join(tried)
+        + f" (candidate from today {today or date.today()} with publication lag "
+        f"{PUBLICATION_LAG_DAYS}d). Refusing to re-serve an older snapshot silently."
+    )
+
+
+def _fetch_detail_latest(month: Month, cache_dir: Path) -> pd.DataFrame:
+    """DUDETAIL rows (registered capacity) with the latest EFFECTIVEDATE per DUID.
+
+    Same as-of semantics as the original query: capacity changes effective
+    before the second instant of ``month``, newest version per DUID kept.
+    """
+    detail = dynamic_data_compiler(
+        start_time=first_instant(month),
+        end_time=day2_instant(month),
+        table_name="DUDETAIL",
+        raw_data_location=str(cache_dir),
+        select_columns="all",
+        fformat="csv",
+    )
+    detail["REGISTEREDCAPACITY"] = pd.to_numeric(detail["REGISTEREDCAPACITY"], errors="coerce")
+    detail["MAXCAPACITY"] = pd.to_numeric(detail["MAXCAPACITY"], errors="coerce")
+    detail_latest = detail.sort_values("EFFECTIVEDATE").drop_duplicates("DUID", keep="last")
+    return detail_latest
+
+
+def fetch_and_build(
+    skip_demand: bool = False,
+    full_demand_backfill: bool = False,
+    today: date | None = None,
+):
     print("=" * 60)
     print("AEMO Grid Data via NEMOSIS")
     print("=" * 60)
@@ -324,32 +631,20 @@ def fetch_and_build(skip_demand: bool = False):
     print("\n0. Loading fuel type lookup...")
     reg_lookup = load_registration_fuel_lookup()
 
-    # 1. Fetch DUDETAILSUMMARY (region, station, schedule type)
-    print("\n1. Fetching DUDETAILSUMMARY...")
-    summary = dynamic_data_compiler(
-        start_time="2026/01/01 00:00:00",
-        end_time="2026/01/02 00:00:00",
-        table_name="DUDETAILSUMMARY",
-        raw_data_location=str(CACHE_DIR),
-        select_columns="all",
-        fformat="csv",
+    # 1. Resolve the latest published archive month and fetch the registration
+    #    snapshot (DUDETAILSUMMARY) as of its first instant — never a hard-coded
+    #    window again (S2-08).
+    print("\n1. Resolving latest published AEMO MMS archive month...")
+    snapshot_month, summary = _resolve_snapshot_month(CACHE_DIR, today=today)
+    print(
+        f"   Registration snapshot as of {registration_snapshot_date(snapshot_month)} "
+        f"(archive month {month_label(snapshot_month)})"
     )
     print(f"   {len(summary)} units from DUDETAILSUMMARY")
 
-    # 2. Fetch DUDETAIL (registered capacity)
+    # 2. Fetch DUDETAIL (registered capacity) for the same snapshot month
     print("\n2. Fetching DUDETAIL...")
-    detail = dynamic_data_compiler(
-        start_time="2026/01/01 00:00:00",
-        end_time="2026/01/02 00:00:00",
-        table_name="DUDETAIL",
-        raw_data_location=str(CACHE_DIR),
-        select_columns="all",
-        fformat="csv",
-    )
-
-    detail["REGISTEREDCAPACITY"] = pd.to_numeric(detail["REGISTEREDCAPACITY"], errors="coerce")
-    detail["MAXCAPACITY"] = pd.to_numeric(detail["MAXCAPACITY"], errors="coerce")
-    detail_latest = detail.sort_values("EFFECTIVEDATE").drop_duplicates("DUID", keep="last")
+    detail_latest = _fetch_detail_latest(snapshot_month, CACHE_DIR)
     print(f"   {len(detail_latest)} unique DUIDs from DUDETAIL")
 
     # 3. Merge
@@ -379,12 +674,16 @@ def fetch_and_build(skip_demand: bool = False):
         "status": "Operating",  # MMS only has registered (operating) generators
     })
 
-    # 6. Add pipeline (committed/proposed) from AEMO Gen Info workbook
+    # 6. Add pipeline (committed/proposed) from AEMO Gen Info workbook.
+    #    The workbook's edition is recorded separately — re-parsing an old
+    #    manual download does not refresh its publication vintage (S2-08).
     print("\n5. Loading generation pipeline...")
-    pipeline = load_aemo_pipeline()
+    pipeline, workbook_meta = load_aemo_pipeline()
     if not pipeline.empty:
         print(f"   Added {len(pipeline)} pipeline generators ({pipeline['status'].value_counts().to_dict()})")
         generators = pd.concat([generators, pipeline], ignore_index=True)
+    if workbook_meta is not None:
+        print(f"   Pipeline workbook edition: {workbook_meta['file']}")
 
     # Exclude loads, dummy generators, and interconnectors from capacity summary
     gen_only = generators[~generators["fuel_category"].isin(["Load", "Dummy", "Interconnector"])]
@@ -400,20 +699,47 @@ def fetch_and_build(skip_demand: bool = False):
     )
     grid_capacity["capacity_mw"] = grid_capacity["capacity_mw"].round(1)
 
-    # 8. Save
+    # 8. Save — each output carries its source-vintage sidecar (archive month,
+    #    registration snapshot date, workbook edition), so a rewritten file is
+    #    never mistaken for advanced source coverage (S2-08).
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
+    snapshot_label = month_label(snapshot_month)
+    snapshot_date = registration_snapshot_date(snapshot_month)
+
     gen_path = PROCESSED_DIR / "generation_info.parquet"
-    generators.to_parquet(gen_path, index=False)
-    print(f"\n   Saved: {gen_path.name} ({len(generators)} rows)")
+    gen_vintage = vintage_dict(
+        gen_path.name,
+        source_tables=["DUDETAILSUMMARY", "DUDETAIL"],
+        extra={
+            "registration_snapshot": snapshot_date,
+            "archive_month": snapshot_label,
+            "pipeline_workbook": workbook_meta,
+        },
+        row_count=len(generators),
+    )
+    write_parquet_with_vintage(generators, gen_path, gen_vintage)
+    print(f"\n   Saved: {gen_path.name} ({len(generators)} rows; snapshot {snapshot_date})")
 
     grid_path = PROCESSED_DIR / "grid_capacity.parquet"
-    grid_capacity.to_parquet(grid_path, index=False)
-    print(f"   Saved: {grid_path.name} ({len(grid_capacity)} rows)")
+    grid_vintage = vintage_dict(
+        grid_path.name,
+        source_tables=["DUDETAILSUMMARY", "DUDETAIL"],
+        extra={
+            "registration_snapshot": snapshot_date,
+            "archive_month": snapshot_label,
+            "pipeline_workbook": workbook_meta,
+        },
+        row_count=len(grid_capacity),
+    )
+    write_parquet_with_vintage(grid_capacity, grid_path, grid_vintage)
+    print(f"   Saved: {grid_path.name} ({len(grid_capacity)} rows; snapshot {snapshot_date})")
 
-    # 9. Fetch actual demand (M4)
+    # 9. Fetch actual demand (publication-lag-aware incremental by default;
+    #    --skip-demand/--no-demand keeps the legacy skip; --full-demand-backfill
+    #    keeps the explicit full-history rebuild path).
     if not skip_demand:
-        fetch_regional_demand()
+        fetch_regional_demand(full_backfill=full_demand_backfill, today=today)
 
     # 10. Summary
     print("\n" + "=" * 60)
@@ -448,5 +774,9 @@ def fetch_and_build(skip_demand: bool = False):
 
 
 if __name__ == "__main__":
-    skip_demand = "--skip-demand" in sys.argv
-    fetch_and_build(skip_demand=skip_demand)
+    skip_demand = "--skip-demand" in sys.argv or "--no-demand" in sys.argv
+    full_demand_backfill = "--full-demand-backfill" in sys.argv
+    if skip_demand and full_demand_backfill:
+        print("ERROR: --skip-demand/--no-demand and --full-demand-backfill are mutually exclusive")
+        sys.exit(2)
+    fetch_and_build(skip_demand=skip_demand, full_demand_backfill=full_demand_backfill)

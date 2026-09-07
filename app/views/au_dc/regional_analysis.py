@@ -16,6 +16,7 @@ from app.lib.au_dc_charts import (
 )
 from app.lib.au_dc_methodology import DISCLOSED_CAPEX_HELP, RISKED_MW_HELP
 from app.lib.au_dc_stage_scope import OPERATING_STAGE_EVIDENCED_SCOPES
+from app.lib.au_dc_vintage import demand_caption, read_vintage, registration_caption
 
 _AU_DC_DATA = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
 DATA_DIR = _AU_DC_DATA / "processed"
@@ -132,7 +133,13 @@ st.markdown("---")
 st.markdown("## Grid Generation Capacity")
 
 if grid_capacity is not None:
-    st.caption("AEMO/NEM view only. WA/SWIS projects are included in the project database but not in NEM grid capacity charts.")
+    grid_vintage = read_vintage(grid_path)
+    st.caption(
+        registration_caption(
+            grid_vintage,
+            "AEMO/NEM view only. WA/SWIS projects are included in the project database but not in NEM grid capacity charts.",
+        )
+    )
     fig = grid_capacity_stacked_bar(grid_capacity)
     st.plotly_chart(fig, use_container_width=True)
 
@@ -311,7 +318,9 @@ if nem_demand is not None:
         pivot["Total"] = pivot.sum(axis=1)
         st.dataframe(pivot.style.format("{:.1f}"), use_container_width=True)
 
-    st.caption("Source: AEMO DISPATCHREGIONSUM via NEMOSIS — 5-minute dispatch data aggregated to monthly averages")
+    nem_vintage = read_vintage(nem_demand_path)
+    _through = str(nem_demand["year_month"].max()) if "year_month" in nem_demand.columns else None
+    st.caption(demand_caption(nem_vintage, _through))
 else:
     st.info("Actual NEM demand data not available.")
 

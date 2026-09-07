@@ -4,7 +4,12 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-/opt/ai-dc-dashboard}"
 PYTHON="${PYTHON:-${APP_DIR}/.venv/bin/python}"
 PUSH_CHANGES="${PUSH_CHANGES:-1}"
-AU_FETCH_ARGS="${AU_FETCH_ARGS:---skip-demand}"
+# Default: no AU_FETCH_ARGS -> fetch_aemo_nemosis.py runs its publication-lag-aware
+# INCREMENTAL demand refresh (only months after the last month already in
+# nem_demand_actual.parquet are fetched, never a 2020+ replay).
+# Legacy opt-outs still work: AU_FETCH_ARGS=--skip-demand (or --no-demand)
+# skips demand; AU_FETCH_ARGS=--full-demand-backfill forces the full rebuild.
+AU_FETCH_ARGS="${AU_FETCH_ARGS:-}"
 RAW_CACHE_RETENTION_DAYS="${RAW_CACHE_RETENTION_DAYS:-540}"
 COMMIT_MESSAGE_PREFIX="${COMMIT_MESSAGE_PREFIX:-Update AU DC dashboard data}"
 
