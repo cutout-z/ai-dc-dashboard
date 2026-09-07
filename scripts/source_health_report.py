@@ -121,6 +121,7 @@ OBSERVED_DATE_COLS: dict[str, dict[str, Any]] = {
     "dc_power_forecasts.csv": {"col": "published_date", "format": "date"},
     "consensus.json": {"key": "updated"},
     "llm_leaderboard.json": {"key_path": ("_meta", "updated")},
+    "llm_indexes.json": {"key_path": ("_meta", "updated")},
     # NB: forecast files (dc_demand, esoo_forecasts — parquet + CSV) carry only
     # *target* years (e.g. 2032), which are not observation dates — they stay
     # on the mtime fallback rather than false-greening on future years.
@@ -141,6 +142,7 @@ FRESH_DAYS = {
     "earnings_dates.csv": 14,
     "funding_deals.csv": 30,
     "llm_leaderboard.json": 30,
+    "llm_indexes.json": 30,
     "model_releases.csv": 30,
     "news_catalog.csv": 7,
     "tsmc_monthly_revenue.csv": 15,
@@ -198,6 +200,8 @@ EXPECTED_FILES: list[dict[str, Any]] = [
     {"name": "earnings_dates.csv", "subdir": "reference", "role": "enrichment", "required": ["symbol", "earnings_date"]},
     {"name": "funding_deals.csv", "subdir": "reference", "role": "data", "required": ["date", "entity", "source"]},
     {"name": "llm_leaderboard.json", "subdir": "reference", "role": "enrichment", "required": ["_meta", "models"]},
+    {"name": "llm_indexes.json", "subdir": "reference", "role": "enrichment", "required": ["_meta", "indexes"],
+     "rebuild": "python scripts/refresh_llm_leaderboard.py"},
     {"name": "model_releases.csv", "subdir": "reference", "role": "data", "required": ["release_date", "model"]},
     {"name": "news_catalog.csv", "subdir": "reference", "role": "intermediate", "required": ["catalog_key", "title", "source", "published"],
      "rebuild": "python scripts/catalog_news.py"},

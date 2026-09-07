@@ -138,6 +138,7 @@ FILE_FRESH_DAYS = {
     "ai_supplement.csv": 90,         # curated, updates with earnings
     "consensus.json": 7,             # refreshed via etl/refresh_consensus.py
     "llm_leaderboard.json": 30,
+    "llm_indexes.json": 30,
 }
 
 # Date columns to scan for "latest observed" per CSV
@@ -201,10 +202,26 @@ for json_path in sorted(REF_DIR.glob("*.json")):
             row_count = len(data.get("data", {}))
             latest = data.get("updated", "—")
         elif name == "llm_leaderboard.json":
+            # full-field model snapshot: models list + _meta.updated (as-of)
             if isinstance(data, list):
                 row_count = len(data)
             elif isinstance(data, dict):
-                row_count = len(data.get("data", data.get("models", data)))
+                row_count = len(data.get("models") or [])
+            _llm_meta = data.get("_meta") if isinstance(data, dict) else None
+            if isinstance(_llm_meta, dict) and _llm_meta.get("updated"):
+                latest = _llm_meta["updated"]
+        elif name == "llm_indexes.json":
+            # TrueSkill index artifact: row count = model entries across categories
+            if isinstance(data, dict):
+                indexes = data.get("indexes") or {}
+                row_count = sum(
+                    len(info.get("models") or [])
+                    for info in indexes.values()
+                    if isinstance(info, dict)
+                )
+                _llm_meta = data.get("_meta")
+                if isinstance(_llm_meta, dict) and _llm_meta.get("updated"):
+                    latest = _llm_meta["updated"]
     except Exception as e:
         status = "error"
         latest = f"parse error: {e}"
@@ -318,8 +335,6 @@ TABLE_SPECS = [
     ("value_chain_universe", None, None, False),
     ("value_chain_taxonomy", None, None, False),
     ("quarterly_financials", "period", 90, False),
-    ("llm_arena_elo", None, 30, False),
-    ("llm_model_specs", None, 30, False),
     ("v_hyperscaler_capex", "period", 120, True),
     ("v_semi_revenue", "period", 120, True),
     ("v_full_universe", None, None, True),

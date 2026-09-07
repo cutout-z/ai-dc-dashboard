@@ -7,7 +7,10 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-from app.lib.llm_perf import fetch_zeroeval_models, fetch_zeroeval_indexes, chart_layout  # noqa: F401
+from app.lib.llm_perf import (  # noqa: F401
+    fetch_zeroeval_models, fetch_zeroeval_indexes, chart_layout,
+    llm_data_status, llm_no_data_message, order_leaderboard,
+)
 
 # Country code → flag emoji
 _FLAG = {
@@ -184,31 +187,24 @@ ze_df = fetch_zeroeval_models()
 indexes = fetch_zeroeval_indexes()
 
 st.title("LLM Leaderboard")
+st.caption(llm_data_status())
 st.caption(
-    "Ranking the best LLMs by performance, price, and speed. "
-    "Live data from [LLM Stats](https://llm-stats.com) · updated hourly."
+    "Ranking the best LLMs by performance, price, and speed — committed ZeroEval "
+    "snapshot by default; enable live data in the sidebar to override."
 )
 
 if ze_df.empty:
-    st.info("Live data unavailable — ZeroEval API offline.")
+    st.info(llm_no_data_message())
 else:
-    lb = ze_df.copy()
+    lb, sort_key, _missing = order_leaderboard(ze_df, indexes, list(_INDEX_COLS))
 
-    # --- Merge TrueSkill index scores ---
-    for cat in _INDEX_COLS:
-        col = f"idx_{cat}"
-        if cat in indexes:
-            idx_df = indexes[cat][["model_id", "conservative"]].rename(
-                columns={"conservative": col}
-            )
-            lb = lb.merge(idx_df, on="model_id", how="left")
-        else:
-            lb[col] = None
-
-    # Sort by Reasoning index (matching llm-stats.com default)
-    sort_col = "idx_reasoning"
-    lb = lb.dropna(subset=[sort_col])
-    lb = lb.sort_values(sort_col, ascending=False).reset_index(drop=True)
+    # Visible ordering note: never let a missing index look like a TrueSkill rank.
+    if sort_key == "benchmark_mean":
+        st.info(
+            "TrueSkill reasoning index data unavailable for this snapshot — table sorted by the "
+            "mean of published GPQA / SWE-Bench / HLE / AIME-2025 scores (a reader-side mean, "
+            "not a TrueSkill rating). Index columns below appear only where published data exists."
+        )
 
     # Country flag
     lb["country"] = lb.get("organization_country", pd.Series(dtype=str)).apply(
@@ -275,8 +271,19 @@ else:
         "knowledge": "TrueSkill rating across knowledge benchmarks: factual recall, world knowledge, SimpleQA.",
     }
 
-    # Add index columns
-    for cat in _INDEX_COLS:
+    # Add index columns — published data only. An unavailable category never
+    # renders an all-null column that could read as a fabricated rank row.
+    _available_index_cats = [
+        cat for cat in _INDEX_COLS
+        if f"idx_{cat}" in lb.columns and lb[f"idx_{cat}"].notna().any()
+    ]
+    if sort_key == "benchmark_mean":
+        display_data["Benchmark mean"] = lb["benchmark_mean"].round(1)
+        col_config["Benchmark mean"] = st.column_config.NumberColumn(
+            format="%.1f",
+            help="Mean of published GPQA / SWE-Bench / HLE / AIME-2025 scores — not a TrueSkill rating.",
+        )
+    for cat in _available_index_cats:
         label = _INDEX_LABELS.get(cat, cat.title())
         col = f"idx_{cat}"
         display_data[label] = pd.to_numeric(lb[col], errors="coerce").round(1)
@@ -293,10 +300,14 @@ else:
         height=700,
         column_config=col_config,
     )
+    if sort_key == "benchmark_mean":
+        _sort_note = "Sorted by benchmark mean (GPQA/SWE-Bench/HLE/AIME-2025)"
+    else:
+        _sort_note = "Sorted by Reasoning index (ZeroEval TrueSkill conservative rating)"
     st.caption(
         f"[LLM Stats](https://llm-stats.com) / api.zeroeval.com · {len(lb)} models · "
-        "Sorted by Reasoning index (TrueSkill conservative rating). "
-        "Speed in characters/sec."
+        f"{_sort_note}. Speed in characters/sec. "
+        "Ranks/indices shown are published ZeroEval TrueSkill values."
     )
 
     # --- Performance Index bar chart ---
@@ -437,6 +448,7 @@ else:
 
     st.markdown("")
     st.caption(
-        "Charts on the other LLM Performance pages use live data from "
-        "[LLM Stats](https://llm-stats.com) via api.zeroeval.com."
+        "The other LLM Performance pages read the same committed ZeroEval snapshot "
+        "(visible as-of at the top of each page); live override is available via the "
+        "sidebar toggle."
     )

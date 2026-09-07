@@ -7,7 +7,8 @@ import streamlit as st
 
 from app.lib.llm_perf import (
     ATTR, PROVIDER_COLOURS,
-    fetch_zeroeval_models, preprocess_ze, chart_layout, sota_prog,
+    fetch_zeroeval_models, preprocess_ze, chart_layout,
+    llm_data_status, llm_no_data_message, sota_prog,
 )
 
 ze_df = fetch_zeroeval_models()
@@ -15,13 +16,14 @@ df, _ = preprocess_ze(ze_df)
 CHART_LAYOUT = chart_layout()
 
 st.title("Open Models")
+st.caption(llm_data_status())
 st.caption(
     "How open-weight models are growing, how close they are to proprietary systems, "
     "and where the open race is happening."
 )
 
 if ze_df.empty or df.empty:
-    st.info("Live data unavailable — ZeroEval API offline.")
+    st.info(llm_no_data_message())
 else:
     ql = df.groupby(["quarter", "is_open"]).size().reset_index(name="count")
     ql["pct"] = ql.groupby("quarter")["count"].transform(lambda x: x / x.sum() * 100)

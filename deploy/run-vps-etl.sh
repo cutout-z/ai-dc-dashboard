@@ -22,7 +22,6 @@ git pull --ff-only origin main
 "${PYTHON}" scripts/catalog_news.py
 
 if [[ "${RUN_ZEROEVAL}" == "1" ]]; then
-  "${PYTHON}" scripts/fetch_llm_benchmarks.py
   "${PYTHON}" scripts/refresh_llm_leaderboard.py
 fi
 

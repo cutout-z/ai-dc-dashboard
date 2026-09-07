@@ -230,4 +230,18 @@ pg = st.navigation(
     }
 )
 
+# LLM Performance data mode: committed snapshot by default, optional live
+# override (S2-12). Pages read this flag via app/lib/llm_perf.py.
+with st.sidebar:
+    st.toggle(
+        "LLM pages: use live ZeroEval data",
+        key="llm_use_live",
+        value=False,
+        help=(
+            "Default reads the committed data/reference snapshots (as-of shown at "
+            "the top of each LLM page). Live fetches api.zeroeval.com and falls "
+            "back to the snapshot on any failure."
+        ),
+    )
+
 pg.run()

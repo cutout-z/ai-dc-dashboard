@@ -8,6 +8,7 @@ import streamlit as st
 from app.lib.llm_perf import (
     ATTR, CONTEXT_WINDOWS, PROVIDER_COLOURS,
     fetch_zeroeval_models, preprocess_ze, chart_layout,
+    llm_data_status, llm_no_data_message,
     provider_sidebar,
 )
 
@@ -17,10 +18,14 @@ CHART_LAYOUT = chart_layout()
 sel_providers = provider_sidebar()
 
 st.title("Speed and Context")
+st.caption(llm_data_status())
 st.caption(
     "What you trade off when deploying models: context length, throughput, "
     "and how much speed costs in capability."
 )
+
+if ze_df.empty or df.empty:
+    st.info(llm_no_data_message())
 
 
 # ---------------------------------------------------------------------------

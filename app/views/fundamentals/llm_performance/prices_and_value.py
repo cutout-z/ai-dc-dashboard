@@ -7,7 +7,8 @@ import streamlit as st
 
 from app.lib.llm_perf import (
     ATTR, PROVIDER_COLOURS,
-    fetch_zeroeval_models, preprocess_ze,
+    fetch_zeroeval_models, llm_data_status, llm_no_data_message,
+    preprocess_ze,
     chart_layout,
 )
 
@@ -16,6 +17,7 @@ df, _ = preprocess_ze(ze_df)
 CHART_LAYOUT = chart_layout()
 
 st.title("Prices and Value")
+st.caption(llm_data_status())
 st.caption(
     "How fast intelligence is getting cheaper, which models deliver the most value, and where prices differ."
 )
@@ -26,7 +28,7 @@ st.caption(
 )
 
 if ze_df.empty or df.empty:
-    st.info("Live data unavailable — ZeroEval API offline.")
+    st.info(llm_no_data_message())
 else:
     # --- Shared filtered data ---
     priced = df.dropna(subset=["gpqa_score", "blended_price"])

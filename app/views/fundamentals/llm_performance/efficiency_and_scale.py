@@ -8,6 +8,7 @@ import streamlit as st
 from app.lib.llm_perf import (
     ATTR, PROVIDER_COLOURS,
     fetch_zeroeval_models, preprocess_ze, chart_layout,
+    llm_data_status, llm_no_data_message,
 )
 
 ze_df = fetch_zeroeval_models()
@@ -15,10 +16,11 @@ df, _ = preprocess_ze(ze_df)
 CHART_LAYOUT = chart_layout()
 
 st.title("Efficiency and Scale")
+st.caption(llm_data_status())
 st.caption("How architecture, parameters, and training scale affect capability.")
 
 if ze_df.empty or df.empty:
-    st.info("Live data unavailable — ZeroEval API offline.")
+    st.info(llm_no_data_message())
 else:
     mp = df.dropna(subset=["gpqa_score", "blended_price"])
     mp = mp[mp["blended_price"] > 0].copy()

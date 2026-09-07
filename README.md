@@ -93,8 +93,9 @@ The dashboard's reference data can still be refreshed manually when needed. The 
 # Refresh financial data (CAPEX, revenue, income statements via yfinance)
 python scripts/fetch_financials.py
 
-# Refresh LLM benchmark + leaderboard data
-python scripts/fetch_llm_benchmarks.py
+# Refresh LLM benchmark data — writes the full-field model snapshot
+# (data/reference/llm_leaderboard.json) and the separately-identified TrueSkill
+# index snapshot (data/reference/llm_indexes.json), both schema-validated
 python scripts/refresh_llm_leaderboard.py
 
 # Snapshot the curated news feed into an append-only event catalogue

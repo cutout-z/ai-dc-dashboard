@@ -1,16 +1,34 @@
-"""Shared data, constants, and helpers for LLM Performance pages."""
+"""Shared data, constants, and helpers for LLM Performance pages.
+
+Data chain (Astra S2-12 / C14): the committed snapshots under
+``data/reference/`` are the default source of truth — a full-field model
+snapshot (``llm_leaderboard.json``) plus separately-identified TrueSkill index
+data (``llm_indexes.json``), both validated by ``app/lib/llm_snapshot.py``.
+Pages read the committed snapshot with a visible as-of; a sidebar toggle
+(``llm_use_live``, set in Home.py) opts into a live ZeroEval fetch, which falls
+back to the snapshot on any failure. A reader never fabricates a rank offline:
+index columns only ever come from the published index artifact.
+"""
 from __future__ import annotations
 
-import sqlite3
-import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
+import subprocess
 
 import pandas as pd
 import plotly.graph_objects as go
 import requests
 import streamlit as st
 
+from app.lib import llm_snapshot
+
 _DATA_DIR = Path(__file__).parent.parent.parent / "data" / "reference"
+
+# session_state keys used by the reader layer
+_LLM_LIVE_KEY = "llm_use_live"
+_PROV_KEY = "_llm_data_provenance"
+
+_PROV_DEFAULT = {"mode": "snapshot", "asof": None, "note": ""}
 
 PROVIDER_COLOURS: dict[str, str] = {
     "OpenAI":    "#10b981",
@@ -140,85 +158,198 @@ def _zeroeval_api_key() -> str | None:
     return None
 
 
-@st.cache_data(ttl=3600)
-def fetch_zeroeval_models() -> pd.DataFrame:
-    """Fetch live model data from api.zeroeval.com. Cached for 1 hour."""
+# ────────────────────────────────────────────────────────────────────────────
+# Reader layer — committed snapshot by default, optional live override
+# (S2-12: readers default to validated snapshots; never fabricate ranks offline)
+# ────────────────────────────────────────────────────────────────────────────
+def _live_wanted() -> bool:
+    """True when the Home.py sidebar 'use live ZeroEval data' toggle is on."""
+    try:
+        return bool(st.session_state.get(_LLM_LIVE_KEY, False))
+    except Exception:
+        return False
+
+
+def _set_provenance(prov: dict) -> None:
+    try:
+        st.session_state[_PROV_KEY] = prov
+    except Exception:
+        pass
+
+
+def _fetch_live_models_uncached() -> pd.DataFrame:
+    """Hit the live ZeroEval models endpoint. Raises on any failure."""
     api_key = _zeroeval_api_key()
     headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
-    try:
-        resp = requests.get(
-            "https://api.zeroeval.com/leaderboard/models/full",
-            params={"justCanonicals": "true"},
-            headers=headers,
-            timeout=15,
-        )
-        resp.raise_for_status()
-        return pd.DataFrame(resp.json())
-    except Exception as e:
-        st.warning(f"ZeroEval API unavailable: {e}")
-        return pd.DataFrame()
+    resp = requests.get(
+        llm_snapshot.MODELS_SOURCE_URL,
+        params={"justCanonicals": "true"},
+        headers=headers,
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if not isinstance(data, list) or not data:
+        raise ValueError("unexpected response shape (expected a non-empty list)")
+    return pd.DataFrame(data)
 
 
-@st.cache_data(ttl=3600)
-def fetch_zeroeval_indexes() -> dict[str, pd.DataFrame]:
-    """Fetch TrueSkill index scores from api.zeroeval.com/leaderboard/indexes/all.
+def _fetch_live_indexes_uncached() -> dict[str, pd.DataFrame]:
+    """Hit the live ZeroEval indexes endpoint; contract-validate before use."""
+    api_key = _zeroeval_api_key()
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    resp = requests.get(llm_snapshot.INDEXES_SOURCE_URL, headers=headers, timeout=20)
+    resp.raise_for_status()
+    payload = llm_snapshot.build_indexes_payload(resp.json())
+    errors = llm_snapshot.validate_indexes_payload(payload)
+    if errors:
+        raise ValueError(f"live index response failed the shared contract ({len(errors)} issue(s))")
+    return llm_snapshot.indexes_to_frames(payload["indexes"])
 
-    Returns a dict mapping category name (e.g. 'reasoning', 'code', 'math')
-    to a DataFrame with columns: model_id, conservative, mu, sigma, rank.
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def _live_models_cached() -> pd.DataFrame:
+    return _fetch_live_models_uncached()
+
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def _live_indexes_cached() -> dict[str, pd.DataFrame]:
+    return _fetch_live_indexes_uncached()
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _committed_models_payload() -> dict:
+    """Validated committed models snapshot.
+
+    Raises FileNotFoundError when absent and ContractError when malformed —
+    the caller decides how to surface it, never a silent empty frame.
     """
-    api_key = _zeroeval_api_key()
-    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    return llm_snapshot.load_models_payload(llm_snapshot.models_path(_DATA_DIR))
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _committed_indexes_payload() -> dict:
+    return llm_snapshot.load_indexes_payload(llm_snapshot.indexes_path(_DATA_DIR))
+
+
+def fetch_zeroeval_models() -> pd.DataFrame:
+    """Model frame for the LLM pages.
+
+    Defaults to the validated committed full-field snapshot with a visible
+    as-of. Live ZeroEval data is fetched only when the sidebar toggle is on,
+    and any live failure falls back to the snapshot with a provenance note.
+    An empty frame is returned ONLY when no committed snapshot exists AND live
+    data is unavailable — callers then show the no-data state.
+    """
+    if _live_wanted():
+        try:
+            df = _live_models_cached()
+            if df is not None and not df.empty:
+                _set_provenance({
+                    "mode": "live",
+                    "asof": None,
+                    "note": f"live api.zeroeval.com fetch, "
+                            f"{datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC",
+                })
+                return df
+        except Exception as exc:  # live failure -> snapshot fallback
+            _set_provenance({
+                "mode": "snapshot", "asof": None,
+                "note": f"live fetch failed ({exc.__class__.__name__}) — showing committed snapshot",
+            })
     try:
-        resp = requests.get(
-            "https://api.zeroeval.com/leaderboard/indexes/all",
-            headers=headers,
-            timeout=15,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        result = {}
-        for cat, info in data.items():
-            if not isinstance(info, dict) or "models" not in info:
-                continue
-            rows = [
-                {
-                    "model_id": m["model_id"],
-                    "conservative": m.get("conservative"),
-                    "mu": m.get("mu"),
-                    "sigma": m.get("sigma"),
-                    "rank": m.get("rank"),
-                }
-                for m in info["models"]
-            ]
-            if rows:
-                result[cat] = pd.DataFrame(rows)
-        return result
-    except Exception:
+        payload = _committed_models_payload()
+    except FileNotFoundError:
+        _set_provenance({
+            "mode": "none", "asof": None,
+            "note": "no committed snapshot (data/reference/llm_leaderboard.json) and live data unavailable",
+        })
+        return pd.DataFrame()
+    except llm_snapshot.ContractError as exc:
+        _set_provenance({
+            "mode": "none", "asof": None,
+            "note": f"committed snapshot failed validation: {exc}",
+        })
+        return pd.DataFrame()
+    _set_provenance({"mode": "snapshot", "asof": payload["_meta"].get("updated"), "note": ""})
+    return pd.DataFrame(payload["models"])
+
+
+def fetch_zeroeval_indexes() -> dict[str, pd.DataFrame]:
+    """TrueSkill index frames keyed by category (e.g. 'reasoning', 'code').
+
+    Defaults to the committed llm_indexes.json artifact. Missing/unavailable
+    index data yields {} — categories simply render unavailable; ranks are
+    never fabricated. Live override follows the same sidebar toggle and also
+    falls back to the committed artifact on failure.
+    """
+    if _live_wanted():
+        try:
+            frames = _live_indexes_cached()
+            if frames:
+                return frames
+        except Exception:
+            pass  # fall through to committed artifact
+    try:
+        payload = _committed_indexes_payload()
+    except (FileNotFoundError, llm_snapshot.ContractError):
         return {}
+    return llm_snapshot.indexes_to_frames(payload["indexes"])
 
 
-@st.cache_data(ttl=86400)
-def load_token_prices() -> pd.DataFrame:
-    csv = _DATA_DIR / "token_prices_history.csv"
-    if not csv.exists():
-        return pd.DataFrame()
-    df = pd.read_csv(csv)
-    df["date"] = pd.to_datetime(df["date"])
-    df["blended_usd_per_mtok"] = (3 * df["input_usd_per_mtok"] + df["output_usd_per_mtok"]) / 4
-    return df
+def order_leaderboard(
+    models_df: pd.DataFrame,
+    index_frames: dict[str, pd.DataFrame],
+    index_cols: list[str],
+    primary: str = "reasoning",
+) -> tuple[pd.DataFrame, str, list[str]]:
+    """Order the leaderboard model frame for display (shared snapshot helper).
+
+    Returns ``(ordered_df, sort_key, missing_categories)`` where ``sort_key`` is
+    ``'reasoning_index'`` (published ZeroEval TrueSkill reasoning index) or
+    ``'benchmark_mean'`` (labelled reader-side mean of headline benchmarks when
+    the reasoning index is unavailable) — the caller renders that label
+    honestly, so a missing index can never masquerade as a TrueSkill ranking.
+    """
+    return llm_snapshot.leaderboard_order(models_df, index_frames, index_cols, primary)
 
 
-def load_arena_elo() -> pd.DataFrame:
-    db_path = st.session_state.get("db_path", "")
-    if not db_path:
-        return pd.DataFrame()
+def llm_data_status() -> str:
+    """One-line visible as-of / mode caption for LLM pages (markdown text).
+
+    Records which data the page is actually showing and when it was captured,
+    so committed evidence is never mistaken for a live read.
+    """
     try:
-        conn = sqlite3.connect(db_path)
-        df = pd.read_sql("SELECT * FROM llm_arena_elo ORDER BY elo DESC", conn)
-        conn.close()
-        return df
+        prov = dict(st.session_state.get(_PROV_KEY, _PROV_DEFAULT))
     except Exception:
-        return pd.DataFrame()
+        prov = dict(_PROV_DEFAULT)
+    mode = prov.get("mode", "snapshot")
+    note = prov.get("note") or ""
+    if mode == "live":
+        return f"Data: live from api.zeroeval.com — {note}"
+    if mode == "none":
+        return "Data: unavailable — " + note
+    asof = prov.get("asof") or "unknown"
+    text = f"Data: committed ZeroEval snapshot · as-of {asof}"
+    if note:
+        text += f" · {note}"
+    return text
+
+
+def llm_no_data_message() -> str:
+    """Message for pages whose model frame is empty (no snapshot, live down)."""
+    try:
+        note = (st.session_state.get(_PROV_KEY, {}) or {}).get("note")
+    except Exception:
+        note = None
+    if not note:
+        note = "committed snapshot missing and live fetch unavailable"
+    return (
+        "No LLM benchmark data available — " + note
+        + ". Restore data/reference/llm_leaderboard.json (or run "
+        + "scripts/refresh_llm_leaderboard.py) or enable live data in the sidebar."
+    )
 
 
 def preprocess_ze(ze_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:

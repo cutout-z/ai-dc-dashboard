@@ -8,7 +8,8 @@ import streamlit as st
 
 from app.lib.llm_perf import (
     ATTR, BENCH_MAP, PROVIDER_COLOURS, ORG_TO_PROVIDER,
-    fetch_zeroeval_models, preprocess_ze, chart_layout, sota_prog,
+    fetch_zeroeval_models, preprocess_ze, chart_layout,
+    llm_data_status, llm_no_data_message, sota_prog,
 )
 
 # Benchmark descriptions — what each eval tests and why it matters
@@ -30,10 +31,11 @@ df, _ = preprocess_ze(ze_df)
 CHART_LAYOUT = chart_layout()
 
 st.title("Benchmark Performance")
+st.caption(llm_data_status())
 st.caption("How quickly frontier capability is improving, and how tightly packed the leaders have become.")
 
 if ze_df.empty or df.empty:
-    st.info("Live data unavailable — ZeroEval API offline.")
+    st.info(llm_no_data_message())
 else:
     _BENCH_COLOURS = px.colors.qualitative.Dark24
 

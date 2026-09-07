@@ -7,6 +7,7 @@ import streamlit as st
 from app.lib.llm_perf import (
     ATTR, PROVIDER_COLOURS, ORG_TO_PROVIDER,
     fetch_zeroeval_models, preprocess_ze, chart_layout,
+    llm_data_status, llm_no_data_message,
 )
 
 ze_df = fetch_zeroeval_models()
@@ -14,10 +15,11 @@ df, _ = preprocess_ze(ze_df)
 CHART_LAYOUT = chart_layout()
 
 st.title("Labs and Countries")
+st.caption(llm_data_status())
 st.caption("Who is leading, who is shipping the most, and how the balance of power is shifting.")
 
 if ze_df.empty or df.empty:
-    st.info("Live data unavailable — ZeroEval API offline.")
+    st.info(llm_no_data_message())
 else:
     ctry_counts = df["country"].value_counts().reset_index()
     ctry_counts.columns = ["country", "count"]
