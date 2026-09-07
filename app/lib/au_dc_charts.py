@@ -5,6 +5,9 @@ import plotly.graph_objects as go
 import pandas as pd
 
 
+from app.lib.au_dc_stage_scope import forecast_partition, risk_tier_group
+
+
 COLOUR_PALETTE = {
     # Operator types
     "Colocation": "#2563eb",
@@ -246,36 +249,28 @@ def market_breakdown_pie(df: pd.DataFrame, group_col: str, value_col: str = "fac
 
 
 def capacity_forecast_chart(projects: pd.DataFrame) -> go.Figure:
-    """Cumulative risked capacity by year, stacked by risk tier.
+    """Cumulative stated capacity by sourced startup year, stacked by risk tier.
+
+    Dated rows accumulate by startup year (2020-2030). Operating rows without
+    a sourced startup year are existing capacity and count from chart start.
+    Non-operating rows without a sourced startup/delivery year are shown in
+    the separate "Undated" bucket at the right of the chart — they are never
+    pinned to a fixed delivery year (no invented 2028 cliff).
 
     Risk tiers derived from risk_weight column set by the risk model:
       Operating / UC → 100%
       Approved (power secured) → 75%
       Approved (no power) → 25%
-      Proposed → 0% (not shown)
+      Proposed → 0% (shown unrisked, not excluded)
     """
-    timeline = projects.copy()
-    # Operating with no startup_year are already built — pin to 2019 (shows from chart start)
-    timeline.loc[(timeline["status"] == "Operating") & (timeline["startup_year"].isna()), "startup_year"] = 2019
-    # Proposed/pipeline with no startup_year — pin to 2028 (conservative far end)
-    timeline.loc[(timeline["status"] != "Operating") & (timeline["startup_year"].isna()), "startup_year"] = 2028
-    timeline = timeline.dropna(subset=["startup_year"])
-    timeline["startup_year"] = timeline["startup_year"].astype(int)
+    partition = forecast_partition(projects)
+    timeline = partition["dated"].copy()
+    undated = partition["undated"]
+    undated_x = 2031  # display slot labelled "Undated"; not a delivery year
 
-    # Map risk_weight + status → display group
-    def _group(row):
-        s, w = row["status"], row["risk_weight"]
-        if s == "Operating":
-            return "Operating"
-        if s == "Under Construction":
-            return "Under Construction"
-        if s == "Approved" and w >= 0.74:
-            return "Approved — Power Secured"
-        if s == "Approved":
-            return "Approved — Grid Pending"
-        return "Proposed"
-
-    timeline["group"] = timeline.apply(_group, axis=1)
+    timeline["group"] = timeline.apply(
+        lambda r: risk_tier_group(r["status"], r["risk_weight"]), axis=1
+    )
 
     years = list(range(2020, 2031))
     groups = [
@@ -298,6 +293,18 @@ def capacity_forecast_chart(projects: pd.DataFrame) -> go.Figure:
         for group in groups:
             subset = timeline[(timeline["group"] == group) & (timeline["startup_year"] <= year)]
             rows.append({"year": year, "group": group, "mw": subset["facility_mw"].sum()})
+    # Undated bucket: non-operating rows with no sourced year — total per tier,
+    # shown at its own x slot (not cumulative, not a forecast year).
+    if not undated.empty:
+        undated = undated.copy()
+        undated["group"] = undated.apply(
+            lambda r: risk_tier_group(r["status"], r["risk_weight"]), axis=1
+        )
+        undated_mw = (
+            undated.groupby("group")["facility_mw"].sum().to_dict()
+        )
+        for group in groups:
+            rows.append({"year": undated_x, "group": group, "mw": undated_mw.get(group, 0.0)})
     df = pd.DataFrame(rows)
 
     fig = go.Figure()
@@ -313,7 +320,14 @@ def capacity_forecast_chart(projects: pd.DataFrame) -> go.Figure:
 
     fig.update_layout(
         barmode="stack",
-        xaxis_title="Year",
+        xaxis=dict(
+            title="Year",
+            tickmode="array",
+            tickvals=list(range(2020, undated_x + 1)),
+            ticktext=[str(y) for y in years] + ["Undated"],
+            # Undated is a bucket, not a date: leave a visual gap before it.
+            range=[2019.5, undated_x + 0.4],
+        ),
         yaxis_title="Cumulative Capacity (MW, unrisked)",
         legend=dict(orientation="h", yanchor="top", y=-0.15, x=0),
         **{**CHART_LAYOUT, "margin": dict(l=40, r=20, t=40, b=90)},

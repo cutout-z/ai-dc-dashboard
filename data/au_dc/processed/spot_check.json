@@ -1,8 +1,8 @@
 {
-  "run_at": "2026-08-30T23:31:08.348752+00:00",
+  "run_at": "2026-09-07T12:50:30.577941+00:00",
   "project_count": 99,
   "total_mw_unrisked": 8785.825,
-  "total_mw_risked": 3633.825,
+  "total_mw_risked": 3538.825,
   "checks": [
     {
       "level": "ok",

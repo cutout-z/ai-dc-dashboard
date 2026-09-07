@@ -15,6 +15,7 @@ from app.lib.au_dc_charts import (
     CHART_LAYOUT,
 )
 from app.lib.au_dc_methodology import DISCLOSED_CAPEX_HELP, RISKED_MW_HELP
+from app.lib.au_dc_stage_scope import OPERATING_STAGE_EVIDENCED_SCOPES
 
 _AU_DC_DATA = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
 DATA_DIR = _AU_DC_DATA / "processed"
@@ -181,6 +182,19 @@ if projects is not None and regions is not None:
     else:
         projects_region["capex_disclosed_for_sum"] = projects_region["capex_aud_m"]
 
+    # Operating-stage split (S2-06): directly evidenced operating-stage MW vs
+    # Operating campus envelopes with no stored stage split. Column names are
+    # additive; the old operating_mw total is retained as "(recorded)".
+    _mw_num = pd.to_numeric(projects_region.get("facility_mw"), errors="coerce")
+    _is_op = projects_region["status"].astype(str).str.strip().eq("Operating")
+    if "capacity_scope" in projects_region.columns:
+        _scope = projects_region["capacity_scope"].fillna("").astype(str).str.strip()
+        _stage_evidenced = _is_op & _scope.isin(OPERATING_STAGE_EVIDENCED_SCOPES)
+    else:
+        _stage_evidenced = _is_op
+    projects_region["_operating_stage_mw"] = _mw_num.where(_stage_evidenced, 0.0)
+    projects_region["_operating_campus_mw"] = _mw_num.where(_is_op & ~_stage_evidenced, 0.0)
+
     dc_by_region = (
         projects_region.groupby("nem_region")
         .agg(
@@ -188,6 +202,8 @@ if projects is not None and regions is not None:
             total_mw_unrisked=("facility_mw", "sum"),
             total_mw_risked=("risked_mw", "sum"),
             operating_mw=("facility_mw", lambda x: x[projects_region.loc[x.index, "status"] == "Operating"].sum()),
+            operating_stage_mw=("_operating_stage_mw", "sum"),
+            operating_campus_mw=("_operating_campus_mw", "sum"),
             pipeline_mw=("facility_mw", lambda x: x[projects_region.loc[x.index, "status"] != "Operating"].sum()),
             capex_disclosed=("capex_disclosed_for_sum", "sum"),
         )
@@ -208,7 +224,8 @@ if projects is not None and regions is not None:
         screener = screener.merge(grid_by_region, on="nem_region", how="left")
         screener["dc_as_pct_of_grid"] = (screener["total_mw_unrisked"] / screener["grid_capacity_mw"] * 100).round(2)
 
-    display_cols = ["nem_region", "state", "num_projects", "operating_mw", "pipeline_mw",
+    display_cols = ["nem_region", "state", "num_projects", "operating_mw", "operating_stage_mw",
+                    "operating_campus_mw", "pipeline_mw",
                     "total_mw_unrisked", "total_mw_risked", "compute_per_capita_kw_per_m"]
     if "grid_capacity_mw" in screener.columns:
         display_cols += ["grid_capacity_mw", "dc_as_pct_of_grid"]
@@ -221,7 +238,15 @@ if projects is not None and regions is not None:
         column_config={
             "nem_region": "Region", "state": "State",
             "num_projects": "# Projects",
-            "operating_mw": st.column_config.NumberColumn("Operating MW", format="%d"),
+            "operating_mw": st.column_config.NumberColumn("Operating MW (recorded)", format="%d"),
+            "operating_stage_mw": st.column_config.NumberColumn(
+                "Operating MW (stage-evidenced)", format="%d",
+                help="Directly evidenced operating-stage MW: rows whose stored source basis is a row-level or campus-current-operating figure.",
+            ),
+            "operating_campus_mw": st.column_config.NumberColumn(
+                "Operating campus env. MW", format="%d",
+                help="Operating campuses whose MW is a campus envelope with no stored stage split (e.g. Eastern Creek, AirTrunk SYD1/SYD2/MEL1). Kept separate from stage-evidenced operating MW.",
+            ),
             "pipeline_mw": st.column_config.NumberColumn("Pipeline MW", format="%d"),
             "total_mw_unrisked": st.column_config.NumberColumn("Total MW (Unrisked)", format="%d"),
             "total_mw_risked": st.column_config.NumberColumn("Total MW (Risked)", format="%d", help=RISKED_MW_HELP),

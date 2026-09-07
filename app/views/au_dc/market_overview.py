@@ -18,7 +18,12 @@ from app.lib.au_dc_excluded_capacity import (
     excluded_capacity_components,
     public_excluded_capacity_overlay,
 )
-from app.lib.au_dc_methodology import OPERATOR_CAPACITY_SEGMENTS_HELP, RISKED_MW_HELP
+from app.lib.au_dc_methodology import (
+    FORECAST_TIMELINE_HELP,
+    OPERATOR_CAPACITY_SEGMENTS_HELP,
+    RISKED_MW_HELP,
+)
+from app.lib.au_dc_stage_scope import operating_layers as _operating_layers_fn, operating_stage_summary
 
 AU_DC_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
 DATA_DIR = AU_DC_DIR / "processed"
@@ -81,13 +86,36 @@ capacity_segments = operator_segments[
     ["risked", "announced_site_tied", "unassigned_aggregate", "announced_total"]
 ].sum()
 excluded_overlay = public_excluded_capacity_overlay(projects, aggregate_guidance, site_leads)
+operating_layers = operating_stage_summary(projects_for_totals)
 
 with k1:
     st.metric("Total Projects", total_projects, delta=f"{quarantined} quarantined" if quarantined else None)
 with k2:
     st.metric("Operating DCs", len(operating))
 with k3:
-    st.metric("Operating Capacity", f"{operating['facility_mw'].sum():,.0f} MW")
+    # Operating-stage MW is separated from campus envelopes whose stage
+    # allocation is not stored: the headline counts only directly evidenced
+    # operating-stage rows, and envelope MW stays visible as its own layer
+    # (Eastern Creek / SYD1 / SYD2 / MEL1) instead of silently counting as
+    # fully operating-stage (S2-06).
+    st.metric(
+        "Operating Capacity (stage-evidenced)",
+        f"{operating_layers['evidenced_mw']:,.0f} MW",
+        delta=(
+            f"{operating_layers['campus_envelope_mw']:,.0f} MW campus envelope — "
+            "stage split not stored"
+            if operating_layers["campus_envelope_mw"] > 0
+            else None
+        ),
+        delta_color="off",
+        help=(
+            "Directly evidenced operating-stage MW: rows whose stored source "
+            "basis is a row-level or campus-current-operating figure. Operating "
+            "campus rows with no stored stage split (Eastern Creek, SYD1, SYD2, "
+            "MEL1) are shown separately — their row status is the best available "
+            "campus label, not proof every MW is currently operating."
+        ),
+    )
 with k4:
     st.metric(
         "Risked Capacity",
@@ -103,6 +131,48 @@ with k5:
             "plus unassigned aggregate operator guidance that is not yet mapped to named project rows."
         ),
     )
+
+if operating_layers["campus_envelope_mw"] > 0:
+    st.caption(
+        "Operating capacity layers: "
+        f"{operating_layers['evidenced_mw']:,.0f} MW directly evidenced operating-stage "
+        f"({operating_layers['evidenced_rows']} rows) + "
+        f"{operating_layers['campus_envelope_mw']:,.0f} MW on operating campuses whose "
+        f"stage split is not stored ({operating_layers['campus_envelope_rows']} rows: "
+        f"{', '.join(operating_layers['campus_envelope_projects'])}). "
+        "Campus envelopes are retained as announced/reference capacity; no stage MW is guessed."
+    )
+
+_operating_evidenced, _operating_campus = _operating_layers_fn(projects_for_totals)
+if not _operating_campus.empty:
+    _cols = [
+        c for c in [
+            "project_name", "operator", "nem_region", "status", "facility_mw",
+            "startup_year", "capacity_scope", "stage_status_caveat",
+        ] if c in _operating_campus.columns
+    ]
+    with st.expander("Operating campus envelopes — stage split not stored"):
+        st.caption(
+            "Rows below are Operating with campus-level MW but no stored building/stage "
+            "allocation. They stay visible as separate rows and are not counted in the "
+            "stage-evidenced Operating Capacity headline; see Stage Caveat before treating "
+            "their MW as currently operating-stage."
+        )
+        st.dataframe(
+            _operating_campus[_cols].sort_values("facility_mw", ascending=False),
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "project_name": "Project",
+                "operator": "Operator",
+                "nem_region": "Region",
+                "status": "Status",
+                "facility_mw": st.column_config.NumberColumn("MW (campus)", format="%d"),
+                "startup_year": st.column_config.NumberColumn("Startup", format="%d"),
+                "capacity_scope": st.column_config.TextColumn("Capacity Scope"),
+                "stage_status_caveat": st.column_config.TextColumn("Stage Caveat", width="large"),
+            },
+        )
 
 st.markdown("### Excluded Public-Source Capacity Signals")
 st.caption(
@@ -177,7 +247,15 @@ Updated periodically as announcements are made; there is no automated refresh.
 - *Unrisked*: included project MW at the disclosed capacity basis. The database distinguishes IT load,
   gross facility power, campus full-build MW, and power-consumption envelopes where the source allows.
   Quarantined legacy estimates and no-MW facility leads are excluded from default totals.
-- *Risked*: probability-weighted MW based on development status and power/grid connection certainty —
+- *Operating-stage vs campus envelope*: operating-stage headlines count only rows with direct
+  stage-level evidence. Operating campuses whose MW is a campus envelope with no stored stage split
+  (Eastern Creek, SYD1, SYD2, MEL1) are shown as a separate envelope layer — their status is a campus
+  label, not proof every MW is currently operating-stage. No stage MW is guessed.
+- *Risked*: a delivery-confidence lens (not a calibrated probability). The disclosed status weight is
+  applied to the MW the status directly covers — the directly evidenced stage figure where one is stored
+  (e.g. GreenSquareDC SYD1's 15 MW Stage 1 inside its 110 MW campus envelope), otherwise the row-level
+  facility figure. Campus envelopes stay visible as announced/reference capacity and are not
+  double-counted.
 
   | Status | Weight | Rationale |
   |---|---|---|
@@ -189,6 +267,8 @@ Updated periodically as announcements are made; there is no automated refresh.
 
 - Where only a partial phase is funded, the figure reflects what has been disclosed (not full campus aspiration)
 - *Power secured* status is manually assessed from public disclosures; defaults to unconfirmed if not explicitly announced
+- *Timeline*: capacity is placed by sourced startup year only. Pipeline rows with no sourced
+  startup/delivery year are shown in an "Undated" bucket rather than being assigned a forecast year.
 
 **CAPEX methodology**
 CAPEX is disclosed only where public filings or announcements provide a figure. Where missing, the model
@@ -237,9 +317,12 @@ st.markdown("### Forecast Pipeline by Risk Category")
 fig = capacity_forecast_chart(projects_for_totals)
 st.plotly_chart(fig, use_container_width=True)
 st.caption(
-    "Cumulative stated capacity by project startup year, colour-coded by certainty tier. "
-    "Proposed projects with no confirmed startup year pinned to 2028. "
-    "Power secured status for Approved projects based on public disclosures."
+    "Cumulative stated capacity by sourced startup year, colour-coded by certainty tier. "
+    "Operating rows with no sourced startup year are existing capacity (shown from chart "
+    "start). Pipeline with no sourced startup/delivery year sits in the Undated bucket — "
+    "no delivery year is invented, so undated pipeline never creates a false 2028 cliff. "
+    "Power secured status for Approved projects based on public disclosures.",
+    help=FORECAST_TIMELINE_HELP,
 )
 
 st.markdown("---")

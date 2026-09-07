@@ -96,7 +96,7 @@ def build():
         "facility_mw", "critical_it_mw", "capex_aud_m", "startup_year",
         "full_capacity_year", "pue", "wue", "it_load_mw", "gross_power_mw",
         "power_consumption_mw", "grid_connection_mva", "campus_full_build_mw",
-        "unverified_capacity_mw",
+        "unverified_capacity_mw", "evidenced_stage_mw",
     ]
     for col in numeric_cols:
         if col in df.columns:

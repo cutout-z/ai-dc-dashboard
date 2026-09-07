@@ -9,6 +9,7 @@ from pathlib import Path
 from app.lib.au_dc_charts import COLOUR_PALETTE, CHART_LAYOUT, price_history_chart
 from app.lib.au_dc_financials import fetch_asx_dc_quotes, fetch_asx_dc_history
 from app.lib.au_dc_methodology import CAPEX_ESTIMATION_HELP, RISKED_MW_HELP
+from app.lib.au_dc_stage_scope import operating_stage_summary
 
 _AU_DC_DATA = Path(__file__).resolve().parent.parent.parent.parent / "data" / "au_dc"
 DATA_DIR = _AU_DC_DATA / "processed"
@@ -223,6 +224,7 @@ operators_list = sorted(projects["operator"].unique().tolist())
 selected_op = st.selectbox("Select Operator", operators_list, key="au_co_op")
 
 op_projects = projects[projects["operator"] == selected_op]
+op_layers = operating_stage_summary(op_projects)
 
 p1, p2, p3, p4 = st.columns(4)
 with p1:
@@ -230,8 +232,27 @@ with p1:
 with p2:
     st.metric("Total Capacity", f"{op_projects['facility_mw'].sum():,.0f} MW")
 with p3:
-    operating_mw = op_projects[op_projects["status"] == "Operating"]["facility_mw"].sum()
-    st.metric("Operating", f"{operating_mw:,.0f} MW")
+    # Operating-stage MW separated from campus envelopes with no stored stage
+    # split (S2-06): headline counts directly evidenced operating-stage only;
+    # envelope MW is shown as its own layer, not silently claimed as operating.
+    st.metric(
+        "Operating (stage-evidenced)",
+        f"{op_layers['evidenced_mw']:,.0f} MW",
+        delta=(
+            f"{op_layers['campus_envelope_mw']:,.0f} MW campus envelope — "
+            "stage split not stored"
+            if op_layers["campus_envelope_mw"] > 0
+            else None
+        ),
+        delta_color="off",
+        help=(
+            "Directly evidenced operating-stage MW for this operator. Operating "
+            "campus rows with no stored stage split (e.g. Eastern Creek, AirTrunk "
+            "SYD1/SYD2/MEL1) are listed separately as campus-envelope MW — their "
+            "status is the best available campus label, not proof every MW is "
+            "currently operating-stage."
+        ),
+    )
 with p4:
     pipeline_mw = op_projects[op_projects["status"] != "Operating"]["facility_mw"].sum()
     st.metric("Pipeline", f"{pipeline_mw:,.0f} MW")
