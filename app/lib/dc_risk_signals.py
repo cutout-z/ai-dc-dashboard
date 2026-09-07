@@ -17,18 +17,20 @@ import pandas as pd
 DATA_DIR = Path(__file__).parent.parent.parent / "data" / "reference"
 AU_DC_DIR = Path(__file__).parent.parent.parent / "data" / "au_dc" / "reference"
 
-STATUS_ORDER = {"green": 0, "gray": 0, "amber": 1, "red": 2}
+STATUS_ORDER = {"green": 0, "gray": 0, "context": 0, "amber": 1, "red": 2}
 STATUS_LABELS = {
     "green": "Supported",
     "amber": "Watch",
     "red": "Warning",
     "gray": "Insufficient data",
+    "context": "Context only",
 }
 STATUS_COLORS = {
     "green": "#22c55e",
     "amber": "#f59e0b",
     "red": "#ef4444",
     "gray": "#6b7280",
+    "context": "#64748b",
 }
 
 
@@ -221,48 +223,48 @@ def power_deliverability_signal(data_dir: Path = DATA_DIR) -> RiskSignal:
 
 
 def contracted_demand_signal(au_dc_dir: Path = AU_DC_DIR) -> RiskSignal:
-    """Use disclosed contracted MW/backlog where available, without estimating AI revenue."""
+    """Track disclosed AU/ANZ operator contracted MW as unscored context (S2-05).
+
+    Signed capacity and forward order books are useful demand context, but no
+    coverage or quality ratio is derived from them: the disclosure population
+    (operator geography — CDC reports Australia *and New Zealand*, NEXTDC its
+    whole portfolio) is not matched to the Australian named-project base, and
+    disclosed capacity is not operating utilisation or currently available
+    capacity. Absolute sourced amounts are preserved; this signal never carries
+    a colour verdict until numerator and denominator populations match on
+    operator scope, geography and capacity basis.
+    """
     path = au_dc_dir / "operator_aggregate_guidance.csv"
     df = _read_csv(path, parse_dates=["announcement_date", "last_verified_at"])
     if df.empty:
         return _empty(
-            "Contracted demand quality",
-            "Signed capacity and forward order books are cleaner DC demand signals than AI revenue estimates.",
+            "Tracked AU/ANZ contracted demand",
+            "Signed capacity and forward order books are closer to DC operator economics than broad AI revenue estimates, but do not by themselves establish demand quality.",
             "Contracted utilisation, forward order books, churn, cancellations, and customer concentration.",
         )
 
     df = df.copy()
     for col in [
         "contracted_capacity_mw", "forward_order_book_mw", "new_contract_mw",
-        "named_project_mw_in_db", "total_capacity_mw",
     ]:
         if col in df:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
     demand_rows = df[
-        df[["contracted_capacity_mw", "forward_order_book_mw", "new_contract_mw"]]
+        df[[c for c in ["contracted_capacity_mw", "forward_order_book_mw", "new_contract_mw"] if c in df]]
         .fillna(0)
         .sum(axis=1) > 0
     ].copy()
     if demand_rows.empty:
         return _empty(
-            "Contracted demand quality",
-            "Signed capacity and forward order books are cleaner DC demand signals than AI revenue estimates.",
+            "Tracked AU/ANZ contracted demand",
+            "Signed capacity and forward order books are closer to DC operator economics than broad AI revenue estimates, but do not by themselves establish demand quality.",
             "Contracted utilisation, forward order books, churn, cancellations, and customer concentration.",
         )
 
     contracted_mw = float(demand_rows["contracted_capacity_mw"].fillna(0).sum())
     forward_mw = float(demand_rows["forward_order_book_mw"].fillna(0).sum())
     new_mw = float(demand_rows["new_contract_mw"].fillna(0).sum())
-    named_mw = float(demand_rows["named_project_mw_in_db"].fillna(0).sum())
-    coverage = contracted_mw / named_mw * 100 if named_mw else None
-
-    if contracted_mw <= 0:
-        status = "gray"
-    elif coverage is not None and coverage < 25:
-        status = "amber"
-    else:
-        status = "green"
 
     evidence = []
     for _, row in demand_rows.sort_values("announcement_date", ascending=False).head(5).iterrows():
@@ -279,7 +281,7 @@ def contracted_demand_signal(au_dc_dir: Path = AU_DC_DIR) -> RiskSignal:
 
     table_cols = [
         "operator", "announcement_date", "geography", "contracted_capacity_mw",
-        "forward_order_book_mw", "new_contract_mw", "named_project_mw_in_db",
+        "forward_order_book_mw", "new_contract_mw",
         "source", "treatment_notes",
     ]
     table = demand_rows[[c for c in table_cols if c in demand_rows.columns]].copy()
@@ -288,17 +290,19 @@ def contracted_demand_signal(au_dc_dir: Path = AU_DC_DIR) -> RiskSignal:
 
     detail = (
         f"Tracked AU/ANZ operator disclosures show {contracted_mw:,.0f}MW contracted"
-        f" and {forward_mw:,.0f}MW in forward order book."
+        f" and {forward_mw:,.0f}MW in forward order book"
+        + (f" ({new_mw:,.0f}MW in new commitments)." if new_mw else ".")
+        + " Unscored context: no coverage/quality ratio is derived — the disclosure population "
+        "(operator geography, e.g. CDC AU/NZ) is not matched to the Australian named-project base, "
+        "and disclosed MW are not operating utilisation or available capacity."
     )
-    if coverage is not None:
-        detail += f" Contracted MW equals {coverage:.0f}% of named project MW in the database."
 
     return RiskSignal(
-        name="Contracted demand quality",
-        status=status,
-        value=f"{contracted_mw:,.0f}MW contracted",
+        name="Tracked AU/ANZ contracted demand",
+        status="context",
+        value=f"{contracted_mw:,.0f}MW contracted disclosed",
         detail=detail,
-        why_it_matters="Signed utilisation and order books are closer to DC operator economics than broad AI revenue estimates.",
+        why_it_matters="Signed utilisation and order books are closer to DC operator economics than broad AI revenue estimates, but this ratio does not establish demand quality until populations match.",
         watch_for="Cancellations, delays to signed-but-not-commenced capacity, tenant concentration, or contracted MW no longer converting into operating MW.",
         evidence=evidence,
         table=table,
@@ -306,12 +310,21 @@ def contracted_demand_signal(au_dc_dir: Path = AU_DC_DIR) -> RiskSignal:
 
 
 def power_procurement_coverage_signal(data_dir: Path = DATA_DIR) -> RiskSignal:
-    """Portfolio-level power coverage from existing sourcing disclosures."""
+    """Track hyperscaler power procurement composition as unscored context (S2-05).
+
+    Rows and absolute amounts are preserved, but no coverage ratio or colour is
+    derived: the numerator (GW of procurement with a disclosed contractual
+    status) and the denominator (announced campus/tenant load) are different
+    populations. A Contracted/PPA status is not firm available supply —
+    undelivered, renewable-only, or speculative supply (fusion, future SMR) is
+    disclosed per row, not netted as firm. Nameplate, contractual status,
+    delivery date and geography are shown per row where disclosed.
+    """
     path = data_dir / "dc_power_sourcing.csv"
     df = _read_csv(path, parse_dates=["announced_date"])
     if df.empty:
         return _empty(
-            "Portfolio power coverage",
+            "Tracked power procurement composition",
             "Power procurement is a gating item for new DC capacity.",
             "Campus-level firm power coverage, PPA pricing, delivery dates, and whether contracted power matches announced IT load.",
         )
@@ -321,41 +334,37 @@ def power_procurement_coverage_signal(data_dir: Path = DATA_DIR) -> RiskSignal:
     df_known = df[df["capacity_gw"].notna()].copy()
     if df_known.empty:
         return _empty(
-            "Portfolio power coverage",
+            "Tracked power procurement composition",
             "Power procurement is a gating item for new DC capacity.",
             "Campus-level firm power coverage, PPA pricing, delivery dates, and whether contracted power matches announced IT load.",
         )
 
-    firm_statuses = {"Contracted", "PPA", "Actual"}
-    df_known["is_firm_or_ppa"] = df_known["status"].isin(firm_statuses)
-    firm_gw = float(df_known.loc[df_known["is_firm_or_ppa"], "capacity_gw"].sum())
+    # Composition buckets by disclosed contractual status. 'Contracted'/'PPA'/
+    # 'Actual' are a status class label, not a firm-availability claim.
+    contracted_statuses = {"Contracted", "PPA", "Actual"}
+    df_known["is_contracted_status"] = df_known["status"].isin(contracted_statuses)
     total_gw = float(df_known["capacity_gw"].sum())
-    firm_share = firm_gw / total_gw * 100 if total_gw else 0
+    contracted_status_gw = float(df_known.loc[df_known["is_contracted_status"], "capacity_gw"].sum())
+    soft_or_early_gw = total_gw - contracted_status_gw
 
-    if firm_share >= 75:
-        status = "green"
-    elif firm_share >= 50:
-        status = "amber"
-    else:
-        status = "red"
-
+    df_known["bucket"] = df_known["is_contracted_status"].map(
+        {True: "contracted_status", False: "soft_or_early"}
+    )
     by_company = (
-        df_known.groupby(["company", "is_firm_or_ppa"])["capacity_gw"]
+        df_known.groupby(["company", "bucket"])["capacity_gw"]
         .sum()
         .unstack(fill_value=0)
         .reset_index()
     )
-    if True not in by_company:
-        by_company[True] = 0.0
-    if False not in by_company:
-        by_company[False] = 0.0
-    by_company = by_company.rename(columns={True: "firm_or_ppa_gw", False: "pipeline_or_soft_gw"})
-    by_company["total_gw"] = by_company["firm_or_ppa_gw"] + by_company["pipeline_or_soft_gw"]
-    by_company["firm_share"] = by_company["firm_or_ppa_gw"] / by_company["total_gw"] * 100
-    by_company = by_company.sort_values("total_gw", ascending=False)
+    for col in ("contracted_status", "soft_or_early"):
+        if col not in by_company:
+            by_company[col] = 0.0
+    by_company["tracked_gw"] = by_company["contracted_status"] + by_company["soft_or_early"]
+    by_company = by_company.sort_values("tracked_gw", ascending=False)
 
     evidence = [
-        f"{row['company']}: {row['firm_or_ppa_gw']:.1f}GW firm/PPA of {row['total_gw']:.1f}GW tracked ({row['firm_share']:.0f}%)"
+        f"{row['company']}: {row['tracked_gw']:.1f}GW tracked — "
+        f"{row['contracted_status']:.1f}GW contracted/PPA-status + {row['soft_or_early']:.1f}GW soft or early-stage"
         for _, row in by_company.head(5).iterrows()
     ]
 
@@ -367,12 +376,17 @@ def power_procurement_coverage_signal(data_dir: Path = DATA_DIR) -> RiskSignal:
         table["announced_date"] = table["announced_date"].dt.strftime("%Y-%m-%d")
 
     return RiskSignal(
-        name="Portfolio power coverage",
-        status=status,
-        value=f"{firm_share:.0f}% firm/PPA",
+        name="Tracked power procurement composition",
+        status="context",
+        value=f"{contracted_status_gw:.1f}GW contracted/PPA-status of {total_gw:.1f}GW tracked",
         detail=(
-            f"Existing sourcing disclosures show {firm_gw:.1f}GW firm/PPA capacity out of "
-            f"{total_gw:.1f}GW with known MW. This is portfolio-level, not campus-level."
+            "Unscored context, NOT a firm-supply or coverage score: the numerator (GW of tracked "
+            f"procurement with a disclosed status — {contracted_status_gw:.1f}GW contracted/PPA-status, "
+            f"{soft_or_early_gw:.1f}GW soft/early-stage of {total_gw:.1f}GW) is not matched to announced "
+            "campus/tenant load, and undelivered or renewable-only PPAs (including speculative fusion/"
+            "SMR) are not firm available supply. Row-level status, source type, and dates remain "
+            "visible below; aggregate colour resumes only when numerator and denominator populations "
+            "match on operator scope, geography, capacity basis and delivery date."
         ),
         why_it_matters="Operators are exposed when tenant demand is real but power delivery is soft, delayed, or not matched to the campus.",
         watch_for="Soft MOUs replacing firm PPAs, power delivery dates slipping beyond lease commitments, and campuses with announced MW but no firm power evidence.",
@@ -750,27 +764,34 @@ def unscored_context(data_dir: Path = DATA_DIR) -> list[dict[str, str]]:
 
 
 AU_DIRECT_SIGNALS = {
-    "Contracted demand quality",
     "Project execution and permitting",
+    # "Tracked AU/ANZ contracted demand" is AU-origin evidence but is demoted to
+    # unscored context (S2-05): its disclosure population is not matched to the
+    # Australian named-project base, so it cannot vote red/amber/green.
 }
 
 
 def overall_status(signals: list[RiskSignal]) -> dict[str, str]:
-    """Evidence summary separated by attribution, not a colour vote (S2-02).
+    """Evidence summary separated by attribution, not a colour vote (S2-02/S2-05).
 
     Only AU-direct signals can produce a red or green headline: global
     transmission proxies alone never claim Australian distress, and
-    unavailable/unscored inputs never claim expansion is supported.
+    unavailable/unscored inputs never claim expansion is supported. Coverage
+    dimensions demoted to unscored ``context`` status (S2-05) never colour the
+    aggregate and withhold a green headline until their numerator/denominator
+    populations match on operator scope, geography, capacity basis and date.
     """
-    au = [s for s in signals if s.name in AU_DIRECT_SIGNALS]
-    gx = [s for s in signals if s.name not in AU_DIRECT_SIGNALS]
+    ctx = [s for s in signals if s.status == "context"]
+    scored = [s for s in signals if s.status != "context"]
+    au = [s for s in scored if s.name in AU_DIRECT_SIGNALS]
+    gx = [s for s in scored if s.name not in AU_DIRECT_SIGNALS]
     au_red = [s for s in au if s.status == "red"]
     au_amber = [s for s in au if s.status == "amber"]
     au_green = [s for s in au if s.status == "green"]
     au_gray = [s for s in au if s.status == "gray"]
     g_warn = [s for s in gx if s.status == "red"]
     g_watch = [s for s in gx if s.status == "amber"]
-    unavailable = [s for s in signals if s.status == "gray"]
+    unavailable = [s for s in scored if s.status == "gray"]
 
     def _names(items: list[RiskSignal]) -> str:
         return ", ".join(s.name for s in items) if items else "none"
@@ -786,6 +807,10 @@ def overall_status(signals: list[RiskSignal]) -> dict[str, str]:
             (
                 f"Unavailable/unscored inputs: {len(unavailable)}"
                 + (f" ({_names(unavailable[:3])})" if unavailable else "")
+            ),
+            (
+                f"Unscored context: {len(ctx)}"
+                + (f" ({_names(ctx)})" if ctx else "")
             ),
         ]
     )
@@ -804,6 +829,12 @@ def overall_status(signals: list[RiskSignal]) -> dict[str, str]:
         return {
             "status": "gray",
             "label": "Limited evidence — inputs unavailable/unscored",
+            "detail": detail,
+        }
+    if ctx:
+        return {
+            "status": "gray",
+            "label": "Coverage dimensions unscored — aggregate colour withheld until populations match",
             "detail": detail,
         }
     if au_green:

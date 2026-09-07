@@ -41,10 +41,10 @@ def _sig(name: str, status: str) -> RiskSignal:
 
 
 ALL_SIGNAL_NAMES = [
-    "Contracted demand quality",
+    "Tracked AU/ANZ contracted demand",
     "Project execution and permitting",
     "Hyperscaler commitment",
-    "Portfolio power coverage",
+    "Tracked power procurement composition",
     "Power deliverability",
     "Capital markets",
     "Buildout financing exposure",
@@ -66,12 +66,12 @@ def test_two_global_warnings_amber_limited_evidence() -> None:
     # Review reproduction: AU-direct green, red votes from US-heavy queue +
     # news proxy only -> must NOT be red, and must state limited evidence.
     signals = [
-        _sig("Contracted demand quality", "green"),
+        _sig("Tracked AU/ANZ contracted demand", "green"),
         _sig("Project execution and permitting", "green"),
         _sig("Power deliverability", "red"),
         _sig("Capital markets", "red"),
         _sig("Hyperscaler commitment", "green"),
-        _sig("Portfolio power coverage", "green"),
+        _sig("Tracked power procurement composition", "green"),
         _sig("Buildout financing exposure", "green"),
         _sig("Market breadth", "green"),
         _sig("Model economics", "green"),
@@ -92,9 +92,21 @@ def test_only_au_direct_can_produce_red() -> None:
 
 def test_au_direct_red_produces_red() -> None:
     signals = [_sig(n, "green") for n in ALL_SIGNAL_NAMES]
-    signals[0] = _sig("Contracted demand quality", "red")
+    signals[1] = _sig("Project execution and permitting", "red")
     overall = overall_status(signals)
     assert overall["status"] == "red"
+
+
+def test_demoted_coverage_names_cannot_vote_red() -> None:
+    # S2-05: the demoted coverage signals are no longer AU-direct voters even if
+    # a synthetic caller hands them a red status.
+    assert "Tracked AU/ANZ contracted demand" not in AU_DIRECT_SIGNALS
+    assert "Tracked power procurement composition" not in AU_DIRECT_SIGNALS
+    signals = [_sig(n, "green") for n in ALL_SIGNAL_NAMES]
+    signals[0] = _sig("Tracked AU/ANZ contracted demand", "red")
+    signals[3] = _sig("Tracked power procurement composition", "red")
+    overall = overall_status(signals)
+    assert overall["status"] != "red"
 
 
 def test_green_requires_all_scored_au_direct() -> None:
@@ -108,7 +120,6 @@ def test_green_requires_all_scored_au_direct() -> None:
     assert overall["status"] == "gray"
     assert "imited evidence" in overall["label"]
     all_gray_except_au = [_sig(n, "gray") for n in ALL_SIGNAL_NAMES]
-    all_gray_except_au[0] = _sig("Contracted demand quality", "green")
     all_gray_except_au[1] = _sig("Project execution and permitting", "green")
     assert overall_status(all_gray_except_au)["status"] == "gray"
 

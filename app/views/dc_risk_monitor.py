@@ -108,9 +108,9 @@ signals = [
 overall = overall_status(signals)
 
 SIGNAL_LENS = {
-    "Contracted demand quality": {
+    "Tracked AU/ANZ contracted demand": {
         "lens": "AU direct",
-        "why": "Uses AU/ANZ operator contracted-capacity and order-book disclosures.",
+        "why": "Uses AU/ANZ operator contracted-capacity and order-book disclosures — unscored context: the disclosure population is not matched to the Australian named-project base.",
     },
     "Project execution and permitting": {
         "lens": "AU direct",
@@ -120,9 +120,9 @@ SIGNAL_LENS = {
         "lens": "Global tenant proxy",
         "why": "Australian growth is largely hyperscaler-led, so global capex cuts/pushouts can transmit into local leasing and delivery confidence.",
     },
-    "Portfolio power coverage": {
+    "Tracked power procurement composition": {
         "lens": "Global tenant proxy",
-        "why": "Tracks global hyperscaler power procurement because the same tenants anchor Australian demand; campus-level AU power matching is still a gap.",
+        "why": "Tracks global hyperscaler power procurement by disclosed status because the same tenants anchor Australian demand — unscored context: disclosure GW is not matched to campus/tenant load, so it is not a coverage score.",
     },
     "Power deliverability": {
         "lens": "Global infrastructure proxy",
@@ -229,7 +229,8 @@ with detail_col:
         """
     )
     st.caption(
-        "Signals with weak attribution to DC operators are kept as context only: AI revenue disclosure, circular financing, and GPU spot prices."
+        "Signals with weak attribution to DC operators are kept as context only: AI revenue disclosure, circular financing, and GPU spot prices. "
+        "Coverage ratios that compare incomparable populations (firm/PPA of tracked procurement vs announced load; contracted MW vs the AU named-project base) are likewise unscored context until their numerator and denominator populations match."
     )
 
 st.subheader("Australian Market Lens")
@@ -344,11 +345,31 @@ else:
 
 st.subheader("Scored Signals")
 
-for section, section_signals in [
-    ("Australian Direct Signals", [s for s in signals if SIGNAL_LENS.get(s.name, {}).get("lens") == "AU direct"]),
-    ("Global Transmission Signals", [s for s in signals if SIGNAL_LENS.get(s.name, {}).get("lens") != "AU direct"]),
-]:
+sections = [
+    (
+        "Australian Direct Signals",
+        [s for s in signals if s.status != "context" and SIGNAL_LENS.get(s.name, {}).get("lens") == "AU direct"],
+    ),
+    (
+        "Global Transmission Signals",
+        [s for s in signals if s.status != "context" and SIGNAL_LENS.get(s.name, {}).get("lens") != "AU direct"],
+    ),
+    (
+        "Coverage Context (unscored)",
+        [s for s in signals if s.status == "context"],
+    ),
+]
+for section, section_signals in sections:
+    if not section_signals:
+        continue
     st.markdown(f"### {section}")
+    if section == "Coverage Context (unscored)":
+        st.caption(
+            "Coverage ratios whose numerator/denominator populations do not match (firm/PPA of "
+            "procurement disclosures vs announced load; contracted MW of operator disclosures vs "
+            "the Australian named-project base) are kept as unscored context — source rows and "
+            "absolute amounts are shown, with no colour verdict."
+        )
     for signal in section_signals:
         with st.container(border=True):
             _render_signal_card(signal)
@@ -367,12 +388,12 @@ st.dataframe(
         [
             {
                 "Area": "Lease backlog / preleasing",
-                "Now implemented": "AU/ANZ operator contracted MW and forward order book disclosures.",
+                "Now implemented": "AU/ANZ operator contracted MW and forward order book disclosures (unscored context — disclosure population not matched to the AU named-project base).",
                 "Remaining gap": "Tenant concentration, WALE, churn, and signed-but-not-commenced conversion.",
             },
             {
                 "Area": "Power procurement",
-                "Now implemented": "Portfolio-level firm/PPA versus soft pipeline from tracked sourcing disclosures.",
+                "Now implemented": "Tracked procurement composition by disclosed contractual status (unscored context — no coverage score until disclosure GW is matched to campus/tenant load).",
                 "Remaining gap": "Australian campus-level firm MW versus announced IT load and power delivery dates.",
             },
             {
