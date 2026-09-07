@@ -3,13 +3,19 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 import yfinance as yf
 
-from app.lib.yahoo_spark import run_spark, compute_returns_from_closes, _format_price
+from app.lib.yahoo_spark import (
+    run_spark,
+    compute_returns_from_closes,
+    compute_pct_from_high,
+    _format_price,
+)
 
 REFERENCE_DIR = Path(__file__).parent.parent.parent / "data" / "reference"
 
@@ -72,21 +78,60 @@ def _load_earnings_fallback() -> dict[str, str | None]:
     }
 
 
+@st.cache_data(ttl=600, show_spinner=False)
+def fetch_committed_earnings_dates() -> dict[str, str | None]:
+    """Committed earnings snapshot — ``data/reference/earnings_dates.csv``.
+
+    No network: this is the critical-path reader (S2-13). Live Yahoo dates
+    stay an explicit opt-in behind :func:`fetch_earnings_dates`, so a stalled
+    Yahoo never holds the earnings calendar hostage to the committed snapshot.
+    """
+    return _load_earnings_fallback()
+
+
+def committed_earnings_newest_date(dates: dict[str, str | None]) -> str | None:
+    """Newest listed date in the committed earnings snapshot (content-derived).
+
+    Uses the snapshot's own dates — never file mtime, which on a git checkout
+    reflects the clone/pull time rather than when the producer last refreshed.
+    """
+    parsed = [
+        pd.to_datetime(value, errors="coerce")
+        for value in (dates or {}).values()
+        if value is not None
+    ]
+    parsed = [ts for ts in parsed if pd.notna(ts)]
+    if not parsed:
+        return None
+    return max(parsed).strftime("%Y-%m-%d")
+
+
+def _fetch_one_earnings_date(sym: str) -> tuple[str, str | None]:
+    """One ticker's live earnings-date lookup (worker for the bounded pool)."""
+    try:
+        t = yf.Ticker(sym)
+        return sym, _extract_earnings_date(t.calendar)
+    except Exception as e:
+        logger.debug("Earnings %s error: %s", sym, e)
+        return sym, None
+
+
 @st.cache_data(ttl=3600)
 def fetch_earnings_dates(tickers: tuple[str, ...]) -> dict[str, str | None]:
-    """Fetch next earnings date for an arbitrary list of tickers.
+    """Fetch next earnings date for an arbitrary list of tickers (live).
 
-    Tries yfinance first; falls back to reference CSV if all calls fail
-    (common on Streamlit Cloud where Yahoo rate-limits shared IPs).
+    Explicit opt-in on page critical paths (S2-13) — readers default to the
+    committed snapshot (:func:`fetch_committed_earnings_dates`). Live legs run
+    bounded-concurrent (6 workers) and fall back to the reference CSV per
+    ticker when yfinance returns nothing or a past date (common on Streamlit
+    Cloud where Yahoo rate-limits shared IPs).
     """
     results: dict[str, str | None] = {}
-    for sym in tickers:
-        try:
-            t = yf.Ticker(sym)
-            results[sym] = _extract_earnings_date(t.calendar)
-        except Exception as e:
-            logger.debug("Earnings %s error: %s", sym, e)
-            results[sym] = None
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futures = [pool.submit(_fetch_one_earnings_date, sym) for sym in tickers]
+        for future in futures:
+            sym, dt = future.result()
+            results[sym] = dt
 
     # Fall back to reference CSV for tickers where yfinance returned nothing
     # or a past date (common for half-yearly ANZ reporters and on Streamlit Cloud)
@@ -234,6 +279,59 @@ def _fetch_fundamentals(symbols: list[str]) -> dict:
             sym, data = future.result()
             results[sym] = data
     return results
+
+
+def _breadth_rows_from_spark(spark_data: dict) -> list[dict]:
+    """Pure price-only breadth rows from a Yahoo spark response (S2-13).
+
+    Breadth only consumes period returns and 52-week drawdowns, so the builder
+    needs closes alone — no fundamental jobs, no yfinance statements. Rows
+    carry the same keys :func:`market_breadth_signal` reads from the full
+    loader (``symbol/name/group/price/change_pct/returns/pct_from_high``);
+    ``pct_from_high`` is the price-only drawdown (last close vs the trailing
+    ~252-session high *close*) via
+    :func:`app.lib.yahoo_spark.compute_pct_from_high`, so the loader is a pure
+    function of its price snapshot.
+    """
+    rows = []
+    for entry in MAG7_AI_STOCKS:
+        sym = entry["symbol"]
+        sd = spark_data.get(sym)
+        closes = (sd or {}).get("closes") or []
+
+        if len(closes) >= 2:
+            price = closes[-1]
+            prev = closes[-2]
+            change_pct = round((price / prev - 1) * 100, 2) if prev else None
+            returns = compute_returns_from_closes(closes)
+            pct_from_high = compute_pct_from_high(closes)
+        else:
+            price = None
+            change_pct = None
+            returns = {}
+            pct_from_high = None
+
+        rows.append({
+            **entry,
+            "price": _format_price(price),
+            "change_pct": change_pct,
+            "returns": returns,
+            "pct_from_high": pct_from_high,
+        })
+
+    return rows
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_breadth_data() -> list[dict]:
+    """Cached price-only breadth loader for the risk monitor (S2-13).
+
+    One Yahoo spark call (closes only, 10y so every period return is
+    populated) — **no fundamental jobs**. See :func:`_breadth_rows_from_spark`
+    for the pure row contract.
+    """
+    symbols = [s["symbol"] for s in MAG7_AI_STOCKS]
+    return _breadth_rows_from_spark(run_spark(symbols, time_range="10y"))
 
 
 @st.cache_data(ttl=300)

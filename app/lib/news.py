@@ -11,8 +11,10 @@ from __future__ import annotations
 
 import logging
 import re
+import threading
 import time
 import urllib.parse
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlunsplit, urlsplit
 from dataclasses import dataclass
 from datetime import date, datetime, time as datetime_time, timezone
@@ -24,6 +26,25 @@ import streamlit as st
 from app.lib.news_scoring import get_display_tier, score_news_item
 
 logger = logging.getLogger("ai_research.news")
+
+# S2-13: bounded-concurrent feed fetches. A single feed request can take up to
+# FEED_TIMEOUT_S; running all configured feeds sequentially put that worst case
+# (17 × 15 s ≈ 255 s) on the page critical path ahead of committed history.
+# FEED_MAX_WORKERS bounds the pool so the wall-clock ceiling stays near
+# ceil(feeds / workers) × timeout while each thread reuses its own connection.
+FEED_TIMEOUT_S = 15
+FEED_MAX_WORKERS = 4
+
+_thread_local = threading.local()
+
+
+def _get_session() -> requests.Session:
+    """One requests.Session per thread (connection reuse; Session is not thread-safe)."""
+    session = getattr(_thread_local, "session", None)
+    if session is None:
+        session = requests.Session()
+        _thread_local.session = session
+    return session
 
 # ──────────────────────────────────────────────
 # Bucket definitions
@@ -350,7 +371,7 @@ def _fetch_feed(
     if stats is not None:
         stats["attempted"] += 1
     try:
-        response = requests.get(url, timeout=15)
+        response = _get_session().get(url, timeout=FEED_TIMEOUT_S)
         response.raise_for_status()
         parsed = feedparser.parse(response.content)
     except Exception as e:
@@ -425,49 +446,78 @@ def _fetch_news_buckets_uncached(
 ) -> dict[str, list[dict]]:
     """Live fetch of all configured buckets (no caching).
 
+    Bounded-concurrent (S2-13): every configured feed URL is fetched through a
+    ``FEED_MAX_WORKERS``-wide pool (one session per worker thread), then the
+    per-bucket pipeline (date window, ANZ operator filter, URL/title dedupe,
+    published-desc sort, ``max_per_bucket`` truncation) runs in deterministic
+    config order — completion order never changes the result.
+
     ``stats``, when given, is filled with feed-request level results —
     attempted/succeeded counts plus per-feed failure labels — giving the
-    catalogue producer the S2-04 attempted/succeeded contract.
+    catalogue producer the S2-04 attempted/succeeded contract. Counts and
+    failure labels are merged from per-task records in config order, so they
+    are exact and deterministic even though fetches complete out of order.
     """
+    # Deterministic task list in config order (queries then directs per bucket).
+    tasks: list[tuple[str, str, str, str]] = []  # (bucket, url, fallback, failed_label)
+    for label, cfg in BUCKETS.items():
+        for query in cfg.get("queries", []):
+            tasks.append(
+                (
+                    label,
+                    _gn_url(query, start_date=start_date, end_date=end_date),
+                    "Google News",
+                    f"google_news:{query}",
+                )
+            )
+        for direct_name in cfg.get("direct", []):
+            feed_url = DIRECT_FEEDS.get(direct_name)
+            if feed_url:
+                tasks.append((label, feed_url, direct_name, f"direct:{direct_name}"))
+
+    # Bounded-concurrent fetch. Each task gets its own stats dict so the
+    # workers never mutate shared state; results are merged below in config
+    # order (deterministic counts and failure labels).
+    per_task_stats = [
+        {"attempted": 0, "succeeded": 0, "failed_feeds": []} for _ in tasks
+    ]
+    with ThreadPoolExecutor(max_workers=FEED_MAX_WORKERS) as pool:
+        futures = [
+            pool.submit(
+                _fetch_feed,
+                url,
+                fallback,
+                stats=task_stats,
+                failed_label=failed_label,
+            )
+            for (_, url, fallback, failed_label), task_stats in zip(tasks, per_task_stats)
+        ]
+        fetched: list[list[NewsItem]] = [f.result() for f in futures]
+
+    if stats is not None:
+        for task_stats, (_, _, _, failed_label) in zip(per_task_stats, tasks):
+            stats["attempted"] += task_stats["attempted"]
+            stats["succeeded"] += task_stats["succeeded"]
+            stats["failed_feeds"].extend(task_stats["failed_feeds"])
+
+    # Per-bucket assembly in config order — deterministic output regardless
+    # of which feed finished first.
+    by_bucket: dict[str, list[list[NewsItem]]] = {label: [] for label in BUCKETS}
+    for task, items in zip(tasks, fetched):
+        by_bucket[task[0]].append(items)
+
     result: dict[str, list[dict]] = {}
     for label, cfg in BUCKETS.items():
         seen_urls: set[str] = set()
         seen_titles: set[str] = set()
         items: list[NewsItem] = []
+        is_anz = label == "ANZ DC"
 
-        for query in cfg.get("queries", []):
-            url = _gn_url(query, start_date=start_date, end_date=end_date)
-            for item in _fetch_feed(
-                url,
-                source_fallback="Google News",
-                stats=stats,
-                failed_label=f"google_news:{query}",
-            ):
+        for feed_items in by_bucket[label]:
+            for item in feed_items:
                 if not _in_date_window(item.published, start_date, end_date):
                     continue
-                if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
-                    continue
-                title_key = normalise_title_key(item.title)
-                url_key = normalise_url(item.url)
-                if url_key in seen_urls or title_key in seen_titles:
-                    continue
-                seen_urls.add(url_key)
-                seen_titles.add(title_key)
-                items.append(item)
-
-        for direct_name in cfg.get("direct", []):
-            feed_url = DIRECT_FEEDS.get(direct_name)
-            if not feed_url:
-                continue
-            for item in _fetch_feed(
-                feed_url,
-                source_fallback=direct_name,
-                stats=stats,
-                failed_label=f"direct:{direct_name}",
-            ):
-                if not _in_date_window(item.published, start_date, end_date):
-                    continue
-                if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
+                if is_anz and not is_anz_operator_news(item.title, item.summary):
                     continue
                 title_key = normalise_title_key(item.title)
                 url_key = normalise_url(item.url)
@@ -517,6 +567,23 @@ def fetch_news_buckets(
     Returns dicts (not NewsItem objects) because Streamlit's cache serializes output.
     """
     return _fetch_news_buckets_uncached(max_per_bucket, start_date, end_date, None)
+
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def fetch_news_buckets_with_stats(
+    max_per_bucket: int = 30,
+    start_date: str | date | None = None,
+    end_date: str | date | None = None,
+) -> tuple[dict[str, list[dict]], dict]:
+    """Cached fetch returning ``(bucket_data, stats)`` for live readers.
+
+    Page consumers use this variant (S2-13) so a partially-failed or stalled
+    feed run is visible next to the rendered items — the S2-04 stats contract
+    on the live path, not just the catalogue producer's.
+    """
+    stats = {"attempted": 0, "succeeded": 0, "failed_feeds": []}
+    data = _fetch_news_buckets_uncached(max_per_bucket, start_date, end_date, stats)
+    return data, stats
 
 
 def fetch_stats_summary(stats: dict) -> str:

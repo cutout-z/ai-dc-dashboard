@@ -107,6 +107,24 @@ def run_spark(symbols: list, time_range: str = "10y") -> dict:
     return merged
 
 
+def compute_pct_from_high(closes: list, window: int = 252) -> Optional[float]:
+    """Percent below the trailing-window high close — a price-only drawdown.
+
+    ``(last / max(closes[-window:]) - 1) * 100``. The high is the best *close*
+    of the trailing ``window`` sessions (~1 trading year at the default 252),
+    so the metric needs only the price series — no fundamentals (S2-13 breadth
+    loader). ``None`` when there are fewer than two closes or a zero high.
+    """
+    if not closes or len(closes) < 2:
+        return None
+    recent = closes[-max(1, int(window)):]
+    high = max(recent)
+    last = closes[-1]
+    if not high:
+        return None
+    return round((last / high - 1) * 100, 2)
+
+
 def compute_returns_from_closes(closes: list) -> dict:
     if len(closes) < 2:
         return {p: None for p in PERIOD_LABELS}

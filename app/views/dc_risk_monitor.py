@@ -23,7 +23,7 @@ from app.lib.dc_risk_signals import (
     project_execution_signal,
     unscored_context,
 )
-from app.lib.equities import fetch_equities_data
+from app.lib.equities import fetch_breadth_data
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -65,7 +65,7 @@ st.caption(
 def _load_market_signal() -> RiskSignal:
     try:
         with st.spinner("Loading market breadth..."):
-            return market_breadth_signal(fetch_equities_data())
+            return market_breadth_signal(fetch_breadth_data())
     except Exception:
         return market_breadth_signal(None)
 

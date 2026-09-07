@@ -392,10 +392,16 @@ st.caption(
 
 live_rows = [
     {
-        "Source": "fetch_equities_data() — prices + fundamentals",
+        "Source": "fetch_equities_data() — prices + fundamentals (Equity Analysis)",
         "TTL": "5m",
         "API": "Yahoo spark + yfinance fast_info",
         "Fallback": "Prices: spark (reliable). Fundamentals: fast_info → t.info → computed from statements",
+    },
+    {
+        "Source": "fetch_breadth_data() — price-only breadth (Risk Monitor)",
+        "TTL": "5m",
+        "API": "Yahoo spark (closes only)",
+        "Fallback": "None — one spark call; no fundamental jobs (S2-13)",
     },
     {
         "Source": "fetch_financials() — 3-statement",

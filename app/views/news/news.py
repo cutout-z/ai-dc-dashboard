@@ -1,4 +1,12 @@
-"""News — earnings calendars and curated AI/DC news feed."""
+"""News — earnings calendars and curated AI/DC news feed.
+
+S2-13 page-critical-path ordering: committed content renders FIRST — the
+earnings snapshot (``data/reference/earnings_dates.csv``, no network) and the
+durable news catalogue — and the live feed fetch runs LAST, bounded-concurrent
+in :mod:`app.lib.news`. A stalled or failed feed therefore can never hide the
+stored history, and partial feed failures stay visible next to the live items.
+Live Yahoo earnings dates are an explicit opt-in toggle.
+"""
 
 from __future__ import annotations
 
@@ -11,9 +19,15 @@ import streamlit as st
 from app.lib.equities import (
     ANZ_EARNINGS_TICKERS,
     MAG7_AI_STOCKS,
+    committed_earnings_newest_date,
+    fetch_committed_earnings_dates,
     fetch_earnings_dates,
 )
-from app.lib.news import fetch_news_buckets, flatten_news_buckets
+from app.lib.news import (
+    fetch_news_buckets_with_stats,
+    fetch_stats_summary,
+    flatten_news_buckets,
+)
 from app.lib.news_scoring import (
     TIER_COLORS,
     TIER_LABELS,
@@ -26,24 +40,8 @@ st.title("News")
 st.caption("Earnings calendars for key players + curated AI/DC news feed.")
 
 # ══════════════════════════════════════════════
-# 1. EARNINGS CALENDARS
+# Helpers (no UI output)
 # ══════════════════════════════════════════════
-st.header("Earnings Calendar")
-
-# Build ticker → metadata lookup
-global_tickers = [
-    {"symbol": s["symbol"], "name": s["name"], "group": s["group"], "region": "US"}
-    for s in MAG7_AI_STOCKS
-]
-anz_tickers = [
-    {"symbol": s["symbol"], "name": s["name"], "group": "ANZ DC / Infra", "region": s["region"]}
-    for s in ANZ_EARNINGS_TICKERS
-]
-all_tickers = global_tickers + anz_tickers
-
-with st.spinner("Fetching earnings dates..."):
-    dates = fetch_earnings_dates(tuple(t["symbol"] for t in all_tickers))
-
 
 def _parse_date(s: str | None) -> pd.Timestamp | None:
     if not s:
@@ -53,54 +51,6 @@ def _parse_date(s: str | None) -> pd.Timestamp | None:
     except Exception:
         return None
 
-
-rows = []
-now = pd.Timestamp.now()
-for t in all_tickers:
-    ed = _parse_date(dates.get(t["symbol"]))
-    days_away = (ed - now).days if ed is not None else None
-    stale = days_away is not None and days_away < 0
-    rows.append({
-        "Ticker": t["symbol"],
-        "Name": t["name"],
-        "Group": t["group"],
-        "Region": t["region"],
-        "Earnings Date": "—" if stale or ed is None else ed.strftime("%Y-%m-%d"),
-        "Days Away": str(days_away) if not stale and days_away is not None else "—",
-        "Status": "Awaiting next date" if stale else ("Unavailable" if ed is None else "Upcoming"),
-        "_provider_date": ed.strftime("%Y-%m-%d") if stale and ed is not None else "",
-        "_sort": ed if ed is not None and not stale else pd.Timestamp.max,
-    })
-
-df_earn = pd.DataFrame(rows).sort_values("_sort").drop(columns=["_sort"])
-
-with st.container(border=True):
-    st.subheader("Global (Mag 7 + AI Infra + DC Operators)")
-    df_g = df_earn[df_earn["Region"] == "US"].drop(columns=["Region", "_provider_date"])
-    df_g = df_g[df_g["Status"] == "Upcoming"].drop(columns=["Status"])
-    st.dataframe(df_g, use_container_width=True, hide_index=True, height=35 * (len(df_g) + 1) + 3)
-
-with st.container(border=True):
-    st.subheader("ANZ")
-    df_a = df_earn[df_earn["Region"] == "ANZ"].drop(columns=["Region", "_provider_date"])
-    st.dataframe(df_a, use_container_width=True, hide_index=True, height=35 * (len(df_a) + 1) + 3)
-    stale_dates = df_earn[(df_earn["Region"] == "ANZ") & (df_earn["_provider_date"] != "")]
-    if not stale_dates.empty:
-        stale_txt = ", ".join(
-            f"{row['Ticker']} last provider date {row['_provider_date']}"
-            for _, row in stale_dates.iterrows()
-        )
-        st.caption(f"Awaiting next announced date from Yahoo/FMP for: {stale_txt}.")
-
-# ══════════════════════════════════════════════
-# 2. NEWS FEED — materiality-ranked
-# ══════════════════════════════════════════════
-st.header("News Feed")
-st.caption(
-    "Ranked for AI-bubble risk and mitigants: valuations, financing, material contracts, "
-    "capex/power, supply-chain constraints, regulation, and industry economics. "
-    "Cached 30 min."
-)
 
 # Dot / label colour per bucket
 _BUCKET_COLORS: dict[str, str] = {
@@ -173,62 +123,29 @@ def _render_history_table(label: str, df: pd.DataFrame) -> None:
     )
 
 
-col_refresh, col_filter, _ = st.columns([1, 1.8, 3.2])
-with col_refresh:
-    if st.button("Refresh", use_container_width=True):
-        fetch_news_buckets.clear()
-with col_filter:
-    show_low = st.toggle("Show low-materiality", value=False)
-
-with st.spinner("Fetching news..."):
-    news_data = fetch_news_buckets()
-
-
-if not any(news_data.values()):
-    st.warning("No news items fetched. Check network connectivity.")
-else:
-    all_items = flatten_news_buckets(news_data)
-
-    # Group by tier
-    tier_groups: dict[str, list[dict]] = {"HIGH": [], "MEDIUM": [], "LOW": []}
-    for it in all_items:
-        tier_groups[it["tier"]].append(it)
-
-    total = len(all_items)
-    high_n = len(tier_groups["HIGH"])
-    med_n = len(tier_groups["MEDIUM"])
-    low_n = len(tier_groups["LOW"])
-
-    # Summary metrics
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-    col_m1.metric("Total", total)
-    col_m2.metric("High", high_n)
-    col_m3.metric("Medium", med_n)
-    col_m4.metric("Low", low_n)
-
-    def _render_tier(tier: str, items: list[dict]) -> str:
-        """Build HTML for a tier section."""
-        if not items:
-            return ""
-        tier_color = TIER_COLORS[tier]
-        tier_label = TIER_LABELS[tier]
-        header = f"""
+def _render_tier_html(tier: str, items: list[dict]) -> str:
+    """Build HTML for a tier section."""
+    if not items:
+        return ""
+    tier_color = TIER_COLORS[tier]
+    tier_label = TIER_LABELS[tier]
+    header = f"""
 <div style="display:flex;align-items:center;gap:8px;padding:12px 0 6px;">
   <span style="font-size:14px;font-weight:600;color:{tier_color};">{tier_label}</span>
   <span style="font-size:11px;color:#6b7280;">({len(items)} items)</span>
 </div>"""
-        rows: list[str] = []
-        for it in items:
-            bucket = it["bucket"]
-            bkt_color = _BUCKET_COLORS.get(bucket, "#6b7280")
-            title = it["title"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            source = it["source"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            age = it["age_str"]
-            url = it["url"]
-            score = it.get("materiality_score", 0)
-            bar_pct = max(int(score * 100), 2)
+    rows: list[str] = []
+    for it in items:
+        bucket = it["bucket"]
+        bkt_color = _BUCKET_COLORS.get(bucket, "#6b7280")
+        title = it["title"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        source = it["source"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        age = it["age_str"]
+        url = it["url"]
+        score = it.get("materiality_score", 0)
+        bar_pct = max(int(score * 100), 2)
 
-            rows.append(f"""
+        rows.append(f"""
 <div style="display:flex;align-items:flex-start;gap:10px;padding:7px 2px 5px;">
   <div style="margin-top:6px;width:40px;flex-shrink:0;">
     <div style="width:100%;height:4px;background:#1e293b;border-radius:2px;">
@@ -248,22 +165,107 @@ else:
   </div>
 </div>
 <div style="border-top:1px solid #1e293b;margin:0 0 0 52px;"></div>""")
-        return header + "\n".join(rows)
-
-    html_parts: list[str] = []
-    html_parts.append(_render_tier("HIGH", tier_groups["HIGH"]))
-    html_parts.append(_render_tier("MEDIUM", tier_groups["MEDIUM"]))
-    if show_low:
-        html_parts.append(_render_tier("LOW", tier_groups["LOW"]))
-
-    with st.container(border=True, height=680):
-        st.markdown("\n".join(p for p in html_parts if p), unsafe_allow_html=True)
+    return header + "\n".join(rows)
 
 
 # ══════════════════════════════════════════════
-# 3. NEWS HISTORY — durable catalog
+# 1. EARNINGS CALENDAR — committed snapshot first (live opt-in)
+# ══════════════════════════════════════════════
+st.header("Earnings Calendar")
+
+# Build ticker → metadata lookup
+global_tickers = [
+    {"symbol": s["symbol"], "name": s["name"], "group": s["group"], "region": "US"}
+    for s in MAG7_AI_STOCKS
+]
+anz_tickers = [
+    {"symbol": s["symbol"], "name": s["name"], "group": "ANZ DC / Infra", "region": s["region"]}
+    for s in ANZ_EARNINGS_TICKERS
+]
+all_tickers = global_tickers + anz_tickers
+
+live_earnings = st.toggle(
+    "Check Yahoo for latest earnings dates",
+    value=False,
+    key="news_live_earnings",
+    help=(
+        "Off by default (S2-13): the calendar renders the committed "
+        "data/reference/earnings_dates.csv snapshot instantly, with no network. "
+        "Enable to run live Yahoo lookups instead (results cached 60 min)."
+    ),
+)
+
+today = pd.Timestamp.now().normalize()
+if live_earnings:
+    with st.spinner("Fetching earnings dates from Yahoo..."):
+        dates = fetch_earnings_dates(tuple(t["symbol"] for t in all_tickers))
+    st.caption(
+        "Dates from live Yahoo, falling back to the committed snapshot where Yahoo "
+        "returns nothing or a past date (cached 60 min)."
+    )
+else:
+    dates = fetch_committed_earnings_dates()
+    newest = committed_earnings_newest_date(dates)
+    asof = f"newest listed date {newest}" if newest else "no listed dates"
+    hint = ""
+    if newest is not None and newest < today.strftime("%Y-%m-%d"):
+        hint = " This snapshot predates today — enable the live Yahoo check above for upcoming dates."
+    st.caption(
+        f"Committed snapshot data/reference/earnings_dates.csv ({asof}) — rendered "
+        f"with no network; live Yahoo is an explicit opt-in above.{hint}"
+    )
+
+
+def _earnings_rows(dates: dict) -> list[dict]:
+    rows = []
+    now = pd.Timestamp.now()
+    for t in all_tickers:
+        ed = _parse_date(dates.get(t["symbol"]))
+        days_away = (ed - now).days if ed is not None else None
+        stale = days_away is not None and days_away < 0
+        rows.append({
+            "Ticker": t["symbol"],
+            "Name": t["name"],
+            "Group": t["group"],
+            "Region": t["region"],
+            "Earnings Date": "—" if stale or ed is None else ed.strftime("%Y-%m-%d"),
+            "Days Away": str(days_away) if not stale and days_away is not None else "—",
+            "Status": "Awaiting next date" if stale else ("Unavailable" if ed is None else "Upcoming"),
+            "_provider_date": ed.strftime("%Y-%m-%d") if stale and ed is not None else "",
+            "_sort": ed if ed is not None and not stale else pd.Timestamp.max,
+        })
+    return rows
+
+
+df_earn = pd.DataFrame(_earnings_rows(dates)).sort_values("_sort").drop(columns=["_sort"])
+
+with st.container(border=True):
+    st.subheader("Global (Mag 7 + AI Infra + DC Operators)")
+    df_g = df_earn[df_earn["Region"] == "US"].drop(columns=["Region", "_provider_date"])
+    df_g = df_g[df_g["Status"] == "Upcoming"].drop(columns=["Status"])
+    st.dataframe(df_g, use_container_width=True, hide_index=True, height=35 * (len(df_g) + 1) + 3)
+
+with st.container(border=True):
+    st.subheader("ANZ")
+    df_a = df_earn[df_earn["Region"] == "ANZ"].drop(columns=["Region", "_provider_date"])
+    st.dataframe(df_a, use_container_width=True, hide_index=True, height=35 * (len(df_a) + 1) + 3)
+    stale_dates = df_earn[(df_earn["Region"] == "ANZ") & (df_earn["_provider_date"] != "")]
+    if not stale_dates.empty:
+        stale_txt = ", ".join(
+            f"{row['Ticker']} last listed date {row['_provider_date']}"
+            for _, row in stale_dates.iterrows()
+        )
+        st.caption(f"Awaiting next announced date for: {stale_txt}.")
+
+
+# ══════════════════════════════════════════════
+# 2. NEWS HISTORY — durable catalog (committed; renders with no network)
 # ══════════════════════════════════════════════
 st.header("News History")
+st.caption(
+    "Durable catalogue written by scripts/catalog_news.py — a committed artifact that "
+    "renders with no network, so a stalled live feed can never hide it."
+)
 catalog_df = _load_news_catalog(str(NEWS_CATALOG_PATH))
 
 if catalog_df.empty:
@@ -327,3 +329,77 @@ else:
         _render_history_table("High", high_history)
     with medium_tab:
         _render_history_table("Medium", medium_history)
+
+
+# ══════════════════════════════════════════════
+# 3. NEWS FEED — live, bounded-concurrent, LAST (after committed content)
+# ══════════════════════════════════════════════
+st.header("News Feed")
+st.caption(
+    "Ranked for AI-bubble risk and mitigants: valuations, financing, material contracts, "
+    "capex/power, supply-chain constraints, regulation, and industry economics. "
+    "Cached 30 min. Fetched bounded-concurrent after the committed content above."
+)
+
+col_refresh, col_filter, _ = st.columns([1, 1.8, 3.2])
+with col_refresh:
+    if st.button("Refresh", use_container_width=True):
+        fetch_news_buckets_with_stats.clear()
+with col_filter:
+    show_low = st.toggle("Show low-materiality", value=False, key="news_show_low")
+
+with st.spinner("Fetching news..."):
+    news_data, feed_stats = fetch_news_buckets_with_stats()
+
+
+def _feed_status_line(stats: dict) -> str:
+    attempted = stats.get("attempted", 0)
+    succeeded = stats.get("succeeded", 0)
+    if not attempted:
+        return "no feed requests were made"
+    if succeeded == attempted:
+        return f"all {attempted} feed requests succeeded"
+    return f"{succeeded}/{attempted} feed requests succeeded"
+
+
+if not any(news_data.values()):
+    st.warning(
+        f"No live news items fetched — {_feed_status_line(feed_stats)} "
+        f"({fetch_stats_summary(feed_stats)}). "
+        "The stored News History above remains available and unaffected."
+    )
+else:
+    all_items = flatten_news_buckets(news_data)
+
+    # Group by tier
+    tier_groups: dict[str, list[dict]] = {"HIGH": [], "MEDIUM": [], "LOW": []}
+    for it in all_items:
+        tier_groups[it["tier"]].append(it)
+
+    total = len(all_items)
+    high_n = len(tier_groups["HIGH"])
+    med_n = len(tier_groups["MEDIUM"])
+    low_n = len(tier_groups["LOW"])
+
+    # Summary metrics
+    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+    col_m1.metric("Total", total)
+    col_m2.metric("High", high_n)
+    col_m3.metric("Medium", med_n)
+    col_m4.metric("Low", low_n)
+
+    # Partial feed failures stay visible next to the items they affect.
+    if feed_stats.get("succeeded", 0) < feed_stats.get("attempted", 0):
+        st.warning(
+            f"Partial live-fetch failure — {_feed_status_line(feed_stats)} "
+            f"({fetch_stats_summary(feed_stats)}). Stored history above is unaffected."
+        )
+
+    html_parts: list[str] = []
+    html_parts.append(_render_tier_html("HIGH", tier_groups["HIGH"]))
+    html_parts.append(_render_tier_html("MEDIUM", tier_groups["MEDIUM"]))
+    if show_low:
+        html_parts.append(_render_tier_html("LOW", tier_groups["LOW"]))
+
+    with st.container(border=True, height=680):
+        st.markdown("\n".join(p for p in html_parts if p), unsafe_allow_html=True)
