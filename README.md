@@ -152,9 +152,15 @@ The table is append-only — rows form a time series for tracking changes across
 
 The live News page itself is a 30-minute RSS cache. To make news durable over time, run
 `python scripts/catalog_news.py`; it writes material High/Medium feed items to
-`data/reference/news_catalog.csv` with first-seen, last-seen, event key, source, tier, and score.
+`data/reference/news_catalog.csv` — one row per article keyed by its normalised
+source URL (S2-09), with first-seen, last-seen, source, tier, and score. The optional
+`event_key` column groups distinct articles that carry the exact same headline
+(syndicated coverage); it is never used to collapse rows, so two different stories
+about the same company or two lifecycle updates on one IPO remain separate articles.
 For historical catch-up, run `python scripts/catalog_news.py --backfill-days 60 --window-days 7`;
-the News page reads the same catalog for the High/Medium history tables.
+the News page reads the same catalog for the High/Medium history tables. Catalogs keyed
+by the pre-2026-09 title-derived keys can be migrated with
+`python scripts/migrate_news_catalog.py` (dry-run report first; `--write` persists).
 
 ---
 

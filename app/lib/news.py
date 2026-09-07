@@ -13,6 +13,7 @@ import logging
 import re
 import time
 import urllib.parse
+from urllib.parse import urlunsplit, urlsplit
 from dataclasses import dataclass
 from datetime import date, datetime, time as datetime_time, timezone
 
@@ -125,52 +126,82 @@ def normalise_title_key(title: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", base).strip()
 
 
-def normalise_event_key(title: str) -> str:
-    lower = normalise_title_key(title)
-    if (
-        ("infratil" in lower or "cdc" in lower)
-        and ("data cent" in lower or "cdc" in lower)
-        and (
-            "555" in lower
-            or "record contract" in lower
-            or "us customer" in lower
-            or "monster" in lower
-            or "deal" in lower
-            or "contract" in lower
-            or "secures" in lower
-            or "wins" in lower
-        )
-        and not any(term in lower for term in ("stake", "valuation", "revaluation"))
-    ):
-        return "cdc-infratil-us-customer-contract"
-    if (
-        "nextdc" in lower
-        and "openai" in lower
-        and (
-            "7b" in lower
-            or "7 b" in lower
-            or "sydney" in lower
-            or "ai infrastructure" in lower
-            or "data centre" in lower
-            or "data center" in lower
-        )
-    ):
-        return "nextdc-openai-sydney-ai-data-centre"
-    if "airtrunk" in lower and ("5bn" in lower or "5 b" in lower) and "melbourne" in lower:
-        return "airtrunk-5bn-melbourne-data-centre"
-    if "goodman" in lower and "90mw" in lower and "sydney" in lower:
-        return "goodman-90mw-sydney-data-centre"
-    if "goodman" in lower and "1gw" in lower and "power" in lower:
-        return "goodman-1gw-data-centre-power-bank"
-    if "anthropic" in lower and "akamai" in lower and ("1 8" in lower or "cloud deal" in lower):
-        return "anthropic-akamai-cloud-contract"
-    if "eu commission" in lower and "openai" in lower and "anthropic" in lower:
-        return "eu-commission-openai-anthropic"
-    if "cerebras" in lower and "ipo" in lower:
-        return "cerebras-ipo"
-    if "apple" in lower and "cleanmax" in lower and "150mw" in lower:
-        return "apple-cleanmax-150mw"
-    return lower
+# Query parameters that do not identify the article and are stripped when
+# normalising a URL into an article-identity key (S2-09). `oc` is the Google
+# News RSS display parameter — the article token lives in the path (CBMi...),
+# never in this query value.
+_TRACKING_PARAMS = {
+    "fbclid", "gclid", "mc_cid", "mc_eid", "oc", "ref", "ref_src",
+    "cmp", "igshid", "hsCtaTracking", "_hsenc", "_hsmi", "vero_conv",
+    "vero_id", "wt_mc", "yclid", "msclkid",
+}
+
+
+def normalise_url(url: str) -> str:
+    """Normalise a source URL into a stable article-identity key (S2-09).
+
+    Declared normalisation:
+      - strip surrounding whitespace and any URL fragment;
+      - lowercase the scheme and host, drop default ports (:80 / :443);
+      - drop known tracking/click parameters (``utm_*`` plus
+        :data:`_TRACKING_PARAMS`) so click-tagged variants of one article
+        collapse to one identity;
+      - sort remaining query parameters by name for byte-stable output;
+      - collapse duplicate slashes in the path and drop any trailing slash
+        (a bare origin therefore collapses to an empty path);
+      - otherwise preserve the path and remaining query exactly — Google News
+        RSS article tokens (``/rss/articles/CBMi...``) are path data and are
+        identity.
+
+    Empty / whitespace-only input returns ``""``.
+    """
+    raw = (url or "").strip()
+    if not raw:
+        return ""
+    parts = urlsplit(raw)
+    scheme = parts.scheme.lower()
+    host = (parts.hostname or "").lower()
+    if not scheme or not host:
+        # Not an absolute http(s) URL — leave it untouched rather than guess.
+        return raw
+    try:
+        port = parts.port
+    except ValueError:
+        port = None
+    if port in (80, 443):
+        port = None
+    netloc = host
+    if port is not None:
+        netloc = f"{host}:{port}"
+    path = re.sub(r"/+", "/", parts.path or "")
+    if path.endswith("/"):
+        path = path[:-1]
+    kept = []
+    if parts.query:
+        for param in sorted(parts.query.split("&")):
+            if not param:
+                continue
+            name = param.partition("=")[0].lower()
+            if name.startswith("utm_") or name in _TRACKING_PARAMS:
+                continue
+            kept.append(param)
+    query = "&".join(kept)
+    rebuilt = urlunsplit((scheme, netloc, path, query, ""))
+    return rebuilt
+
+
+def article_identity_key(url: str, title: str = "") -> str:
+    """Primary article identity = normalised source URL, with a declared fallback.
+
+    Article rows are keyed by :func:`normalise_url` of the source URL (S2-09).
+    When no usable URL is present the fallback is explicit and inspectable —
+    ``title:<normalised-title-key>`` — never an opaque hash. The ``title:``
+    prefix cannot collide with a real URL identity.
+    """
+    normalised = normalise_url(url)
+    if normalised:
+        return normalised
+    return f"title:{normalise_title_key(title)}"
 
 
 _ANZ_OPERATOR_PATTERNS = [
@@ -416,10 +447,11 @@ def _fetch_news_buckets_uncached(
                     continue
                 if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
                     continue
-                title_key = normalise_event_key(item.title)
-                if item.url in seen_urls or title_key in seen_titles:
+                title_key = normalise_title_key(item.title)
+                url_key = normalise_url(item.url)
+                if url_key in seen_urls or title_key in seen_titles:
                     continue
-                seen_urls.add(item.url)
+                seen_urls.add(url_key)
                 seen_titles.add(title_key)
                 items.append(item)
 
@@ -437,10 +469,11 @@ def _fetch_news_buckets_uncached(
                     continue
                 if label == "ANZ DC" and not is_anz_operator_news(item.title, item.summary):
                     continue
-                title_key = normalise_event_key(item.title)
-                if item.url in seen_urls or title_key in seen_titles:
+                title_key = normalise_title_key(item.title)
+                url_key = normalise_url(item.url)
+                if url_key in seen_urls or title_key in seen_titles:
                     continue
-                seen_urls.add(item.url)
+                seen_urls.add(url_key)
                 seen_titles.add(title_key)
                 items.append(item)
 
@@ -500,21 +533,30 @@ def fetch_stats_summary(stats: dict) -> str:
 
 
 def flatten_news_buckets(news_data: dict[str, list[dict]]) -> list[dict]:
-    """Flatten bucketed news into one deduped, display-tiered feed."""
+    """Flatten bucketed news into one deduped, display-tiered feed.
+
+    Article identity is the normalised source URL (S2-09); the same headline
+    served from multiple URLs (syndication) is collapsed in the live feed by
+    exact normalised-title match only — never by broad event/company class.
+    Each emitted item carries its ``url_key`` (article identity) for the
+    durable catalog to key on.
+    """
     all_items: list[dict] = []
     seen_urls: set[str] = set()
     seen_titles: set[str] = set()
     for bucket_label, items in news_data.items():
         for item in items:
-            title_key = normalise_event_key(item["title"])
-            if item["url"] in seen_urls or title_key in seen_titles:
+            title_key = normalise_title_key(item["title"])
+            url_key = normalise_url(item["url"])
+            if url_key in seen_urls or title_key in seen_titles:
                 continue
-            seen_urls.add(item["url"])
+            if url_key:
+                seen_urls.add(url_key)
             seen_titles.add(title_key)
             all_items.append({
                 **item,
                 "bucket": bucket_label,
-                "event_key": title_key,
+                "url_key": url_key,
                 "tier": get_display_tier(item, bucket_label),
             })
 

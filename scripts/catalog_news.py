@@ -20,8 +20,10 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.lib.news import (  # noqa: E402
     _fetch_news_buckets_uncached,
+    article_identity_key,
     fetch_stats_summary,
     flatten_news_buckets,
+    normalise_title_key,
 )
 from app.lib.run_result import final_status, now_iso, write_log_record  # noqa: E402
 
@@ -29,6 +31,10 @@ from app.lib.run_result import final_status, now_iso, write_log_record  # noqa: 
 CATALOG_PATH = PROJECT_ROOT / "data" / "reference" / "news_catalog.csv"
 LOG_PATH = PROJECT_ROOT / "data" / "fetcher_log.json"
 
+# One row per article. `catalog_key` = article identity = normalised source
+# URL (S2-09); `event_key` is an OPTIONAL grouping relation — populated only
+# when a distinct article shares the exact normalised headline (syndication),
+# never used to collapse or merge rows.
 FIELDNAMES = [
     "catalog_key",
     "event_key",
@@ -70,6 +76,27 @@ def _write_catalog(path: Path, rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
+def _recompute_event_groups(existing: dict[str, dict]) -> None:
+    """Event grouping = separate optional relation, never identity (S2-09).
+
+    Rows are keyed by article identity (normalised source URL) and are never
+    merged by title. Two *distinct* articles whose representative titles
+    normalise to the same exact headline (syndicated coverage of one story)
+    share an ``event_key`` equal to that normalised headline; every other row
+    gets an empty ``event_key``. Recomputed on every write so membership
+    follows the current representative titles; the old broad company/event
+    class collapse values are gone.
+    """
+    title_counts: dict[str, int] = {}
+    for row in existing.values():
+        key = normalise_title_key(row.get("title") or "")
+        if key:
+            title_counts[key] = title_counts.get(key, 0) + 1
+    for row in existing.values():
+        key = normalise_title_key(row.get("title") or "")
+        row["event_key"] = key if title_counts.get(key, 0) > 1 else ""
+
+
 def _merge_items(
     existing: dict[str, dict],
     current_items: list[dict],
@@ -86,8 +113,12 @@ def _merge_items(
     updated = 0
 
     for item in current_items:
-        event_key = item.get("event_key") or ""
-        catalog_key = event_key or item.get("url") or item.get("title", "")
+        # Article identity = normalised source URL (with a declared title
+        # fallback for URL-less items). A changed title on the same URL
+        # upserts the same row — it never forks a second row.
+        catalog_key = item.get("url_key") or article_identity_key(
+            item.get("url", ""), item.get("title", "")
+        )
         old = existing.get(catalog_key)
         old_max = float(old.get("max_materiality_score", 0) or 0) if old else 0.0
         score = float(item.get("materiality_score", 0) or 0)
@@ -97,7 +128,6 @@ def _merge_items(
             added += 1
             old = {field: "" for field in FIELDNAMES}
             old["catalog_key"] = catalog_key
-            old["event_key"] = event_key
             old["first_seen_at"] = seen_at
             old["seen_count"] = "0"
         else:
@@ -117,6 +147,10 @@ def _merge_items(
             old["summary"] = _clean_text(item.get("summary"))
 
         existing[catalog_key] = old
+
+    # Event grouping is derived from the post-merge rows (optional relation),
+    # never used to collapse identity.
+    _recompute_event_groups(existing)
 
     return added, updated
 
