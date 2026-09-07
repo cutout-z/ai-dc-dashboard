@@ -6,6 +6,7 @@ GPU spot-price signals as primary data-centre operator risks.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -451,7 +452,13 @@ def project_execution_signal(au_dc_dir: Path = AU_DC_DIR) -> RiskSignal:
 
 
 def capital_markets_signal(data_dir: Path = DATA_DIR) -> RiskSignal:
-    """Use current news catalog as a proxy until direct credit-spread feeds exist."""
+    """Dated credit-event list from the news catalog (S2-02: demoted to context).
+
+    Keyword hits are candidate discovery only: each event is classified
+    adverse / mitigating / neutral over a declared lookback window, and this
+    signal never produces a red verdict — real spread/rating data would be
+    required for that.
+    """
     path = data_dir / "news_catalog.csv"
     df = _read_csv(path, parse_dates=["published", "first_seen_at", "last_seen_at"])
     if df.empty:
@@ -469,32 +476,57 @@ def capital_markets_signal(data_dir: Path = DATA_DIR) -> RiskSignal:
     )
     hits = df[text.str.contains(terms, case=False, regex=True, na=False)].copy()
     hits = hits.sort_values("published", ascending=False)
-    high_hits = hits[hits.get("last_tier", "").isin(["HIGH", "MEDIUM"])] if "last_tier" in hits else hits
 
-    if len(high_hits) >= 5:
-        status = "red"
-    elif len(high_hits) >= 1:
-        status = "amber"
-    else:
-        status = "green"
+    # Declared lookback: only recent events inform the current funding backdrop.
+    # Historical rows stay in the event list as dated history, never as a
+    # present-tense stress signal.
+    lookback_days = 90
+    now = pd.Timestamp.now(tz="UTC")
+    published = pd.to_datetime(hits.get("published"), errors="coerce", utc=True)
+    within_window = published.notna() & ((now - published).dt.days <= lookback_days)
+    recent_hits = hits[within_window.values]
 
-    value = f"{len(high_hits)} credit event(s)"
-    detail = "This is a proxy, not a spread model. It should be replaced or supplemented with actual bond/yield data when available."
-    evidence = [
-        f"{row.get('published').date() if pd.notna(row.get('published')) else 'n/a'}: {row.get('title', '')}"
-        for _, row in high_hits.head(5).iterrows()
-    ]
+    adverse_re = r"widened|spike[d]?|failed|failure|pulled|halted|haircut|downgrade[d]?|default|covenant breach|liquidity crunch|emergency|distress|repric"
+    mitigating_re = r"raised|upsized|refinanced|secured|closed (?:a )?(?:new|\\$|us\\$)?(?:loan|facility|financing)|extended maturity|upgraded|oversubscribed"
+
+    def _classify(row: pd.Series) -> str:
+        blob = f"{row.get('title', '')} {row.get('summary', '')}".lower()
+        if re.search(adverse_re, blob):
+            return "adverse"
+        if re.search(mitigating_re, blob):
+            return "mitigating"
+        return "neutral"
+
+    def _fmt(row: pd.Series, cls: str) -> str:
+        date = row.get("published")
+        date_str = date.strftime("%Y-%m-%d") if pd.notna(date) else "n/a"
+        return f"[{cls}] {date_str}: {row.get('title', '')}"
+
+    evidence = [_fmt(row, _classify(row)) for _, row in recent_hits.head(5).iterrows()]
     if not evidence:
-        evidence = ["No material credit-market headlines in the catalog."]
+        evidence = [f"No credit-financing headlines in the last {lookback_days} days."]
+    else:
+        evidence.append(f"Lookback: {lookback_days} days (older hits listed as history only).")
+
+    recent_adverse = int(
+        recent_hits.head(20).apply(lambda row: _classify(row) == "adverse", axis=1).sum()
+    )
+    value = f"{len(recent_hits)} recent credit event(s), {recent_adverse} adverse"
+    detail = (
+        "Context list, not a verdict: keyword discovery with adverse/mitigating/neutral "
+        "classification over a declared lookback. Replace with actual bond/yield/spread "
+        "data before drawing stress conclusions."
+    )
 
     table_cols = ["published", "last_tier", "last_bucket", "title", "source", "url"]
-    table = high_hits[[c for c in table_cols if c in high_hits.columns]].head(20).copy()
+    table = hits[[c for c in table_cols if c in hits.columns]].head(20).copy()
     if "published" in table:
         table["published"] = table["published"].dt.strftime("%Y-%m-%d")
 
     return RiskSignal(
         name="Capital markets",
-        status=status,
+        # Never red: keyword volume is not evidence of funding stress.
+        status="amber" if recent_adverse >= 3 else "gray",
         value=value,
         detail=detail,
         why_it_matters="Credit stress can hit DC operators before operating metrics crack, especially where growth depends on debt-funded campuses or tenant financing.",
@@ -607,6 +639,18 @@ def market_breadth_signal(stocks: list[dict] | None = None) -> RiskSignal:
     deep_drawdowns = int((dc_drawdowns <= -20).sum()) if not dc_drawdowns.empty else 0
     underperf = (dc_6m - mag7_6m) if dc_6m is not None and mag7_6m is not None else None
 
+    # S2-02: breadth requires valid quote observations. Metadata-only rows
+    # (symbols loaded, every return/drawdown field unavailable) are degraded
+    # data, not a green "Tracked" result.
+    observed_returns = int(df[["1M", "3M", "6M", "1Y"]].notna().any(axis=1).sum())
+    observed_drawdowns = int(df["pct_from_high"].notna().sum())
+    if observed_returns == 0 and observed_drawdowns == 0:
+        return _empty(
+            "Market breadth",
+            "Narrow AI/DC leadership is a useful crowding and risk-appetite signal.",
+            "AI infrastructure and DC operators underperforming while a few mega-cap leaders hold up.",
+        )
+
     if deep_drawdowns >= 2 or (underperf is not None and underperf <= -25):
         status = "red"
     elif deep_drawdowns >= 1 or (underperf is not None and underperf <= -10):
@@ -705,25 +749,67 @@ def unscored_context(data_dir: Path = DATA_DIR) -> list[dict[str, str]]:
     ]
 
 
-def overall_status(signals: list[RiskSignal]) -> dict[str, str]:
-    reds = sum(1 for s in signals if s.status == "red")
-    ambers = sum(1 for s in signals if s.status == "amber")
-    grays = sum(1 for s in signals if s.status == "gray")
+AU_DIRECT_SIGNALS = {
+    "Contracted demand quality",
+    "Project execution and permitting",
+}
 
-    if reds >= 2:
-        return {
-            "status": "red",
-            "label": "Demand/capital stress emerging",
-            "detail": f"{reds} warning, {ambers} watch, {grays} insufficient-data signal(s)",
-        }
-    if reds == 1 or ambers >= 2:
+
+def overall_status(signals: list[RiskSignal]) -> dict[str, str]:
+    """Evidence summary separated by attribution, not a colour vote (S2-02).
+
+    Only AU-direct signals can produce a red or green headline: global
+    transmission proxies alone never claim Australian distress, and
+    unavailable/unscored inputs never claim expansion is supported.
+    """
+    au = [s for s in signals if s.name in AU_DIRECT_SIGNALS]
+    gx = [s for s in signals if s.name not in AU_DIRECT_SIGNALS]
+    au_red = [s for s in au if s.status == "red"]
+    au_amber = [s for s in au if s.status == "amber"]
+    au_green = [s for s in au if s.status == "green"]
+    au_gray = [s for s in au if s.status == "gray"]
+    g_warn = [s for s in gx if s.status == "red"]
+    g_watch = [s for s in gx if s.status == "amber"]
+    unavailable = [s for s in signals if s.status == "gray"]
+
+    def _names(items: list[RiskSignal]) -> str:
+        return ", ".join(s.name for s in items) if items else "none"
+
+    detail = " | ".join(
+        [
+            (
+                f"AU direct: {len(au_green)} scored OK, {len(au_red)} warning "
+                f"({_names(au_red)}), {len(au_amber)} watch ({_names(au_amber)}), "
+                f"{len(au_gray)} unavailable"
+            ),
+            f"Global transmission: {len(g_warn)} warning, {len(g_watch)} watch across {len(gx)} signals",
+            (
+                f"Unavailable/unscored inputs: {len(unavailable)}"
+                + (f" ({_names(unavailable[:3])})" if unavailable else "")
+            ),
+        ]
+    )
+
+    if au_red:
+        return {"status": "red", "label": "AU-direct warning evidence", "detail": detail}
+    if au_amber:
+        return {"status": "amber", "label": "AU-direct watch conditions", "detail": detail}
+    if g_warn or g_watch:
         return {
             "status": "amber",
-            "label": "Execution risk rising",
-            "detail": f"{reds} warning, {ambers} watch, {grays} insufficient-data signal(s)",
+            "label": "Global warnings only — limited evidence, not AU-confirmed",
+            "detail": detail,
         }
-    return {
-        "status": "green",
-        "label": "Expansion supported",
-        "detail": f"{reds} warning, {ambers} watch, {grays} insufficient-data signal(s)",
-    }
+    if unavailable:
+        return {
+            "status": "gray",
+            "label": "Limited evidence — inputs unavailable/unscored",
+            "detail": detail,
+        }
+    if au_green:
+        return {
+            "status": "green",
+            "label": "AU-direct evidence: no warnings scored",
+            "detail": detail,
+        }
+    return {"status": "gray", "label": "Limited evidence — nothing scored", "detail": detail}

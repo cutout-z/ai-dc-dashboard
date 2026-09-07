@@ -212,9 +212,9 @@ with top_col:
     st.markdown(
         f"""
         <div style="border-radius:8px;padding:18px;background:{overall_color};color:white;">
-          <div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;">Current state</div>
-          <div style="font-size:1.55rem;font-weight:800;line-height:1.15;margin-top:6px;">{overall["label"]}</div>
-          <div style="font-size:0.9rem;margin-top:8px;">{overall["detail"]}</div>
+          <div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;">Evidence summary — not an aggregate verdict</div>
+          <div style="font-size:1.35rem;font-weight:800;line-height:1.15;margin-top:6px;">{overall["label"]}</div>
+          <div style="font-size:0.82rem;margin-top:8px;">{overall["detail"]}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -387,7 +387,7 @@ st.dataframe(
             },
             {
                 "Area": "Capital markets",
-                "Now implemented": "Material credit/debt event proxy from the news catalog plus tracked debt/hybrid financing exposure.",
+                "Now implemented": "Dated credit-event list with adverse/mitigating/neutral classification over a declared 90-day lookback, plus tracked debt/hybrid financing exposure. Never produces a red verdict by itself.",
                 "Remaining gap": "Australian operator bond yields/spreads, rating outlooks, maturities, and covenant data.",
             },
             {
