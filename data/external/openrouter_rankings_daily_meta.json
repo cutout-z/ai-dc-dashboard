@@ -1,9 +1,9 @@
 {
   "source": "https://openrouter.ai/api/v1/datasets/rankings-daily",
-  "updated": "2026-09-13T22:49:23+00:00",
+  "updated": "2026-09-14T22:49:25+00:00",
   "data_start": "2025-01-01",
-  "data_end": "2026-09-12",
-  "days": 618,
-  "rows": 31518,
+  "data_end": "2026-09-13",
+  "days": 619,
+  "rows": 31569,
   "note": "Top 50 public models per UTC day by total_tokens plus one aggregated 'other' row for the long tail. Tokens = prompt + completion, native tokenizers. Platform-wide OpenRouter traffic only; not spend."
 }
