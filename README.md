@@ -84,10 +84,9 @@ by `nas-job ai-dc-*`:
 1. Scheduled lanes run ETL, AU DC refreshes, source-health checks, and
    report-only research briefs (lane registry + cadence windows in
    `tools/nas-runner/configs/brain-ops.nas.toml`).
-2. The dispatcher reuses this repo's `deploy/run-vps-*.sh` scripts as entry
+2. The dispatcher reuses this repo's `deploy/run-*.sh` scripts as entry
    points, overriding `APP_DIR`/`PYTHON`/`REPORT_DIR` for the container
-   layout. The `run-vps-*` names are retained for compatibility — they are
-   NAS lanes now, not VPS services.
+   layout.
 3. Refresh scripts rebuild compact dashboard-ready outputs under `data/`.
 4. If tracked outputs change, the lane commits and pushes to GitHub.
 5. Streamlit Community Cloud picks up the latest committed data on its
@@ -102,9 +101,9 @@ Current NAS lanes (definitive cadence: `tools/nas-runner/configs/brain-ops.nas.t
 | Research brief (`ai-dc-research-brief`) | Stages a review prompt/report only; no CSV/DB writes. |
 | AU DC data (`ai-dc-au-data`) | Refreshes AEMO generation/grid/project outputs, runs AU DC checks, prunes raw cache, and commits changed processed outputs. |
 
-The earlier Hetzner VPS + systemd timers era is **historical** — see
-`deploy/README.md` for the current NAS runner setup and what remains of the
-old VPS instructions.
+The earlier Hetzner VPS + systemd timers era is **historical** — its systemd
+units were deleted in the 2026-09 NAS cleanup. See `deploy/README.md` for the
+current NAS runner setup.
 
 Operational details live in `deploy/`.
 
@@ -144,8 +143,10 @@ model is:
   `REPORT_DIR` (container path — see `tools/nas-runner/configs/brain-ops.nas.toml`);
 - LLM-backed research is report-only until reviewed and promoted manually.
 
-The `run-vps-*.sh` filenames in `deploy/` are historical compatibility names —
-the NAS dispatcher invokes them with its own environment overrides.
+The `deploy/run-*.sh` entry scripts are named for the NAS runner; the
+VPS-era `run-vps-*` names were retired in the 2026-09 cleanup. The NAS
+dispatcher invokes them with its own environment overrides, and the two
+committing lanes self-heal a rewritten `main` instead of aborting.
 
 Raw AU DC AEMO/NEMOSIS cache is pruned with `scripts/prune_au_dc_raw_cache.py`; processed parquet/CSV outputs are the durable dashboard layer.
 

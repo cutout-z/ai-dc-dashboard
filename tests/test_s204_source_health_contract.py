@@ -9,7 +9,7 @@ Covers the Astra review requirements:
 - unreadable payloads and missing required columns are hard failures;
 - future-dated embedded values (forecast targets) are not freshness evidence;
 - CLI `--check` audit mode: exit 0 on ok/degraded, 2 on error
-  (deploy/run-vps-*.sh treat >=2 as fatal); default runs stay exit 0;
+  (deploy/run-*.sh treat >=2 as fatal); default runs stay exit 0;
 - run_result contract: final_status vocabulary and write_log_record's
   last_attempt/last_success preservation;
 - the Streamlit view module imports and renders under a stub (no server).
@@ -243,7 +243,7 @@ def test_cli_check_exit_0_when_ok(fresh_tree):
 
 
 def test_cli_default_markdown_exits_zero_despite_stale(fresh_tree):
-    """Plain runs (as the VPS wrappers invoke them) never hard-error."""
+    """Plain runs (as the NAS lane wrappers invoke them) never hard-error."""
     ref = fresh_tree / "data" / "reference"
     _write_csv(ref / "funding_deals.csv", ["date", "entity", "amount_bn", "type", "source"],
                [[DAYS_AGO(400), "OldCo", 1.0, "primary", "press"]])

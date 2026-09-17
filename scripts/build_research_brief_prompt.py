@@ -1,4 +1,4 @@
-"""Build the report-only AI & DC research prompt for a VPS LLM runner."""
+"""Build the report-only AI & DC research prompt for the NAS LLM runner."""
 
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ def main() -> None:
 
     print(f"# AI & DC Dashboard Research Brief Prompt — {today}")
     print()
-    print("You are running on the Hetzner VPS as a report-only research agent.")
+    print("You are running on the NAS runner (QNAP `ai-wif-runner` container) as a report-only research agent.")
     print("Do not edit repo data files, do not commit, and do not write to SQLite.")
     print("Return a concise Markdown brief plus a JSON appendix of candidate findings.")
     print()

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-/opt/ai-dc-dashboard}"
+APP_DIR="${APP_DIR:-/workspace/repos/ai-dc-dashboard}"
 PYTHON="${PYTHON:-${APP_DIR}/.venv/bin/python}"
 PUSH_CHANGES="${PUSH_CHANGES:-1}"
 RUN_ZEROEVAL="${RUN_ZEROEVAL:-0}"
@@ -12,7 +12,15 @@ cd "${APP_DIR}"
 
 git fetch origin main
 git checkout main
-git pull --ff-only origin main
+# Self-heal: this clone only ever holds regeneratable pipeline data commits, so
+# when GitHub main has been rewritten (force-push/rebase) a fast-forward becomes
+# impossible. Reset onto the fetched remote instead of aborting — a bare
+# `git pull --ff-only` under `set -e` exited 128 and stalled the lane for weeks
+# (2026-09-03 rewrite → ai-dc-etl / ai-dc-au-data dead until 2026-09-17).
+if ! git pull --ff-only origin main; then
+  echo "origin/main is not fast-forwardable (rewritten?) — resetting onto it."
+  git reset --hard origin/main
+fi
 
 "${PYTHON}" scripts/fetch_financials.py
 "${PYTHON}" etl/fetch_macro.py
@@ -37,7 +45,7 @@ if [[ "${RUN_REFERENCE_AUDIT}" == "1" ]]; then
   fi
 fi
 
-"${PYTHON}" scripts/source_health_report.py --out-dir "${REPORT_DIR:-/var/lib/ai-dc-dashboard/reports/source-health}" >/dev/null
+"${PYTHON}" scripts/source_health_report.py --out-dir "${REPORT_DIR:-/workspace/reports/ai-dc-dashboard/source-health}" >/dev/null
 
 git add data/reference/ data/db/ai_research.db data/fetcher_log.json data/stale_guidance.json
 
@@ -46,8 +54,8 @@ if git diff --cached --quiet; then
   exit 0
 fi
 
-git config user.name "${GIT_AUTHOR_NAME:-ai-dc-vps-bot}"
-git config user.email "${GIT_AUTHOR_EMAIL:-ai-dc-vps-bot@users.noreply.github.com}"
+git config user.name "${GIT_AUTHOR_NAME:-ai-dc-nas-bot}"
+git config user.email "${GIT_AUTHOR_EMAIL:-ai-dc-nas-bot@users.noreply.github.com}"
 git commit -m "${COMMIT_MESSAGE_PREFIX} $(date -u +%Y-%m-%d)"
 
 if [[ "${PUSH_CHANGES}" == "1" ]]; then

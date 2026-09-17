@@ -339,7 +339,7 @@ def test_no_fabricated_rank_material_in_views_or_pipeline():
     assert "sqlite3" not in llm_perf
     assert "llm_arena_elo" not in llm_perf
     assert not (REPO / "scripts" / "fetch_llm_benchmarks.py").exists()
-    wrapper = (REPO / "deploy" / "run-vps-etl.sh").read_text()
+    wrapper = (REPO / "deploy" / "run-etl.sh").read_text()
     assert "fetch_llm_benchmarks" not in wrapper
     assert "refresh_llm_leaderboard.py" in wrapper
     # active pages default to committed evidence with a visible as-of

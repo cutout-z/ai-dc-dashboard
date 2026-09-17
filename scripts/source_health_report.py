@@ -30,7 +30,7 @@ CLI
     python scripts/source_health_report.py --check         # audit mode
 
 ``--check`` prints one summary line and exits 0 on ok/degraded, >=2 on
-error — matching the ``deploy/run-vps-*.sh`` audit convention (wrappers run
+error — matching the ``deploy/run-*.sh`` audit convention (wrappers run
 ``set -euo pipefail`` and treat exit >= 2 as fatal).
 """
 
@@ -786,7 +786,7 @@ def to_markdown(report: dict) -> str:
 # CLI
 # ────────────────────────────────────────────────────────────────────
 def _check_exit_code(report: dict) -> int:
-    """0 = ok/degraded, 2 = error (run-vps-*.sh treat >=2 as fatal)."""
+    """0 = ok/degraded, 2 = error (run-*.sh treat >=2 as fatal)."""
     return 0 if report["overall_status"] in (OVERALL_OK, OVERALL_DEGRADED) else 2
 
 
@@ -799,7 +799,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--check",
         action="store_true",
-        help="Audit mode: one summary line; exit 0 ok/degraded, 2 error (run-vps-*.sh convention)",
+        help="Audit mode: one summary line; exit 0 ok/degraded, 2 error (run-*.sh convention)",
     )
     args = parser.parse_args(argv)
 

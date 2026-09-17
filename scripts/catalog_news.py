@@ -1,6 +1,6 @@
 """Catalog the current AI/DC news feed into a durable event CSV.
 
-The Streamlit page remains a live reader. This script is intended for the VPS
+The Streamlit page remains a live reader. This script is intended for the NAS
 refresh lane, where changed `data/reference/news_catalog.csv` can be committed.
 """
 

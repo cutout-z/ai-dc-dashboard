@@ -61,7 +61,7 @@ def write_log_record(
     - ``last_success`` only advances on ok/degraded runs and is otherwise
       preserved from the previous record, so staleness stays visible.
     - Legacy ``last_run``/``count``/``notes`` keys are kept in sync so older
-      readers (VPS-era) still render.
+      readers (legacy schema) still render.
     """
     import json
 
