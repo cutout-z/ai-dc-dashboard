@@ -1,0 +1,17 @@
+{
+  "archive_month": "2026-08",
+  "output": "grid_capacity.parquet",
+  "pipeline_workbook": {
+    "file": "nem-generation-information-latest.xlsx",
+    "file_mtime_utc": "2026-05-11T05:51:53+00:00",
+    "sha256_prefix": "d569c6ba9813"
+  },
+  "registration_snapshot": "2026-08-01",
+  "row_count": 52,
+  "schema_version": 1,
+  "source": "AEMO NEMWEB MMSDM monthly archives via NEMOSIS",
+  "source_tables": [
+    "DUDETAILSUMMARY",
+    "DUDETAIL"
+  ]
+}
