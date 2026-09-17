@@ -1,8 +1,65 @@
 {
-  "checked_at": "2026-08-28T23:51:18Z",
+  "schema_version": 2,
+  "checked_at": "2026-09-17T09:37:48Z",
   "lookback_days": 14,
-  "cutoff": "2026-08-14",
-  "stale_tickers": [],
+  "cutoff": "2026-09-03",
+  "status": "ok",
+  "attempted": 1,
+  "succeeded": 1,
+  "tickers_tracked": 7,
+  "newest_observed_earnings_date": "2026-09-10",
+  "unknown_earnings": [],
+  "stale_tickers": [
+    {
+      "ticker": "ORCL",
+      "company": "Oracle",
+      "last_earnings_date": "2026-09-10",
+      "last_guidance_date": "2025-12-10",
+      "fiscal_year": "FY2026",
+      "fy_end_month": "5",
+      "prior_guidance_usd_b": "50.0",
+      "prior_low": "",
+      "prior_high": "",
+      "q_capex_usd_b": 28.5,
+      "search_query": "Oracle FY2026 earnings capex capital expenditure guidance 2026-09-10"
+    }
+  ],
   "fresh_tickers": [],
-  "quarterly_actuals": []
+  "quarterly_actuals": [
+    {
+      "ticker": "AAPL",
+      "quarter_end": "2026-06-30",
+      "capex_usd_b": 2.46
+    },
+    {
+      "ticker": "AMZN",
+      "quarter_end": "2026-03-31",
+      "capex_usd_b": 44.2
+    },
+    {
+      "ticker": "CRWV",
+      "quarter_end": "2026-06-30",
+      "capex_usd_b": 6.42
+    },
+    {
+      "ticker": "GOOGL",
+      "quarter_end": "2026-06-30",
+      "capex_usd_b": 44.92
+    },
+    {
+      "ticker": "META",
+      "quarter_end": "2026-06-30",
+      "capex_usd_b": 30.12
+    },
+    {
+      "ticker": "MSFT",
+      "quarter_end": "2026-06-30",
+      "capex_usd_b": 35.8
+    },
+    {
+      "ticker": "ORCL",
+      "quarter_end": "2026-08-31",
+      "capex_usd_b": 28.5
+    }
+  ]
 }
