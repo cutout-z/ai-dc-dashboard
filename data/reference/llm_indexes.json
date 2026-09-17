@@ -2,7 +2,7 @@
   "_meta": {
     "schema_version": 1,
     "source": "https://api.zeroeval.com/leaderboard/indexes/all",
-    "fetched_at": "2026-09-17T09:59:33Z",
+    "fetched_at": "2026-09-17T11:25:15Z",
     "updated": "2026-09-17",
     "index_count": 55,
     "model_entry_count": 5199,
@@ -584,20 +584,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "o3-mini",
-          "model_name": "o3-mini",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 28.2,
-          "sigma": 2.22,
-          "conservative": 21.53,
-          "rank": 37,
-          "games_played": 4,
-          "games_available": 9,
-          "coverage_ratio": 0.4444,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "claude-sonnet-4-20250514",
           "model_name": "Claude Sonnet 4",
           "organization_id": "anthropic",
@@ -605,10 +591,24 @@
           "mu": 33.92,
           "sigma": 4.13,
           "conservative": 21.53,
-          "rank": 38,
+          "rank": 37,
           "games_played": 1,
           "games_available": 9,
           "coverage_ratio": 0.1111,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "o3-mini",
+          "model_name": "o3-mini",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 28.2,
+          "sigma": 2.22,
+          "conservative": 21.53,
+          "rank": 38,
+          "games_played": 4,
+          "games_available": 9,
+          "coverage_ratio": 0.4444,
           "global_prior": 0.0
         },
         {
@@ -3488,12 +3488,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "command-a-plus-05-2026",
-          "model_name": "Command A+",
-          "organization_id": "cohere",
-          "organization_name": "Cohere",
-          "mu": 29.67,
-          "sigma": 3.91,
+          "model_id": "llama-3.1-nemotron-ultra-253b-v1",
+          "model_name": "Llama 3.1 Nemotron Ultra 253B v1",
+          "organization_id": "nvidia",
+          "organization_name": "NVIDIA",
+          "mu": 29.58,
+          "sigma": 3.87,
           "conservative": 17.95,
           "rank": 43,
           "games_played": 1,
@@ -3502,12 +3502,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "llama-3.1-nemotron-ultra-253b-v1",
-          "model_name": "Llama 3.1 Nemotron Ultra 253B v1",
-          "organization_id": "nvidia",
-          "organization_name": "NVIDIA",
-          "mu": 29.58,
-          "sigma": 3.87,
+          "model_id": "command-a-plus-05-2026",
+          "model_name": "Command A+",
+          "organization_id": "cohere",
+          "organization_name": "Cohere",
+          "mu": 29.67,
+          "sigma": 3.91,
           "conservative": 17.95,
           "rank": 44,
           "games_played": 1,
@@ -4452,10 +4452,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemini-3.7-flash",
-          "model_name": "Gemini 3.7 Flash",
-          "organization_id": "google",
-          "organization_name": "Google",
+          "model_id": "inkling",
+          "model_name": "Inkling",
+          "organization_id": "thinking-machines",
+          "organization_name": "Thinking Machines Lab",
           "mu": 25.0,
           "sigma": 6.22,
           "conservative": 6.33,
@@ -4466,10 +4466,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "inkling",
-          "model_name": "Inkling",
-          "organization_id": "thinking-machines",
-          "organization_name": "Thinking Machines Lab",
+          "model_id": "gemini-3.7-flash",
+          "model_name": "Gemini 3.7 Flash",
+          "organization_id": "google",
+          "organization_name": "Google",
           "mu": 25.0,
           "sigma": 6.22,
           "conservative": 6.33,
@@ -4536,10 +4536,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "lfm-2.5-2.6b",
-          "model_name": "LFM2.5-2.6B",
-          "organization_id": "liquid",
-          "organization_name": "Liquid AI",
+          "model_id": "qwen3-max-thinking",
+          "model_name": "Qwen3 Max Thinking",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
           "mu": 18.51,
           "sigma": 6.68,
           "conservative": -1.52,
@@ -4550,10 +4550,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3-max-thinking",
-          "model_name": "Qwen3 Max Thinking",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
+          "model_id": "lfm-2.5-2.6b",
+          "model_name": "LFM2.5-2.6B",
+          "organization_id": "liquid",
+          "organization_name": "Liquid AI",
           "mu": 18.51,
           "sigma": 6.68,
           "conservative": -1.52,
@@ -6436,20 +6436,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "longcat-flash-lite",
-          "model_name": "LongCat-Flash-Lite",
-          "organization_id": "meituan",
-          "organization_name": "Meituan",
-          "mu": 25.12,
-          "sigma": 2.53,
-          "conservative": 17.54,
-          "rank": 116,
-          "games_played": 3,
-          "games_available": 36,
-          "coverage_ratio": 0.0833,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gemini-1.5-pro",
           "model_name": "Gemini 1.5 Pro",
           "organization_id": "google",
@@ -6457,10 +6443,24 @@
           "mu": 24.13,
           "sigma": 2.19,
           "conservative": 17.54,
-          "rank": 117,
+          "rank": 116,
           "games_played": 5,
           "games_available": 36,
           "coverage_ratio": 0.1389,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "longcat-flash-lite",
+          "model_name": "LongCat-Flash-Lite",
+          "organization_id": "meituan",
+          "organization_name": "Meituan",
+          "mu": 25.12,
+          "sigma": 2.53,
+          "conservative": 17.54,
+          "rank": 117,
+          "games_played": 3,
+          "games_available": 36,
+          "coverage_ratio": 0.0833,
           "global_prior": 0.0
         },
         {
@@ -7374,20 +7374,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3.5-2b",
-          "model_name": "Qwen3.5-2B",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 9.24,
-          "sigma": 2.07,
-          "conservative": 3.02,
-          "rank": 183,
-          "games_played": 5,
-          "games_available": 36,
-          "coverage_ratio": 0.1389,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "nova-micro",
           "model_name": "Nova Micro",
           "organization_id": "amazon",
@@ -7395,10 +7381,24 @@
           "mu": 9.83,
           "sigma": 2.27,
           "conservative": 3.02,
-          "rank": 184,
+          "rank": 183,
           "games_played": 7,
           "games_available": 36,
           "coverage_ratio": 0.1944,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "qwen3.5-2b",
+          "model_name": "Qwen3.5-2B",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 9.24,
+          "sigma": 2.07,
+          "conservative": 3.02,
+          "rank": 184,
+          "games_played": 5,
+          "games_available": 36,
+          "coverage_ratio": 0.1389,
           "global_prior": 0.0
         },
         {
@@ -8396,20 +8396,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "o1-2024-12-17",
-          "model_name": "o1",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 38.77,
-          "sigma": 4.02,
-          "conservative": 26.7,
-          "rank": 30,
-          "games_played": 1,
-          "games_available": 11,
-          "coverage_ratio": 0.0909,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "mai-thinking-1",
           "model_name": "MAI-Thinking-1",
           "organization_id": "microsoft",
@@ -8417,10 +8403,24 @@
           "mu": 38.09,
           "sigma": 3.8,
           "conservative": 26.7,
-          "rank": 31,
+          "rank": 30,
           "games_played": 2,
           "games_available": 11,
           "coverage_ratio": 0.1818,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "o1-2024-12-17",
+          "model_name": "o1",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 38.77,
+          "sigma": 4.02,
+          "conservative": 26.7,
+          "rank": 31,
+          "games_played": 1,
+          "games_available": 11,
+          "coverage_ratio": 0.0909,
           "global_prior": 0.0
         },
         {
@@ -10006,20 +10006,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3-14b",
-          "model_name": "Qwen3 14B",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 19.07,
-          "sigma": 4.18,
-          "conservative": 6.52,
-          "rank": 145,
-          "games_played": 1,
-          "games_available": 11,
-          "coverage_ratio": 0.0909,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "qwen2.5-vl-32b",
           "model_name": "Qwen2.5 VL 32B Instruct",
           "organization_id": "qwen",
@@ -10027,10 +10013,24 @@
           "mu": 15.01,
           "sigma": 2.83,
           "conservative": 6.52,
-          "rank": 146,
+          "rank": 145,
           "games_played": 2,
           "games_available": 11,
           "coverage_ratio": 0.1818,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "qwen3-14b",
+          "model_name": "Qwen3 14B",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 19.07,
+          "sigma": 4.18,
+          "conservative": 6.52,
+          "rank": 146,
+          "games_played": 1,
+          "games_available": 11,
+          "coverage_ratio": 0.0909,
           "global_prior": 0.0
         },
         {
@@ -10216,11 +10216,11 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemini-3.1-pro-preview",
-          "model_name": "Gemini 3.1 Pro",
+          "model_id": "gemini-3.1-flash-lite-preview",
+          "model_name": "Gemini 3.1 Flash-Lite",
           "organization_id": "google",
           "organization_name": "Google",
-          "mu": 18.21,
+          "mu": 18.2,
           "sigma": 4.56,
           "conservative": 4.51,
           "rank": 160,
@@ -10244,11 +10244,11 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemini-3.1-flash-lite-preview",
-          "model_name": "Gemini 3.1 Flash-Lite",
+          "model_id": "gemini-3.1-pro-preview",
+          "model_name": "Gemini 3.1 Pro",
           "organization_id": "google",
           "organization_name": "Google",
-          "mu": 18.2,
+          "mu": 18.21,
           "sigma": 4.56,
           "conservative": 4.51,
           "rank": 162,
@@ -13808,20 +13808,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3.6-27b",
-          "model_name": "Qwen3.6-27B",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 38.22,
-          "sigma": 1.33,
-          "conservative": 34.23,
-          "rank": 48,
-          "games_played": 11,
-          "games_available": 55,
-          "coverage_ratio": 0.2,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "deepseek-v3.2-speciale",
           "model_name": "DeepSeek-V3.2-Speciale",
           "organization_id": "deepseek",
@@ -13829,10 +13815,24 @@
           "mu": 40.54,
           "sigma": 2.1,
           "conservative": 34.23,
-          "rank": 49,
+          "rank": 48,
           "games_played": 4,
           "games_available": 55,
           "coverage_ratio": 0.0727,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "qwen3.6-27b",
+          "model_name": "Qwen3.6-27B",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 38.22,
+          "sigma": 1.33,
+          "conservative": 34.23,
+          "rank": 49,
+          "games_played": 11,
+          "games_available": 55,
+          "coverage_ratio": 0.2,
           "global_prior": 0.0
         },
         {
@@ -15544,20 +15544,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "nova-pro",
-          "model_name": "Nova Pro",
-          "organization_id": "amazon",
-          "organization_name": "Amazon",
-          "mu": 24.53,
-          "sigma": 1.87,
-          "conservative": 18.9,
-          "rank": 172,
-          "games_played": 6,
-          "games_available": 55,
-          "coverage_ratio": 0.1091,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "mistral-large-latest",
           "model_name": "Mistral Large 3 (675B Instruct 2512)",
           "organization_id": "mistral",
@@ -15565,10 +15551,24 @@
           "mu": 28.11,
           "sigma": 3.07,
           "conservative": 18.9,
-          "rank": 173,
+          "rank": 172,
           "games_played": 2,
           "games_available": 55,
           "coverage_ratio": 0.0364,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "nova-pro",
+          "model_name": "Nova Pro",
+          "organization_id": "amazon",
+          "organization_name": "Amazon",
+          "mu": 24.53,
+          "sigma": 1.87,
+          "conservative": 18.9,
+          "rank": 173,
+          "games_played": 6,
+          "games_available": 55,
+          "coverage_ratio": 0.1091,
           "global_prior": 0.0
         },
         {
@@ -15838,20 +15838,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "deepseek-r1-zero",
-          "model_name": "DeepSeek R1 Zero",
-          "organization_id": "deepseek",
-          "organization_name": "DeepSeek",
-          "mu": 26.12,
-          "sigma": 2.86,
-          "conservative": 17.54,
-          "rank": 193,
-          "games_played": 2,
-          "games_available": 55,
-          "coverage_ratio": 0.0364,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "llama-3.3-70b-instruct",
           "model_name": "Llama 3.3 70B Instruct",
           "organization_id": "meta",
@@ -15859,10 +15845,24 @@
           "mu": 23.8,
           "sigma": 2.08,
           "conservative": 17.54,
-          "rank": 194,
+          "rank": 193,
           "games_played": 4,
           "games_available": 55,
           "coverage_ratio": 0.0727,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "deepseek-r1-zero",
+          "model_name": "DeepSeek R1 Zero",
+          "organization_id": "deepseek",
+          "organization_name": "DeepSeek",
+          "mu": 26.12,
+          "sigma": 2.86,
+          "conservative": 17.54,
+          "rank": 194,
+          "games_played": 2,
+          "games_available": 55,
+          "coverage_ratio": 0.0364,
           "global_prior": 0.0
         },
         {
@@ -16048,20 +16048,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "o1-pro",
-          "model_name": "o1-pro",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 27.61,
-          "sigma": 3.81,
-          "conservative": 16.18,
-          "rank": 208,
-          "games_played": 1,
-          "games_available": 55,
-          "coverage_ratio": 0.0182,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gemini-2.5-flash",
           "model_name": "Gemini 2.5 Flash",
           "organization_id": "google",
@@ -16069,10 +16055,24 @@
           "mu": 23.27,
           "sigma": 2.36,
           "conservative": 16.18,
-          "rank": 209,
+          "rank": 208,
           "games_played": 3,
           "games_available": 55,
           "coverage_ratio": 0.0545,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "o1-pro",
+          "model_name": "o1-pro",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 27.61,
+          "sigma": 3.81,
+          "conservative": 16.18,
+          "rank": 209,
+          "games_played": 1,
+          "games_available": 55,
+          "coverage_ratio": 0.0182,
           "global_prior": 0.0
         },
         {
@@ -16090,20 +16090,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "grok-2-mini",
-          "model_name": "Grok-2 mini",
-          "organization_id": "xai",
-          "organization_name": "xAI",
-          "mu": 21.96,
-          "sigma": 2.07,
-          "conservative": 15.76,
-          "rank": 211,
-          "games_played": 4,
-          "games_available": 55,
-          "coverage_ratio": 0.0727,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "deepseek-v3-0324",
           "model_name": "DeepSeek-V3 0324",
           "organization_id": "deepseek",
@@ -16111,10 +16097,24 @@
           "mu": 22.89,
           "sigma": 2.38,
           "conservative": 15.76,
-          "rank": 212,
+          "rank": 211,
           "games_played": 3,
           "games_available": 55,
           "coverage_ratio": 0.0545,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "grok-2-mini",
+          "model_name": "Grok-2 mini",
+          "organization_id": "xai",
+          "organization_name": "xAI",
+          "mu": 21.96,
+          "sigma": 2.07,
+          "conservative": 15.76,
+          "rank": 212,
+          "games_played": 4,
+          "games_available": 55,
+          "coverage_ratio": 0.0727,
           "global_prior": 0.0
         },
         {
@@ -16132,12 +16132,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "claude-haiku-4-5-20251001",
-          "model_name": "Claude Haiku 4.5",
-          "organization_id": "anthropic",
-          "organization_name": "Anthropic",
-          "mu": 24.11,
-          "sigma": 2.84,
+          "model_id": "llama-3.1-nemotron-ultra-253b-v1",
+          "model_name": "Llama 3.1 Nemotron Ultra 253B v1",
+          "organization_id": "nvidia",
+          "organization_name": "NVIDIA",
+          "mu": 24.12,
+          "sigma": 2.85,
           "conservative": 15.58,
           "rank": 214,
           "games_played": 2,
@@ -16146,12 +16146,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "llama-3.1-nemotron-ultra-253b-v1",
-          "model_name": "Llama 3.1 Nemotron Ultra 253B v1",
-          "organization_id": "nvidia",
-          "organization_name": "NVIDIA",
-          "mu": 24.12,
-          "sigma": 2.85,
+          "model_id": "claude-haiku-4-5-20251001",
+          "model_name": "Claude Haiku 4.5",
+          "organization_id": "anthropic",
+          "organization_name": "Anthropic",
+          "mu": 24.11,
+          "sigma": 2.84,
           "conservative": 15.58,
           "rank": 215,
           "games_played": 2,
@@ -16370,20 +16370,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "llama-4-scout",
-          "model_name": "Llama 4 Scout",
-          "organization_id": "meta",
-          "organization_name": "Meta",
-          "mu": 18.46,
-          "sigma": 1.88,
-          "conservative": 12.84,
-          "rank": 231,
-          "games_played": 5,
-          "games_available": 55,
-          "coverage_ratio": 0.0909,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "ministral-3b-latest",
           "model_name": "Min  istral 3 (3B Reasoning 2512)",
           "organization_id": "mistral",
@@ -16391,10 +16377,24 @@
           "mu": 21.32,
           "sigma": 2.83,
           "conservative": 12.84,
-          "rank": 232,
+          "rank": 231,
           "games_played": 2,
           "games_available": 55,
           "coverage_ratio": 0.0364,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "llama-4-scout",
+          "model_name": "Llama 4 Scout",
+          "organization_id": "meta",
+          "organization_name": "Meta",
+          "mu": 18.46,
+          "sigma": 1.88,
+          "conservative": 12.84,
+          "rank": 232,
+          "games_played": 5,
+          "games_available": 55,
+          "coverage_ratio": 0.0909,
           "global_prior": 0.0
         },
         {
@@ -16496,20 +16496,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "llama-3.1-70b-instruct",
-          "model_name": "Llama 3.1 70B Instruct",
-          "organization_id": "meta",
-          "organization_name": "Meta",
-          "mu": 17.75,
-          "sigma": 2.1,
-          "conservative": 11.44,
-          "rank": 240,
-          "games_played": 6,
-          "games_available": 55,
-          "coverage_ratio": 0.1091,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gpt-4o-mini-2024-07-18",
           "model_name": "GPT-4o mini",
           "organization_id": "openai",
@@ -16517,10 +16503,24 @@
           "mu": 17.1,
           "sigma": 1.89,
           "conservative": 11.44,
-          "rank": 241,
+          "rank": 240,
           "games_played": 5,
           "games_available": 55,
           "coverage_ratio": 0.0909,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "llama-3.1-70b-instruct",
+          "model_name": "Llama 3.1 70B Instruct",
+          "organization_id": "meta",
+          "organization_name": "Meta",
+          "mu": 17.75,
+          "sigma": 2.1,
+          "conservative": 11.44,
+          "rank": 241,
+          "games_played": 6,
+          "games_available": 55,
+          "coverage_ratio": 0.1091,
           "global_prior": 0.0
         },
         {
@@ -17000,20 +17000,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "grok-1.5",
-          "model_name": "Grok-1.5",
-          "organization_id": "xai",
-          "organization_name": "xAI",
-          "mu": 10.57,
-          "sigma": 1.88,
-          "conservative": 4.93,
-          "rank": 276,
-          "games_played": 5,
-          "games_available": 55,
-          "coverage_ratio": 0.0909,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "qwen-2.5-coder-32b-instruct",
           "model_name": "Qwen2.5-Coder 32B Instruct",
           "organization_id": "qwen",
@@ -17021,10 +17007,24 @@
           "mu": 10.27,
           "sigma": 1.78,
           "conservative": 4.93,
-          "rank": 277,
+          "rank": 276,
           "games_played": 6,
           "games_available": 55,
           "coverage_ratio": 0.1091,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "grok-1.5",
+          "model_name": "Grok-1.5",
+          "organization_id": "xai",
+          "organization_name": "xAI",
+          "mu": 10.57,
+          "sigma": 1.88,
+          "conservative": 4.93,
+          "rank": 277,
+          "games_played": 5,
+          "games_available": 55,
+          "coverage_ratio": 0.0909,
           "global_prior": 0.0
         },
         {
@@ -18972,20 +18972,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gpt-5.6-luna",
-          "model_name": "GPT-5.6 Luna",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 32.44,
-          "sigma": 2.15,
-          "conservative": 25.99,
-          "rank": 43,
-          "games_played": 7,
-          "games_available": 101,
-          "coverage_ratio": 0.0693,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "qwen3.6-35b-a3b",
           "model_name": "Qwen3.6-35B-A3B",
           "organization_id": "qwen",
@@ -18993,10 +18979,24 @@
           "mu": 29.43,
           "sigma": 1.15,
           "conservative": 25.99,
-          "rank": 44,
+          "rank": 43,
           "games_played": 16,
           "games_available": 101,
           "coverage_ratio": 0.1584,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "gpt-5.6-luna",
+          "model_name": "GPT-5.6 Luna",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 32.44,
+          "sigma": 2.15,
+          "conservative": 25.99,
+          "rank": 44,
+          "games_played": 7,
+          "games_available": 101,
+          "coverage_ratio": 0.0693,
           "global_prior": 0.0
         },
         {
@@ -23960,10 +23960,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "mistral-small-24b-instruct-2501",
-          "model_name": "Mistral Small 3 24B Instruct",
-          "organization_id": "mistral",
-          "organization_name": "Mistral AI",
+          "model_id": "gemma-4-e2b-it",
+          "model_name": "Gemma 4 E2B",
+          "organization_id": "google",
+          "organization_name": "Google",
           "mu": 6.9,
           "sigma": 3.77,
           "conservative": -4.4,
@@ -23974,10 +23974,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemma-4-e2b-it",
-          "model_name": "Gemma 4 E2B",
-          "organization_id": "google",
-          "organization_name": "Google",
+          "model_id": "mistral-small-24b-instruct-2501",
+          "model_name": "Mistral Small 3 24B Instruct",
+          "organization_id": "mistral",
+          "organization_name": "Mistral AI",
           "mu": 6.9,
           "sigma": 3.77,
           "conservative": -4.4,
@@ -24896,8 +24896,8 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemma-3n-e2b",
-          "model_name": "Gemma 3n E2B",
+          "model_id": "gemma-3n-e2b-it-litert-preview",
+          "model_name": "Gemma 3n E2B Instructed LiteRT (Preview)",
           "organization_id": "google",
           "organization_name": "Google",
           "mu": 17.83,
@@ -24910,8 +24910,8 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemma-3n-e2b-it-litert-preview",
-          "model_name": "Gemma 3n E2B Instructed LiteRT (Preview)",
+          "model_id": "gemma-3n-e2b",
+          "model_name": "Gemma 3n E2B",
           "organization_id": "google",
           "organization_name": "Google",
           "mu": 17.83,
@@ -27072,20 +27072,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "kimi-k2.6",
-          "model_name": "Kimi K2.6",
-          "organization_id": "moonshotai",
-          "organization_name": "Moonshot AI",
-          "mu": 46.78,
-          "sigma": 0.96,
-          "conservative": 43.89,
-          "rank": 38,
-          "games_played": 23,
-          "games_available": 266,
-          "coverage_ratio": 0.0865,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "grok-4.5",
           "model_name": "Grok 4.5",
           "organization_id": "xai",
@@ -27093,10 +27079,24 @@
           "mu": 49.09,
           "sigma": 1.74,
           "conservative": 43.89,
-          "rank": 39,
+          "rank": 38,
           "games_played": 8,
           "games_available": 266,
           "coverage_ratio": 0.0301,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "kimi-k2.6",
+          "model_name": "Kimi K2.6",
+          "organization_id": "moonshotai",
+          "organization_name": "Moonshot AI",
+          "mu": 46.78,
+          "sigma": 0.96,
+          "conservative": 43.89,
+          "rank": 39,
+          "games_played": 23,
+          "games_available": 266,
+          "coverage_ratio": 0.0865,
           "global_prior": 0.0
         },
         {
@@ -27506,20 +27506,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gpt-5.3-codex",
-          "model_name": "GPT-5.3 Codex",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 43.73,
-          "sigma": 2.18,
-          "conservative": 37.19,
-          "rank": 69,
-          "games_played": 4,
-          "games_available": 266,
-          "coverage_ratio": 0.015,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "step-3.5-flash",
           "model_name": "Step-3.5-Flash",
           "organization_id": "stepfun",
@@ -27527,10 +27513,24 @@
           "mu": 42.16,
           "sigma": 1.66,
           "conservative": 37.19,
-          "rank": 70,
+          "rank": 69,
           "games_played": 7,
           "games_available": 266,
           "coverage_ratio": 0.0263,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "gpt-5.3-codex",
+          "model_name": "GPT-5.3 Codex",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 43.73,
+          "sigma": 2.18,
+          "conservative": 37.19,
+          "rank": 70,
+          "games_played": 4,
+          "games_available": 266,
+          "coverage_ratio": 0.015,
           "global_prior": 0.0
         },
         {
@@ -27744,20 +27744,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3.5-27b",
-          "model_name": "Qwen3.5-27B",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 36.88,
-          "sigma": 0.74,
-          "conservative": 34.67,
-          "rank": 86,
-          "games_played": 53,
-          "games_available": 266,
-          "coverage_ratio": 0.1992,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gpt-5.1-high-2025-11-12",
           "model_name": "GPT-5.1 High",
           "organization_id": "openai",
@@ -27765,10 +27751,24 @@
           "mu": 41.76,
           "sigma": 2.36,
           "conservative": 34.67,
-          "rank": 87,
+          "rank": 86,
           "games_played": 3,
           "games_available": 266,
           "coverage_ratio": 0.0113,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "qwen3.5-27b",
+          "model_name": "Qwen3.5-27B",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 36.88,
+          "sigma": 0.74,
+          "conservative": 34.67,
+          "rank": 87,
+          "games_played": 53,
+          "games_available": 266,
+          "coverage_ratio": 0.1992,
           "global_prior": 0.0
         },
         {
@@ -28892,20 +28892,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "grok-4.3",
-          "model_name": "Grok 4.3",
-          "organization_id": "xai",
-          "organization_name": "xAI",
-          "mu": 34.3,
-          "sigma": 3.89,
-          "conservative": 22.64,
-          "rank": 168,
-          "games_played": 1,
-          "games_available": 266,
-          "coverage_ratio": 0.0038,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "mercury-2",
           "model_name": "Mercury 2",
           "organization_id": "inceptionlabs",
@@ -28913,10 +28899,24 @@
           "mu": 28.3,
           "sigma": 1.88,
           "conservative": 22.64,
-          "rank": 169,
+          "rank": 168,
           "games_played": 5,
           "games_available": 266,
           "coverage_ratio": 0.0188,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "grok-4.3",
+          "model_name": "Grok 4.3",
+          "organization_id": "xai",
+          "organization_name": "xAI",
+          "mu": 34.3,
+          "sigma": 3.89,
+          "conservative": 22.64,
+          "rank": 169,
+          "games_played": 1,
+          "games_available": 266,
+          "coverage_ratio": 0.0038,
           "global_prior": 0.0
         },
         {
@@ -29158,20 +29158,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "grok-4.1-2025-11-17",
-          "model_name": "Grok-4.1",
-          "organization_id": "xai",
-          "organization_name": "xAI",
-          "mu": 36.54,
-          "sigma": 5.38,
-          "conservative": 20.41,
-          "rank": 187,
-          "games_played": 1,
-          "games_available": 266,
-          "coverage_ratio": 0.0038,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gpt-4.5",
           "model_name": "GPT-4.5",
           "organization_id": "openai",
@@ -29179,10 +29165,24 @@
           "mu": 23.4,
           "sigma": 1.0,
           "conservative": 20.41,
-          "rank": 188,
+          "rank": 187,
           "games_played": 22,
           "games_available": 266,
           "coverage_ratio": 0.0827,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "grok-4.1-2025-11-17",
+          "model_name": "Grok-4.1",
+          "organization_id": "xai",
+          "organization_name": "xAI",
+          "mu": 36.54,
+          "sigma": 5.38,
+          "conservative": 20.41,
+          "rank": 188,
+          "games_played": 1,
+          "games_available": 266,
+          "coverage_ratio": 0.0038,
           "global_prior": 0.0
         },
         {
@@ -29284,20 +29284,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3.5-4b",
-          "model_name": "Qwen3.5-4B",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 23.17,
-          "sigma": 1.19,
-          "conservative": 19.6,
-          "rank": 196,
-          "games_played": 16,
-          "games_available": 266,
-          "coverage_ratio": 0.0602,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "nemotron-3.5-lightning-30b-a3b",
           "model_name": "Nemotron 3.5 Lightning (30B A3B)",
           "organization_id": "nvidia",
@@ -29305,10 +29291,24 @@
           "mu": 23.94,
           "sigma": 1.45,
           "conservative": 19.6,
-          "rank": 197,
+          "rank": 196,
           "games_played": 11,
           "games_available": 266,
           "coverage_ratio": 0.0414,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "qwen3.5-4b",
+          "model_name": "Qwen3.5-4B",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 23.17,
+          "sigma": 1.19,
+          "conservative": 19.6,
+          "rank": 197,
+          "games_played": 16,
+          "games_available": 266,
+          "coverage_ratio": 0.0602,
           "global_prior": 0.0
         },
         {
@@ -29648,20 +29648,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwq-32b",
-          "model_name": "QwQ-32B",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 20.78,
-          "sigma": 1.74,
-          "conservative": 15.57,
-          "rank": 222,
-          "games_played": 6,
-          "games_available": 266,
-          "coverage_ratio": 0.0226,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gpt-oss-20b",
           "model_name": "GPT OSS 20B",
           "organization_id": "openai",
@@ -29669,10 +29655,24 @@
           "mu": 21.3,
           "sigma": 1.91,
           "conservative": 15.57,
-          "rank": 223,
+          "rank": 222,
           "games_played": 5,
           "games_available": 266,
           "coverage_ratio": 0.0188,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "qwq-32b",
+          "model_name": "QwQ-32B",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 20.78,
+          "sigma": 1.74,
+          "conservative": 15.57,
+          "rank": 223,
+          "games_played": 6,
+          "games_available": 266,
+          "coverage_ratio": 0.0226,
           "global_prior": 0.0
         },
         {
@@ -29732,20 +29732,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "deepseek-r1-distill-llama-70b",
-          "model_name": "DeepSeek R1 Distill Llama 70B",
-          "organization_id": "deepseek",
-          "organization_name": "DeepSeek",
-          "mu": 20.93,
-          "sigma": 2.07,
-          "conservative": 14.72,
-          "rank": 228,
-          "games_played": 4,
-          "games_available": 266,
-          "coverage_ratio": 0.015,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "lfm-2.5-2.6b",
           "model_name": "LFM2.5-2.6B",
           "organization_id": "liquid",
@@ -29753,10 +29739,24 @@
           "mu": 21.59,
           "sigma": 2.29,
           "conservative": 14.72,
-          "rank": 229,
+          "rank": 228,
           "games_played": 5,
           "games_available": 266,
           "coverage_ratio": 0.0188,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "deepseek-r1-distill-llama-70b",
+          "model_name": "DeepSeek R1 Distill Llama 70B",
+          "organization_id": "deepseek",
+          "organization_name": "DeepSeek",
+          "mu": 20.93,
+          "sigma": 2.07,
+          "conservative": 14.72,
+          "rank": 229,
+          "games_played": 4,
+          "games_available": 266,
+          "coverage_ratio": 0.015,
           "global_prior": 0.0
         },
         {
@@ -30614,20 +30614,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemini-1.5-flash",
-          "model_name": "Gemini 1.5 Flash",
-          "organization_id": "google",
-          "organization_name": "Google",
-          "mu": 9.15,
-          "sigma": 1.18,
-          "conservative": 5.61,
-          "rank": 291,
-          "games_played": 15,
-          "games_available": 266,
-          "coverage_ratio": 0.0564,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gemma-4-e2b-it",
           "model_name": "Gemma 4 E2B",
           "organization_id": "google",
@@ -30635,10 +30621,24 @@
           "mu": 10.39,
           "sigma": 1.59,
           "conservative": 5.61,
-          "rank": 292,
+          "rank": 291,
           "games_played": 10,
           "games_available": 266,
           "coverage_ratio": 0.0376,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "gemini-1.5-flash",
+          "model_name": "Gemini 1.5 Flash",
+          "organization_id": "google",
+          "organization_name": "Google",
+          "mu": 9.15,
+          "sigma": 1.18,
+          "conservative": 5.61,
+          "rank": 292,
+          "games_played": 15,
+          "games_available": 266,
+          "coverage_ratio": 0.0564,
           "global_prior": 0.0
         },
         {
@@ -32174,10 +32174,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "inkling",
-          "model_name": "Inkling",
-          "organization_id": "thinking-machines",
-          "organization_name": "Thinking Machines Lab",
+          "model_id": "lfm-2.5-vl-3b",
+          "model_name": "LFM2.5-VL-3B",
+          "organization_id": "liquid",
+          "organization_name": "Liquid AI",
           "mu": 31.49,
           "sigma": 6.68,
           "conservative": 11.46,
@@ -32188,10 +32188,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "lfm-2.5-vl-3b",
-          "model_name": "LFM2.5-VL-3B",
-          "organization_id": "liquid",
-          "organization_name": "Liquid AI",
+          "model_id": "inkling",
+          "model_name": "Inkling",
+          "organization_id": "thinking-machines",
+          "organization_name": "Thinking Machines Lab",
           "mu": 31.49,
           "sigma": 6.68,
           "conservative": 11.46,
@@ -32314,10 +32314,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "claude-haiku-4-5-20251001",
-          "model_name": "Claude Haiku 4.5",
-          "organization_id": "anthropic",
-          "organization_name": "Anthropic",
+          "model_id": "phi-3.5-vision-instruct",
+          "model_name": "Phi-3.5-vision-instruct",
+          "organization_id": "microsoft",
+          "organization_name": "Microsoft",
           "mu": 25.0,
           "sigma": 6.22,
           "conservative": 6.33,
@@ -32342,10 +32342,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "phi-3.5-vision-instruct",
-          "model_name": "Phi-3.5-vision-instruct",
-          "organization_id": "microsoft",
-          "organization_name": "Microsoft",
+          "model_id": "claude-haiku-4-5-20251001",
+          "model_name": "Claude Haiku 4.5",
+          "organization_id": "anthropic",
+          "organization_name": "Anthropic",
           "mu": 25.0,
           "sigma": 6.22,
           "conservative": 6.33,
@@ -32454,10 +32454,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "phi-4-multimodal-instruct",
-          "model_name": "Phi-4-multimodal-instruct",
-          "organization_id": "microsoft",
-          "organization_name": "Microsoft",
+          "model_id": "qwen2.5-omni-7b",
+          "model_name": "Qwen2.5-Omni-7B",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
           "mu": 18.51,
           "sigma": 6.68,
           "conservative": -1.52,
@@ -32468,10 +32468,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen2.5-omni-7b",
-          "model_name": "Qwen2.5-Omni-7B",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
+          "model_id": "phi-4-multimodal-instruct",
+          "model_name": "Phi-4-multimodal-instruct",
+          "organization_id": "microsoft",
+          "organization_name": "Microsoft",
           "mu": 18.51,
           "sigma": 6.68,
           "conservative": -1.52,
@@ -33780,12 +33780,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gpt-5.1-instant-2025-11-12",
-          "model_name": "GPT-5.1 Instant",
+          "model_id": "gpt-5.1-2025-11-13",
+          "model_name": "GPT-5.1",
           "organization_id": "openai",
           "organization_name": "OpenAI",
-          "mu": 22.1,
-          "sigma": 4.67,
+          "mu": 22.09,
+          "sigma": 4.66,
           "conservative": 8.1,
           "rank": 60,
           "games_played": 1,
@@ -33794,12 +33794,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gpt-5.1-2025-11-13",
-          "model_name": "GPT-5.1",
+          "model_id": "gpt-5.1-instant-2025-11-12",
+          "model_name": "GPT-5.1 Instant",
           "organization_id": "openai",
           "organization_name": "OpenAI",
-          "mu": 22.09,
-          "sigma": 4.66,
+          "mu": 22.1,
+          "sigma": 4.67,
           "conservative": 8.1,
           "rank": 61,
           "games_played": 1,
@@ -33976,8 +33976,8 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemma-3n-e2b",
-          "model_name": "Gemma 3n E2B",
+          "model_id": "gemma-3n-e2b-it-litert-preview",
+          "model_name": "Gemma 3n E2B Instructed LiteRT (Preview)",
           "organization_id": "google",
           "organization_name": "Google",
           "mu": 19.09,
@@ -33990,8 +33990,8 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemma-3n-e2b-it-litert-preview",
-          "model_name": "Gemma 3n E2B Instructed LiteRT (Preview)",
+          "model_id": "gemma-3n-e2b",
+          "model_name": "Gemma 3n E2B",
           "organization_id": "google",
           "organization_name": "Google",
           "mu": 19.09,
@@ -36144,20 +36144,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "nova-pro",
-          "model_name": "Nova Pro",
-          "organization_id": "amazon",
-          "organization_name": "Amazon",
-          "mu": 35.31,
-          "sigma": 3.92,
-          "conservative": 23.54,
-          "rank": 19,
-          "games_played": 1,
-          "games_available": 9,
-          "coverage_ratio": 0.1111,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "qwen3-next-80b-a3b-thinking",
           "model_name": "Qwen3-Next-80B-A3B-Thinking",
           "organization_id": "qwen",
@@ -36165,10 +36151,24 @@
           "mu": 31.03,
           "sigma": 2.5,
           "conservative": 23.54,
-          "rank": 20,
+          "rank": 19,
           "games_played": 3,
           "games_available": 9,
           "coverage_ratio": 0.3333,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "nova-pro",
+          "model_name": "Nova Pro",
+          "organization_id": "amazon",
+          "organization_name": "Amazon",
+          "mu": 35.31,
+          "sigma": 3.92,
+          "conservative": 23.54,
+          "rank": 20,
+          "games_played": 1,
+          "games_available": 9,
+          "coverage_ratio": 0.1111,
           "global_prior": 0.0
         },
         {
@@ -36270,20 +36270,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3-vl-235b-a22b-instruct",
-          "model_name": "Qwen3 VL 235B A22B Instruct",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 28.67,
-          "sigma": 2.21,
-          "conservative": 22.04,
-          "rank": 28,
-          "games_played": 4,
-          "games_available": 9,
-          "coverage_ratio": 0.4444,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "lfm-2.5-2.6b",
           "model_name": "LFM2.5-2.6B",
           "organization_id": "liquid",
@@ -36291,10 +36277,24 @@
           "mu": 34.55,
           "sigma": 4.17,
           "conservative": 22.04,
-          "rank": 29,
+          "rank": 28,
           "games_played": 1,
           "games_available": 9,
           "coverage_ratio": 0.1111,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "qwen3-vl-235b-a22b-instruct",
+          "model_name": "Qwen3 VL 235B A22B Instruct",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 28.67,
+          "sigma": 2.21,
+          "conservative": 22.04,
+          "rank": 29,
+          "games_played": 4,
+          "games_available": 9,
+          "coverage_ratio": 0.4444,
           "global_prior": 0.0
         },
         {
@@ -46534,20 +46534,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gpt-5.2-2025-12-11",
-          "model_name": "GPT-5.2",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 44.32,
-          "sigma": 0.98,
-          "conservative": 41.37,
-          "rank": 51,
-          "games_played": 23,
-          "games_available": 383,
-          "coverage_ratio": 0.0601,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "minimax-m3",
           "model_name": "MiniMax M3",
           "organization_id": "minimax",
@@ -46555,10 +46541,24 @@
           "mu": 44.45,
           "sigma": 1.03,
           "conservative": 41.37,
-          "rank": 52,
+          "rank": 51,
           "games_played": 24,
           "games_available": 383,
           "coverage_ratio": 0.0627,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "gpt-5.2-2025-12-11",
+          "model_name": "GPT-5.2",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 44.32,
+          "sigma": 0.98,
+          "conservative": 41.37,
+          "rank": 52,
+          "games_played": 23,
+          "games_available": 383,
+          "coverage_ratio": 0.0601,
           "global_prior": 0.0
         },
         {
@@ -48312,20 +48312,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "deepseek-v3.1",
-          "model_name": "DeepSeek-V3.1",
-          "organization_id": "deepseek",
-          "organization_name": "DeepSeek",
-          "mu": 25.34,
-          "sigma": 1.1,
-          "conservative": 22.06,
-          "rank": 178,
-          "games_played": 16,
-          "games_available": 383,
-          "coverage_ratio": 0.0418,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "nemotron-3.5-lightning-30b-a3b",
           "model_name": "Nemotron 3.5 Lightning (30B A3B)",
           "organization_id": "nvidia",
@@ -48333,10 +48319,24 @@
           "mu": 26.02,
           "sigma": 1.32,
           "conservative": 22.06,
-          "rank": 179,
+          "rank": 178,
           "games_played": 13,
           "games_available": 383,
           "coverage_ratio": 0.0339,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "deepseek-v3.1",
+          "model_name": "DeepSeek-V3.1",
+          "organization_id": "deepseek",
+          "organization_name": "DeepSeek",
+          "mu": 25.34,
+          "sigma": 1.1,
+          "conservative": 22.06,
+          "rank": 179,
+          "games_played": 16,
+          "games_available": 383,
+          "coverage_ratio": 0.0418,
           "global_prior": 0.0
         },
         {
@@ -48606,20 +48606,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "o1-pro",
-          "model_name": "o1-pro",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 28.14,
-          "sigma": 2.82,
-          "conservative": 19.68,
-          "rank": 199,
-          "games_played": 2,
-          "games_available": 383,
-          "coverage_ratio": 0.0052,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "granite-4.2-8b",
           "model_name": "IBM Granite 4.2 8B",
           "organization_id": "ibm",
@@ -48627,10 +48613,24 @@
           "mu": 23.04,
           "sigma": 1.12,
           "conservative": 19.68,
-          "rank": 200,
+          "rank": 199,
           "games_played": 18,
           "games_available": 383,
           "coverage_ratio": 0.047,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "o1-pro",
+          "model_name": "o1-pro",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 28.14,
+          "sigma": 2.82,
+          "conservative": 19.68,
+          "rank": 200,
+          "games_played": 2,
+          "games_available": 383,
+          "coverage_ratio": 0.0052,
           "global_prior": 0.0
         },
         {
@@ -52234,20 +52234,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gpt-5.1-thinking-2025-11-12",
-          "model_name": "GPT-5.1 Thinking",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 43.45,
-          "sigma": 4.02,
-          "conservative": 31.39,
-          "rank": 29,
-          "games_played": 1,
-          "games_available": 22,
-          "coverage_ratio": 0.0455,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "kimi-k2-thinking-0905",
           "model_name": "Kimi K2-Thinking-0905",
           "organization_id": "moonshotai",
@@ -52255,10 +52241,24 @@
           "mu": 40.59,
           "sigma": 3.07,
           "conservative": 31.39,
-          "rank": 30,
+          "rank": 29,
           "games_played": 2,
           "games_available": 22,
           "coverage_ratio": 0.0909,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "gpt-5.1-thinking-2025-11-12",
+          "model_name": "GPT-5.1 Thinking",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 43.45,
+          "sigma": 4.02,
+          "conservative": 31.39,
+          "rank": 30,
+          "games_played": 1,
+          "games_available": 22,
+          "coverage_ratio": 0.0455,
           "global_prior": 0.0
         },
         {
@@ -53004,20 +53004,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gpt-5.4-mini",
-          "model_name": "GPT-5.4 mini",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 35.1,
-          "sigma": 3.96,
-          "conservative": 23.22,
-          "rank": 84,
-          "games_played": 1,
-          "games_available": 22,
-          "coverage_ratio": 0.0455,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "qwen3-next-80b-a3b-instruct",
           "model_name": "Qwen3-Next-80B-A3B-Instruct",
           "organization_id": "qwen",
@@ -53025,10 +53011,24 @@
           "mu": 30.46,
           "sigma": 2.42,
           "conservative": 23.22,
-          "rank": 85,
+          "rank": 84,
           "games_played": 3,
           "games_available": 22,
           "coverage_ratio": 0.1364,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "gpt-5.4-mini",
+          "model_name": "GPT-5.4 mini",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 35.1,
+          "sigma": 3.96,
+          "conservative": 23.22,
+          "rank": 85,
+          "games_played": 1,
+          "games_available": 22,
+          "coverage_ratio": 0.0455,
           "global_prior": 0.0
         },
         {
@@ -57898,12 +57898,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3-14b",
-          "model_name": "Qwen3 14B",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 20.98,
-          "sigma": 3.96,
+          "model_id": "gpt-5-2025-08-07",
+          "model_name": "GPT-5",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 20.73,
+          "sigma": 3.87,
           "conservative": 9.1,
           "rank": 128,
           "games_played": 1,
@@ -57912,12 +57912,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gpt-5-2025-08-07",
-          "model_name": "GPT-5",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 20.73,
-          "sigma": 3.87,
+          "model_id": "qwen3-14b",
+          "model_name": "Qwen3 14B",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 20.98,
+          "sigma": 3.96,
           "conservative": 9.1,
           "rank": 129,
           "games_played": 1,
@@ -58178,12 +58178,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "claude-3-7-sonnet-20250219",
-          "model_name": "Claude 3.7 Sonnet",
-          "organization_id": "anthropic",
-          "organization_name": "Anthropic",
-          "mu": 16.8,
-          "sigma": 3.97,
+          "model_id": "nova-lite",
+          "model_name": "Nova Lite",
+          "organization_id": "amazon",
+          "organization_name": "Amazon",
+          "mu": 23.24,
+          "sigma": 6.11,
           "conservative": 4.9,
           "rank": 148,
           "games_played": 1,
@@ -58192,12 +58192,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "nova-lite",
-          "model_name": "Nova Lite",
-          "organization_id": "amazon",
-          "organization_name": "Amazon",
-          "mu": 23.24,
-          "sigma": 6.11,
+          "model_id": "claude-3-7-sonnet-20250219",
+          "model_name": "Claude 3.7 Sonnet",
+          "organization_id": "anthropic",
+          "organization_name": "Anthropic",
+          "mu": 16.8,
+          "sigma": 3.97,
           "conservative": 4.9,
           "rank": 149,
           "games_played": 1,
@@ -58304,12 +58304,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "k-exaone-236b-a23b",
-          "model_name": "K-EXAONE-236B-A23B",
-          "organization_id": "lg",
-          "organization_name": "LG AI Research",
-          "mu": 16.06,
-          "sigma": 4.0,
+          "model_id": "longcat-flash-lite",
+          "model_name": "LongCat-Flash-Lite",
+          "organization_id": "meituan",
+          "organization_name": "Meituan",
+          "mu": 15.95,
+          "sigma": 3.97,
           "conservative": 4.05,
           "rank": 157,
           "games_played": 1,
@@ -58318,12 +58318,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "longcat-flash-lite",
-          "model_name": "LongCat-Flash-Lite",
-          "organization_id": "meituan",
-          "organization_name": "Meituan",
-          "mu": 15.95,
-          "sigma": 3.97,
+          "model_id": "k-exaone-236b-a23b",
+          "model_name": "K-EXAONE-236B-A23B",
+          "organization_id": "lg",
+          "organization_name": "LG AI Research",
+          "mu": 16.06,
+          "sigma": 4.0,
           "conservative": 4.05,
           "rank": 158,
           "games_played": 1,
@@ -58360,12 +58360,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "grok-4.20-beta-0309-reasoning",
-          "model_name": "Grok-4.20 Beta Reasoning",
+          "model_id": "grok-4-fast",
+          "model_name": "Grok 4 Fast",
           "organization_id": "xai",
           "organization_name": "xAI",
-          "mu": 15.52,
-          "sigma": 4.16,
+          "mu": 14.78,
+          "sigma": 3.91,
           "conservative": 3.05,
           "rank": 161,
           "games_played": 1,
@@ -58374,12 +58374,12 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "grok-4-fast",
-          "model_name": "Grok 4 Fast",
+          "model_id": "grok-4.20-beta-0309-reasoning",
+          "model_name": "Grok-4.20 Beta Reasoning",
           "organization_id": "xai",
           "organization_name": "xAI",
-          "mu": 14.78,
-          "sigma": 3.91,
+          "mu": 15.52,
+          "sigma": 4.16,
           "conservative": 3.05,
           "rank": 162,
           "games_played": 1,
@@ -58430,20 +58430,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "granite-4.2-8b",
-          "model_name": "IBM Granite 4.2 8B",
-          "organization_id": "ibm",
-          "organization_name": "IBM",
-          "mu": 9.03,
-          "sigma": 2.41,
-          "conservative": 1.81,
-          "rank": 166,
-          "games_played": 5,
-          "games_available": 88,
-          "coverage_ratio": 0.0568,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gemma-4-e4b-it",
           "model_name": "Gemma 4 E4B",
           "organization_id": "google",
@@ -58451,10 +58437,24 @@
           "mu": 14.04,
           "sigma": 4.08,
           "conservative": 1.81,
-          "rank": 167,
+          "rank": 166,
           "games_played": 1,
           "games_available": 88,
           "coverage_ratio": 0.0114,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "granite-4.2-8b",
+          "model_name": "IBM Granite 4.2 8B",
+          "organization_id": "ibm",
+          "organization_name": "IBM",
+          "mu": 9.03,
+          "sigma": 2.41,
+          "conservative": 1.81,
+          "rank": 167,
+          "games_played": 5,
+          "games_available": 88,
+          "coverage_ratio": 0.0568,
           "global_prior": 0.0
         },
         {
@@ -61898,10 +61898,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "mistral-small-24b-instruct-2501",
-          "model_name": "Mistral Small 3 24B Instruct",
-          "organization_id": "mistral",
-          "organization_name": "Mistral AI",
+          "model_id": "gemma-4-e2b-it",
+          "model_name": "Gemma 4 E2B",
+          "organization_id": "google",
+          "organization_name": "Google",
           "mu": 6.9,
           "sigma": 3.77,
           "conservative": -4.4,
@@ -61912,10 +61912,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemma-4-e2b-it",
-          "model_name": "Gemma 4 E2B",
-          "organization_id": "google",
-          "organization_name": "Google",
+          "model_id": "mistral-small-24b-instruct-2501",
+          "model_name": "Mistral Small 3 24B Instruct",
+          "organization_id": "mistral",
+          "organization_name": "Mistral AI",
           "mu": 6.9,
           "sigma": 3.77,
           "conservative": -4.4,
@@ -65566,10 +65566,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "mistral-small-24b-instruct-2501",
-          "model_name": "Mistral Small 3 24B Instruct",
-          "organization_id": "mistral",
-          "organization_name": "Mistral AI",
+          "model_id": "gemma-4-e2b-it",
+          "model_name": "Gemma 4 E2B",
+          "organization_id": "google",
+          "organization_name": "Google",
           "mu": 6.9,
           "sigma": 3.77,
           "conservative": -4.4,
@@ -65580,10 +65580,10 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemma-4-e2b-it",
-          "model_name": "Gemma 4 E2B",
-          "organization_id": "google",
-          "organization_name": "Google",
+          "model_id": "mistral-small-24b-instruct-2501",
+          "model_name": "Mistral Small 3 24B Instruct",
+          "organization_id": "mistral",
+          "organization_name": "Mistral AI",
           "mu": 6.9,
           "sigma": 3.77,
           "conservative": -4.4,
@@ -67122,20 +67122,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "laguna-s-2.1",
-          "model_name": "Laguna S 2.1",
-          "organization_id": "poolside",
-          "organization_name": "Poolside",
-          "mu": 37.13,
-          "sigma": 2.04,
-          "conservative": 31.0,
-          "rank": 45,
-          "games_played": 5,
-          "games_available": 58,
-          "coverage_ratio": 0.0862,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "seed-2.1-turbo",
           "model_name": "Seed 2.1 Turbo",
           "organization_id": "bytedance",
@@ -67143,10 +67129,24 @@
           "mu": 35.44,
           "sigma": 1.48,
           "conservative": 31.0,
-          "rank": 46,
+          "rank": 45,
           "games_played": 10,
           "games_available": 58,
           "coverage_ratio": 0.1724,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "laguna-s-2.1",
+          "model_name": "Laguna S 2.1",
+          "organization_id": "poolside",
+          "organization_name": "Poolside",
+          "mu": 37.13,
+          "sigma": 2.04,
+          "conservative": 31.0,
+          "rank": 46,
+          "games_played": 5,
+          "games_available": 58,
+          "coverage_ratio": 0.0862,
           "global_prior": 0.0
         },
         {
@@ -67430,20 +67430,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3.6-27b",
-          "model_name": "Qwen3.6-27B",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 30.69,
-          "sigma": 1.61,
-          "conservative": 25.86,
-          "rank": 67,
-          "games_played": 8,
-          "games_available": 58,
-          "coverage_ratio": 0.1379,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "mimo-v2-pro",
           "model_name": "MiMo-V2-Pro",
           "organization_id": "xiaomi",
@@ -67451,10 +67437,24 @@
           "mu": 31.68,
           "sigma": 1.94,
           "conservative": 25.86,
-          "rank": 68,
+          "rank": 67,
           "games_played": 5,
           "games_available": 58,
           "coverage_ratio": 0.0862,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "qwen3.6-27b",
+          "model_name": "Qwen3.6-27B",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 30.69,
+          "sigma": 1.61,
+          "conservative": 25.86,
+          "rank": 68,
+          "games_played": 8,
+          "games_available": 58,
+          "coverage_ratio": 0.1379,
           "global_prior": 0.0
         },
         {
@@ -67780,20 +67780,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "nemotron-3-ultra-550b-a55b",
-          "model_name": "Nemotron 3 Ultra (550B A55B)",
-          "organization_id": "nvidia",
-          "organization_name": "NVIDIA",
-          "mu": 27.01,
-          "sigma": 2.0,
-          "conservative": 21.0,
-          "rank": 92,
-          "games_played": 5,
-          "games_available": 58,
-          "coverage_ratio": 0.0862,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gpt-5.1-codex",
           "model_name": "GPT-5.1 Codex",
           "organization_id": "openai",
@@ -67801,10 +67787,24 @@
           "mu": 29.47,
           "sigma": 2.82,
           "conservative": 21.0,
-          "rank": 93,
+          "rank": 92,
           "games_played": 3,
           "games_available": 58,
           "coverage_ratio": 0.0517,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "nemotron-3-ultra-550b-a55b",
+          "model_name": "Nemotron 3 Ultra (550B A55B)",
+          "organization_id": "nvidia",
+          "organization_name": "NVIDIA",
+          "mu": 27.01,
+          "sigma": 2.0,
+          "conservative": 21.0,
+          "rank": 93,
+          "games_played": 5,
+          "games_available": 58,
+          "coverage_ratio": 0.0862,
           "global_prior": 0.0
         },
         {
@@ -68522,20 +68522,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "longcat-flash-chat",
-          "model_name": "LongCat-Flash-Chat",
-          "organization_id": "meituan",
-          "organization_name": "Meituan",
-          "mu": 18.69,
-          "sigma": 2.09,
-          "conservative": 12.41,
-          "rank": 145,
-          "games_played": 4,
-          "games_available": 58,
-          "coverage_ratio": 0.069,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "llama-3.1-nemotron-ultra-253b-v1",
           "model_name": "Llama 3.1 Nemotron Ultra 253B v1",
           "organization_id": "nvidia",
@@ -68543,10 +68529,24 @@
           "mu": 23.84,
           "sigma": 3.81,
           "conservative": 12.41,
-          "rank": 146,
+          "rank": 145,
           "games_played": 1,
           "games_available": 58,
           "coverage_ratio": 0.0172,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "longcat-flash-chat",
+          "model_name": "LongCat-Flash-Chat",
+          "organization_id": "meituan",
+          "organization_name": "Meituan",
+          "mu": 18.69,
+          "sigma": 2.09,
+          "conservative": 12.41,
+          "rank": 146,
+          "games_played": 4,
+          "games_available": 58,
+          "coverage_ratio": 0.069,
           "global_prior": 0.0
         },
         {
@@ -71288,20 +71288,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "longcat-flash-chat",
-          "model_name": "LongCat-Flash-Chat",
-          "organization_id": "meituan",
-          "organization_name": "Meituan",
-          "mu": 20.13,
-          "sigma": 2.5,
-          "conservative": 12.63,
-          "rank": 60,
-          "games_played": 3,
-          "games_available": 12,
-          "coverage_ratio": 0.25,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "qwen3.5-27b",
           "model_name": "Qwen3.5-27B",
           "organization_id": "qwen",
@@ -71309,10 +71295,24 @@
           "mu": 24.53,
           "sigma": 3.97,
           "conservative": 12.63,
-          "rank": 61,
+          "rank": 60,
           "games_played": 1,
           "games_available": 12,
           "coverage_ratio": 0.0833,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "longcat-flash-chat",
+          "model_name": "LongCat-Flash-Chat",
+          "organization_id": "meituan",
+          "organization_name": "Meituan",
+          "mu": 20.13,
+          "sigma": 2.5,
+          "conservative": 12.63,
+          "rank": 61,
+          "games_played": 3,
+          "games_available": 12,
+          "coverage_ratio": 0.25,
           "global_prior": 0.0
         },
         {
@@ -72936,11 +72936,11 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemma-3n-e2b",
-          "model_name": "Gemma 3n E2B",
+          "model_id": "gemma-3n-e2b-it-litert-preview",
+          "model_name": "Gemma 3n E2B Instructed LiteRT (Preview)",
           "organization_id": "google",
           "organization_name": "Google",
-          "mu": 14.59,
+          "mu": 14.6,
           "sigma": 4.75,
           "conservative": 0.34,
           "rank": 59,
@@ -72950,11 +72950,11 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gemma-3n-e2b-it-litert-preview",
-          "model_name": "Gemma 3n E2B Instructed LiteRT (Preview)",
+          "model_id": "gemma-3n-e2b",
+          "model_name": "Gemma 3n E2B",
           "organization_id": "google",
           "organization_name": "Google",
-          "mu": 14.6,
+          "mu": 14.59,
           "sigma": 4.75,
           "conservative": 0.34,
           "rank": 60,
@@ -78686,20 +78686,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "gpt-5.6-terra",
-          "model_name": "GPT-5.6 Terra",
-          "organization_id": "openai",
-          "organization_name": "OpenAI",
-          "mu": 35.91,
-          "sigma": 2.0,
-          "conservative": 29.92,
-          "rank": 29,
-          "games_played": 7,
-          "games_available": 111,
-          "coverage_ratio": 0.0631,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "gpt-5.5-pro",
           "model_name": "GPT-5.5 Pro",
           "organization_id": "openai",
@@ -78707,10 +78693,24 @@
           "mu": 41.49,
           "sigma": 3.86,
           "conservative": 29.92,
-          "rank": 30,
+          "rank": 29,
           "games_played": 1,
           "games_available": 111,
           "coverage_ratio": 0.009,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "gpt-5.6-terra",
+          "model_name": "GPT-5.6 Terra",
+          "organization_id": "openai",
+          "organization_name": "OpenAI",
+          "mu": 35.91,
+          "sigma": 2.0,
+          "conservative": 29.92,
+          "rank": 30,
+          "games_played": 7,
+          "games_available": 111,
+          "coverage_ratio": 0.0631,
           "global_prior": 0.0
         },
         {
@@ -79890,20 +79890,6 @@
           "global_prior": 0.0
         },
         {
-          "model_id": "qwen3-vl-8b-thinking",
-          "model_name": "Qwen3 VL 8B Thinking",
-          "organization_id": "qwen",
-          "organization_name": "Alibaba Cloud / Qwen Team",
-          "mu": 13.28,
-          "sigma": 0.86,
-          "conservative": 10.71,
-          "rank": 115,
-          "games_played": 30,
-          "games_available": 111,
-          "coverage_ratio": 0.2703,
-          "global_prior": 0.0
-        },
-        {
           "model_id": "deepseek-reasoner",
           "model_name": "DeepSeek-V3.2 (Thinking)",
           "organization_id": "deepseek",
@@ -79911,10 +79897,24 @@
           "mu": 22.16,
           "sigma": 3.81,
           "conservative": 10.71,
-          "rank": 116,
+          "rank": 115,
           "games_played": 1,
           "games_available": 111,
           "coverage_ratio": 0.009,
+          "global_prior": 0.0
+        },
+        {
+          "model_id": "qwen3-vl-8b-thinking",
+          "model_name": "Qwen3 VL 8B Thinking",
+          "organization_id": "qwen",
+          "organization_name": "Alibaba Cloud / Qwen Team",
+          "mu": 13.28,
+          "sigma": 0.86,
+          "conservative": 10.71,
+          "rank": 116,
+          "games_played": 30,
+          "games_available": 111,
+          "coverage_ratio": 0.2703,
           "global_prior": 0.0
         },
         {
