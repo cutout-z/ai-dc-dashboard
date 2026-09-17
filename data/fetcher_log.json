@@ -1,6 +1,6 @@
 {
   "refresh_earnings_dates.py": {
-    "last_run": "2026-09-17T09:37:35Z",
+    "last_run": "2026-09-17T09:58:17Z",
     "status": "ok",
     "count": 18,
     "notes": "0 dates changed"
@@ -12,25 +12,25 @@
     "notes": "Holdings from 4 ETFs: AIQ, BOTZ, ROBT, CHAT"
   },
   "refresh_capex_guidance.py": {
-    "last_attempt": "2026-09-17T09:37:48Z",
-    "last_run": "2026-09-17T09:37:48Z",
+    "last_attempt": "2026-09-17T09:58:29Z",
+    "last_run": "2026-09-17T09:58:29Z",
     "status": "ok",
     "attempted": 1,
     "succeeded": 1,
     "observations": 1,
     "count": 1,
     "notes": "1 stale, 0 current, 0 unknown; newest observed earnings 2026-09-10",
-    "last_success": "2026-09-17T09:37:48Z"
+    "last_success": "2026-09-17T09:58:29Z"
   },
   "catalog_news.py": {
-    "last_attempt": "2026-09-17T09:37:53Z",
-    "last_run": "2026-09-17T09:37:53Z",
+    "last_attempt": "2026-09-17T09:58:35Z",
+    "last_run": "2026-09-17T09:58:35Z",
     "status": "ok",
     "attempted": 17,
     "succeeded": 17,
     "observations": 8,
     "count": 8,
-    "notes": "added=5, updated=3, total_catalogued=117; 17/17 feed requests succeeded",
-    "last_success": "2026-09-17T09:37:53Z"
+    "notes": "added=0, updated=8, total_catalogued=117; 17/17 feed requests succeeded",
+    "last_success": "2026-09-17T09:58:35Z"
   }
 }

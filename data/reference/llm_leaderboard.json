@@ -3,7 +3,7 @@
     "schema_version": 2,
     "source": "https://api.zeroeval.com/leaderboard/models/full",
     "endpoint_params": "justCanonicals=true",
-    "fetched_at": "2026-09-17T09:38:48Z",
+    "fetched_at": "2026-09-17T09:59:33Z",
     "updated": "2026-09-17",
     "model_count": 392,
     "note": "Source-faithful full-field snapshot: every canonical model row returned by the ZeroEval models/full endpoint, stored verbatim. No rank or composite is published here \u2014 readers derive displayed scores or read published TrueSkill index values from the sibling llm_indexes.json."
