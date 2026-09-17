@@ -2,7 +2,9 @@
 
 Covers the Astra review reproductions and verify list:
 - partial outage (MSFT succeeds, every other ticker fails) -> publication
-  aborts, the previous 285-row series is preserved untouched;
+  aborts, the previous series is preserved untouched (285 rows at review
+  time; the baseline is read from the DB, so ETL refreshes add rows without
+  breaking this check);
 - all-endpoints-empty (with and without seed data) -> abort, not silent wipe;
 - a valid upsert replaces only the keys the candidate covers and keeps
   last-good rows the candidate does not mention;
@@ -34,6 +36,10 @@ import scripts.fetch_financials as ff  # noqa: E402
 
 REAL_DB = REPO_ROOT / "data" / "db" / "ai_research.db"
 
+# Row count when the Astra S2-03 reproduction was written. Only a floor:
+# production grows as the ETL refresh adds quarters.
+REVIEW_BASELINE = 285
+
 COLUMNS = [
     "ticker", "company", "period", "metric", "frequency",
     "value", "unit", "source", "fetched_at",
@@ -64,6 +70,13 @@ def _group_counts(conn: sqlite3.Connection) -> dict[tuple, int]:
         "GROUP BY 1, 2, 3"
     ).fetchall()
     return {tuple(r[:3]): r[3] for r in rows}
+
+
+def _total(conn: sqlite3.Connection) -> int:
+    """Row count of the fixture connection (its preserve-me baseline)."""
+    return conn.execute(
+        "SELECT COUNT(*) FROM quarterly_financials"
+    ).fetchone()[0]
 
 
 def _dup_keys(conn: sqlite3.Connection) -> list[tuple]:
@@ -113,10 +126,12 @@ def _raise_for(tickers_fail: set[str], rows_builder):
 # ── review reproduction: partial outage must fail closed ────────────────────
 
 def test_partial_outage_preserves_history_and_aborts(monkeypatch) -> None:
-    """285-row DB + only MSFT reachable -> abort, old series byte-identical."""
+    """Real DB + only MSFT reachable -> abort, old series byte-identical."""
     conn = _fixture_conn()
     before = _snapshot(conn)
-    assert len(before) == 285, "fixture must mirror the real 285-row DB"
+    assert len(before) >= REVIEW_BASELINE, (
+        "fixture must mirror the real DB (at least the 285-row review baseline)"
+    )
 
     # MSFT candidate = exactly its current stored rows (an "exact" fetch).
     msft_rows = [
@@ -138,7 +153,7 @@ def test_partial_outage_preserves_history_and_aborts(monkeypatch) -> None:
         "non-MSFT failures must be reported as problems"
     )
     assert _snapshot(conn) == before, "partial failure must leave the DB untouched"
-    assert sum(_group_counts(conn).values()) == 285
+    assert _total(conn) == len(before)
     conn.close()
 
 
@@ -159,7 +174,7 @@ def test_all_endpoints_empty_no_seeds_aborts(monkeypatch) -> None:
 
 def test_all_endpoints_empty_with_seeds_aborts(monkeypatch) -> None:
     """APIs silently empty (no errors reported), seed fills only its slice ->
-    every non-seed series 'vanishes' -> abort, not a silent 285->126 wipe."""
+    every non-seed series 'vanishes' -> abort, not a silent near-total wipe."""
     conn = _fixture_conn()
     before = _snapshot(conn)
     _stub_fetch(monkeypatch, lambda t, on_error: [])
@@ -176,6 +191,7 @@ def test_all_endpoints_empty_with_seeds_aborts(monkeypatch) -> None:
 def test_single_failed_endpoint_blocks_publication(monkeypatch) -> None:
     """Data-rich candidate but ONE ticker down -> degraded abort (fail closed)."""
     conn = _fixture_conn()
+    baseline = _total(conn)
 
     def full_series(ticker: str) -> list[dict]:
         rows = conn.execute(
@@ -199,7 +215,7 @@ def test_single_failed_endpoint_blocks_publication(monkeypatch) -> None:
     assert any(failing in p for p in excinfo.value.problems)
 
     # The untouched fixture baseline is intact (this test's own connection).
-    assert sum(_group_counts(conn).values()) == 285
+    assert _total(conn) == baseline
     conn.close()
 
 
@@ -209,6 +225,7 @@ def test_valid_upsert_keeps_last_good_rows_not_covered(monkeypatch) -> None:
     """Candidate covers the newest ~60% of each series: those rows update,
     the older rows survive untouched, row count is unchanged, no dup keys."""
     conn = _fixture_conn()
+    baseline = _total(conn)
 
     def partial_series(ticker: str) -> list[dict]:
         rows = conn.execute(
@@ -228,8 +245,8 @@ def test_valid_upsert_keeps_last_good_rows_not_covered(monkeypatch) -> None:
     result = ff.run(conn=conn)
     assert result["status"] == "ok"
 
-    total = conn.execute("SELECT COUNT(*) FROM quarterly_financials").fetchone()[0]
-    assert total == 285, "upsert must not grow or shrink the table"
+    total = _total(conn)
+    assert total == baseline, "upsert must not grow or shrink the table"
     assert _dup_keys(conn) == []
 
     updated = conn.execute(
@@ -255,9 +272,10 @@ def test_valid_upsert_keeps_last_good_rows_not_covered(monkeypatch) -> None:
 
 
 def test_correction_of_prior_period_updates_in_place(monkeypatch) -> None:
-    """Full-coverage candidate with corrected values: same 285 rows, values
+    """Full-coverage candidate with corrected values: same row count, values
     shifted by +1, reader views recreated on the publish connection."""
     conn = _fixture_conn()
+    baseline = _total(conn)
     before = {
         (t, p, m, f): v
         for t, p, m, f, v, *_ in conn.execute(
@@ -279,10 +297,10 @@ def test_correction_of_prior_period_updates_in_place(monkeypatch) -> None:
 
     result = ff.run(conn=conn)
     assert result["status"] == "ok"
-    assert result["rows"] == 285
+    assert result["rows"] == baseline
 
-    total = conn.execute("SELECT COUNT(*) FROM quarterly_financials").fetchone()[0]
-    assert total == 285, "corrections must update in place, not append"
+    total = _total(conn)
+    assert total == baseline, "corrections must update in place, not append"
     assert _dup_keys(conn) == []
 
     shifted = conn.execute(
@@ -304,6 +322,7 @@ def test_declared_new_listing_is_allowed(monkeypatch) -> None:
     table without tripping the completeness gate (only existing series are
     validated against their previous row counts)."""
     conn = _fixture_conn()
+    baseline = _total(conn)
 
     def series_with_newcomer(ticker: str) -> list[dict]:
         rows = conn.execute(
@@ -329,8 +348,8 @@ def test_declared_new_listing_is_allowed(monkeypatch) -> None:
 
     result = ff.run(conn=conn)
     assert result["status"] == "ok"
-    total = conn.execute("SELECT COUNT(*) FROM quarterly_financials").fetchone()[0]
-    assert total == 285 + 4
+    total = _total(conn)
+    assert total == baseline + 4
     nbis = conn.execute(
         "SELECT COUNT(*) FROM quarterly_financials WHERE ticker='NBIS'"
     ).fetchone()[0]
