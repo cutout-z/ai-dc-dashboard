@@ -10,9 +10,13 @@ Card source order:
   2. `~/ai-wif-brain-dashboard/data/investment_radar_public.json` — local mode
 
 Card selection (2026-09-17): dashboard-classified (mechanism-gated) articles
-PLUS every DC-relevant radar article (AI/DC · Supply chain themes). Each card
-badges its routing destination (DASHBOARD / RESEARCH / MINER / WATCH); routing
-internals otherwise stay private.
+PLUS every DC-relevant radar article (AI/DC · Supply chain themes).
+
+Card display (2026-09-17): headline + date only. Per Zalen's request the
+routing badge (DASHBOARD / RESEARCH / MINER / WATCH), theme, polarity and
+confidence pills, the extracted-entities line, the routing designation in the
+footer, the per-card "View full note" button, the summary metric row, both
+filter dropdowns and the "Showing N of M" counter were all removed.
 
 Full-note bodies (added 2026-09-17) — note text never lives in this public
 repo. Availability by environment, in order:
@@ -22,7 +26,8 @@ repo. Availability by environment, in order:
      (`main:data/notes/public_notes.json`, published by the Brain dashboard's
      nightly job), fetched with a read-only GITHUB_TOKEN app secret.
 Frontmatter is stripped for display; author / source / date render as a
-caption above the note body.
+caption above the note body. The loaders below are retained, but the card UI
+no longer exposes an entry point for them.
 """
 
 from __future__ import annotations
@@ -59,40 +64,6 @@ NOTES_MIRROR_URL = (
 _LOCAL_NOTES = Path.home() / "ai-wif-brain-dashboard" / "data" / "notes" / "public_notes.json"
 
 _FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n?", re.DOTALL)
-
-# ── colour palette (dark-theme, consistent with Brain dashboard) ──────────
-POLARITY_COLORS: dict[str, str] = {
-    "bull / upside": "#22c55e",
-    "bear / risk":   "#ef4444",
-    "mixed":         "#f59e0b",
-    "context":       "#6b7280",
-}
-
-THEME_COLORS: dict[str, str] = {
-    "AI/DC":                   "#3b82f6",
-    "Supply chain":            "#a855f7",
-    "Macro":                   "#f59e0b",
-    "Commodities / energy":    "#14b8a6",
-    "Market structure":        "#ec4899",
-    "Company / security":      "#f97316",
-    "Geopolitics":             "#ef4444",
-}
-
-CONFIDENCE_BADGE: dict[str, str] = {
-    "high":   "#22c55e",
-    "medium": "#f59e0b",
-    "low":    "#ef4444",
-}
-
-# Card badge by routing destination (label, text color, bg, border).
-# "AI & DC Dashboard" items are mechanism-gated (F07); the rest are DC-relevant
-# radar discovery material with weaker evidence, surfaced since 2026-09-17.
-DESTINATION_BADGE: dict[str, tuple[str, str, str, str]] = {
-    "AI & DC Dashboard":  ("DASHBOARD", "#22d3ee", "rgba(6,182,212,0.15)",  "#0891b2"),
-    "Investment Miner":   ("MINER",     "#fbbf24", "rgba(245,158,11,0.15)", "#b45309"),
-    "Personal investing": ("RESEARCH",  "#a5b4fc", "rgba(165,180,252,0.15)", "#4f46e5"),
-    "":                   ("WATCH",     "#9ca3af", "rgba(156,163,175,0.15)", "#4b5563"),
-}
 
 
 # ── helpers ────────────────────────────────────────────────────────────────
@@ -266,93 +237,22 @@ def _note_body_for(item: dict, notes_map: dict[tuple[str, str], str]) -> str | N
     return notes_map.get(key)
 
 
+# ── cards ──────────────────────────────────────────────────────────────────
+
 def _render_card_html(item: dict) -> str:
-    """Render a single article card as dark-theme HTML."""
-    text = _html_escape(item.get("text", ""))
-    snippet = _html_escape(item.get("snippet", ""))
-    themes = item.get("themes", [])
-    polarity = item.get("polarity", "context")
-    entities = item.get("entities", [])
-    confidence = item.get("confidence", "medium")
-    date = item.get("date", "")
-    destination = item.get("destination", "")
-
-    pol_color = POLARITY_COLORS.get(polarity, "#6b7280")
-    pol_label = polarity.upper() if polarity != "context" else "CONTEXT"
-    conf_color = CONFIDENCE_BADGE.get(confidence, "#6b7280")
-    conf_label = f"CONFIDENCE {confidence.upper()}"
-
-    theme_tags = "".join(
-        f'<span style="display:inline-block;margin:0 4px 4px 0;padding:2px 8px;'
-        f'border-radius:12px;font-size:10px;font-weight:600;text-transform:uppercase;'
-        f'border:1px solid {THEME_COLORS.get(t, "#6b7280")}40;'
-        f'color:{THEME_COLORS.get(t, "#6b7280")};'
-        f'background:{THEME_COLORS.get(t, "#6b7280")}15;">{_html_escape(t)}</span>'
-        for t in themes
-    )
-
-    entities_str = ", ".join(entities) if entities else ""
-    entities_html = (
-        f'<div style="margin-top:6px;font-size:11px;color:#6b7280;">'
-        f'Entities: {_html_escape(entities_str)}</div>'
-        if entities_str
-        else ""
-    )
-
-    footer_parts = [date]
-    if destination:
-        dest = destination.replace(" + ", " · ")
-        footer_parts.append(dest)
-    footer = " · ".join(footer_parts)
-
-    badge_label, badge_color, badge_bg, badge_border = DESTINATION_BADGE.get(
-        destination, ("RADAR", "#9ca3af", "rgba(156,163,175,0.15)", "#4b5563")
-    )
+    """Render a single article card: headline + date only."""
+    text = _html_escape(str(item.get("text", "")))
+    date = _html_escape(str(item.get("date", "")))
 
     return f"""
     <div style="background:#111827;border:1px solid #1e293b;border-radius:8px;
                 padding:16px;margin-bottom:0;">
-      <div style="display:flex;align-items:flex-start;gap:10px;">
-        <span style="flex-shrink:0;display:inline-block;padding:2px 10px;
-                     border-radius:4px;font-size:10px;font-weight:700;
-                     text-transform:uppercase;
-                     background:{badge_bg};
-                     color:{badge_color};border:1px solid {badge_border};">
-          {badge_label}
-        </span>
-        <div>
-          <div style="font-size:14px;font-weight:600;color:#e2e8f0;
-                      line-height:1.4;margin-bottom:4px;">
-            {text}
-          </div>
-          <div style="font-size:12px;color:#9ca3af;font-style:italic;
-                      margin-bottom:8px;">
-            {snippet}
-          </div>
-        </div>
+      <div style="font-size:14px;font-weight:600;color:#e2e8f0;
+                  line-height:1.4;margin-bottom:6px;">
+        {text}
       </div>
-
-      <div style="margin-bottom:6px;">{theme_tags}</div>
-
-      <div style="margin-bottom:6px;">
-        <span style="display:inline-block;margin-right:6px;padding:2px 8px;
-                     border-radius:12px;font-size:10px;font-weight:600;
-                     border:1px solid {pol_color}40;
-                     color:{pol_color};background:{pol_color}15;">
-          {pol_label}
-        </span>
-        <span style="display:inline-block;padding:2px 8px;border-radius:12px;
-                     font-size:10px;font-weight:600;
-                     border:1px solid {conf_color}40;
-                     color:{conf_color};background:{conf_color}15;">
-          {conf_label}
-        </span>
-      </div>
-
-      {entities_html}
-
-      <div style="margin-top:8px;font-size:11px;color:#4b5563;">
-        {footer}
+      <div style="font-size:11px;color:#4b5563;">
+        {date}
       </div>
     </div>
     """
@@ -365,9 +265,6 @@ st.title("Interesting Articles")
 with st.spinner("Loading articles..."):
     items = _load_dashboard_items(status_mtime=_get_status_mtime())
 
-notes_map = _load_notes_map()
-notes_available = LOCAL_MODE or bool(notes_map)
-
 if not items:
     st.info(
         "No dashboard-classified articles found. "
@@ -377,115 +274,15 @@ if not items:
     )
     st.caption(f"Looking at: `{STATUS_PATH}`")
 else:
-    # ── notes availability caption ──
-    if LOCAL_MODE:
-        note_hint = (
-            " Click **📄 View full note** on any card to read the underlying vault note."
-        )
-    elif notes_available:
-        note_hint = (
-            " Click **📄 View full note** on any card to read the note "
-            "(served from the private notes mirror)."
-        )
-    elif _github_token():
-        note_hint = " Note mirror unavailable right now — cards only."
-    else:
-        note_hint = " Vault notes are available locally only."
     st.caption(
         "Extracted threads and articles surfaced by the Brain dashboard's "
-        "investment radar for AI & DC Dashboard relevance." + note_hint
+        "investment radar for AI & DC Dashboard relevance."
     )
-    st.caption(
-        "Badges: **DASHBOARD** = material investment mechanism evidenced · "
-        "**RESEARCH / MINER / WATCH** = radar discovery routing."
-    )
-
-    # ── summary metrics ──
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Articles", len(items))
-    col2.metric(
-        "Bull / Upside",
-        sum(1 for it in items if "bull" in str(it.get("polarity", "")).lower()),
-    )
-    col3.metric(
-        "Bear / Risk",
-        sum(1 for it in items if "bear" in str(it.get("polarity", "")).lower()),
-    )
-    col4.metric(
-        "Mixed",
-        sum(1 for it in items if it.get("polarity") == "mixed"),
-    )
-    col5.metric(
-        "Context",
-        sum(1 for it in items if it.get("polarity") == "context"),
-    )
-
-    # ── filters ──
-    filt_col1, filt_col2 = st.columns([2, 1])
-    with filt_col1:
-        all_themes = sorted(
-            {t for it in items for t in it.get("themes", [])}
-        )
-        selected_themes = st.multiselect(
-            "Filter by theme", all_themes, default=[], placeholder="All themes"
-        )
-    with filt_col2:
-        all_pols = sorted(
-            {it.get("polarity", "context") for it in items}
-        )
-        selected_pols = st.multiselect(
-            "Filter by polarity", all_pols, default=[], placeholder="All polarities"
-        )
-
-    filtered = items
-    if selected_themes:
-        filtered = [
-            it for it in filtered
-            if set(selected_themes).intersection(it.get("themes", []))
-        ]
-    if selected_pols:
-        filtered = [
-            it for it in filtered
-            if it.get("polarity") in selected_pols
-        ]
-
-    st.caption(f"Showing {len(filtered)} of {len(items)} articles")
 
     # ── render cards ──
     with st.container(height=700, border=False):
-        for i, item in enumerate(filtered):
-            card_key = f"card_{i}"
-
-            # Card HTML
+        for item in items:
             st.markdown(_render_card_html(item), unsafe_allow_html=True)
-
-            # View full note button — shown whenever a note source exists
-            if notes_available:
-                view_col, _ = st.columns([1, 4])
-                with view_col:
-                    if st.button("📄 View full note", key=f"btn_{card_key}"):
-                        st.session_state.setdefault("expanded_notes", set())
-                        if card_key in st.session_state["expanded_notes"]:
-                            st.session_state["expanded_notes"].discard(card_key)
-                        else:
-                            st.session_state["expanded_notes"].add(card_key)
-
-                # Show note content if expanded
-                if st.session_state.get("expanded_notes", set()) and card_key in st.session_state["expanded_notes"]:
-                    with st.container(border=True):
-                        note_content = _note_body_for(item, notes_map)
-                        if note_content:
-                            meta, body = _split_note(note_content)
-                            if meta:
-                                st.caption(meta)
-                            st.markdown(body)
-                        else:
-                            st.warning(
-                                "Note not found for this article."
-                                + (" (vault note missing)" if LOCAL_MODE
-                                   else " (not in notes mirror)")
-                            )
-            # No note source (cloud without token): cards only.
-
-            # Divider between cards
-            st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)
+            st.markdown(
+                "<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True
+            )

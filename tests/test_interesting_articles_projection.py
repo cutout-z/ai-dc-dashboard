@@ -3,11 +3,14 @@
 Runs the real page under Streamlit AppTest twice:
   cloud-mode  — repo data/investment_radar_public.json is the projection,
                 _HOME_STATUS removed: old full-snapshot loader would show 0.
-  local-mode  — _HOME_PUBLIC present (fixture with private-marker + item),
-                page renders with local caption and "View full note" buttons.
+  local-mode  — _HOME_PUBLIC present (fixture with private-marker + item).
 
 Also checks the private-snapshot resolver directly. Never touches the real
 private snapshot; all state via monkeypatched module constants.
+
+Card display contract (2026-09-17): headline + date only — no routing badge,
+theme/polarity/confidence pills, entities line or designation, and no summary
+metric row / filter controls on the page.
 
 Run:  /opt/anaconda3/bin/python3.12 tests/test_interesting_articles_projection.py
 """
@@ -90,12 +93,16 @@ def main() -> int:
         at.run(timeout=30)
         check("page renders (no exception)",
               not at.exception, at.exception[0].value if at.exception else "")
-        arts = [m.value for m in at.metric]
         repo_expected = len(
             json.loads((REPO / "data" / "investment_radar_public.json").read_text())["articles"]
         )
-        check("renders repo projection (consumer == export count)",
-              bool(arts) and int(arts[0]) == repo_expected, f"{arts[:1]} vs {repo_expected}")
+        cards = [m.value for m in at.markdown if "background:#111827" in m.value]
+        check("renders one card per projected article (consumer == export count)",
+              len(cards) == repo_expected, f"{len(cards)} vs {repo_expected}")
+        check("no summary metrics row on the page", not at.metric,
+              f"{len(at.metric)} metric(s) rendered" if at.metric else "")
+        check("no filter controls on the page", not at.multiselect)
+        check("no buttons on the page", not at.button)
 
         # ---------- local mode ----------
         home2 = make_home(tmp / "local", with_projection=True)
@@ -152,15 +159,23 @@ def main() -> int:
               "@someone" in meta and "x.com/a" in meta and "2026-09-01" in meta, meta)
         check("body keeps note content", body.strip().startswith("# Note"), body[:48])
 
-        # ---------- card badges derive from routing destination ----------
-        html_dash = mod2._render_card_html(
-            {"date": "d", "text": "t", "destination": "AI & DC Dashboard"})
-        check("DASHBOARD badge for dashboard destination", "DASHBOARD" in html_dash)
-        html_res = mod2._render_card_html(
-            {"date": "d", "text": "t", "destination": "Personal investing"})
-        check("RESEARCH badge for personal-investing destination", "RESEARCH" in html_res)
-        html_watch = mod2._render_card_html({"date": "d", "text": "t"})
-        check("WATCH badge when destination empty", "WATCH" in html_watch)
+        # ---------- card payload: headline + date only ----------
+        html_card = mod2._render_card_html({
+            "date": "2026-09-14",
+            "text": "Headline here",
+            "snippet": "snippety",
+            "destination": "Personal investing",
+            "polarity": "context",
+            "confidence": "medium",
+            "themes": ["AI/DC", "Macro"],
+            "entities": ["OpenAI", "Anthropic"],
+        })
+        check("card keeps headline", "Headline here" in html_card)
+        check("card keeps date", "2026-09-14" in html_card)
+        for gone in ("RESEARCH", "DASHBOARD", "MINER", "WATCH", "AI/DC", "Macro",
+                     "CONTEXT", "CONFIDENCE", "Entities", "OpenAI",
+                     "Personal investing", "snippety"):
+            check(f"card drops {gone!r}", gone not in html_card)
 
         print(f"\n{PASS} passed, {FAIL} failed")
         return 1 if FAIL else 0
