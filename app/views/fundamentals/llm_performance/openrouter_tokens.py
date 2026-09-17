@@ -241,8 +241,8 @@ st.subheader("Top models by day")
 days = sorted(df["date"].dt.date.unique(), reverse=True)
 pick = st.selectbox("Day (UTC)", days, index=0, format_func=lambda d: d.isoformat())
 day_df = df[df["date"].dt.date == pick].copy()
+day_total = day_df["total_tokens"].sum()  # whole day incl. the `other` long-tail row — denominator BEFORE truncation (S2-14)
 day_df = day_df.sort_values("total_tokens", ascending=False).head(25).reset_index(drop=True)
-day_total = day_df["total_tokens"].sum()
 day_df.insert(0, "rank", range(1, len(day_df) + 1))
 day_df["share"] = day_df["total_tokens"] / day_total * 100
 day_df["model"] = day_df["model"].apply(lambda m: "long-tail `other`" if m == "other" else m)
@@ -261,7 +261,7 @@ st.dataframe(
     },
 )
 st.caption(
-    f"Top 25 of the day's dataset rows; the dataset's own `other` row aggregates every model "
-    f"outside the top 50. Dataset window: {meta.get('data_start', '—')} → {meta.get('data_end', '—')}"
+    f"Top 25 of the day's dataset rows; shares are of the WHOLE day's tokens (including the "
+    f"`other` long-tail row), so the top-25 shares sum to less than 100%. Dataset window: {meta.get('data_start', '—')} → {meta.get('data_end', '—')}"
     f" · pulled {meta.get('updated', '—')} · {meta.get('days', '—')} days · {meta.get('rows', '—')} rows."
 )
