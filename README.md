@@ -25,6 +25,15 @@ All data is fetched live or maintained in public reference CSVs — no proprieta
 - **Reference data** — hand-curated CSVs for CAPEX guidance, frontier lab valuations, model releases, GPU lease prices, DC power forecasts, TSMC monthly revenue
 - **Supply chain universe** — curated stock mapping across AI infra segments (included in repo)
 
+### Interesting Articles — full notes
+
+The News → Interesting Articles page shows investment-radar cards from the
+allowlisted public projection. Full vault-note bodies are private: on the Mac
+they read straight from the Obsidian vault; on Streamlit Cloud they load from
+a private mirror (`cutout-z/ai-wif-brain-dashboard`, published nightly) using
+the `GITHUB_TOKEN` app secret. Without the secret the page degrades to cards
+only. Note author/source/date render as a caption; frontmatter is stripped.
+
 ### Australian data-centre capacity treatment
 
 The Australian Market pages separate public-source data into distinct capacity layers:

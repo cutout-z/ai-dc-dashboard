@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -122,6 +123,34 @@ def main() -> int:
         check("resolver finds local vault ref", resolved == "Q&A/some-note.md", resolved)
         resolved_miss = mod2._resolve_local_source_path.__wrapped__("2026-01-01", "Nope")
         check("resolver misses cleanly", resolved_miss == "")
+
+        # ---------- notes mirror: local file source + note formatting ----------
+        home3 = make_home(tmp / "mirror", with_projection=True)
+        notes_dir = home3 / "ai-wif-brain-dashboard" / "data" / "notes"
+        notes_dir.mkdir(parents=True, exist_ok=True)
+        fixture_body = (
+            "---\nauthor: \"@someone\"\nlinks: [\"[[private]]\"]\n"
+            "source: \"https://x.com/a\"\ncreated: 2026-09-01T00:00:00Z\n---\n\n# Note\n\nBody here"
+        )
+        (notes_dir / "public_notes.json").write_text(json.dumps({
+            "schema_version": 1, "generated_at": "t0",
+            "notes": [{"date": "2026-09-06", "text": "Local article",
+                       "source_path": "Q&A/some-note.md", "digest": "abc",
+                       "body": fixture_body}],
+        }))
+        os.environ.pop("GITHUB_TOKEN", None)  # keep tests offline
+        mod3, _st3 = load_page(home3)
+        m3 = mod3._load_notes_map.__wrapped__()
+        check("mirror map loads from local file",
+              ("2026-09-06", "Local article") in m3, f"{list(m3)[:2]}")
+        check("mirror body carries note text",
+              "Body here" in m3.get(("2026-09-06", "Local article"), ""))
+        meta, body = mod3._split_note(fixture_body)
+        check("frontmatter stripped from displayed body",
+              "---" not in body and "links:" not in body, body[:48])
+        check("meta caption carries author + source + date",
+              "@someone" in meta and "x.com/a" in meta and "2026-09-01" in meta, meta)
+        check("body keeps note content", body.strip().startswith("# Note"), body[:48])
 
         print(f"\n{PASS} passed, {FAIL} failed")
         return 1 if FAIL else 0

@@ -11,6 +11,7 @@ Streamlit multi-page app: `streamlit run app/Home.py`
 - `scripts/` — maintenance and audit scripts
 - `models/` — data models
 - `monitors/` — monitoring/alerting
+- `app/views/threads/interesting_articles.py` — radar article cards from the public projection; full notes from the private mirror (GITHUB_TOKEN app secret on Cloud; reads the vault directly in local mode)
 
 ## Data Provenance Rules (CRITICAL)
 
