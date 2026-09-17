@@ -9,6 +9,11 @@ Card source order:
   1. repo `data/investment_radar_public.json` — works on Streamlit Cloud
   2. `~/ai-wif-brain-dashboard/data/investment_radar_public.json` — local mode
 
+Card selection (2026-09-17): dashboard-classified (mechanism-gated) articles
+PLUS every DC-relevant radar article (AI/DC · Supply chain themes). Each card
+badges its routing destination (DASHBOARD / RESEARCH / MINER / WATCH); routing
+internals otherwise stay private.
+
 Full-note bodies (added 2026-09-17) — note text never lives in this public
 repo. Availability by environment, in order:
   1. local vault — the iCloud ZC_Mac_Vault on the Mac (LOCAL_MODE); freshest
@@ -77,6 +82,16 @@ CONFIDENCE_BADGE: dict[str, str] = {
     "high":   "#22c55e",
     "medium": "#f59e0b",
     "low":    "#ef4444",
+}
+
+# Card badge by routing destination (label, text color, bg, border).
+# "AI & DC Dashboard" items are mechanism-gated (F07); the rest are DC-relevant
+# radar discovery material with weaker evidence, surfaced since 2026-09-17.
+DESTINATION_BADGE: dict[str, tuple[str, str, str, str]] = {
+    "AI & DC Dashboard":  ("DASHBOARD", "#22d3ee", "rgba(6,182,212,0.15)",  "#0891b2"),
+    "Investment Miner":   ("MINER",     "#fbbf24", "rgba(245,158,11,0.15)", "#b45309"),
+    "Personal investing": ("RESEARCH",  "#a5b4fc", "rgba(165,180,252,0.15)", "#4f46e5"),
+    "":                   ("WATCH",     "#9ca3af", "rgba(156,163,175,0.15)", "#4b5563"),
 }
 
 
@@ -290,6 +305,10 @@ def _render_card_html(item: dict) -> str:
         footer_parts.append(dest)
     footer = " · ".join(footer_parts)
 
+    badge_label, badge_color, badge_bg, badge_border = DESTINATION_BADGE.get(
+        destination, ("RADAR", "#9ca3af", "rgba(156,163,175,0.15)", "#4b5563")
+    )
+
     return f"""
     <div style="background:#111827;border:1px solid #1e293b;border-radius:8px;
                 padding:16px;margin-bottom:0;">
@@ -297,9 +316,9 @@ def _render_card_html(item: dict) -> str:
         <span style="flex-shrink:0;display:inline-block;padding:2px 10px;
                      border-radius:4px;font-size:10px;font-weight:700;
                      text-transform:uppercase;
-                     background:rgba(6,182,212,0.15);
-                     color:#22d3ee;border:1px solid #0891b2;">
-          DASHBOARD
+                     background:{badge_bg};
+                     color:{badge_color};border:1px solid {badge_border};">
+          {badge_label}
         </span>
         <div>
           <div style="font-size:14px;font-weight:600;color:#e2e8f0;
@@ -375,6 +394,10 @@ else:
     st.caption(
         "Extracted threads and articles surfaced by the Brain dashboard's "
         "investment radar for AI & DC Dashboard relevance." + note_hint
+    )
+    st.caption(
+        "Badges: **DASHBOARD** = material investment mechanism evidenced · "
+        "**RESEARCH / MINER / WATCH** = radar discovery routing."
     )
 
     # ── summary metrics ──

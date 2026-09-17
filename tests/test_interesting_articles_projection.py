@@ -152,6 +152,16 @@ def main() -> int:
               "@someone" in meta and "x.com/a" in meta and "2026-09-01" in meta, meta)
         check("body keeps note content", body.strip().startswith("# Note"), body[:48])
 
+        # ---------- card badges derive from routing destination ----------
+        html_dash = mod2._render_card_html(
+            {"date": "d", "text": "t", "destination": "AI & DC Dashboard"})
+        check("DASHBOARD badge for dashboard destination", "DASHBOARD" in html_dash)
+        html_res = mod2._render_card_html(
+            {"date": "d", "text": "t", "destination": "Personal investing"})
+        check("RESEARCH badge for personal-investing destination", "RESEARCH" in html_res)
+        html_watch = mod2._render_card_html({"date": "d", "text": "t"})
+        check("WATCH badge when destination empty", "WATCH" in html_watch)
+
         print(f"\n{PASS} passed, {FAIL} failed")
         return 1 if FAIL else 0
 

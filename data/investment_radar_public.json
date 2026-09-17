@@ -3,6 +3,22 @@
  "generated_at": "2026-09-17T14:57:56.887102",
  "articles": [
   {
+   "date": "2026-09-14",
+   "destination": "Personal investing",
+   "entities": [
+    "OpenAI",
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "from the outside, it is very reasonable to interpret the past 2 weeks as an orchestrated industry-wide regulatory…",
+   "source": "threads",
+   "text": "@MajmudarAdam - from the outside, it is very reasonable to interpret the past 2 weeks as an orchestrated… [agents, ai, llm, openai]",
+   "themes": [
+    "AI/DC",
+    "Macro"
+   ]
+  },
+  {
    "date": "2026-09-11",
    "destination": "AI & DC Dashboard",
    "entities": [],
@@ -13,6 +29,25 @@
    "themes": [
     "AI/DC",
     "Commodities / energy"
+   ]
+  },
+  {
+   "date": "2026-09-05",
+   "destination": "Personal investing",
+   "entities": [
+    "Meta",
+    "Alphabet",
+    "Amazon",
+    "Microsoft"
+   ],
+   "polarity": "context",
+   "snippet": "Applied AI Doesn't Work",
+   "source": "threads",
+   "text": "@vasuman - The world has spent a fortune on AI [agents, automation, claude, claude-code, llm]",
+   "themes": [
+    "AI/DC",
+    "Commodities / energy",
+    "Company / security"
    ]
   },
   {
@@ -32,6 +67,26 @@
     "AI/DC",
     "Macro",
     "Commodities / energy",
+    "Market structure",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-08-30",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "TSMC",
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "TSMC fumbles Copackaged optics for the Nth time like some fucking donkeys and now the whole industry is limping towards…",
+   "source": "threads",
+   "text": "@bubbleboi - TSMC fumbles Copackaged optics for the Nth time like some fucking donkeys and now the whole… [datacenter, gpu, infrastructure]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
     "Market structure",
     "Company / security"
    ]
@@ -95,6 +150,61 @@
    ]
   },
   {
+   "date": "2026-08-04",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "[TF Overseas Tech] Why the Rise of Open Source and the Collapse of the Closed Model Monopoly Is Good for Cloud",
+   "source": "threads",
+   "text": "@jukan05 - [TF Overseas Tech] Why the Rise of Open Source and the Collapse of the Closed Model… [datacenter, gpu, infrastructure, llm]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy"
+   ]
+  },
+  {
+   "date": "2026-08-02",
+   "destination": "Investment Miner",
+   "entities": [
+    "BE",
+    "SNDK",
+    "MU",
+    "CRWV",
+    "NBIS",
+    "ADBE",
+    "WDAY",
+    "INTU"
+   ],
+   "polarity": "context",
+   "snippet": "What Everyone Missed In Leo’s Blow-Up",
+   "source": "threads",
+   "text": "@porterstansb - What Everyone Missed In Leo’s Blow-Up [agents, claude-code, datacenter, gpu, llm, openai]",
+   "themes": [
+    "AI/DC",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-07-29",
+   "destination": "Personal investing",
+   "entities": [
+    "Micron"
+   ],
+   "polarity": "context",
+   "snippet": "This has been an absolutely brutal month for the Kospi. Here’s how I read it as an engineer/speculator:",
+   "source": "threads",
+   "text": "@bubbleboi - This has been an absolutely brutal month for the Kospi. Here’s how I read it as an… [ai, llm]",
+   "themes": [
+    "Supply chain",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
    "date": "2026-07-27",
    "destination": "AI & DC Dashboard",
    "entities": [
@@ -139,6 +249,18 @@
    ]
   },
   {
+   "date": "2026-07-11",
+   "destination": "",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "Colibri runs GLM-5.2 (744B MoE) in pure C with zero dependencies. The trick: only ~40B params activate per token, so it…",
+   "source": "threads",
+   "text": "@chenzeling4 - 744B parameters. On a laptop. With 25GB RAM [datacenter, gpu, infrastructure]",
+   "themes": [
+    "AI/DC"
+   ]
+  },
+  {
    "date": "2026-07-06",
    "destination": "AI & DC Dashboard",
    "entities": [
@@ -153,6 +275,87 @@
     "AI/DC",
     "Macro",
     "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-07-06",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "Alphabet",
+    "TSMC",
+    "ASML",
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "about his ratings of AI supply chain bottlenecks.",
+   "source": "threads",
+   "text": "@chrisbarber - I interviewed [datacenter, gpu, infrastructure]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-07-04",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "Google",
+    "Amazon",
+    "Microsoft",
+    "OpenAI",
+    "AMD",
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "NVIDIA, CUDA and the New Challengers",
+   "source": "threads",
+   "text": "@magicsilicon - Deep Moats and Platform Shifts in Computing - Part 2 [thread-extraction]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-07-04",
+   "destination": "Investment Miner",
+   "entities": [
+    "DIEM",
+    "oil"
+   ],
+   "polarity": "context",
+   "snippet": "Tokenized inference looks like a cost on first glance. The actual economics tell a different story",
+   "source": "threads",
+   "text": "@galactiator - Understanding Venice's $DIEM Economics [thread-extraction]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-07-04",
+   "destination": "Personal investing",
+   "entities": [
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "Venice is a privacy-first AI inference platform that lets users access frontier and open-source models without…",
+   "source": "threads",
+   "text": "@YanLiberman - VVV Crypto AI's Most Underappreciated Revenue Story [ai]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Market structure",
     "Company / security"
    ]
   },
@@ -182,6 +385,101 @@
    ]
   },
   {
+   "date": "2026-07-03",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "Google",
+    "TSMC",
+    "Broadcom",
+    "Micron",
+    "Intel",
+    "Marvell"
+   ],
+   "polarity": "context",
+   "snippet": "7 Predictions for the Next 3 Years",
+   "source": "threads",
+   "text": "@bubbleboi - 7 Predictions for the Next 3 Years [datacenter, gpu, infrastructure, investing, llm]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
+    "Commodities / energy",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-07-03",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "Google",
+    "TSMC",
+    "Broadcom",
+    "Micron",
+    "Intel",
+    "Marvell"
+   ],
+   "polarity": "context",
+   "snippet": "7 Predictions for the Next 3 Years",
+   "source": "threads",
+   "text": "@(2) bubble boi - 7 Predictions for the Next 3 Years - Intel becomes a trillion dollar company as it takes away half of TSMC’s market cap as well as cutting out Broadcom Marvell &amp; MediaTek as mi [datacenter, gpu, infrastructure, investing, llm]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
+    "Commodities / energy",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-07-02",
+   "destination": "",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "First we split by phase: prefill on one set of chips, decode on another.",
+   "source": "threads",
+   "text": "@SemiAnalysis_ - Inference keeps getting carved up, and every cut makes intelligence cheaper [datacenter, gpu, infrastructure]",
+   "themes": [
+    "AI/DC",
+    "Supply chain"
+   ]
+  },
+  {
+   "date": "2026-07-02",
+   "destination": "Personal investing",
+   "entities": [
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "Assume your an AI lab and you got a ~1.8T param MoE model, 16 experts × ~111B params, with 2 experts active per token =…",
+   "source": "threads",
+   "text": "@0xBADB01E - Quick math [automation, datacenter, gpu, infrastructure, llm]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-07-02",
+   "destination": "Personal investing",
+   "entities": [
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "Assume your an AI lab and you got a ~1.8T param MoE model, 16 experts × ~111B params, with 2 experts active per token =…",
+   "source": "threads",
+   "text": "@(2) Big Boss - Quick math Assume your an AI lab and you got a ~1.8T param MoE model, 16 experts × ~111B params, with 2 experts active per token = ~280B active params. If you serve at FP8 (1 byte par [automation, datacenter, gpu, infrastructure, llm]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Company / security"
+   ]
+  },
+  {
    "date": "2026-07-01",
    "destination": "AI & DC Dashboard",
    "entities": [],
@@ -195,6 +493,243 @@
    ]
   },
   {
+   "date": "2026-06-30",
+   "destination": "Personal investing",
+   "entities": [
+    "NVDA",
+    "QCOM",
+    "CGNX",
+    "ALGM",
+    "OUST",
+    "VPG",
+    "LSCC",
+    "AMBA"
+   ],
+   "polarity": "context",
+   "snippet": "Here's the stack, layer by layer. Household names first, hidden picks last.",
+   "source": "threads",
+   "text": "@ren_stocks - Everyone and their mother is talking about humanoids on my timeline, so I thought I'd give it a go [datacenter, gpu, infrastructure, investing, llm]",
+   "themes": [
+    "AI/DC",
+    "Commodities / energy",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-27",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "What Makes a Robotics Business Economically Viable",
+   "source": "threads",
+   "text": "@JacklouisP - What Makes a Robotics Business Economically Viable [automation, investing, llm]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-27",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "What Makes a Robotics Business Economically Viable",
+   "source": "threads",
+   "text": "@JacklouisP - Jack [automation, investing, llm]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-27",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "What Makes a Robotics Business Economically Viable",
+   "source": "threads",
+   "text": "@(3) Jack 🤖 - What Makes a Robotics Business Economically Viable [automation, investing, llm]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-26",
+   "destination": "Personal investing",
+   "entities": [
+    "NVDA",
+    "Micron"
+   ],
+   "polarity": "context",
+   "snippet": "\"Memory is cyclical, everyone knows that, and the recent run up in memory names is an obvious bubble.\"",
+   "source": "threads",
+   "text": "@AlexCorrino - Memory is cyclical, everyone knows that, and the recent run up in memory names is an… [agents, claude-code, gpu, investing]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-26",
+   "destination": "Personal investing",
+   "entities": [
+    "NVDA",
+    "Micron"
+   ],
+   "polarity": "context",
+   "snippet": "\"Memory is cyclical, everyone knows that, and the recent run up in memory names is an obvious bubble.\"",
+   "source": "threads",
+   "text": "@(3) Alex Corrino - Memory is cyclical, everyone knows that, and the recent run up in memory names is an obvious bubble. That's the easy, re [agents, claude-code, gpu, investing]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-22",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "Quite a bad take",
+   "source": "threads",
+   "text": "@tugot17 - Quite a bad take [datacenter, gpu, infrastructure, llm]",
+   "themes": [
+    "AI/DC",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-22",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "Memory is going to need more hafnium supply, and will need to compete with higher demand from many sectors",
+   "source": "threads",
+   "text": "@todd_hannigan - Memory is going to need more hafnium supply, and will need to compete with higher demand… [investing]",
+   "themes": [
+    "Supply chain",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-22",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "Quite a bad take",
+   "source": "threads",
+   "text": "@(3) Piotr Mazurek - Quite a bad take 😀 1. Frontier US models are expensive not because they are pricey to serve but because they serve at a [datacenter, gpu, infrastructure, llm]",
+   "themes": [
+    "AI/DC",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-20",
+   "destination": "Investment Miner",
+   "entities": [
+    "SpaceX",
+    "Google",
+    "TSMC",
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "New episode: Advanced packaging for AI chips, from wire bonds to TSMC CoWOS and Intel EMIB.",
+   "source": "threads",
+   "text": "@semidoped - New episode Advanced packaging for AI chips, from wire bonds to TSMC CoWOS and Intel… [ai]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-20",
+   "destination": "Personal investing",
+   "entities": [
+    "TSMC",
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "New episode: Advanced packaging for AI chips, from wire bonds to TSMC CoWOS and Intel EMIB.",
+   "source": "threads",
+   "text": "@(3) Semi Doped - Images to go along with this episode are here https t.co nhVbDyCYpz [ai]",
+   "themes": [
+    "Supply chain"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "Microsoft"
+   ],
+   "polarity": "context",
+   "snippet": "Sukh Sroay (@sukh_saroy) · Apr 17, 2026",
+   "source": "threads",
+   "text": "@sukh_saroy - Fincept Terminal open-source Bloomberg alternative [bloomberg, finance, fintech, open-source, tools]",
+   "themes": [
+    "Supply chain",
+    "Macro",
+    "Market structure",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "Microsoft"
+   ],
+   "polarity": "context",
+   "snippet": "Bloomberg Terminal costs $24,000 a year. this open-source desktop app is trying to replace it -- and it's free.",
+   "source": "threads",
+   "text": "@sukh_saroy - Fincept Terminal open-source Bloomberg Terminal alternative [ai, bloomberg, financial-tools, fintech, open-source]",
+   "themes": [
+    "Supply chain",
+    "Macro",
+    "Market structure",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "OpenAI",
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "By Lisan al Gaib (@scaling01)",
+   "source": "threads",
+   "text": "@scaling01 - The AI model gap is bigger than you think [ai, benchmarks, capability-gap, llm, open-source]",
+   "themes": [
+    "AI/DC",
+    "Market structure"
+   ]
+  },
+  {
    "date": "2026-06-18",
    "destination": "AI & DC Dashboard",
    "entities": [],
@@ -205,6 +740,115 @@
    "themes": [
     "AI/DC",
     "Commodities / energy"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "Google",
+    "Amazon",
+    "Microsoft",
+    "OpenAI",
+    "AMD",
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "NVIDIA, CUDA and the New Challengers",
+   "source": "threads",
+   "text": "@magicsilicon - http x.com i article 2050815126295678976 [ai]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
+    "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "Author: Lotto (@LottoLabs)",
+   "source": "threads",
+   "text": "@lottolabs - Why Your Fancy New Computer Might Lose to an Old RTX 3090 [gpu, hardware, inference, llm, local-inference]",
+   "themes": [
+    "AI/DC"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "AMKR",
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "A team lead at Amkor Technology Korea's R&D center stated that glass substrates are expected to be commercialized…",
+   "source": "threads",
+   "text": "@jukan05 - Amkor glass substrates commercialization 3 years EMIB-T Intel [amkor, glass-substrates, intel, packaging, semiconductor]",
+   "themes": [
+    "Supply chain"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "Author: Joao Marcos (@joaomviso)",
+   "source": "threads",
+   "text": "@joaomviso - run Qwen3-27B locally for $60 per month [hardware, llm, local-inference, open-source]",
+   "themes": [
+    "AI/DC"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Investment Miner",
+   "entities": [
+    "RKLB",
+    "FLY",
+    "LUNR",
+    "RDW",
+    "YSS",
+    "ASTS",
+    "PL",
+    "IRDM"
+   ],
+   "polarity": "context",
+   "snippet": "Jason Luongo (@JasonL_Capital) · Apr 19, 2026",
+   "source": "threads",
+   "text": "@jasonl_capital - SpaceX IPO space economy supply chain stocks by sector [ipo, space-economy, spacex, stocks, supply-chain]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Investment Miner",
+   "entities": [
+    "DIEM",
+    "oil"
+   ],
+   "polarity": "context",
+   "snippet": "Tokenized inference looks like a cost on first glance. The actual economics tell a different story",
+   "source": "threads",
+   "text": "@galactiator - http x.com i article 2055857923981447170 [ai]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security"
    ]
   },
   {
@@ -246,6 +890,93 @@
   },
   {
    "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA"
+   ],
+   "polarity": "context",
+   "snippet": "The Jensen Huang episode.",
+   "source": "threads",
+   "text": "@dwarkesh_sp - Jensen Huang episode podcast chapters [ai-chips, dwarkesh-podcast, jensen-huang, nvidia, podcast]",
+   "themes": [
+    "AI/DC",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "HPE"
+   ],
+   "polarity": "context",
+   "snippet": "Semianalysis published a table last night that does more for the demand side narrative than 6 months of analyst…",
+   "source": "threads",
+   "text": "@demian_ai - Semianalysis published a table last night that does more for the demand side narrative than 6 months of analyst commenta [ai, automation, llm]",
+   "themes": [
+    "AI/DC",
+    "Macro"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "Tesla",
+    "Amazon"
+   ],
+   "polarity": "context",
+   "snippet": "Elon Musk has said that actuators comprise 56% of the Bill of Materials cost for Optimus. A year ago, we dove deep into…",
+   "source": "threads",
+   "text": "@citrini - Humanoid Robots Thematic Primer [ai, humanoid-robots, investing, robotics, thematic]",
+   "themes": [
+    "Supply chain",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "NVDA",
+    "Meta",
+    "Google",
+    "OpenAI",
+    "Anthropic",
+    "Oracle"
+   ],
+   "polarity": "context",
+   "snippet": "The first words of our August State of the Themes AI section were direct: Long GOOGL.",
+   "source": "threads",
+   "text": "@citrini - Carving Up the TPU [ai, infrastructure, investing, nvidia, semiconductor]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "Author: Citrini (@citrini) · Verified · Thematic, Cross-Asset Investment Research",
+   "source": "threads",
+   "text": "@citrini - Advanced Packaging Intel trade 2026 [infrastructure, investing, semiconductor]",
+   "themes": [
+    "Supply chain"
+   ]
+  },
+  {
+   "date": "2026-06-18",
    "destination": "AI & DC Dashboard",
    "entities": [
     "TSMC"
@@ -272,6 +1003,149 @@
    "themes": [
     "AI/DC",
     "Supply chain"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "oil"
+   ],
+   "polarity": "context",
+   "snippet": "Author: Chamath Palihapitiya (@chamath)",
+   "source": "threads",
+   "text": "@chamath - Deep Dive The 60 Critical Minerals That Power the Modern World [china, critical-minerals, energy, geopolitics, supply-chain]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "oil"
+   ],
+   "polarity": "context",
+   "snippet": "On the 2026 All-In Predictions episode, I made a simple point:",
+   "source": "threads",
+   "text": "@chamath - Deep Dive Critical Minerals Power the Modern World [china, critical-minerals, energy, geopolitics, supply-chain]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "TSMC",
+    "AMD",
+    "Intel"
+   ],
+   "polarity": "context",
+   "snippet": "Author: bubble boi (@bubbleboi)",
+   "source": "threads",
+   "text": "@bubbleboi - TSMC vs Intel EMIB packaging thesis [infrastructure, investing, semiconductor]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Investment Miner",
+   "entities": [
+    "SpaceX",
+    "OpenAI",
+    "Anthropic",
+    "oil",
+    "natural gas",
+    "gold"
+   ],
+   "polarity": "context",
+   "snippet": "People underestimate xAI at their own peril. They’re the real wild card in the AI race, and the bigger picture reveals…",
+   "source": "threads",
+   "text": "@bubbleboi - People underestimate xAI at their own peril. They’re the real wild card in the AI race, and the bigger picture reveals a [datacenter, infrastructure, investing, market-structure, openai]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "INTC",
+    "AMD",
+    "ARM",
+    "AMAT",
+    "TSM",
+    "KLAC",
+    "DOW",
+    "AMSC"
+   ],
+   "polarity": "context",
+   "snippet": "Author: Serenity (@aleabitoreddit)",
+   "source": "threads",
+   "text": "@aleabitoreddit - AI semi supply chain bottlenecks TLDR [ai, bottlenecks, infrastructure, investing, semiconductor]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "INTC",
+    "MRVL",
+    "TSM",
+    "COHR",
+    "RKLB",
+    "DRAM",
+    "AVGO",
+    "AMZN"
+   ],
+   "polarity": "context",
+   "snippet": "Here's a bunch of random 30 US-available random stocks I like today and why:",
+   "source": "threads",
+   "text": "@aleabitoreddit - 30 US stocks watchlist AI semi supply chain [ai, investing, semiconductor]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
+    "Commodities / energy",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "Venice is a privacy-first AI inference platform that lets users access frontier and open-source models without…",
+   "source": "threads",
+   "text": "@YanLiberman - http x.com i article 2056765011935068160 [ai]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Market structure",
+    "Company / security"
    ]
   },
   {
@@ -303,6 +1177,30 @@
    "text": "@Shaughnessy119 - I think this is partially why @OpenRouter just raised $113M+ by @CapitalG [claude, claude-code, gpu, llm, openai]",
    "themes": [
     "AI/DC",
+    "Market structure",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Investment Miner",
+   "entities": [
+    "NVIDIA",
+    "SpaceX",
+    "Meta",
+    "Google",
+    "OpenAI",
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "Why did xAI hand over a 220,000-GPU cluster to Anthropic?",
+   "source": "threads",
+   "text": "@Jukan - Why did xAI hand over a 220,000-GPU cluster to Anthropic The technical backdrop to xAI's decision to hand Colossus 1 ov [datacenter, gpu, infrastructure, llm, openai]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy",
     "Market structure",
     "Company / security",
     "Geopolitics"
@@ -358,6 +1256,180 @@
    ]
   },
   {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "You’ve been juggling agent sessions across tabs, terminals, and windows for long enough. Windsurf 2.0 changes that.",
+   "source": "threads",
+   "text": "@EricBalchunas - New filing for ProShares AI Computing Power ETF which will track GPU compute power futures contracts. Intriguing [datacenter, gpu, infrastructure, investing]",
+   "themes": [
+    "AI/DC",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "Meta",
+    "Google",
+    "Amazon",
+    "Microsoft",
+    "Broadcom",
+    "AMD",
+    "Micron"
+   ],
+   "polarity": "context",
+   "snippet": "Your AI Agent Called. It Wants More Memory.",
+   "source": "threads",
+   "text": "@CernBasher - http x.com i article 2055840634364145664 [ai]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA",
+    "Meta",
+    "Google",
+    "Amazon",
+    "Microsoft",
+    "Broadcom",
+    "AMD",
+    "Micron"
+   ],
+   "polarity": "context",
+   "snippet": "Your AI Agent Called. It Wants More Memory.",
+   "source": "threads",
+   "text": "@CernBasher - Your AI Agent Called. It Wants More Memory. [thread-extraction]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "Personal investing",
+   "entities": [
+    "Google",
+    "Amazon",
+    "Microsoft",
+    "OpenAI",
+    "Anthropic",
+    "Oracle"
+   ],
+   "polarity": "context",
+   "snippet": "Anthropic spends $3 to make $1 and that’s before you include any and all other costs like staff or electricity.",
+   "source": "threads",
+   "text": "@AskYoshik - The AI bubble math doesn't add up [ai, openai]",
+   "themes": [
+    "AI/DC",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-18",
+   "destination": "",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "Goldman Delta One head, Rich Privorotsky, on tokenomics",
+   "source": "threads",
+   "text": "@(1) zerohedge - Goldman Delta One head, Rich Privorotsky, on tokenomics Token economics Reading that DeepSeek reportedly cut token pricing [datacenter, infrastructure, llm]",
+   "themes": [
+    "AI/DC"
+   ]
+  },
+  {
+   "date": "2026-06-14",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "_No text content was returned by the extractor._",
+   "source": "threads",
+   "text": "@zerohedge - How fast is AI debt rising In Q3 '25 total hyperscaler IG leverage was 0.9x. 6 months later it is 1.8x, bigger than all of Ener [datacenter, infrastructure]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy"
+   ]
+  },
+  {
+   "date": "2026-06-10",
+   "destination": "Personal investing",
+   "entities": [
+    "BOT"
+   ],
+   "polarity": "context",
+   "snippet": "Slick video, charismatic marketer, “why I bet my career on robotics.” He works for $BOT. RoboStrategy, the closed-end…",
+   "source": "threads",
+   "text": "@D2_Finance - This is not a robotics thesis. It is a funnel [investing]",
+   "themes": [
+    "Supply chain",
+    "Macro",
+    "Market structure",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-06-10",
+   "destination": "Investment Miner",
+   "entities": [
+    "SpaceX",
+    "OpenAI"
+   ],
+   "polarity": "context",
+   "snippet": "Escape Velocity For The Final Frontier",
+   "source": "threads",
+   "text": "@(2) Piers Kicks - Escape Velocity For The Final Frontier [claude, claude-code, datacenter, gpu, llm, openai]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-05-30",
+   "destination": "",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "Goldman Delta One head, Rich Privorotsky, on tokenomics",
+   "source": "threads",
+   "text": "@zerohedge - Goldman Delta One head, Rich Privorotsky, on tokenomics [datacenter, infrastructure, llm]",
+   "themes": [
+    "AI/DC"
+   ]
+  },
+  {
+   "date": "2026-05-26",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "\"AI is hiking your energy bill\" is the most popular political talking point of 2026. The data doesn't support it. A…",
+   "source": "threads",
+   "text": "@nic_carter - AI is hiking your energy bill is the most popular political talking point of 2026. The data… [ai]",
+   "themes": [
+    "AI/DC",
+    "Commodities / energy"
+   ]
+  },
+  {
    "date": "2026-05-26",
    "destination": "AI & DC Dashboard",
    "entities": [
@@ -394,6 +1466,59 @@
    ]
   },
   {
+   "date": "2026-05-18",
+   "destination": "Investment Miner",
+   "entities": [
+    "NVIDIA",
+    "SpaceX",
+    "Meta",
+    "Google",
+    "OpenAI",
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "Why did xAI hand over a 220,000-GPU cluster to Anthropic?",
+   "source": "threads",
+   "text": "@jukan05 - Why did xAI hand over a 220,000-GPU cluster to Anthropic [datacenter, gpu, infrastructure, llm, openai]",
+   "themes": [
+    "AI/DC",
+    "Macro",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-05-17",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "New filing for ProShares AI Computing Power ETF which will track GPU compute power futures contracts. Intriguing..",
+   "source": "threads",
+   "text": "@EricBalchunas - New filing for ProShares AI Computing Power ETF which will track GPU compute power futures… [datacenter, gpu, infrastructure, investing]",
+   "themes": [
+    "AI/DC",
+    "Commodities / energy",
+    "Market structure",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-04-17",
+   "destination": "Personal investing",
+   "entities": [
+    "OpenAI"
+   ],
+   "polarity": "context",
+   "snippet": "99% of our production code is written by AI. Last Tuesday, we shipped a new feature at 10 AM, A/B tested it by noon,…",
+   "source": "threads",
+   "text": "@anorth_chen - AI-first engineering 99 pct code written by AI [agentic-coding, ai-first, creaoai, engineering, software-development, startup]",
+   "themes": [
+    "Supply chain"
+   ]
+  },
+  {
    "date": "2026-04-17",
    "destination": "AI & DC Dashboard",
    "entities": [
@@ -409,6 +1534,26 @@
    "themes": [
     "AI/DC",
     "Commodities / energy",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-04-17",
+   "destination": "Personal investing",
+   "entities": [
+    "OpenAI",
+    "Anthropic"
+   ],
+   "polarity": "context",
+   "snippet": "Views: 93K | Replies: 23 | Reposts: 52 | Likes: 203 | Bookmarks: 273",
+   "source": "threads",
+   "text": "@EMostaque - OpenAI industrial policy math critique [ai, displacement, economics, industrial-policy, labour, openai, sovereign-wealth-fund, tax]",
+   "themes": [
+    "AI/DC",
+    "Supply chain",
+    "Macro",
+    "Commodities / energy",
+    "Market structure",
     "Company / security"
    ]
   },
@@ -430,6 +1575,39 @@
     "Macro",
     "Commodities / energy",
     "Company / security",
+    "Geopolitics"
+   ]
+  },
+  {
+   "date": "2026-04-16",
+   "destination": "Personal investing",
+   "entities": [
+    "NVIDIA"
+   ],
+   "polarity": "context",
+   "snippet": "I've noticed a lot of AI bubble bears aren't aware about Blackwell and that models haven't even begun to be trained on…",
+   "source": "threads",
+   "text": "@fejau_inc - AI bubble bears Blackwell models still early [ai, ai-bubble, ai-infrastructure, blackwell, datacenter, nvidia]",
+   "themes": [
+    "AI/DC",
+    "Company / security"
+   ]
+  },
+  {
+   "date": "2026-04-16",
+   "destination": "Personal investing",
+   "entities": [
+    "oil",
+    "LNG",
+    "copper"
+   ],
+   "polarity": "context",
+   "snippet": "Your weekend reading on the impacts of the war with Iran and the closing of the Strait of Hormuz on areas other than…",
+   "source": "threads",
+   "text": "@MBazilian - Iran war Strait of Hormuz supply chain impacts helium sulfur aluminum [aluminum, geopolitics, helium, hormuz, iran, military, semiconductors, sulfur, supply-chains]",
+   "themes": [
+    "Supply chain",
+    "Commodities / energy",
     "Geopolitics"
    ]
   }
