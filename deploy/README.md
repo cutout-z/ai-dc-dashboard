@@ -76,7 +76,6 @@ systemd timers. That setup is **historical** — do not reinstall it:
 - the retired `.service`/`.timer` unit files were deleted in the 2026-09 NAS
   cleanup; `env/*.env.example` remain as NAS-path templates. The QNAP scheduled
   tasks are the live scheduler;
-- ⚠ the repo-scoped GitHub deploy key titled `ai-dc-vps-bot` still exists
-  (write-enabled, created 2026-05-11). The NAS lanes do not use it — they push
-  over HTTPS with a stored token — so it should be renamed or revoked in
-  Settings → Deploy keys.
+- ✅ the repo-scoped GitHub deploy key titled `ai-dc-vps-bot` (write-enabled,
+  created 2026-05-11) has been **revoked** (2026-09-19). The NAS lanes push over
+  HTTPS with a stored token; no deploy key is in use.
