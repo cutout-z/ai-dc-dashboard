@@ -1,8 +1,8 @@
 {
-  "run_at": "2026-09-17T09:40:38.972015+00:00",
+  "run_at": "2026-09-19T13:30:56.995804+00:00",
   "project_count": 99,
-  "total_mw_unrisked": 8785.825,
-  "total_mw_risked": 3538.825,
+  "total_mw_unrisked": 8925.225,
+  "total_mw_risked": 3620.925,
   "checks": [
     {
       "level": "ok",
@@ -134,8 +134,8 @@
         {
           "project_name": "DCI Sydney",
           "operator": "DCI Data Centres",
-          "facility_mw": NaN,
-          "source": "DCI official locations page; MW not disclosed"
+          "facility_mw": 63.0,
+          "source": "NSW SSD-21342738 Consolidated Consent (Mod 2, determined 5 Aug 2026) - Eastern Creek Data Centre Expansion Project (SYD02); DCI Data Centers news release Jul 2026"
         },
         {
           "project_name": "Equinix SY10x",
@@ -158,14 +158,11 @@
       ]
     },
     {
-      "level": "warn",
+      "level": "ok",
       "code": "pipeline_missing_mw",
-      "message": "2 pipeline project(s) (UC/Proposed/Approved) have no facility_mw \u2014 they won't appear in capacity charts.",
-      "count": 2,
-      "projects": [
-        "DCI Sydney",
-        "EdgeConneX Macquarie Park"
-      ]
+      "message": "All pipeline projects have facility_mw populated.",
+      "count": 0,
+      "projects": []
     },
     {
       "level": "warn",
@@ -236,7 +233,7 @@
   ],
   "summary": {
     "errors": 0,
-    "warnings": 5,
-    "ok": 7
+    "warnings": 4,
+    "ok": 8
   }
 }
