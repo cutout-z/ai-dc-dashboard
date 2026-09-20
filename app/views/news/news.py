@@ -59,8 +59,11 @@ _RANGE_PRESETS: dict[str, int | None] = {
     "Custom": -1,
 }
 
-st.title("News")
-st.caption("Earnings calendars for key players + one curated AI/DC news feed.")
+st.title("News & Interesting Articles")
+st.caption(
+    "Earnings calendars and one curated AI/DC news feed, plus investment-radar "
+    "articles from the Brain dashboard below."
+)
 
 
 # ══════════════════════════════════════════════
@@ -454,3 +457,14 @@ elif feed_stats.get("succeeded", 0) < feed_stats.get("attempted", 0):
         f"Partial live-fetch failure — {_feed_status_line(feed_stats)} "
         f"({fetch_stats_summary(feed_stats)}). Catalogued rows above are unaffected."
     )
+
+
+# ══════════════════════════════════════════════
+# Interesting Articles — merged into this page (2026-09-20)
+# ══════════════════════════════════════════════
+
+st.divider()
+st.header("Interesting Articles")
+from app.views.threads.interesting_articles import render_interesting_articles
+
+render_interesting_articles()

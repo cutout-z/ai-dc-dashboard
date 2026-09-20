@@ -68,9 +68,10 @@ st.markdown(
 
 # Overview
 landing = st.Page("views/landing.py", title="Overview", default=True, url_path="home")
-dc_risk_monitor = st.Page(
-    "views/dc_risk_monitor.py", title="DC Risk Monitor", url_path="dc-risk-monitor"
-)
+# Hidden from nav 2026-09-20 (Zalen): logic not finalised, not public-facing.
+# dc_risk_monitor = st.Page(
+#     "views/dc_risk_monitor.py", title="DC Risk Monitor", url_path="dc-risk-monitor"
+# )
 
 # Fundamentals Tracking
 equity_analysis = st.Page(
@@ -162,18 +163,19 @@ guidance_revisions = st.Page(
     "views/fundamentals/guidance_revisions.py", title="Historical Guidance Revisions"
 )
 
-# News
-news = st.Page("views/news/news.py", title="News", url_path="news")
+# News — merged page (2026-09-20): news feed + Interesting Articles section
+news = st.Page("views/news/news.py", title="News & Interesting Articles", url_path="news")
 
-# Interesting Articles (from Brain dashboard investment radar)
-interesting_articles = st.Page(
-    "views/threads/interesting_articles.py", title="Interesting Articles"
-)
+# Interesting Articles now lives as a section on the News page above.
+# interesting_articles = st.Page(
+#     "views/threads/interesting_articles.py", title="Interesting Articles"
+# )
 
 # System
-source_health = st.Page(
-    "views/system/source_health.py", title="Source Health"
-)
+# Hidden from nav 2026-09-20 (Zalen): not public-facing.
+# source_health = st.Page(
+#     "views/system/source_health.py", title="Source Health"
+# )
 acronyms = st.Page(
     "views/system/acronyms.py", title="Acronyms & Glossary"
 )
@@ -197,7 +199,7 @@ au_project = st.Page(
 
 pg = st.navigation(
     {
-        "Dashboard": [landing, dc_risk_monitor],
+        "Dashboard": [landing],
         "Financial Analysis": [
             equity_analysis,
             financials,
@@ -226,7 +228,7 @@ pg = st.navigation(
             au_company,
             au_project,
         ],
-        "Other": [news, interesting_articles, source_health, acronyms],
+        "Other": [news, acronyms],
     }
 )
 

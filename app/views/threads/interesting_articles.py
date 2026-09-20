@@ -241,7 +241,7 @@ def _note_body_for(item: dict, notes_map: dict[tuple[str, str], str]) -> str | N
 
 # ── cards ──────────────────────────────────────────────────────────────────
 
-def _render_card_html(item: dict) -> str:
+def _render_card_html(item: dict) -> str:  # retained for reference; unused since the 2026-09-20 grid rework
     """Render a single article card: headline + date only."""
     text = _html_escape(str(item.get("text", "")))
     date = _html_escape(str(item.get("date", "")))
@@ -260,35 +260,39 @@ def _render_card_html(item: dict) -> str:
     """
 
 
-# ── page ───────────────────────────────────────────────────────────────────
+# ── page (callable so the News page can embed this section) ────────────────
 
-st.title("Interesting Articles")
+def render_interesting_articles() -> None:
+    """Render the Interesting Articles section (cards grid + note dialogs).
 
-with st.spinner("Loading articles..."):
-    items = _load_dashboard_items(status_mtime=_get_status_mtime())
+    UX (2026-09-20 rework):
+    - cards lay out in a 2-column grid with no fixed-height scroll box, so
+      many more articles are visible on load;
+    - the "Read note" button lives INSIDE each card (no hanging button row);
+    - clicking opens a full modal dialog (st.dialog) showing the complete
+      note — meta caption above, whole markdown body scrollable — instead of
+      an inline expansion that required scrolling to reach.
+    """
+    with st.spinner("Loading articles..."):
+        items = _load_dashboard_items(status_mtime=_get_status_mtime())
 
-notes_map = _load_notes_map()
-notes_available = LOCAL_MODE or bool(notes_map)
+    notes_map = _load_notes_map()
+    notes_available = LOCAL_MODE or bool(notes_map)
 
-if not items:
-    st.info(
-        "No dashboard-classified articles found. "
-        "The public article projection (`investment_radar_public.json`) may not "
-        "be available yet, or the investment radar hasn't surfaced any "
-        "DC-relevant items."
-    )
-    st.caption(f"Looking at: `{STATUS_PATH}`")
-else:
-    # ── notes availability caption ──
+    if not items:
+        st.info(
+            "No dashboard-classified articles found. "
+            "The public article projection (`investment_radar_public.json`) may not "
+            "be available yet, or the investment radar hasn't surfaced any "
+            "DC-relevant items."
+        )
+        st.caption(f"Looking at: `{STATUS_PATH}`")
+        return
+
     if LOCAL_MODE:
-        note_hint = (
-            " Click **📄 View full note** on any card to read the underlying vault note."
-        )
+        note_hint = " Click **Read note** on any card to open the underlying vault note."
     elif notes_available:
-        note_hint = (
-            " Click **📄 View full note** on any card to read the note "
-            "(served from the private notes mirror)."
-        )
+        note_hint = " Click **Read note** on any card (served from the private notes mirror)."
     elif _github_token():
         note_hint = " Note mirror unavailable right now — cards only."
     else:
@@ -298,43 +302,44 @@ else:
         "investment radar for AI & DC Dashboard relevance." + note_hint
     )
 
-    # ── render cards ──
-    with st.container(height=700, border=False):
-        for i, item in enumerate(items):
-            card_key = f"card_{i}"
-
-            # Card HTML
-            st.markdown(_render_card_html(item), unsafe_allow_html=True)
-
-            # View full note button — shown whenever a note source exists
-            if notes_available:
-                view_col, _ = st.columns([1, 4])
-                with view_col:
-                    if st.button("📄 View full note", key=f"btn_{card_key}"):
-                        st.session_state.setdefault("expanded_notes", set())
-                        if card_key in st.session_state["expanded_notes"]:
-                            st.session_state["expanded_notes"].discard(card_key)
-                        else:
-                            st.session_state["expanded_notes"].add(card_key)
-
-                # Show note content if expanded
-                if st.session_state.get("expanded_notes", set()) and card_key in st.session_state["expanded_notes"]:
-                    with st.container(border=True):
-                        note_content = _note_body_for(item, notes_map)
-                        if note_content:
-                            meta, body = _split_note(note_content)
-                            if meta:
-                                st.caption(meta)
-                            st.markdown(body)
-                        else:
-                            st.warning(
-                                "Note not found for this article."
-                                + (" (vault note missing)" if LOCAL_MODE
-                                   else " (not in notes mirror)")
-                            )
-            # No note source (cloud without token): cards only.
-
-            # Divider between cards
-            st.markdown(
-                "<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True
+    @st.dialog("Full note", width="large")
+    def _show_note(item: dict) -> None:
+        """Modal dialog with the full note body (readable, no page scroll)."""
+        note_content = _note_body_for(item, notes_map)
+        if note_content:
+            meta, body = _split_note(note_content)
+            if meta:
+                st.caption(meta)
+            st.markdown(body)
+        else:
+            st.warning(
+                "Note not found for this article."
+                + (" (vault note missing)" if LOCAL_MODE
+                   else " (not in notes mirror)")
             )
+
+    # ── card grid: 2 columns, button embedded in the card ──
+    cols = st.columns(2)
+    for i, item in enumerate(items):
+        card_key = f"card_{i}"
+        headline = str(item.get("text", ""))
+        date = str(item.get("date", ""))
+        with cols[i % 2]:
+            with st.container(border=True):
+                st.markdown(
+                    f"<div style='font-size:14px;font-weight:600;line-height:1.4;"
+                    f"margin-bottom:4px;'>{_html_escape(headline)}</div>",
+                    unsafe_allow_html=True,
+                )
+                btn_col, date_col = st.columns([1, 3])
+                with btn_col:
+                    if notes_available and st.button(
+                        "Read note", key=f"btn_{card_key}", use_container_width=True
+                    ):
+                        _show_note(item)
+                with date_col:
+                    st.markdown(
+                        f"<div style='font-size:11px;opacity:0.6;"
+                        f"padding-top:7px;text-align:right;'>{_html_escape(date)}</div>",
+                        unsafe_allow_html=True,
+                    )
