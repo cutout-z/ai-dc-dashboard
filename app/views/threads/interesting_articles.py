@@ -318,28 +318,21 @@ def render_interesting_articles() -> None:
                    else " (not in notes mirror)")
             )
 
-    # ── card grid: 2 columns, button embedded in the card ──
-    cols = st.columns(2)
+    # ── single-row cards: one article per full-width row ──
+    # NOTE: keep this plain markdown — raw-HTML st.markdown divs inside these
+    # columns trigger React error #185 (max update depth) with 75 bordered
+    # containers (found by bisection 2026-09-20).
     for i, item in enumerate(items):
-        card_key = f"card_{i}"
         headline = str(item.get("text", ""))
         date = str(item.get("date", ""))
-        with cols[i % 2]:
-            with st.container(border=True):
-                st.markdown(
-                    f"<div style='font-size:14px;font-weight:600;line-height:1.4;"
-                    f"margin-bottom:4px;'>{_html_escape(headline)}</div>",
-                    unsafe_allow_html=True,
-                )
-                btn_col, date_col = st.columns([1, 3])
-                with btn_col:
-                    if notes_available and st.button(
-                        "Read note", key=f"btn_{card_key}", use_container_width=True
-                    ):
-                        _show_note(item)
-                with date_col:
-                    st.markdown(
-                        f"<div style='font-size:11px;opacity:0.6;"
-                        f"padding-top:7px;text-align:right;'>{_html_escape(date)}</div>",
-                        unsafe_allow_html=True,
-                    )
+        with st.container(border=True):
+            head_col, btn_col, date_col = st.columns([8, 1.4, 1.1])
+            with head_col:
+                st.markdown(f"**{_html_escape(headline)}**")
+            with btn_col:
+                if notes_available and st.button(
+                    "Read note", key=f"btn_card_{i}", use_container_width=True
+                ):
+                    _show_note(item)
+            with date_col:
+                st.caption(_html_escape(date))

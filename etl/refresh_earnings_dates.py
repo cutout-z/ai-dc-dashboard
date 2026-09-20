@@ -16,6 +16,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import pandas as pd
+
 # Ensure project root is on sys.path when run as a script
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -44,11 +46,33 @@ def _write_log(status: str, count: int, notes: str = "") -> None:
 
 
 def _next_earnings_date(symbol: str) -> str | None:
-    """Return the next upcoming earnings date for a symbol via FMP."""
+    """Return the next upcoming earnings date for a symbol.
+
+    Primary source: yfinance ``Ticker.calendar`` (the same extraction the page's
+    live path uses, and the only source that reliably carries FORWARD dates for
+    both US and AX/NZ tickers). The FMP historical-calendar endpoint used before
+    2026-09-20 never returned future dates (its forward endpoint is legacy-gated
+    for this key), so the CSV silently froze in the past while the lane logged
+    "0 dates changed" / ok.
+    """
     today = datetime.now().date()
     try:
+        import yfinance as yf
+
+        from app.lib.equities import _extract_earnings_date
+
+        raw = _extract_earnings_date(yf.Ticker(symbol).calendar)
+        if raw:
+            dt = pd.to_datetime(raw, errors="coerce")
+            if pd.notna(dt) and dt.date() >= today:
+                return dt.date().isoformat()
+    except Exception as e:
+        logger.warning("  %s: yfinance error — %s", symbol, e)
+
+    # FMP fallback (historical calendar — only helps if FMP happens to list a
+    # future date; it usually does not).
+    try:
         events = get_earnings_dates(symbol)
-        # FMP returns most recent first — find the next upcoming date
         future = [
             e["date"] for e in events
             if e.get("date") and e["date"] >= today.isoformat()
@@ -61,9 +85,10 @@ def _next_earnings_date(symbol: str) -> str | None:
 
 
 def main() -> None:
-    if not get_fmp_key():
-        logger.error("No FMP API key found — set FMP_API_KEY or add to ~/.openbb_platform/user_settings.json")
-        raise SystemExit(1)
+    # FMP is now only a fallback (its forward endpoint is legacy-gated for this
+    # key); yfinance is the primary source and needs no key. Only bail if the
+    # FMP module itself is unusable AND we have no other path — which can't
+    # happen, so no key gate anymore.
 
     with open(CSV_PATH) as f:
         rows = list(csv.DictReader(f))
