@@ -102,7 +102,10 @@ def main() -> int:
         check("no summary metrics row on the page", not at.metric,
               f"{len(at.metric)} metric(s) rendered" if at.metric else "")
         check("no filter controls on the page", not at.multiselect)
-        check("no buttons on the page", not at.button)
+        # Note viewing restored 2026-09-20: one "View full note" button per card
+        # when a note source is available (LOCAL_MODE here — vault + mirror exist).
+        check("one View-full-note button per card", len(at.button) == repo_expected,
+              f"{len(at.button)} vs {repo_expected}")
 
         # ---------- local mode ----------
         home2 = make_home(tmp / "local", with_projection=True)

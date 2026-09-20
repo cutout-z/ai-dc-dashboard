@@ -14,11 +14,12 @@ PLUS every DC-relevant radar article (AI/DC · Supply chain themes).
 
 Card display (2026-09-17): headline + date only. Per Zalen's request the
 routing badge (DASHBOARD / RESEARCH / MINER / WATCH), theme, polarity and
-confidence pills, the extracted-entities line, the routing designation in the
-footer, the per-card "View full note" button, the summary metric row, both
-filter dropdowns and the "Showing N of M" counter were all removed.
+confidence pills, the extracted-entities line, the routing designation in
+the footer, the summary metric row, both filter dropdowns and the
+"Showing N of M" counter were all removed.
 
-Full-note bodies (added 2026-09-17) — note text never lives in this public
+Full-note bodies (added 2026-09-17, restored 2026-09-20 after the minimal-card
+sweep 029711f also swept the entry point) — note text never lives in this public
 repo. Availability by environment, in order:
   1. local vault — the iCloud ZC_Mac_Vault on the Mac (LOCAL_MODE); freshest
   2. local mirror file — `~/ai-wif-brain-dashboard/data/notes/public_notes.json`
@@ -26,8 +27,9 @@ repo. Availability by environment, in order:
      (`main:data/notes/public_notes.json`, published by the Brain dashboard's
      nightly job), fetched with a read-only GITHUB_TOKEN app secret.
 Frontmatter is stripped for display; author / source / date render as a
-caption above the note body. The loaders below are retained, but the card UI
-no longer exposes an entry point for them.
+caption above the note body. The per-card "View full note" button (restored
+2026-09-20) is the entry point; with no note source available the page is
+cards-only, captioned.
 """
 
 from __future__ import annotations
@@ -265,6 +267,9 @@ st.title("Interesting Articles")
 with st.spinner("Loading articles..."):
     items = _load_dashboard_items(status_mtime=_get_status_mtime())
 
+notes_map = _load_notes_map()
+notes_available = LOCAL_MODE or bool(notes_map)
+
 if not items:
     st.info(
         "No dashboard-classified articles found. "
@@ -274,15 +279,62 @@ if not items:
     )
     st.caption(f"Looking at: `{STATUS_PATH}`")
 else:
+    # ── notes availability caption ──
+    if LOCAL_MODE:
+        note_hint = (
+            " Click **📄 View full note** on any card to read the underlying vault note."
+        )
+    elif notes_available:
+        note_hint = (
+            " Click **📄 View full note** on any card to read the note "
+            "(served from the private notes mirror)."
+        )
+    elif _github_token():
+        note_hint = " Note mirror unavailable right now — cards only."
+    else:
+        note_hint = " Vault notes are available locally only."
     st.caption(
         "Extracted threads and articles surfaced by the Brain dashboard's "
-        "investment radar for AI & DC Dashboard relevance."
+        "investment radar for AI & DC Dashboard relevance." + note_hint
     )
 
     # ── render cards ──
     with st.container(height=700, border=False):
-        for item in items:
+        for i, item in enumerate(items):
+            card_key = f"card_{i}"
+
+            # Card HTML
             st.markdown(_render_card_html(item), unsafe_allow_html=True)
+
+            # View full note button — shown whenever a note source exists
+            if notes_available:
+                view_col, _ = st.columns([1, 4])
+                with view_col:
+                    if st.button("📄 View full note", key=f"btn_{card_key}"):
+                        st.session_state.setdefault("expanded_notes", set())
+                        if card_key in st.session_state["expanded_notes"]:
+                            st.session_state["expanded_notes"].discard(card_key)
+                        else:
+                            st.session_state["expanded_notes"].add(card_key)
+
+                # Show note content if expanded
+                if st.session_state.get("expanded_notes", set()) and card_key in st.session_state["expanded_notes"]:
+                    with st.container(border=True):
+                        note_content = _note_body_for(item, notes_map)
+                        if note_content:
+                            meta, body = _split_note(note_content)
+                            if meta:
+                                st.caption(meta)
+                            st.markdown(body)
+                        else:
+                            st.warning(
+                                "Note not found for this article."
+                                + (" (vault note missing)" if LOCAL_MODE
+                                   else " (not in notes mirror)")
+                            )
+            # No note source (cloud without token): cards only.
+
+            # Divider between cards
             st.markdown(
                 "<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True
             )
