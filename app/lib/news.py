@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, time as datetime_time, timezone
 
 import feedparser
+import pandas as pd
 import requests
 import streamlit as st
 
@@ -632,6 +633,109 @@ def flatten_news_buckets(news_data: dict[str, list[dict]]) -> list[dict]:
         reverse=True,
     )
     return all_items
+
+
+# Unified News Feed columns (catalogue ∪ live): the page renders exactly these.
+NEWS_FEED_COLUMNS = [
+    "published",
+    "title",
+    "source",
+    "bucket",
+    "tier",
+    "score",
+    "seen",
+    "status",
+    "url",
+    "url_key",
+    "summary",
+]
+
+
+def merge_catalog_and_live_feed(
+    catalog: pd.DataFrame | None,
+    live_items: list[dict] | None = None,
+) -> pd.DataFrame:
+    """Merge the durable catalogue with live feed items into ONE article frame.
+
+    The page renders a single News Feed; this is the join that backs it. The
+    durable catalogue (``data/reference/news_catalog.csv``, written by
+    ``scripts/catalog_news.py``) and the live fetch describe the same article
+    universe — the catalogue is the feed's durable event store — so the merge
+    is a union, not a join across sources:
+
+    - Article identity is the normalised source URL (S2-09): ``catalog_key``
+      on catalogue rows, ``url_key`` on live items, with the declared
+      :func:`article_identity_key` title fallback for URL-less rows.
+    - An article present in both contributes exactly ONE row — the catalogue
+      row, which carries the durable observation state (``seen_count``,
+      representative title/score). Live-only items are appended with
+      ``status="Live"`` and a null ``seen``.
+    - Rows carry the fields both inputs share (published/bucket/tier/score)
+      plus ``status`` ("Catalogued" / "Live") so a reader can tell a
+      catalogued article from one that arrived since the last catalogue write.
+
+    Returns a frame with :data:`NEWS_FEED_COLUMNS`, published-desc (ties by
+    score-desc, undated last). Empty input returns an empty frame with the
+    same columns, never ``None``.
+    """
+    records: list[dict] = []
+    known_keys: set[str] = set()
+
+    if catalog is not None and len(catalog):
+        for rec in catalog.to_dict("records"):
+            key = str(rec.get("catalog_key") or "").strip() or article_identity_key(
+                str(rec.get("url") or ""), str(rec.get("title") or "")
+            )
+            known_keys.add(key)
+            records.append({
+                "published": pd.to_datetime(rec.get("published"), errors="coerce", utc=True),
+                "title": str(rec.get("title") or ""),
+                "source": str(rec.get("source") or ""),
+                "bucket": str(rec.get("last_bucket") or ""),
+                "tier": str(rec.get("last_tier") or ""),
+                "score": float(rec.get("max_materiality_score") or 0.0),
+                "seen": int(rec.get("seen_count") or 0),
+                "status": "Catalogued",
+                "url": str(rec.get("url") or ""),
+                "url_key": key,
+                "summary": str(rec.get("summary") or ""),
+            })
+
+    for item in live_items or []:
+        url = str(item.get("url") or "")
+        title = str(item.get("title") or "")
+        key = str(item.get("url_key") or "").strip() or article_identity_key(url, title)
+        if key in known_keys:
+            continue
+        known_keys.add(key)
+        score = item.get("materiality_score")
+        records.append({
+            "published": pd.to_datetime(item.get("published"), errors="coerce", utc=True),
+            "title": title,
+            "source": str(item.get("source") or ""),
+            "bucket": str(item.get("bucket") or ""),
+            "tier": str(item.get("tier") or ""),
+            "score": float(score) if score is not None else 0.0,
+            "seen": pd.NA,
+            "status": "Live",
+            "url": url,
+            "url_key": key,
+            "summary": str(item.get("summary") or ""),
+        })
+
+    frame = pd.DataFrame(records, columns=NEWS_FEED_COLUMNS)
+    if frame.empty:
+        frame["published"] = pd.to_datetime(frame["published"], errors="coerce", utc=True)
+        frame["score"] = pd.to_numeric(frame["score"], errors="coerce").fillna(0.0)
+        frame["seen"] = frame["seen"].astype("Int64")
+        return frame
+
+    frame["score"] = pd.to_numeric(frame["score"], errors="coerce").fillna(0.0)
+    frame["seen"] = frame["seen"].astype("Int64")
+    frame = frame.sort_values(
+        ["published", "score"], ascending=[False, False], na_position="last"
+    ).reset_index(drop=True)
+    return frame
 
 
 def fetch_news_source_health() -> list[dict]:

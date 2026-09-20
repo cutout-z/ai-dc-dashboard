@@ -6,7 +6,10 @@ Covers the page-critical-path behaviours pytest can't (its streamlit
 cache_data is not coherent outside a runtime):
 - News page renders committed content (earnings snapshot + durable catalog)
   with NO live network on a cold load: the live Yahoo earnings check is off by
-  default and the live feed fetch is the LAST section;
+  default and the live feed fetch runs after the catalogue's first render;
+- ONE News Feed section: the durable catalogue and the live fetch are a single
+  table (no separate 'News History' section), and the fetched items merge into
+  that same table — so the catalogue is on screen when every feed is stalled;
 - a fully stalled feed run leaves the stored history rendered and visible, and
   the failure is reported (attempted/succeeded/failed feeds) instead of a
   silent empty feed;
@@ -31,6 +34,8 @@ if str(REPO) not in sys.path:
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
+import pandas as pd  # noqa: E402
+
 import app.lib.news as news_lib  # noqa: E402
 import app.lib.equities as eq  # noqa: E402
 from app.lib.news import NewsItem  # noqa: E402
@@ -49,8 +54,14 @@ def check(name: str, cond: bool, detail: str = "") -> None:
         print(f"FAIL  {name}  {detail}")
 
 
-def _sections_order(at) -> None:
-    """'News History' (committed) must render before 'News Feed' (live)."""
+def _sections_order(at, *, expect_catalog_rows: bool) -> None:
+    """ONE News Feed section; the committed catalogue renders with no live feeds.
+
+    (Was: a separate 'News History' section that had to render before 'News
+    Feed'. The catalogue and the live fetch are now a single section, so the
+    S2-13 guarantee is asserted where it actually lives — the durable rows are
+    on screen when every feed is stalled — not as a second header.)
+    """
     texts = []
     for coll in ("header", "subheader", "caption", "markdown", "title", "warning", "info"):
         for el in getattr(at, coll, []) or []:
@@ -58,15 +69,18 @@ def _sections_order(at) -> None:
             if t is not None:
                 texts.append(str(t))
     joined = "\n".join(texts)
-    h_hist = joined.find("News History")
-    h_feed = joined.find("News Feed")
-    check("news: committed News History section renders", h_hist >= 0, "history header missing")
-    check("news: live News Feed section renders", h_feed >= 0, "feed header missing")
-    check(
-        "news: News History renders BEFORE News Feed",
-        h_hist >= 0 and h_feed > h_hist,
-        f"history@{h_hist} feed@{h_feed}",
-    )
+    check("news: single News Feed section renders", joined.count("News Feed") == 1,
+          f"header count={joined.count('News Feed')}")
+    check("news: no separate News History section remains",
+          "News History" not in joined, "legacy history header present")
+    tables = list(getattr(at, "dataframe", []) or [])
+    check("news: exactly one feed table (2 earnings + 1 feed)",
+          len(tables) == 3, f"{len(tables)} dataframes")
+    if expect_catalog_rows:
+        feed = tables[-1].value if tables else None
+        check("news: catalogue rows render with no live network",
+              feed is not None and len(feed) > 0,
+              f"rows={0 if feed is None else len(feed)}")
 
 
 def _news_feed_fake(items_per_feed: int = 3, fail: set[str] | None = None):
@@ -116,7 +130,8 @@ def all_feed_labels() -> set[str]:
     }
 
 
-def run_news_page(fail_labels: set[str] | None = None, expected: str | None = None) -> AppTest:
+def run_news_page(fail_labels: set[str] | None = None, expected: str | None = None,
+                  show_low: bool = False) -> AppTest:
     fake, _ = _news_feed_fake(fail=fail_labels)
     news_lib._fetch_feed = fake
     # The live Yahoo earnings path must never run on a cold load (opt-in off).
@@ -129,7 +144,14 @@ def run_news_page(fail_labels: set[str] | None = None, expected: str | None = No
     at = AppTest.from_file(str(REPO / "app" / "views" / "news" / "news.py")).run(timeout=120)
     check("news: page runs without exception", len(at.exception) == 0,
           str([str(e.value) for e in at.exception])[:300])
-    _sections_order(at)
+    if show_low:
+        # Synthetic non-material articles score LOW, which the tier toggle
+        # hides by default — flip it to assert the merged rows are reachable.
+        at.toggle[1].set_value(True)
+        at.run(timeout=120)
+        check("news: page still runs with low-materiality shown", len(at.exception) == 0,
+              str([str(e.value) for e in at.exception])[:300])
+    _sections_order(at, expect_catalog_rows=True)
     joined = "\n".join(
         str(getattr(el, "value", ""))
         for coll in ("caption", "markdown", "warning", "info", "header", "subheader")
@@ -138,21 +160,13 @@ def run_news_page(fail_labels: set[str] | None = None, expected: str | None = No
     if expected is not None:
         check(f"news: expected status visible ({expected[:40]})", expected in joined,
               joined[-300:])
-    else:
-        # Healthy run: the live feed section computed items. Synthetic fake
-        # items are low-materiality so they are hidden behind the show-low
-        # toggle — the authoritative signal is the feed's Total metric
-        # (item count > 0, every item accounted as Low; High/Medium are 0 for
-        # synthetic non-material content). Label keys collide with the history
-        # section's metrics, so Total (feed-only label) is the discriminator.
-        metrics = {el.label: el.value for el in (at.metric or [])}
-        total = metrics.get("Total")
-        low = metrics.get("Low")
-        check("news: live feed items rendered (healthy fetch)",
-              total is not None and int(str(total)) > 0
-              and low is not None and int(str(low)) == int(str(total)),
-              f"metrics={metrics} joined={joined[-200:]}")
     return at
+
+
+def feed_table(at) -> pd.DataFrame:
+    """The single News Feed table (last dataframe on the page)."""
+    tables = list(getattr(at, "dataframe", []) or [])
+    return tables[-1].value if tables else pd.DataFrame()
 
 
 def main() -> int:
@@ -167,13 +181,25 @@ def main() -> int:
     check("news: earnings live toggle defaults OFF",
           len(toggles) > 0 and toggles[0].value is False,
           f"{len(toggles)} toggles")
+    check("news: low-materiality toggle defaults OFF",
+          len(toggles) > 1 and toggles[1].value is False,
+          f"{len(toggles)} toggles")
     joined2 = "\n".join(str(getattr(el, "value", "")) for el in at.caption)
     check("news: committed-snapshot earnings caption present",
           "data/reference/earnings_dates.csv" in joined2, joined2[:200])
+    stalled_rows = len(feed_table(at))
 
-    # ── B. News page: healthy fetch renders items ──
+    # ── B. News page: healthy fetch merges live items into the one table ──
     print("\n[B] News page with healthy feeds")
-    run_news_page()
+    at = run_news_page(show_low=True)
+    table = feed_table(at)
+    check("news: live items merged into the single feed table",
+          len(table) > stalled_rows
+          and bool(table["Title"].astype(str).str.contains("headline").any()),
+          f"rows={len(table)} stalled_rows={stalled_rows}")
+    check("news: merged rows are marked live vs catalogued",
+          set(table["Status"].astype(str).unique()) >= {"Live", "Catalogued"},
+          str(sorted(set(table["Status"].astype(str).unique()))))
 
     # ── C. News page: partial feed failure keeps items + shows warning ──
     print("\n[C] News page with three feeds failed")

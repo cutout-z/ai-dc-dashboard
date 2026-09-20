@@ -6,6 +6,15 @@ durable news catalogue — and the live feed fetch runs LAST, bounded-concurrent
 in :mod:`app.lib.news`. A stalled or failed feed therefore can never hide the
 stored history, and partial feed failures stay visible next to the live items.
 Live Yahoo earnings dates are an explicit opt-in toggle.
+
+ONE feed, not two (2026-09-20): the durable catalogue and the live fetch are a
+single "News Feed" section. The catalogue rows render into a placeholder
+before the fetch runs — so the S2-13 guarantee still holds, committed rows are
+on screen with no network — and the fetched items are merged into that same
+table by :func:`app.lib.news.merge_catalog_and_live_feed` once the fetch
+resolves. The filters that used to head the separate history section
+(published range, buckets, search) sit above the one table, and the range
+defaults to All so the whole catalogue is visible by default.
 """
 
 from __future__ import annotations
@@ -24,20 +33,35 @@ from app.lib.equities import (
     fetch_earnings_dates,
 )
 from app.lib.news import (
+    BUCKETS,
     fetch_news_buckets_with_stats,
     fetch_stats_summary,
     flatten_news_buckets,
-)
-from app.lib.news_scoring import (
-    TIER_COLORS,
-    TIER_LABELS,
+    merge_catalog_and_live_feed,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 NEWS_CATALOG_PATH = PROJECT_ROOT / "data" / "reference" / "news_catalog.csv"
 
+# Tier gate: "Show low-materiality" decides whether LOW rows reach the table.
+# Everything else in the filter bar (range, buckets, search) applies to
+# catalogue and live rows identically.
+_ALWAYS_SHOWN_TIERS = ("HIGH", "MEDIUM")
+_LOW_TIER = "LOW"
+
+# Published-range presets — "All" is the default so nothing is windowed out of
+# the durable event store; the catalogue's full span is the natural first load.
+_RANGE_PRESETS: dict[str, int | None] = {
+    "All": None,
+    "Last 7 days": 7,
+    "Last 30 days": 30,
+    "Last 90 days": 90,
+    "Custom": -1,
+}
+
 st.title("News")
-st.caption("Earnings calendars for key players + curated AI/DC news feed.")
+st.caption("Earnings calendars for key players + one curated AI/DC news feed.")
+
 
 # ══════════════════════════════════════════════
 # Helpers (no UI output)
@@ -50,17 +74,6 @@ def _parse_date(s: str | None) -> pd.Timestamp | None:
         return pd.to_datetime(s, errors="coerce")
     except Exception:
         return None
-
-
-# Dot / label colour per bucket
-_BUCKET_COLORS: dict[str, str] = {
-    "Frontier Labs":           "#ef4444",  # red
-    "Hyperscaler CAPEX":       "#3b82f6",  # blue
-    "Supply Chain":            "#a855f7",  # purple
-    "Model Releases":          "#22c55e",  # green
-    "ANZ DC":                  "#14b8a6",  # teal
-    "China / Export Controls": "#f59e0b",  # amber
-}
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -84,88 +97,145 @@ def _load_news_catalog(path: str) -> pd.DataFrame:
     return df.sort_values("published", ascending=False)
 
 
-def _history_display_df(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty:
-        return pd.DataFrame(
-            columns=["Published", "Title", "Source", "Bucket", "Score", "Seen", "Link"]
-        )
+def _bucket_options(catalog_df: pd.DataFrame) -> list[str]:
+    """Every bucket the live feed can produce, plus any bucket only the catalogue holds.
 
+    Derived from the feed config (never the catalogue alone) so an empty or
+    partial catalogue can never leave the filter with no options.
+    """
+    catalogued = set(catalog_df["last_bucket"].dropna()) if "last_bucket" in catalog_df.columns else set()
+    return sorted(set(BUCKETS.keys()) | catalogued)
+
+
+def _published_bounds(catalog_only: pd.DataFrame) -> tuple[date, date]:
+    """Full span of the merged frame — the 'All' range and the Custom picker bounds."""
+    today = pd.Timestamp.now().normalize().date()
+    published = catalog_only["published"].dropna() if not catalog_only.empty else pd.Series(dtype="datetime64[ns, UTC]")
+    dates = [d.date() for d in published]
+    if not dates:
+        return today - timedelta(days=90), today
+    # Upper bound reaches one day past today so a live item stamped ahead of the
+    # local clock is never windowed out by the Custom picker.
+    return min(dates), max([today, *dates])
+
+
+def _filter_feed(
+    frame: pd.DataFrame,
+    *,
+    start: date | None,
+    end: date | None,
+    buckets: list[str],
+    query: str,
+) -> pd.DataFrame:
+    """Apply the filter bar to the merged frame (the tier gate happens at render)."""
+    if frame.empty:
+        return frame
+
+    out = frame
+    if start is not None:
+        out = out[out["published"] >= pd.Timestamp(start, tz="UTC")]
+    if end is not None:
+        # Inclusive end date.
+        out = out[out["published"] < pd.Timestamp(end, tz="UTC") + pd.Timedelta(days=1)]
+
+    if buckets:
+        out = out[out["bucket"].isin(buckets)]
+
+    query = query.strip().lower()
+    if query:
+        searchable = (
+            out["title"].fillna("")
+            + " "
+            + out["source"].fillna("")
+            + " "
+            + out["summary"].fillna("")
+            + " "
+            + out["bucket"].fillna("")
+        ).str.lower()
+        out = out[searchable.str.contains(query, regex=False, na=False)]
+
+    return out
+
+
+def _display_frame(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame({
-        "Published": df["published"].dt.strftime("%Y-%m-%d"),
+        "Published": df["published"].dt.strftime("%Y-%m-%d").fillna("—"),
         "Title": df["title"].fillna(""),
         "Source": df["source"].fillna(""),
-        "Bucket": df["last_bucket"].fillna(""),
-        "Score": df["max_materiality_score"],
-        "Seen": df["seen_count"],
+        "Bucket": df["bucket"].fillna(""),
+        "Tier": df["tier"].fillna(""),
+        "Score": df["score"],
+        "Seen": df["seen"],
+        "Status": df["status"],
         "Link": df["url"].fillna(""),
     })
 
 
-def _render_history_table(label: str, df: pd.DataFrame) -> None:
-    if df.empty:
-        st.info(f"No {label.lower()} items in the selected range.")
-        return
+def _render_feed(slot, frame: pd.DataFrame, *, include_low: bool, catalog_n: int) -> None:
+    """Render metrics + the one merged table into ``slot``.
 
-    st.dataframe(
-        _history_display_df(df),
-        use_container_width=True,
-        hide_index=True,
-        height=min(540, 38 * (len(df) + 1) + 3),
-        column_config={
-            "Published": st.column_config.TextColumn("Published", width="small"),
-            "Title": st.column_config.TextColumn("Title", width="large"),
-            "Source": st.column_config.TextColumn("Source", width="medium"),
-            "Bucket": st.column_config.TextColumn("Bucket", width="medium"),
-            "Score": st.column_config.NumberColumn("Score", format="%.3f", width="small"),
-            "Seen": st.column_config.NumberColumn("Seen", format="%d", width="small"),
-            "Link": st.column_config.LinkColumn("Link", display_text="Open", width="small"),
-        },
-    )
+    Called twice per run: once with the catalogue alone (before the live fetch,
+    so committed rows are on screen with no network) and once with live items
+    merged in. The second call replaces the first inside the same placeholder —
+    the page keeps ONE feed, and a stalled fetch leaves the catalogue standing.
+    """
+    tiers = set(_ALWAYS_SHOWN_TIERS) | ({_LOW_TIER} if include_low else set())
+    shown = frame[frame["tier"].isin(tiers)]
+    low_hidden = int((~frame["tier"].isin(tiers)).sum())
+    live_n = int((frame["status"] == "Live").sum()) if not frame.empty else 0
 
+    with slot.container():
+        col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+        col_m1.metric("Total", len(frame))
+        col_m2.metric("High", int((frame["tier"] == "HIGH").sum()))
+        col_m3.metric("Medium", int((frame["tier"] == "MEDIUM").sum()))
+        col_m4.metric("Low", int((frame["tier"] == _LOW_TIER).sum()))
 
-def _render_tier_html(tier: str, items: list[dict]) -> str:
-    """Build HTML for a tier section."""
-    if not items:
-        return ""
-    tier_color = TIER_COLORS[tier]
-    tier_label = TIER_LABELS[tier]
-    header = f"""
-<div style="display:flex;align-items:center;gap:8px;padding:12px 0 6px;">
-  <span style="font-size:14px;font-weight:600;color:{tier_color};">{tier_label}</span>
-  <span style="font-size:11px;color:#6b7280;">({len(items)} items)</span>
-</div>"""
-    rows: list[str] = []
-    for it in items:
-        bucket = it["bucket"]
-        bkt_color = _BUCKET_COLORS.get(bucket, "#6b7280")
-        title = it["title"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        source = it["source"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        age = it["age_str"]
-        url = it["url"]
-        score = it.get("materiality_score", 0)
-        bar_pct = max(int(score * 100), 2)
+        caption = (
+            f"{catalog_n} catalogued rows + {live_n} live-fetch rows not in the catalogue "
+            f"= {len(frame)} in range; showing {len(shown)}."
+        )
+        if low_hidden:
+            caption += (
+                f" {low_hidden} low-materiality row(s) hidden — enable "
+                "\"Show low-materiality\" above to include them."
+            )
+        st.caption(caption)
 
-        rows.append(f"""
-<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 2px 5px;">
-  <div style="margin-top:6px;width:40px;flex-shrink:0;">
-    <div style="width:100%;height:4px;background:#1e293b;border-radius:2px;">
-      <div style="width:{bar_pct}%;height:4px;background:{tier_color};border-radius:2px;"></div>
-    </div>
-    <div style="font-size:9px;color:#6b7280;text-align:center;margin-top:1px;">{score:.2f}</div>
-  </div>
-  <div style="min-width:0;">
-    <a href="{url}" target="_blank" rel="noopener"
-       style="color:#e2e8f0;text-decoration:none;font-size:13px;line-height:1.45;">
-      {title}
-    </a>
-    <div style="margin-top:3px;font-size:11px;color:#6b7280;">
-      {source}&nbsp;·&nbsp;{age}
-      &nbsp;&nbsp;<span style="color:{bkt_color};font-weight:500;font-size:10px;">{bucket}</span>
-    </div>
-  </div>
-</div>
-<div style="border-top:1px solid #1e293b;margin:0 0 0 52px;"></div>""")
-    return header + "\n".join(rows)
+        if shown.empty:
+            st.info("No news items match the current filters.")
+            return
+
+        st.dataframe(
+            _display_frame(shown),
+            use_container_width=True,
+            hide_index=True,
+            height=min(760, 38 * (len(shown) + 1) + 3),
+            column_config={
+                "Published": st.column_config.TextColumn("Published", width="small"),
+                "Title": st.column_config.TextColumn("Title", width="large"),
+                "Source": st.column_config.TextColumn("Source", width="medium"),
+                "Bucket": st.column_config.TextColumn("Bucket", width="medium"),
+                "Tier": st.column_config.TextColumn("Tier", width="small"),
+                "Score": st.column_config.NumberColumn("Score", format="%.3f", width="small"),
+                "Seen": st.column_config.NumberColumn(
+                    "Seen", format="%d", width="small",
+                    help=(
+                        "Times the catalogue lane observed this article. "
+                        "Blank = live-fetch row that is not in the catalogue."
+                    ),
+                ),
+                "Status": st.column_config.TextColumn(
+                    "Status", width="small",
+                    help=(
+                        "Catalogued = durable committed catalogue row. Live = fetched now and "
+                        "not in the catalogue — the lane stores HIGH/MEDIUM only, so "
+                        "low-materiality rows stay uncatalogued by design."
+                    ),
+                ),
+                "Link": st.column_config.LinkColumn("Link", display_text="Open", width="small"),
+            },
+        )
 
 
 # ══════════════════════════════════════════════
@@ -259,97 +329,108 @@ with st.container(border=True):
 
 
 # ══════════════════════════════════════════════
-# 2. NEWS HISTORY — durable catalog (committed; renders with no network)
-# ══════════════════════════════════════════════
-st.header("News History")
-st.caption(
-    "Durable catalogue written by scripts/catalog_news.py — a committed artifact that "
-    "renders with no network, so a stalled live feed can never hide it."
-)
-catalog_df = _load_news_catalog(str(NEWS_CATALOG_PATH))
-
-if catalog_df.empty:
-    st.warning("No catalogued news history found.")
-else:
-    min_published = catalog_df["published"].min().date()
-    max_published = catalog_df["published"].max().date()
-    default_start = max(min_published, max_published - timedelta(days=60))
-
-    hist_col_1, hist_col_2, hist_col_3 = st.columns([1.25, 2.25, 2.5])
-    with hist_col_1:
-        selected_range = st.date_input(
-            "Published range",
-            value=(default_start, max_published),
-            min_value=min_published,
-            max_value=max_published,
-        )
-    with hist_col_2:
-        bucket_options = sorted(catalog_df["last_bucket"].dropna().unique().tolist())
-        selected_buckets = st.multiselect("Buckets", bucket_options, default=bucket_options)
-    with hist_col_3:
-        query = st.text_input("Search", placeholder="Company, source, contract, power...")
-
-    if isinstance(selected_range, tuple) and len(selected_range) == 2:
-        start_date, end_date = selected_range
-    elif isinstance(selected_range, date):
-        start_date, end_date = selected_range, selected_range
-    else:
-        start_date, end_date = default_start, max_published
-
-    history = catalog_df.copy()
-    history_date = history["published"].dt.date
-    history = history[(history_date >= start_date) & (history_date <= end_date)]
-
-    if selected_buckets:
-        history = history[history["last_bucket"].isin(selected_buckets)]
-
-    query = query.strip().lower()
-    if query:
-        searchable = (
-            history["title"].fillna("")
-            + " "
-            + history["source"].fillna("")
-            + " "
-            + history["summary"].fillna("")
-            + " "
-            + history["last_bucket"].fillna("")
-        ).str.lower()
-        history = history[searchable.str.contains(query, regex=False, na=False)]
-
-    high_history = history[history["last_tier"] == "HIGH"].sort_values("published", ascending=False)
-    medium_history = history[history["last_tier"] == "MEDIUM"].sort_values("published", ascending=False)
-
-    hist_m1, hist_m2, hist_m3 = st.columns(3)
-    hist_m1.metric("Catalogued", len(history))
-    hist_m2.metric("High", len(high_history))
-    hist_m3.metric("Medium", len(medium_history))
-
-    high_tab, medium_tab = st.tabs(["High", "Medium"])
-    with high_tab:
-        _render_history_table("High", high_history)
-    with medium_tab:
-        _render_history_table("Medium", medium_history)
-
-
-# ══════════════════════════════════════════════
-# 3. NEWS FEED — live, bounded-concurrent, LAST (after committed content)
+# 2. NEWS FEED — durable catalogue ∪ live fetch, ONE section
 # ══════════════════════════════════════════════
 st.header("News Feed")
 st.caption(
     "Ranked for AI-bubble risk and mitigants: valuations, financing, material contracts, "
     "capex/power, supply-chain constraints, regulation, and industry economics. "
-    "Cached 30 min. Fetched bounded-concurrent after the committed content above."
+    "One table: the durable catalogue (scripts/catalog_news.py, committed) plus the live "
+    "fetch merged in — catalogue rows render first, live rows join them when the fetch "
+    "resolves (cached 30 min). The catalogue lane stores HIGH/MEDIUM, so low-materiality "
+    "live rows are never catalogued (hence a blank \"Seen\")."
 )
 
-col_refresh, col_filter, _ = st.columns([1, 1.8, 3.2])
+catalog_df = _load_news_catalog(str(NEWS_CATALOG_PATH))
+# Catalogue-only frame: the first-pass render, built exactly as the merge builds it.
+catalog_only = merge_catalog_and_live_feed(catalog_df, [])
+catalog_n = len(catalog_only)
+span_lo, span_hi = _published_bounds(catalog_only)
+
+col_range, col_buckets, col_search = st.columns([1.2, 2.3, 2.5])
+with col_range:
+    range_label = st.selectbox(
+        "Published range",
+        list(_RANGE_PRESETS),
+        index=0,
+        key="news_range",
+        help=(
+            f"Defaults to All — the whole catalogue plus live items, no windowing. "
+            f"The catalogue currently spans {span_lo} → {span_hi}."
+        ),
+    )
+with col_buckets:
+    bucket_options = _bucket_options(catalog_df)
+    selected_buckets = st.multiselect(
+        "Buckets", bucket_options, default=bucket_options, key="news_buckets"
+    )
+with col_search:
+    query = st.text_input(
+        "Search", placeholder="Company, source, contract, power...", key="news_query"
+    )
+
+col_refresh, col_low, _col_pad = st.columns([1, 1.7, 3.3])
 with col_refresh:
     if st.button("Refresh", use_container_width=True):
         fetch_news_buckets_with_stats.clear()
-with col_filter:
+with col_low:
     show_low = st.toggle("Show low-materiality", value=False, key="news_show_low")
 
-with st.spinner("Fetching news..."):
+start_date: date | None
+end_date: date | None
+preset_days = _RANGE_PRESETS[range_label]
+if preset_days == -1:
+    lo, hi = span_lo, span_hi
+    picked = st.date_input(
+        "Custom published range",
+        value=(lo, hi),
+        min_value=lo,
+        max_value=hi,
+        key="news_range_custom",
+    )
+    if isinstance(picked, tuple) and len(picked) == 2:
+        start_date, end_date = picked
+    elif isinstance(picked, date):
+        start_date, end_date = picked, picked
+    else:
+        start_date, end_date = lo, hi
+elif preset_days:
+    start_date = pd.Timestamp.now().normalize().date() - timedelta(days=preset_days)
+    end_date = None
+else:
+    start_date, end_date = None, None
+
+filtered_catalog = _filter_feed(
+    catalog_only,
+    start=start_date,
+    end=end_date,
+    buckets=selected_buckets,
+    query=query,
+)
+
+# Committed content first: the catalogue renders into the placeholder — and is
+# on screen — before the live fetch runs, so a stalled feed can never hide it
+# (S2-13). The merged render below replaces it in the same slot.
+feed_slot = st.empty()
+_render_feed(feed_slot, filtered_catalog, include_low=show_low, catalog_n=catalog_n)
+
+with st.spinner("Fetching live news..."):
     news_data, feed_stats = fetch_news_buckets_with_stats()
+
+live_items = flatten_news_buckets(news_data) if any(news_data.values()) else []
+merged = merge_catalog_and_live_feed(catalog_df, live_items)
+filtered_merged = _filter_feed(
+    merged,
+    start=start_date,
+    end=end_date,
+    buckets=selected_buckets,
+    query=query,
+)
+
+# Second pass replaces the first in the same placeholder — one feed on screen.
+_render_feed(feed_slot, filtered_merged, include_low=show_low, catalog_n=catalog_n)
+
+st.caption(f"Live fetch — {fetch_stats_summary(feed_stats)}")
 
 
 def _feed_status_line(stats: dict) -> str:
@@ -362,44 +443,14 @@ def _feed_status_line(stats: dict) -> str:
     return f"{succeeded}/{attempted} feed requests succeeded"
 
 
-if not any(news_data.values()):
+if not live_items:
     st.warning(
         f"No live news items fetched — {_feed_status_line(feed_stats)} "
         f"({fetch_stats_summary(feed_stats)}). "
-        "The stored News History above remains available and unaffected."
+        "The catalogued rows above remain available and unaffected."
     )
-else:
-    all_items = flatten_news_buckets(news_data)
-
-    # Group by tier
-    tier_groups: dict[str, list[dict]] = {"HIGH": [], "MEDIUM": [], "LOW": []}
-    for it in all_items:
-        tier_groups[it["tier"]].append(it)
-
-    total = len(all_items)
-    high_n = len(tier_groups["HIGH"])
-    med_n = len(tier_groups["MEDIUM"])
-    low_n = len(tier_groups["LOW"])
-
-    # Summary metrics
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-    col_m1.metric("Total", total)
-    col_m2.metric("High", high_n)
-    col_m3.metric("Medium", med_n)
-    col_m4.metric("Low", low_n)
-
-    # Partial feed failures stay visible next to the items they affect.
-    if feed_stats.get("succeeded", 0) < feed_stats.get("attempted", 0):
-        st.warning(
-            f"Partial live-fetch failure — {_feed_status_line(feed_stats)} "
-            f"({fetch_stats_summary(feed_stats)}). Stored history above is unaffected."
-        )
-
-    html_parts: list[str] = []
-    html_parts.append(_render_tier_html("HIGH", tier_groups["HIGH"]))
-    html_parts.append(_render_tier_html("MEDIUM", tier_groups["MEDIUM"]))
-    if show_low:
-        html_parts.append(_render_tier_html("LOW", tier_groups["LOW"]))
-
-    with st.container(border=True, height=680):
-        st.markdown("\n".join(p for p in html_parts if p), unsafe_allow_html=True)
+elif feed_stats.get("succeeded", 0) < feed_stats.get("attempted", 0):
+    st.warning(
+        f"Partial live-fetch failure — {_feed_status_line(feed_stats)} "
+        f"({fetch_stats_summary(feed_stats)}). Catalogued rows above are unaffected."
+    )
