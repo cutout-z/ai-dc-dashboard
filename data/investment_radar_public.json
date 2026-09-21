@@ -1,7 +1,20 @@
 {
  "schema_version": 1,
- "generated_at": "2026-09-20T07:45:09.804776",
+ "generated_at": "2026-09-21T10:56:31.806442",
  "articles": [
+  {
+   "date": "2026-09-21",
+   "destination": "Personal investing",
+   "entities": [],
+   "polarity": "context",
+   "snippet": "China’s CXMT Begins Mass Production on New Memory-Chip Process Platform",
+   "source": "threads",
+   "text": "@jukan05 - China’s CXMT Begins Mass Production on New Memory-Chip Process Platform [ai]",
+   "themes": [
+    "Supply chain",
+    "Geopolitics"
+   ]
+  },
   {
    "date": "2026-09-18",
    "destination": "Personal investing",
